@@ -28,6 +28,8 @@ private slots:
   void renameTask(task_id id, const QString& sNewName);
   void changeTaskDescription(task_id id, const QString& sNewDescr);
   void moveTask(task_id id, group_id groupId, int iPos);
+  void reloadStylesheet(const QString& sPath);
+  void load();
 
 private:
   Ui::MainWindow *ui;

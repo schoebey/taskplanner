@@ -13,7 +13,6 @@ namespace
   std::map<QWidget*, QPropertyAnimation*> animations;
   void moveWidget(QWidget* pWidget, QPoint newPos)
   {
-    assert(0 == newPos.x());
     if (nullptr != pWidget && newPos != pWidget->pos())
     {
       QPropertyAnimation* pAnimation = nullptr;
@@ -65,12 +64,18 @@ group_id GroupWidget::id() const
   return m_groupId;
 }
 
+void GroupWidget::setCanvas(QWidget* pCanvas)
+{
+  m_pCanvas = pCanvas;
+}
+
 void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
 {
   if (m_vpTaskWidgets.end() ==
       std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
   {
-    int iPosY = c_iItemSpacing;
+    QPoint origin(mapTo(m_pCanvas, ui->frame->pos()));
+    origin.setY(origin.y() + c_iItemSpacing);
 
     if (-1 == iPos)  { iPos = m_vpTaskWidgets.size(); }
 
@@ -79,32 +84,29 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
     for (int iWidget = 0; iWidget < iPos; ++iWidget)
     {
       QWidget* pWidget = m_vpTaskWidgets[iWidget];
-      iPosY += pWidget->height() + c_iItemSpacing;
+      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
     }
 
 
     // insert the new widget
-    QPoint currentPos = pTaskWidget->mapToGlobal(QPoint(0,0));
-    pTaskWidget->setParent(ui->frame);
-    currentPos = ui->frame->mapFromGlobal(currentPos);
-    pTaskWidget->move(currentPos);
+    pTaskWidget->resize(ui->frame->width(), pTaskWidget->height());
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
-    moveWidget(pTaskWidget, QPoint(0, iPosY));
-    iPosY += pTaskWidget->height() + c_iItemSpacing;
+    moveWidget(pTaskWidget, origin);
+    origin.setY(origin.y() + pTaskWidget->height() + c_iItemSpacing);
 
 
     // move the rest of the widgets to the correct place
     for (int iWidget = iPos + 1; iWidget < m_vpTaskWidgets.size(); ++iWidget)
     {
       QWidget* pWidget = m_vpTaskWidgets[iWidget];
-      moveWidget(pWidget, QPoint(0, iPosY));
-      iPosY += pWidget->height() + c_iItemSpacing;
+      moveWidget(pWidget, origin);
+      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
     }
 
     pTaskWidget->SetGroupWidget(this);
     pTaskWidget->show();
 
-    ui->frame->setMinimumHeight(iPosY);
+    ui->frame->setMinimumHeight(ui->frame->mapFrom(m_pCanvas, origin).y());
 
     emit taskMovedTo(pTaskWidget->id(), m_groupId, iPos);
   }
@@ -115,7 +117,8 @@ void GroupWidget::RemoveTask(TaskWidget* pTaskWidget)
   auto it = std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget);
   if (m_vpTaskWidgets.end() != it)
   {
-    int iPosY = c_iItemSpacing;
+    QPoint origin(mapTo(m_pCanvas, ui->frame->pos()));
+    origin.setY(origin.y() + c_iItemSpacing);
 
     int iPos = it - m_vpTaskWidgets.begin();
     m_vpTaskWidgets.erase(it);
@@ -124,22 +127,21 @@ void GroupWidget::RemoveTask(TaskWidget* pTaskWidget)
     for (int iWidget = 0; iWidget < iPos; ++iWidget)
     {
       QWidget* pWidget = m_vpTaskWidgets[iWidget];
-      iPosY += pWidget->height() + c_iItemSpacing;
+      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
     }
 
     // move the rest of the widgets to the correct place
     for (int iWidget = iPos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
     {
       QWidget* pWidget = m_vpTaskWidgets[iWidget];
-      moveWidget(pWidget, QPoint(0, iPosY));
-      iPosY += pWidget->height() + c_iItemSpacing;
+      moveWidget(pWidget, origin);
+      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
     }
 
-    ui->frame->setMinimumHeight(iPosY);
+    ui->frame->setMinimumHeight(ui->frame->mapFrom(m_pCanvas, origin).y());
 
 
     pTaskWidget->SetGroupWidget(nullptr);
-    pTaskWidget->setParent(window());
     pTaskWidget->show();
   }
 }
@@ -149,7 +151,8 @@ void GroupWidget::ShowGhost(TaskWidget* pTaskWidget, int iPos)
   if (m_vpTaskWidgets.end() ==
       std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
   {
-    int iPosY = c_iItemSpacing;
+    QPoint origin(mapTo(m_pCanvas, ui->frame->pos()));
+    origin.setY(origin.y() + c_iItemSpacing);
 
     if (-1 == iPos)  { iPos = m_vpTaskWidgets.size(); }
 
@@ -158,25 +161,25 @@ void GroupWidget::ShowGhost(TaskWidget* pTaskWidget, int iPos)
     for (int iWidget = 0; iWidget < iPos; ++iWidget)
     {
       QWidget* pWidget = m_vpTaskWidgets[iWidget];
-      moveWidget(pWidget, QPoint(0, iPosY));
-      iPosY += pWidget->height() + c_iItemSpacing;
+      moveWidget(pWidget, origin);
+      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
     }
 
     if (iPos < m_vpTaskWidgets.size())
     {
       // make room for the new widget
-      iPosY += pTaskWidget->height() + c_iItemSpacing;
+      origin.setY(origin.y() + pTaskWidget->height() + c_iItemSpacing);
 
       // move the rest of the widgets to the correct place
       for (int iWidget = iPos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
       {
         QWidget* pWidget = m_vpTaskWidgets[iWidget];
-        moveWidget(pWidget, QPoint(0, iPosY));
-        iPosY += pWidget->height() + c_iItemSpacing;
+        moveWidget(pWidget, origin);
+        origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
       }
     }
 
-    ui->frame->setMinimumHeight(iPosY);
+    ui->frame->setMinimumHeight(ui->frame->mapFrom(m_pCanvas, origin).y());
   }
 }
 
@@ -185,21 +188,37 @@ GroupWidget* GroupWidget::GroupWidgetUnderMouse()
   return m_pMouseHoveringOver;
 }
 
-void GroupWidget::resizeEvent(QResizeEvent* pEvent)
+void GroupWidget::repositionChildren()
 {
+  QPoint origin(mapTo(m_pCanvas, ui->frame->pos()));
+  origin.setY(origin.y() + c_iItemSpacing);
   for (auto& pWidget : m_vpTaskWidgets)
   {
+    moveWidget(pWidget, origin);
+    origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
     pWidget->resize(ui->frame->width(), pWidget->height());
   }
+
+  ui->frame->setMinimumHeight(ui->frame->mapFrom(m_pCanvas, origin).y());
+}
+
+void GroupWidget::resizeEvent(QResizeEvent* pEvent)
+{
+  repositionChildren();
+}
+
+void GroupWidget::moveEvent(QMoveEvent* pEvent)
+{
+  repositionChildren();
 }
 
 int GroupWidget::indexFromPoint(QPoint pt)
 {
-  int iY = 0;
+  QPoint globalPt = mapTo(m_pCanvas, pt);
   for (int iIdx = 0; iIdx < m_vpTaskWidgets.size(); ++iIdx)
   {
     QWidget* pWidget = m_vpTaskWidgets[iIdx];
-    if (pWidget->mapFrom(this, pt).y() < pWidget->rect().center().y())
+    if (pWidget->mapFrom(m_pCanvas, globalPt).y() < pWidget->rect().center().y())
     {
       return iIdx;
     }

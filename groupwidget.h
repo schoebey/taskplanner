@@ -19,6 +19,8 @@ public:
 
   group_id id() const;
 
+  void setCanvas(QWidget* pCanvas);
+
   void InsertTask(TaskWidget* pTaskWidget, int iPos = -1);
   void RemoveTask(TaskWidget* pTaskWidget);
 
@@ -33,7 +35,9 @@ signals:
 
 protected:
   void resizeEvent(QResizeEvent* pEvent);
+  void moveEvent(QMoveEvent* pEvent);
   void ShowGhost(TaskWidget* pTaskWidget, int iPos);
+  void repositionChildren();
 
 protected slots:
   void onNewTaskClicked();
@@ -44,6 +48,7 @@ private:
   std::vector<TaskWidget*> m_vpTaskWidgets;
   bool eventFilter(QObject* pObj, QEvent* pEvent);
 
+  QWidget* m_pCanvas = nullptr;
   static GroupWidget* m_pMouseHoveringOver;
 };
 

@@ -4,7 +4,9 @@
 #include "groupwidget.h"
 #include "taskwidget.h"
 
+#include <QFileSystemWatcher>
 #include <QDebug>
+#include <QFile>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -16,6 +18,23 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->frame->setLayout(pLayout);
 
 
+
+  QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
+  pWatcher->addPath("stylesheet.css");
+  connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
+
+  reloadStylesheet("stylesheet.css");
+
+  QMetaObject::invokeMethod(this, "load", Qt::QueuedConnection);
+}
+
+MainWindow::~MainWindow()
+{
+  delete ui;
+}
+
+void MainWindow::load()
+{
   GroupWidget* pGroupWidget0 = createGroupWidget(0);
   GroupWidget* pGroupWidget1 = createGroupWidget(1);
   GroupWidget* pGroupWidget2 = createGroupWidget(2);
@@ -25,9 +44,13 @@ MainWindow::MainWindow(QWidget *parent) :
   pGroupWidget0->InsertTask(createTaskWidget(1));
 }
 
-MainWindow::~MainWindow()
+void MainWindow::reloadStylesheet(const QString& sPath)
 {
-  delete ui;
+  QFile f(sPath);
+  if (f.open(QIODevice::ReadOnly))
+  {
+    setStyleSheet(QString::fromUtf8(f.readAll()));
+  }
 }
 
 GroupWidget* MainWindow::createGroupWidget(group_id id)
@@ -42,6 +65,7 @@ GroupWidget* MainWindow::createGroupWidget(group_id id)
   connect(pGroupWidget, SIGNAL(taskMovedTo(task_id, group_id, int)), this, SLOT(moveTask(task_id, group_id, int)));
 
   m_groupWidgets[id] = pGroupWidget;
+  pGroupWidget->setCanvas(ui->scrollAreaWidgetContents);
 
   return pGroupWidget;
 }
@@ -54,6 +78,7 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   connect(pTaskWidget, SIGNAL(descriptionChanged(task_id, QString)), this, SLOT(changeTaskDescription(task_id, QString)));
 
   m_taskWidgets[id] = pTaskWidget;
+  pTaskWidget->setParent(ui->scrollAreaWidgetContents);
 
   return pTaskWidget;
 }

@@ -13,18 +13,6 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">GroupWidget {
-  border: 1px solid blue;
-  width: 150px;
-  border-radius: 7px;
-}
-
-TaskWidget {
-  border: 1px solid red;
-  border-radius: 5px;
-}</string>
-  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
