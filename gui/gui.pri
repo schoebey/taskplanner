@@ -1,3 +1,5 @@
+INCLUDEPATH += $$PWD
+
 SOURCES += \
     gui/editablelabel.cpp \
     gui/groupwidget.cpp \

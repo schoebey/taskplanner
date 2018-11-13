@@ -8,3 +8,6 @@ equals(QT_MAJOR_VERSION, 5) {
 
 include(task_manager/task_manager.pri)
 include(gui/gui.pri)
+
+SOURCES += \
+    main.cpp

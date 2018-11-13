@@ -26,8 +26,8 @@ public:
 signals:
   void renamed(task_id taskId, const QString& sNewName);
   void descriptionChanged(task_id taskId, const QString& sNewDescription);
-  void timeTrackingStarted();
-  void timeTrackingStopped();
+  void timeTrackingStarted(task_id id);
+  void timeTrackingStopped(task_id id);
 
 private slots:
   void onTitleEdited();
