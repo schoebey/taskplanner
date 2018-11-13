@@ -26,10 +26,13 @@ public:
 signals:
   void renamed(task_id taskId, const QString& sNewName);
   void descriptionChanged(task_id taskId, const QString& sNewDescription);
+  void timeTrackingStarted();
+  void timeTrackingStopped();
 
 private slots:
   void onTitleEdited();
   void onDescriptionEdited();
+  void on_pStartStop_toggled(bool bOn);
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent);

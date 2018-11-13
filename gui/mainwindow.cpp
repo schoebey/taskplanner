@@ -20,10 +20,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
   QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
-  pWatcher->addPath("stylesheet.css");
+  pWatcher->addPath(qApp->applicationDirPath() +"/../../../stylesheet.css");
   connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
 
-  reloadStylesheet("stylesheet.css");
+  reloadStylesheet(qApp->applicationDirPath() + "/../../../stylesheet.css");
 
   QMetaObject::invokeMethod(this, "load", Qt::QueuedConnection);
 }
@@ -46,6 +46,7 @@ void MainWindow::load()
 
 void MainWindow::reloadStylesheet(const QString& sPath)
 {
+  qDebug() << sPath;
   QFile f(sPath);
   if (f.open(QIODevice::ReadOnly))
   {
@@ -76,6 +77,8 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
 
   connect(pTaskWidget, SIGNAL(renamed(task_id, QString)), this, SLOT(renameTask(task_id, QString)));
   connect(pTaskWidget, SIGNAL(descriptionChanged(task_id, QString)), this, SLOT(changeTaskDescription(task_id, QString)));
+  connect(pTaskWidget, SIGNAL(timeTrackingStarted(task_id)), this, SLOT(startTimeTracking(task_id)));
+  connect(pTaskWidget, SIGNAL(timeTrackingStopped(task_id)), this, SLOT(stopTimeTracking(task_id)));
 
   m_taskWidgets[id] = pTaskWidget;
   pTaskWidget->setParent(ui->scrollAreaWidgetContents);

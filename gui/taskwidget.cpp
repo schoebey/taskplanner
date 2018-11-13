@@ -4,6 +4,9 @@
 
 #include <QMouseEvent>
 
+#include <cassert>
+#include <cmath>
+
 
 TaskWidget* TaskWidget::m_pDraggingTaskWidget = nullptr;
 
@@ -98,7 +101,7 @@ void TaskWidget::mouseMoveEvent(QMouseEvent* pMouseEvent)
   if (m_bMouseDown && nullptr == m_pDraggingTaskWidget)
   {
     QPoint ptDist = pMouseEvent->pos() - m_mouseDownPos;
-    if (20 < sqrt(ptDist.x() * ptDist.x() + ptDist.y() * ptDist.y()))
+    if (20 < std::sqrt(ptDist.x() * ptDist.x() + ptDist.y() * ptDist.y()))
     {
       m_pDraggingTaskWidget = this;
 
@@ -123,4 +126,16 @@ void TaskWidget::onDescriptionEdited()
   int iMinHeight = minimumSizeHint().height();
   resize(width(), iMinHeight);
   emit descriptionChanged(m_taskId, ui->pDescription->text());
+}
+
+void TaskWidget::on_pStartStop_toggled(bool bOn)
+{
+  ui->pStartStop->setText(bOn ? "stop" : "start");
+
+  if (bOn) {
+    emit timeTrackingStarted(m_taskId);
+  }
+  else {
+    emit timeTrackingStopped(m_taskId);
+  }
 }

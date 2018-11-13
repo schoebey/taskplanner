@@ -89,7 +89,7 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
 
 
     // insert the new widget
-    pTaskWidget->resize(ui->frame->width(), pTaskWidget->height());
+    pTaskWidget->resize(ui->frame->width(), pTaskWidget->minimumSizeHint().height());
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
     moveWidget(pTaskWidget, origin);
     origin.setY(origin.y() + pTaskWidget->height() + c_iItemSpacing);
@@ -158,7 +158,7 @@ void GroupWidget::ShowGhost(TaskWidget* pTaskWidget, int iPos)
 
 
     // find the new widgets position
-    for (int iWidget = 0; iWidget < iPos; ++iWidget)
+    for (int iWidget = 0; iWidget < std::min<size_t>(iPos, m_vpTaskWidgets.size()); ++iWidget)
     {
       QWidget* pWidget = m_vpTaskWidgets[iWidget];
       moveWidget(pWidget, origin);
@@ -223,6 +223,8 @@ int GroupWidget::indexFromPoint(QPoint pt)
       return iIdx;
     }
   }
+
+  return m_vpTaskWidgets.size();
 }
 
 bool GroupWidget::eventFilter(QObject* pObj, QEvent* pEvent)
