@@ -1,27 +1,17 @@
 #ifndef SERIALIZER_INTERFACE_H
 #define SERIALIZER_INTERFACE_H
 
+#include "serializationenums.h"
+
 #include <QString>
 #include <QVariant>
 
 #include <map>
 #include <memory>
 
-class Manager;
-
-enum class ESerializingError
-{
-  eOk,
-  eWrongParameter,
-  eResourceError
-};
-
-enum class EDeserializingError
-{
-  eOk,
-  eWrongParameter,
-  eResourceError
-};
+class Task;
+class Group;
+class SerializableManager;
 
 class ISerializer
 {
@@ -32,16 +22,29 @@ public:
     bool bRequired;
   };
 
-
-  virtual ESerializingError serialize(const Manager&) const = 0;
-
-  virtual EDeserializingError deserialize(Manager&) const = 0;
-
   virtual std::map<QString, SParameter> parameters() const = 0;
 
   virtual QVariant parameter(const QString& sName) const = 0;
 
   virtual bool setParameter(const QString& sName, const QVariant& value) = 0;
+
+  virtual ESerializingError initSerialization() = 0;
+  virtual ESerializingError deinitSerialization() = 0;
+
+  virtual EDeserializingError initDeserialization() = 0;
+  virtual EDeserializingError deinitDeserialization() = 0;
+
+  virtual ESerializingError serialize(const SerializableManager&) = 0;
+
+  virtual EDeserializingError deserialize(SerializableManager&) = 0;
+
+  virtual ESerializingError serialize(const Task&) = 0;
+
+  virtual EDeserializingError deserialize(Task&) = 0;
+
+  virtual ESerializingError serialize(const Group&) = 0;
+
+  virtual EDeserializingError deserialize(Group&) = 0;
 
 protected:
   ISerializer() {}

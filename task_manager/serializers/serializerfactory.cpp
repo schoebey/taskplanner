@@ -7,7 +7,7 @@ SerializerFactoryPrivate::SerializerFactoryPrivate()
 
 bool SerializerFactoryPrivate::registerCreator(tFnCreate fnCreate, const QString& sName)
 {
-  if (creators.find(sName) == creators.end())  { return false; }
+  if (creators.find(sName) != creators.end())  { return false; }
   creators[sName] = fnCreate;
 
   return true;

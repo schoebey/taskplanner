@@ -7,6 +7,7 @@ class Serializer : public ISerializer
 {
 public:
   Serializer();
+  virtual ~Serializer();
 
   void registerParameter(const QString& sName, QVariant::Type type, bool bRequired);
 

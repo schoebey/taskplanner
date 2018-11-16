@@ -19,6 +19,8 @@ public:
 
   group_id id() const;
 
+  void setName(const QString& sName);
+
   void setCanvas(QWidget* pCanvas);
 
   void InsertTask(TaskWidget* pTaskWidget, int iPos = -1);
@@ -41,6 +43,7 @@ protected:
 
 protected slots:
   void onNewTaskClicked();
+  void onTitleEdited();
 
 private:
   Ui::GroupWidget *ui;

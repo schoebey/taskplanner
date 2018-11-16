@@ -3,7 +3,8 @@ include(serializers/serializers.pri)
 SOURCES += \
     $$PWD/group.cpp \
     $$PWD/manager.cpp \
-    $$PWD/task.cpp
+    $$PWD/task.cpp \
+    $$PWD/serializablemanager.cpp
 
 HEADERS += \
     $$PWD/group.h \
@@ -12,4 +13,8 @@ HEADERS += \
     $$PWD/task.h \
     $$PWD/timefragment.h \
     $$PWD/priority.h \
-    $$PWD/id_generator.h
+    $$PWD/id_generator.h \
+    $$PWD/serializableinterface.h \
+    $$PWD/taskinterface.h \
+    $$PWD/groupinterface.h \
+    $$PWD/serializablemanager.h

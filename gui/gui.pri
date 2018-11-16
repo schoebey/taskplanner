@@ -4,7 +4,8 @@ SOURCES += \
     gui/editablelabel.cpp \
     gui/groupwidget.cpp \
     gui/mainwindow.cpp \
-    gui/taskwidget.cpp
+    gui/taskwidget.cpp \
+    $$PWD/main.cpp
 
 HEADERS += \
     gui/editablelabel.h \

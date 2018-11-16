@@ -1,23 +1,45 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
+#include "id_types.h"
+#include "serializableinterface.h"
+
+#include <memory>
+#include <set>
+#include <map>
+
+class ITask;
 class Task;
+typedef std::shared_ptr<Task> tspTask;
+
+class IGroup;
 class Group;
+typedef std::shared_ptr<Group> tspGroup;
+
+
+class SerializableManager;
 class Manager
 {
 public:
   Manager();
 
-  void addTask();
-  void task();
-  void taskIds();
-  void moveTask();
-  void removeTask();
+  ESerializingError serializeTo(ISerializer* pSerializer) const;
 
-  void addGroup();
-  void group();
-  void groupIds();
-  void removeGroup();
+  EDeserializingError deserializeFrom(ISerializer* pSerializer);
+
+  ITask* addTask(task_id taskId = -1);
+  ITask* task(task_id id);
+  std::set<task_id> taskIds();
+  bool removeTask(task_id);
+
+  IGroup* addGroup(group_id groupId = -1);
+  IGroup* group(group_id id);
+  std::set<group_id> groupIds();
+  bool removeGroup(group_id id);
+
+
+private:
+  std::shared_ptr<SerializableManager> m_spPrivate;
 };
 
 #endif // MANAGER_H

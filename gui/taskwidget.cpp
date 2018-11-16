@@ -31,6 +31,16 @@ task_id TaskWidget::id() const
   return m_taskId;
 }
 
+void TaskWidget::setName(const QString& sName)
+{
+  ui->pTitle->setText(sName);
+}
+
+void TaskWidget::setDescription(const QString& sDescription)
+{
+  ui->pDescription->setText(sDescription);
+}
+
 void TaskWidget::SetGroupWidget(GroupWidget* pGroupWidget)
 {
   m_pGroupWidget = pGroupWidget;
@@ -111,6 +121,7 @@ void TaskWidget::mouseMoveEvent(QMouseEvent* pMouseEvent)
       }
 
       qApp->installEventFilter(this);
+      raise();
     }
   }
 }

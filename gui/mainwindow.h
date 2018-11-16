@@ -10,12 +10,13 @@ namespace Ui {
 
 class GroupWidget;
 class TaskWidget;
+class Manager;
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = nullptr);
+  explicit MainWindow(Manager* pManager, QWidget *parent = nullptr);
   ~MainWindow();
 
 
@@ -35,6 +36,7 @@ private:
   Ui::MainWindow *ui;
   std::map<group_id, GroupWidget*> m_groupWidgets;
   std::map<task_id, TaskWidget*> m_taskWidgets;
+  Manager* m_pManager = nullptr;
 };
 
 #endif // MAINWINDOW_H

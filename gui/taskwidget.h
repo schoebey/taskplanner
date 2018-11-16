@@ -19,6 +19,9 @@ public:
 
   task_id id() const;
 
+  void setName(const QString& sName);
+  void setDescription(const QString& sDescription);
+
   void SetGroupWidget(GroupWidget* pGroupWidget);
 
   static TaskWidget* DraggingTaskWidget();

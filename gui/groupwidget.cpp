@@ -51,6 +51,7 @@ GroupWidget::GroupWidget(group_id id, QWidget *parent) :
 {
   ui->setupUi(this);
   connect(ui->pAddTask, SIGNAL(clicked()), this, SLOT(onNewTaskClicked()));
+  connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
   qApp->installEventFilter(this);
 }
 
@@ -62,6 +63,11 @@ GroupWidget::~GroupWidget()
 group_id GroupWidget::id() const
 {
   return m_groupId;
+}
+
+void GroupWidget::setName(const QString& sName)
+{
+  ui->pTitle->setText(sName);
 }
 
 void GroupWidget::setCanvas(QWidget* pCanvas)
@@ -270,4 +276,9 @@ bool GroupWidget::eventFilter(QObject* pObj, QEvent* pEvent)
 void GroupWidget::onNewTaskClicked()
 {
   emit newTaskClicked(m_groupId);
+}
+
+void GroupWidget::onTitleEdited()
+{
+  emit renamed(m_groupId, ui->pTitle->text());
 }

@@ -1,9 +1,13 @@
 #include "serializer.h"
 #include <QVariant>
+#include <QDebug>
 
 Serializer::Serializer()
-{
+{  
+}
 
+Serializer::~Serializer()
+{
 }
 
 void Serializer::registerParameter(const QString& sName, QVariant::Type type, bool bRequired)
@@ -19,7 +23,8 @@ bool Serializer::hasParameter(const QString& sName) const
   auto it = m_parameters.find(sName);
   if (m_parameters.end() != it)
   {
-    return it->second.value.isValid();
+    return !it->second.value.isNull() &&
+        it->second.value.isValid();
   }
 
   return false;

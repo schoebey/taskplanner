@@ -3,14 +3,19 @@
 
 #include "groupwidget.h"
 #include "taskwidget.h"
+#include "manager.h"
+#include "groupinterface.h"
+#include "taskinterface.h"
+
 
 #include <QFileSystemWatcher>
 #include <QDebug>
 #include <QFile>
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QMainWindow(parent),
-  ui(new Ui::MainWindow)
+  ui(new Ui::MainWindow),
+  m_pManager(pManager)
 {
   ui->setupUi(this);
 
@@ -20,10 +25,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
   QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
-  pWatcher->addPath(qApp->applicationDirPath() +"/../../../stylesheet.css");
+  pWatcher->addPath("stylesheet.css");
   connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
 
-  reloadStylesheet(qApp->applicationDirPath() + "/../../../stylesheet.css");
+  reloadStylesheet("stylesheet.css");
 
   QMetaObject::invokeMethod(this, "load", Qt::QueuedConnection);
 }
@@ -35,13 +40,28 @@ MainWindow::~MainWindow()
 
 void MainWindow::load()
 {
-  GroupWidget* pGroupWidget0 = createGroupWidget(0);
-  GroupWidget* pGroupWidget1 = createGroupWidget(1);
-  GroupWidget* pGroupWidget2 = createGroupWidget(2);
+  for (const auto& groupId : m_pManager->groupIds())
+  {
 
+    IGroup* pGroup = m_pManager->group(groupId);
 
-  pGroupWidget0->InsertTask(createTaskWidget(0));
-  pGroupWidget0->InsertTask(createTaskWidget(1));
+    if (nullptr != pGroup)
+    {
+      GroupWidget* pGroupWidget = createGroupWidget(groupId);
+      pGroupWidget->setName(pGroup->name());
+      for (const auto& taskId : pGroup->taskIds())
+      {
+        ITask* pTask = m_pManager->task(taskId);
+        if (nullptr != pTask)
+        {
+          TaskWidget* pTaskWidget = createTaskWidget(taskId);
+          pTaskWidget->setName(pTask->name());
+          pTaskWidget->setDescription(pTask->description());
+          pGroupWidget->InsertTask(pTaskWidget);
+        }
+      }
+    }
+  }
 }
 
 void MainWindow::reloadStylesheet(const QString& sPath)

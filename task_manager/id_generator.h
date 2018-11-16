@@ -3,10 +3,28 @@
 
 template<class T> class id_generator
 {
+  T generate(T id)
+  {
+    if (-1 == id)
+    {
+      return c_nextId++;
+    }
+    else if (id > c_nextId)
+    {
+      c_nextId = id;
+    }
+
+    return id;
+  }
 public:
-  id_generator()
-    : m_id(c_nextId++)
+  id_generator(T id)
+    : m_id(generate(id))
   {}
+
+  T id() const
+  {
+    return m_id;
+  }
 
 protected:
   T m_id;

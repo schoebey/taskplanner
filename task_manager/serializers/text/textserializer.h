@@ -3,14 +3,35 @@
 
 #include "serializer.h"
 
+#include <QFile>
+#include <QTextStream>
+
 class TextSerializer : public Serializer
 {
 public:
   TextSerializer();
 
-  ESerializingError serialize(const Manager&) const override;
+  ESerializingError initSerialization() override;
+  ESerializingError deinitSerialization() override;
 
-  EDeserializingError deserialize(Manager&) const override;
+  EDeserializingError initDeserialization() override;
+  EDeserializingError deinitDeserialization() override;
+
+  ESerializingError serialize(const SerializableManager&) override;
+
+  EDeserializingError deserialize(SerializableManager&) override;
+
+  ESerializingError serialize(const Task&) override;
+
+  EDeserializingError deserialize(Task&) override;
+
+  ESerializingError serialize(const Group&) override;
+
+  EDeserializingError deserialize(Group&) override;
+
+private:
+  QFile m_file;
+  QTextStream m_stream;
 };
 
 #endif // TEXTSERIALIZER_H
