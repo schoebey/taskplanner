@@ -21,7 +21,7 @@ Task* SerializableManager::addTask(task_id taskId)
   return spTask.get();
 }
 
-Task* SerializableManager::task(task_id id)
+Task* SerializableManager::task(task_id id) const
 {
   auto it = m_tasks.find(id);
   if (it != m_tasks.end())
@@ -32,7 +32,7 @@ Task* SerializableManager::task(task_id id)
   return nullptr;
 }
 
-std::set<task_id> SerializableManager::taskIds()
+std::set<task_id> SerializableManager::taskIds() const
 {
   std::set<task_id> taskIds;
   for (const auto& el : m_tasks)
@@ -61,7 +61,7 @@ Group* SerializableManager::addGroup(group_id groupId)
   return spGroup.get();
 }
 
-Group* SerializableManager::group(group_id id)
+Group* SerializableManager::group(group_id id) const
 {
   auto it = m_groups.find(id);
   if (it != m_groups.end())
@@ -72,7 +72,7 @@ Group* SerializableManager::group(group_id id)
   return nullptr;
 }
 
-std::set<group_id> SerializableManager::groupIds()
+std::set<group_id> SerializableManager::groupIds() const
 {
   std::set<task_id> groupIds;
   for (const auto& el : m_groups)
@@ -104,22 +104,7 @@ ESerializingError SerializableManager::serialize(ISerializer* pSerializer) const
   err = pSerializer->serialize(*this);
   if (ESerializingError::eOk != err)  { return err; }
 
-
-  // write all the groups to the stream
-  for (const auto& group : m_groups)
-  {
-    err = group.second->serialize(pSerializer);
-    if (ESerializingError::eOk != err)  { return err; }
-  }
-
-  // write all the tasks to the stream
-  for (const auto& task : m_tasks)
-  {
-    err = task.second->serialize(pSerializer);
-    if (ESerializingError::eOk != err)  { return err; }
-  }
-
-  err = pSerializer->deinitSerialization();
+  err= pSerializer->deinitSerialization();
   if (ESerializingError::eOk != err)  { return err; }
 
   return ESerializingError::eOk;

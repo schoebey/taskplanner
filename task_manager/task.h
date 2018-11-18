@@ -44,10 +44,12 @@ public:
   void setPriority(const SPriority& priority) override;
 
   task_id parentTask() const override;
+  void setParentTaskId(task_id parentTaskId);
   void setParentTask(task_id parentTaskId) override;
 
   std::set<task_id> taskIds() const override;
   bool addTask(task_id id) override;
+  bool addTaskId(task_id id);
   bool removeTask(task_id id) override;
 
   void startWork() override;

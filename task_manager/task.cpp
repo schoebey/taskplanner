@@ -60,9 +60,25 @@ task_id Task::parentTask() const
   return m_parentTaskId;
 }
 
-void Task::setParentTask(task_id parentTaskId)
+void Task::setParentTaskId(task_id parentTaskId)
 {
   m_parentTaskId = parentTaskId;
+}
+
+void Task::setParentTask(task_id parentTaskId)
+{
+  ITask* pParent = m_pManager->task(m_parentTaskId);
+  if (nullptr != pParent)
+  {
+    pParent->removeTask(id());
+  }
+
+  setParentTaskId(parentTaskId);
+  pParent = m_pManager->task(parentTaskId);
+  if (nullptr != pParent)
+  {
+    pParent->addTask(id());
+  }
 }
 
 std::set<task_id> Task::taskIds() const
@@ -70,7 +86,19 @@ std::set<task_id> Task::taskIds() const
   return m_subTaskIds;
 }
 
-bool Task::addTask(task_id id)
+bool Task::addTask(task_id taskId)
+{
+  ITask* pTask = m_pManager->task(taskId);
+  if (nullptr != pTask && addTaskId(taskId))
+  {
+    pTask->setParentTask(id());
+    return true;
+  }
+
+  return false;
+}
+
+bool Task::addTaskId(task_id id)
 {
   return m_subTaskIds.insert(id).second;
 }
@@ -81,6 +109,11 @@ bool Task::removeTask(task_id id)
   if (it != m_subTaskIds.end())
   {
     m_subTaskIds.erase(it);
+    ITask* pTask = m_pManager->task(id);
+    if (nullptr != pTask)
+    {
+      pTask->setParentTask(-1);
+    }
     return true;
   }
 

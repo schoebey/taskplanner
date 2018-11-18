@@ -50,11 +50,15 @@ std::set<task_id> Group::taskIds() const
   return m_tasksIds;
 }
 
+bool Group::addTaskId(task_id taskId)
+{
+  return m_tasksIds.insert(taskId).second;
+}
+
 bool Group::addTask(task_id taskId)
 {
   ITask* pTask = m_pManager->task(taskId);
-  if (nullptr != pTask &&
-      m_tasksIds.insert(taskId).second)
+  if (nullptr != pTask && addTaskId(taskId))
   {
     pTask->setGroup(id());
     return true;

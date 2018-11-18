@@ -26,6 +26,15 @@ public:
     return m_id;
   }
 
+  void setId(T id)
+  {
+    m_id = id;
+    if (c_nextId <= id)
+    {
+      c_nextId = id + 1;
+    }
+  }
+
 protected:
   T m_id;
   static T c_nextId;

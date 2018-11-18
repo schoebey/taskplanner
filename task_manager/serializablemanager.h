@@ -16,13 +16,13 @@ public:
   EDeserializingError deserialize(ISerializer* pSerializer) override;
 
   Task* addTask(task_id taskId = -1);
-  Task* task(task_id id);
-  std::set<task_id> taskIds();
+  Task* task(task_id id) const;
+  std::set<task_id> taskIds() const;
   bool removeTask(task_id);
 
   Group* addGroup(group_id groupId = -1);
-  Group* group(group_id id);
-  std::set<group_id> groupIds();
+  Group* group(group_id id) const;
+  std::set<group_id> groupIds() const;
   bool removeGroup(group_id id);
 
 private:
