@@ -19,10 +19,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 {
   ui->setupUi(this);
 
-  QHBoxLayout* pLayout = new QHBoxLayout(ui->frame);
-  ui->frame->setLayout(pLayout);
-
-
 
   QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
   pWatcher->addPath("stylesheet.css");
@@ -86,7 +82,6 @@ GroupWidget* MainWindow::createGroupWidget(group_id id)
   connect(pGroupWidget, SIGNAL(taskMovedTo(task_id, group_id, int)), this, SLOT(moveTask(task_id, group_id, int)));
 
   m_groupWidgets[id] = pGroupWidget;
-  pGroupWidget->setCanvas(ui->scrollAreaWidgetContents);
 
   return pGroupWidget;
 }
@@ -101,7 +96,6 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   connect(pTaskWidget, SIGNAL(timeTrackingStopped(task_id)), this, SLOT(stopTimeTracking(task_id)));
 
   m_taskWidgets[id] = pTaskWidget;
-  pTaskWidget->setParent(ui->scrollAreaWidgetContents);
 
   return pTaskWidget;
 }

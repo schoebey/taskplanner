@@ -1,0 +1,62 @@
+MainWindow {
+  background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgb(50, 50, 50), 
+                stop:1 rgb(30, 30, 30));
+}
+
+MainWindow #frame {
+  border: 0px;
+}
+
+QScrollArea {
+  /*border: 1px solid red;*/
+  border-radius: 5px;
+  background: transparent;
+}
+
+QScrollArea #scrollAreaWidgetContents {
+  background: transparent;
+}
+
+GroupWidget {
+  /*border: 1px solid green;*/
+  background-color: rgba(255,255,255,10);
+  width: 150px;
+  border-radius: 7px;
+}
+
+GroupWidget > #pTitle {
+  color: #777;
+}
+
+TaskWidget {
+  margin: 5px 5px 0px 5px;
+  /*border: 3px solid rgba(40, 40, 40, 100);*/
+  /*background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 rgb(70, 70, 70), 
+                stop:1 rgb(60, 60, 60));*/
+  background-image: url(task_background_1.png);
+  border-radius: 6px;
+  padding: 0px;
+}
+
+TaskWidget #pStartStop {
+  border: 1px solid rgba(255,255,255,20);
+  background-color: rgba(255,255,255,10);
+  border-top-right-radius: 5px;
+  padding: 5px;
+  min-height: 15px;
+}
+
+TaskWidget #pTitle {
+  padding: 2px;
+  border: 0px solid red;
+  color: #fff;
+}
+
+
+TaskWidget #pDescription {
+  padding: 2px;
+  border: 0px solid red;
+  color: rgba(255,255,255,150);
+}

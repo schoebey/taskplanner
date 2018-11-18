@@ -71,11 +71,6 @@ void GroupWidget::setName(const QString& sName)
   ui->pTitle->setText(sName);
 }
 
-void GroupWidget::setCanvas(QWidget* pCanvas)
-{
-  m_pCanvas = pCanvas;
-}
-
 void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
 {
   if (m_vpTaskWidgets.end() ==

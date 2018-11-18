@@ -21,8 +21,6 @@ public:
 
   void setName(const QString& sName);
 
-  void setCanvas(QWidget* pCanvas);
-
   void InsertTask(TaskWidget* pTaskWidget, int iPos = -1);
   void RemoveTask(TaskWidget* pTaskWidget);
 
