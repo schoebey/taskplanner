@@ -80,40 +80,20 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
   if (m_vpTaskWidgets.end() ==
       std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
   {
-    QPoint origin(mapTo(m_pCanvas, ui->scrollAreaWidgetContents->pos()));
-    origin.setY(origin.y() + c_iItemSpacing);
-
-    if (-1 == iPos)  { iPos = m_vpTaskWidgets.size(); }
-
-
-    // find the new widgets position
-    for (int iWidget = 0; iWidget < iPos; ++iWidget)
-    {
-      QWidget* pWidget = m_vpTaskWidgets[iWidget];
-      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
-    }
-
-
     // insert the new widget
-    pTaskWidget->resize(ui->scrollAreaWidgetContents->width(), pTaskWidget->minimumSizeHint().height());
-    m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
-    moveWidget(pTaskWidget, origin);
-    origin.setY(origin.y() + pTaskWidget->height() + c_iItemSpacing);
-
-
-    // move the rest of the widgets to the correct place
-    for (int iWidget = iPos + 1; iWidget < m_vpTaskWidgets.size(); ++iWidget)
-    {
-      QWidget* pWidget = m_vpTaskWidgets[iWidget];
-      moveWidget(pWidget, origin);
-      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
-    }
+    if (-1 == iPos) iPos = m_vpTaskWidgets.size();
 
     pTaskWidget->setParent(ui->scrollAreaWidgetContents);
     pTaskWidget->SetGroupWidget(this);
+    pTaskWidget->resize(ui->scrollAreaWidgetContents->width(), pTaskWidget->minimumSizeHint().height());
     pTaskWidget->show();
 
-    ui->scrollAreaWidgetContents->setMinimumHeight(ui->scrollAreaWidgetContents->mapFrom(m_pCanvas, origin).y());
+
+    m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
+    //moveWidget(pTaskWidget, origin);
+
+
+    UpdatePositions();
 
     emit taskMovedTo(pTaskWidget->id(), m_groupId, iPos);
   }
@@ -124,29 +104,9 @@ void GroupWidget::RemoveTask(TaskWidget* pTaskWidget)
   auto it = std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget);
   if (m_vpTaskWidgets.end() != it)
   {
-    QPoint origin(mapTo(m_pCanvas, ui->scrollAreaWidgetContents->pos()));
-    origin.setY(origin.y() + c_iItemSpacing);
-
-    int iPos = it - m_vpTaskWidgets.begin();
     m_vpTaskWidgets.erase(it);
 
-    // calc the height of the items above the removed one
-    for (int iWidget = 0; iWidget < iPos; ++iWidget)
-    {
-      QWidget* pWidget = m_vpTaskWidgets[iWidget];
-      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
-    }
-
-    // move the rest of the widgets to the correct place
-    for (int iWidget = iPos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
-    {
-      QWidget* pWidget = m_vpTaskWidgets[iWidget];
-      moveWidget(pWidget, origin);
-      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
-    }
-
-    ui->scrollAreaWidgetContents->setMinimumHeight(ui->scrollAreaWidgetContents->mapFrom(m_pCanvas, origin).y());
-
+    UpdatePositions();
 
     pTaskWidget->SetGroupWidget(nullptr);
     pTaskWidget->show();
@@ -155,40 +115,56 @@ void GroupWidget::RemoveTask(TaskWidget* pTaskWidget)
 
 void GroupWidget::ShowGhost(TaskWidget* pTaskWidget, int iPos)
 {
-  if (m_vpTaskWidgets.end() ==
-      std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
+  if (nullptr != pTaskWidget)
   {
-    QPoint origin(mapTo(m_pCanvas, ui->scrollAreaWidgetContents->pos()));
-    origin.setY(origin.y() + c_iItemSpacing);
-
-    if (-1 == iPos)  { iPos = m_vpTaskWidgets.size(); }
-
-
-    // find the new widgets position
-    for (int iWidget = 0; iWidget < std::min<size_t>(iPos, m_vpTaskWidgets.size()); ++iWidget)
-    {
-      QWidget* pWidget = m_vpTaskWidgets[iWidget];
-      moveWidget(pWidget, origin);
-      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
-    }
-
-    if (iPos < m_vpTaskWidgets.size())
-    {
-      // make room for the new widget
-      origin.setY(origin.y() + pTaskWidget->height() + c_iItemSpacing);
-
-      // move the rest of the widgets to the correct place
-      for (int iWidget = iPos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
-      {
-        QWidget* pWidget = m_vpTaskWidgets[iWidget];
-        moveWidget(pWidget, origin);
-        origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
-      }
-    }
-
-    ui->scrollAreaWidgetContents->setMinimumHeight(ui->scrollAreaWidgetContents->mapFrom(m_pCanvas, origin).y());
+    UpdatePositions(pTaskWidget->height(), iPos);
+  }
+  else
+  {
+    UpdatePositions();
   }
 }
+
+
+
+
+void GroupWidget::UpdatePositions(int iSpace, int iSpacePos)
+{
+  QPoint origin(0,0);
+  origin.setY(origin.y() + c_iItemSpacing);
+
+  if (-1 == iSpacePos)  { iSpacePos = m_vpTaskWidgets.size(); }
+
+
+  // find the new widgets position
+  for (int iWidget = 0; iWidget < std::min<size_t>(iSpacePos, m_vpTaskWidgets.size()); ++iWidget)
+  {
+    QWidget* pWidget = m_vpTaskWidgets[iWidget];
+    moveWidget(pWidget, origin);
+    pWidget->resize(ui->scrollAreaWidgetContents->width(), pWidget->height());
+    origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
+  }
+
+  if (-1 < iSpace && iSpacePos < m_vpTaskWidgets.size())
+  {
+    // make room for the new widget
+    origin.setY(origin.y() + iSpace + c_iItemSpacing);
+  }
+
+
+  for (int iWidget = iSpacePos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
+  {
+    QWidget* pWidget = m_vpTaskWidgets[iWidget];
+    moveWidget(pWidget, origin);
+    pWidget->resize(ui->scrollAreaWidgetContents->width(), pWidget->height());
+    origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
+  }
+
+  ui->scrollAreaWidgetContents->setMinimumHeight(origin.y());
+}
+
+
+
 
 GroupWidget* GroupWidget::GroupWidgetUnderMouse()
 {
@@ -197,16 +173,7 @@ GroupWidget* GroupWidget::GroupWidgetUnderMouse()
 
 void GroupWidget::repositionChildren()
 {
-  QPoint origin(mapTo(m_pCanvas, ui->scrollAreaWidgetContents->pos()));
-  origin.setY(origin.y() + c_iItemSpacing);
-  for (auto& pWidget : m_vpTaskWidgets)
-  {
-    moveWidget(pWidget, origin);
-    origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
-    pWidget->resize(ui->scrollAreaWidgetContents->width(), pWidget->height());
-  }
-
-  ui->scrollAreaWidgetContents->setMinimumHeight(ui->scrollAreaWidgetContents->mapFrom(m_pCanvas, origin).y());
+  UpdatePositions();
 }
 
 void GroupWidget::resizeEvent(QResizeEvent* pEvent)
@@ -221,11 +188,10 @@ void GroupWidget::moveEvent(QMoveEvent* pEvent)
 
 int GroupWidget::indexFromPoint(QPoint pt)
 {
-  QPoint globalPt = mapTo(m_pCanvas, pt);
   for (int iIdx = 0; iIdx < m_vpTaskWidgets.size(); ++iIdx)
   {
     QWidget* pWidget = m_vpTaskWidgets[iIdx];
-    if (pWidget->mapFrom(m_pCanvas, globalPt).y() < pWidget->rect().center().y())
+    if (pWidget->mapFrom(this, pt).y() < pWidget->rect().center().y())
     {
       return iIdx;
     }
@@ -239,9 +205,9 @@ bool GroupWidget::eventFilter(QObject* pObj, QEvent* pEvent)
   if (QEvent::MouseButtonRelease == pEvent->type())
   {
     QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
-    if (rect().contains(mapFromGlobal(pMouseEvent->globalPos())))
+    if (ui->scrollAreaWidgetContents->rect().contains(ui->scrollAreaWidgetContents->mapFromGlobal(pMouseEvent->globalPos())))
     {
-      if (rect().contains(pMouseEvent->pos()) &&
+      if (ui->scrollAreaWidgetContents->rect().contains(ui->scrollAreaWidgetContents->mapFrom(this, pMouseEvent->pos())) &&
           nullptr != TaskWidget::DraggingTaskWidget())
       {
         InsertTask(TaskWidget::DraggingTaskWidget());
@@ -251,13 +217,14 @@ bool GroupWidget::eventFilter(QObject* pObj, QEvent* pEvent)
   else if (QEvent::MouseMove == pEvent->type())
   {
     QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
-    QPoint pt = mapFromGlobal(pMouseEvent->globalPos());
-    if (rect().contains(pt))
+    QPoint pt = ui->scrollAreaWidgetContents->mapFromGlobal(pMouseEvent->globalPos());
+    if (ui->scrollAreaWidgetContents->rect().contains(pt))
     {
       m_pMouseHoveringOver = this;
 
       if (nullptr != TaskWidget::DraggingTaskWidget())
       {
+        pt = mapFromGlobal(pMouseEvent->globalPos());
         ShowGhost(TaskWidget::DraggingTaskWidget(), indexFromPoint(pt));
       }
     }

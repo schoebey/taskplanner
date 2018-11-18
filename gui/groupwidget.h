@@ -40,6 +40,7 @@ protected:
   void moveEvent(QMoveEvent* pEvent);
   void ShowGhost(TaskWidget* pTaskWidget, int iPos);
   void repositionChildren();
+  void UpdatePositions(int iSpace = -1, int iSpacePos = 0);
 
 protected slots:
   void onNewTaskClicked();

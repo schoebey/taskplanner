@@ -3,6 +3,7 @@
 
 #include "id_types.h"
 #include <QMainWindow>
+#include <map>
 
 namespace Ui {
   class MainWindow;

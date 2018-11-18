@@ -122,6 +122,8 @@ void TaskWidget::mouseMoveEvent(QMouseEvent* pMouseEvent)
 
       qApp->installEventFilter(this);
       setParent(window());
+      move(pMouseEvent->globalPos() - m_mouseDownPos);
+      show();
       raise();
     }
   }
