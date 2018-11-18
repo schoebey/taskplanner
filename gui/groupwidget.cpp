@@ -5,6 +5,7 @@
 #include <QLayout>
 #include <QResizeEvent>
 #include <QPropertyAnimation>
+#include <QDebug>
 
 namespace
 {
@@ -83,9 +84,12 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
     // insert the new widget
     if (-1 == iPos) iPos = m_vpTaskWidgets.size();
 
+    QPoint currentPos = pTaskWidget->mapToGlobal(QPoint(0,0));
+    qDebug() << currentPos.x() << currentPos.y();
     pTaskWidget->setParent(ui->scrollAreaWidgetContents);
     pTaskWidget->SetGroupWidget(this);
     pTaskWidget->resize(ui->scrollAreaWidgetContents->width(), pTaskWidget->minimumSizeHint().height());
+    pTaskWidget->move(ui->scrollAreaWidgetContents->mapFromGlobal(currentPos));
     pTaskWidget->show();
 
 
