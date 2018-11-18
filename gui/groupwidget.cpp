@@ -80,7 +80,7 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
   if (m_vpTaskWidgets.end() ==
       std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
   {
-    QPoint origin(mapTo(m_pCanvas, ui->frame->pos()));
+    QPoint origin(mapTo(m_pCanvas, ui->scrollAreaWidgetContents->pos()));
     origin.setY(origin.y() + c_iItemSpacing);
 
     if (-1 == iPos)  { iPos = m_vpTaskWidgets.size(); }
@@ -95,7 +95,7 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
 
 
     // insert the new widget
-    pTaskWidget->resize(ui->frame->width(), pTaskWidget->minimumSizeHint().height());
+    pTaskWidget->resize(ui->scrollAreaWidgetContents->width(), pTaskWidget->minimumSizeHint().height());
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
     moveWidget(pTaskWidget, origin);
     origin.setY(origin.y() + pTaskWidget->height() + c_iItemSpacing);
@@ -109,10 +109,11 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
       origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
     }
 
+    pTaskWidget->setParent(ui->scrollAreaWidgetContents);
     pTaskWidget->SetGroupWidget(this);
     pTaskWidget->show();
 
-    ui->frame->setMinimumHeight(ui->frame->mapFrom(m_pCanvas, origin).y());
+    ui->scrollAreaWidgetContents->setMinimumHeight(ui->scrollAreaWidgetContents->mapFrom(m_pCanvas, origin).y());
 
     emit taskMovedTo(pTaskWidget->id(), m_groupId, iPos);
   }
@@ -123,7 +124,7 @@ void GroupWidget::RemoveTask(TaskWidget* pTaskWidget)
   auto it = std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget);
   if (m_vpTaskWidgets.end() != it)
   {
-    QPoint origin(mapTo(m_pCanvas, ui->frame->pos()));
+    QPoint origin(mapTo(m_pCanvas, ui->scrollAreaWidgetContents->pos()));
     origin.setY(origin.y() + c_iItemSpacing);
 
     int iPos = it - m_vpTaskWidgets.begin();
@@ -144,7 +145,7 @@ void GroupWidget::RemoveTask(TaskWidget* pTaskWidget)
       origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
     }
 
-    ui->frame->setMinimumHeight(ui->frame->mapFrom(m_pCanvas, origin).y());
+    ui->scrollAreaWidgetContents->setMinimumHeight(ui->scrollAreaWidgetContents->mapFrom(m_pCanvas, origin).y());
 
 
     pTaskWidget->SetGroupWidget(nullptr);
@@ -157,7 +158,7 @@ void GroupWidget::ShowGhost(TaskWidget* pTaskWidget, int iPos)
   if (m_vpTaskWidgets.end() ==
       std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
   {
-    QPoint origin(mapTo(m_pCanvas, ui->frame->pos()));
+    QPoint origin(mapTo(m_pCanvas, ui->scrollAreaWidgetContents->pos()));
     origin.setY(origin.y() + c_iItemSpacing);
 
     if (-1 == iPos)  { iPos = m_vpTaskWidgets.size(); }
@@ -185,7 +186,7 @@ void GroupWidget::ShowGhost(TaskWidget* pTaskWidget, int iPos)
       }
     }
 
-    ui->frame->setMinimumHeight(ui->frame->mapFrom(m_pCanvas, origin).y());
+    ui->scrollAreaWidgetContents->setMinimumHeight(ui->scrollAreaWidgetContents->mapFrom(m_pCanvas, origin).y());
   }
 }
 
@@ -196,16 +197,16 @@ GroupWidget* GroupWidget::GroupWidgetUnderMouse()
 
 void GroupWidget::repositionChildren()
 {
-  QPoint origin(mapTo(m_pCanvas, ui->frame->pos()));
+  QPoint origin(mapTo(m_pCanvas, ui->scrollAreaWidgetContents->pos()));
   origin.setY(origin.y() + c_iItemSpacing);
   for (auto& pWidget : m_vpTaskWidgets)
   {
     moveWidget(pWidget, origin);
     origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
-    pWidget->resize(ui->frame->width(), pWidget->height());
+    pWidget->resize(ui->scrollAreaWidgetContents->width(), pWidget->height());
   }
 
-  ui->frame->setMinimumHeight(ui->frame->mapFrom(m_pCanvas, origin).y());
+  ui->scrollAreaWidgetContents->setMinimumHeight(ui->scrollAreaWidgetContents->mapFrom(m_pCanvas, origin).y());
 }
 
 void GroupWidget::resizeEvent(QResizeEvent* pEvent)
