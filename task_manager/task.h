@@ -54,6 +54,8 @@ public:
 
   void startWork() override;
   void stopWork() override;
+  std::vector<STimeFragment> timeFragments() const;
+  void setTimeFragments(const std::vector<STimeFragment>& vFragments);
 
   void setGroup(group_id groupId) override;
 

@@ -1,4 +1,5 @@
 include(text/text.pri)
+include(markdown/markdown.pri)
 
 INCLUDEPATH += $$PWD/../ \
 

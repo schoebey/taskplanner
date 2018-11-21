@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>219</width>
-    <height>56</height>
+    <height>136</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -32,17 +32,11 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <property name="horizontalSpacing">
+   <property name="spacing">
     <number>0</number>
    </property>
    <item row="0" column="0">
     <widget class="EditableLabel" name="pTitle">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="text">
       <string>TextLabel</string>
      </property>
@@ -61,7 +55,7 @@
    <item row="0" column="1">
     <widget class="QPushButton" name="pStartStop">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
+      <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>

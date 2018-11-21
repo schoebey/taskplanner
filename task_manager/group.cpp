@@ -72,13 +72,14 @@ bool Group::removeTask(task_id taskId)
   auto it = std::find(m_tasksIds.begin(), m_tasksIds.end(), taskId);
   if (it != m_tasksIds.end())
   {
+    m_tasksIds.erase(it);
+
     ITask* pTask = m_pManager->task(taskId);
     if (nullptr != pTask)
     {
       pTask->setGroup(-1);
     }
 
-    m_tasksIds.erase(it);
     return true;
   }
 

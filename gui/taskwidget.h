@@ -15,7 +15,7 @@ class TaskWidget : public QFrame
 
 public:
   explicit TaskWidget(task_id id, QWidget *parent = nullptr);
-  ~TaskWidget();
+  ~TaskWidget() override;
 
   task_id id() const;
 
@@ -38,16 +38,18 @@ private slots:
   void on_pStartStop_toggled(bool bOn);
 
 private:
-  bool eventFilter(QObject* pObj, QEvent* pEvent);
+  bool eventFilter(QObject* pObj, QEvent* pEvent) override;
 
 private:
   Ui::TaskWidget *ui;
   task_id m_taskId;
-  void mousePressEvent(QMouseEvent* pMouseEvent);
-  void mouseMoveEvent(QMouseEvent* pMouseEvent);
+  void mousePressEvent(QMouseEvent* pMouseEvent) override;
+  void mouseMoveEvent(QMouseEvent* pMouseEvent) override;
+  void paintEvent(QPaintEvent* pEvent) override;
 
   bool m_bMouseDown = false;
   QPoint m_mouseDownPos;
+  QImage m_backgroundImage;
 
   GroupWidget* m_pGroupWidget = nullptr;
   GroupWidget* m_pPreviousGroupWidget = nullptr;

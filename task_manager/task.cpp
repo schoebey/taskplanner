@@ -67,17 +67,20 @@ void Task::setParentTaskId(task_id parentTaskId)
 
 void Task::setParentTask(task_id parentTaskId)
 {
-  ITask* pParent = m_pManager->task(m_parentTaskId);
-  if (nullptr != pParent)
+  if (m_parentTaskId != parentTaskId)
   {
-    pParent->removeTask(id());
-  }
+    ITask* pParent = m_pManager->task(m_parentTaskId);
+    if (nullptr != pParent)
+    {
+      pParent->removeTask(id());
+    }
 
-  setParentTaskId(parentTaskId);
-  pParent = m_pManager->task(parentTaskId);
-  if (nullptr != pParent)
-  {
-    pParent->addTask(id());
+    setParentTaskId(parentTaskId);
+    pParent = m_pManager->task(parentTaskId);
+    if (nullptr != pParent)
+    {
+      pParent->addTask(id());
+    }
   }
 }
 
@@ -109,6 +112,7 @@ bool Task::removeTask(task_id id)
   if (it != m_subTaskIds.end())
   {
     m_subTaskIds.erase(it);
+
     ITask* pTask = m_pManager->task(id);
     if (nullptr != pTask)
     {
@@ -134,20 +138,33 @@ void Task::stopWork()
   m_vTimingInfo.back().stopTime = QDateTime::currentDateTime();
 }
 
+std::vector<STimeFragment> Task::timeFragments() const
+{
+  return m_vTimingInfo;
+}
+
+void Task::setTimeFragments(const std::vector<STimeFragment>& vFragments)
+{
+  m_vTimingInfo = vFragments;
+}
+
 void Task::setGroup(group_id groupId)
 {
-  IGroup* pGroup = m_pManager->group(m_groupId);
-  if (nullptr != pGroup)
+  if (m_groupId != groupId)
   {
-    pGroup->removeTask(id());
-  }
+    IGroup* pGroup = m_pManager->group(m_groupId);
+    if (nullptr != pGroup)
+    {
+      pGroup->removeTask(id());
+    }
 
-  m_groupId = groupId;
+    m_groupId = groupId;
 
-  pGroup = m_pManager->group(m_groupId);
-  if (nullptr != pGroup)
-  {
-    pGroup->addTask(id());
+    pGroup = m_pManager->group(m_groupId);
+    if (nullptr != pGroup)
+    {
+      pGroup->addTask(id());
+    }
   }
 
   for (const auto& subTaskId : m_subTaskIds)

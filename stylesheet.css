@@ -35,8 +35,9 @@ TaskWidget {
   /*background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                 stop:0 rgb(70, 70, 70), 
                 stop:1 rgb(60, 60, 60));*/
-  background-image: url(task_background_1.png);
-  border-radius: 6px;
+  /*background: red;*/
+  /*background-image: url(:/task_background_1.png);*/
+  /*border-radius: 5px;*/
   padding: 0px;
 }
 

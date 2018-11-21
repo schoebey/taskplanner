@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>stylesheet.css</file>
+        <file>task_background_1.png</file>
+        <file>dropshadow.png</file>
+        <file>task_background_2.png</file>
+        <file>task_background_3.png</file>
+    </qresource>
+</RCC>

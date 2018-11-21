@@ -199,6 +199,16 @@ int GroupWidget::indexFromPoint(QPoint pt)
   return m_vpTaskWidgets.size();
 }
 
+QImage GroupWidget::backgroundImage() const
+{
+  return m_backgroundImage;
+}
+
+void GroupWidget::setBackgroundImage(const QImage& img)
+{
+  m_backgroundImage = img;
+}
+
 bool GroupWidget::eventFilter(QObject* pObj, QEvent* pEvent)
 {
   if (QEvent::MouseButtonRelease == pEvent->type())

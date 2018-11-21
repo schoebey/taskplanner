@@ -36,14 +36,18 @@ MainWindow::~MainWindow()
 
 void MainWindow::load()
 {
+  int i = 0;
+  std::array<QImage, 3> images = {QImage(":/task_background_1.png"),
+                                  QImage(":/task_background_2.png"),
+                                  QImage(":/task_background_3.png")};
   for (const auto& groupId : m_pManager->groupIds())
   {
-
     IGroup* pGroup = m_pManager->group(groupId);
 
     if (nullptr != pGroup)
     {
       GroupWidget* pGroupWidget = createGroupWidget(groupId);
+      pGroupWidget->setBackgroundImage(images[i++ % images.size()]);
       pGroupWidget->setName(pGroup->name());
       for (const auto& taskId : pGroup->taskIds())
       {
@@ -102,35 +106,70 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
 
 void MainWindow::createNewTask(group_id groupId)
 {
-  // task_id taskId = manager.addTask(groupId);
-  // emit taskAdded(taskId, groupId);
-
-  task_id newId = 0;
-
-  auto it = m_groupWidgets.find(groupId);
-  if (it != m_groupWidgets.end())
+  IGroup* pGroup = m_pManager->group(groupId);
+  if (nullptr != pGroup)
   {
-    it->second->InsertTask(createTaskWidget(newId));
+   ITask* pTask = m_pManager->addTask();
+   pGroup->addTask(pTask->id());
+
+   auto it = m_groupWidgets.find(groupId);
+   if (it != m_groupWidgets.end())
+   {
+     it->second->InsertTask(createTaskWidget(pTask->id()));
+   }
   }
 }
 
 void MainWindow::renameGroup(group_id id, const QString& sNewName)
 {
-  qDebug() << "group" << id << "was renamed to " << sNewName;
+  IGroup* pGroup = m_pManager->group(id);
+  if (nullptr != pGroup)
+  {
+    pGroup->setName(sNewName);
+  }
 }
 
 void MainWindow::renameTask(task_id id, const QString& sNewName)
 {
-  qDebug() << "task" << id << "was renamed to " << sNewName;
+  ITask* pTask = m_pManager->task(id);
+  if (nullptr != pTask)
+  {
+    pTask->setName(sNewName);
+  }
 }
 
 void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
 {
-  qDebug() << "task" << id << "has a new description:" << sNewDescr;
+  ITask* pTask = m_pManager->task(id);
+  if (nullptr != pTask)
+  {
+    pTask->setDescription(sNewDescr);
+  }
 }
 
 void MainWindow::moveTask(task_id id, group_id groupId, int iPos)
 {
+  ITask* pTask = m_pManager->task(id);
+  if (nullptr != pTask)
+  {
+    pTask->setGroup(groupId);
+  }
+}
 
-  qDebug() << "task" << id << "was moved to group" << groupId << "at position" << iPos;
+void MainWindow::startTimeTracking(task_id taskId)
+{
+  ITask* pTask = m_pManager->task(taskId);
+  if (nullptr != pTask)
+  {
+    pTask->startWork();
+  }
+}
+
+void MainWindow::stopTimeTracking(task_id taskId)
+{
+  ITask* pTask = m_pManager->task(taskId);
+  if (nullptr != pTask)
+  {
+    pTask->stopWork();
+  }
 }

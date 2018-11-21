@@ -6,7 +6,7 @@
 struct SPriority
 {
   SPriority()
-    : categories({0})
+    : categories({{0}})
   {}
 
   std::array<int, 10> categories;

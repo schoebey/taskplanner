@@ -32,6 +32,8 @@ private slots:
   void moveTask(task_id id, group_id groupId, int iPos);
   void reloadStylesheet(const QString& sPath);
   void load();
+  void startTimeTracking(task_id taskId);
+  void stopTimeTracking(task_id taskId);
 
 private:
   Ui::MainWindow *ui;

@@ -54,6 +54,20 @@ bool SerializableManager::removeTask(task_id id)
   return false;
 }
 
+bool SerializableManager::changeTaskId(task_id oldId, task_id newId)
+{
+  auto it = m_tasks.find(oldId);
+  if (it != m_tasks.end())
+  {
+    tspTask spTask = it->second;
+    m_tasks.erase(it);
+    spTask->setId(newId);
+    m_tasks[newId] = spTask;
+  }
+
+  return false;
+}
+
 Group* SerializableManager::addGroup(group_id groupId)
 {
   tspGroup spGroup = std::make_shared<Group>(m_pManager, groupId);
@@ -89,6 +103,20 @@ bool SerializableManager::removeGroup(group_id id)
   {
     m_groups.erase(it);
     return true;
+  }
+
+  return false;
+}
+
+bool SerializableManager::changeGroupId(group_id oldId, group_id newId)
+{
+  auto it = m_groups.find(oldId);
+  if (it != m_groups.end())
+  {
+    tspGroup spGroup = it->second;
+    m_groups.erase(it);
+    spGroup->setId(newId);
+    m_groups[newId] = spGroup;
   }
 
   return false;

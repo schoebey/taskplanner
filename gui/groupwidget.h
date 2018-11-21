@@ -28,6 +28,9 @@ public:
 
   int indexFromPoint(QPoint pt);
 
+  QImage backgroundImage() const;
+  void setBackgroundImage(const QImage& img);
+
 signals:
   void taskMovedTo(task_id taskId, group_id groupId, int iPos);
   void renamed(group_id groupId, const QString& sNewName);
@@ -36,6 +39,7 @@ signals:
 protected:
   void resizeEvent(QResizeEvent* pEvent);
   void moveEvent(QMoveEvent* pEvent);
+  bool eventFilter(QObject* pObj, QEvent* pEvent);
   void ShowGhost(TaskWidget* pTaskWidget, int iPos);
   void repositionChildren();
   void UpdatePositions(int iSpace = -1, int iSpacePos = 0);
@@ -48,9 +52,8 @@ private:
   Ui::GroupWidget *ui;
   group_id m_groupId;
   std::vector<TaskWidget*> m_vpTaskWidgets;
-  bool eventFilter(QObject* pObj, QEvent* pEvent);
+  QImage m_backgroundImage;
 
-  QWidget* m_pCanvas = nullptr;
   static GroupWidget* m_pMouseHoveringOver;
 };
 

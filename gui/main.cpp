@@ -5,6 +5,7 @@
 #include "task.h"
 #include "group.h"
 #include "serializerfactory.h"
+#include "style.h"
 
 #include <cassert>
 
@@ -12,24 +13,9 @@ int main(int argc, char *argv[])
 {
   QApplication app(argc, argv);
 
+  app.setStyle(new Style());
 
   Manager manager;
-
-  IGroup* pGroup = manager.addGroup();
-  pGroup->setName("testGroup");
-
-  for (int i = 0; i < 5; ++i)
-  {
-    ITask* pTask = manager.addTask();
-    pTask->setName(QString("test_%1").arg(i));
-    pGroup->addTask(pTask->id());
-  }
-
-  pGroup = manager.addGroup();
-  pGroup->setName("testGroup2");
-
-  pGroup = manager.addGroup();
-  pGroup->setName("testGroup3");
 
 
   tspSerializer spTextWriter = SerializerFactory::create("text");
@@ -37,13 +23,44 @@ int main(int argc, char *argv[])
   {
     assert(false);
   }
-  ESerializingError err = manager.serializeTo(spTextWriter.get());
-  assert(ESerializingError::eOk == err);
 
+  EDeserializingError de = manager.deserializeFrom(spTextWriter.get());
+  assert(EDeserializingError::eOk == de);
+
+
+  if (0 == manager.groupIds().size())
+  {
+      IGroup* pGroup = manager.addGroup();
+      pGroup->setName("backlog");
+
+      pGroup = manager.addGroup();
+      pGroup->setName("in progress");
+
+      pGroup = manager.addGroup();
+      pGroup->setName("done");
+  }
 
 
   MainWindow window(&manager);
   window.show();
 
-  return app.exec();
+  int iRetVal = app.exec();
+
+
+  ESerializingError se = manager.serializeTo(spTextWriter.get());
+  assert(ESerializingError::eOk == se);
+
+
+  tspSerializer spMdWriter = SerializerFactory::create("markdown");
+  if (nullptr == spMdWriter ||
+      !spMdWriter->setParameter("fileName", "serialisation_markdown.txt"))
+  {
+    assert(false);
+  }
+  se = manager.serializeTo(spMdWriter.get());
+  assert(ESerializingError::eOk == se);
+
+
+  return iRetVal;
+
 }

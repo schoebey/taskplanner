@@ -19,11 +19,13 @@ public:
   Task* task(task_id id) const;
   std::set<task_id> taskIds() const;
   bool removeTask(task_id);
+  bool changeTaskId(task_id oldId, task_id newId);
 
   Group* addGroup(group_id groupId = -1);
   Group* group(group_id id) const;
   std::set<group_id> groupIds() const;
   bool removeGroup(group_id id);
+  bool changeGroupId(group_id oldId, group_id newId);
 
 private:
   std::map<task_id, tspTask> m_tasks;

@@ -1,4 +1,4 @@
-#include "textserializer.h"
+#include "markdownserializer.h"
 #include "register.h"
 #include "serializablemanager.h"
 #include "group.h"
@@ -10,22 +10,92 @@
 
 namespace
 {
-  Register<TextSerializer> s("text");
+  Register<MarkdownSerializer> s("markdown");
 
   static const QString c_sPara_FileName = "fileName";
   static const QString c_sManagerHeader = "== manager ==";
   static const QString c_sTaskHeader = "== task ==";
   static const QString c_sGroupHeader = "== group ==";
   static const QString c_sTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
+
+  template<typename T> QString convert(const T& t);
+
+  template<> QString convert(const int& i)
+  {
+    return QString::number(i);
+  }
+
+  template<> QString convert(const STimeFragment& f)
+  {
+    return QString("[%1|%2]").arg(f.startTime.toString(c_sTimeFormat)).arg(f.stopTime.toString(c_sTimeFormat));
+  }
+
+  template<typename T> T convert(const QString& s);
+
+  template<> int convert(const QString& s)
+  {
+    bool bOk(false);
+    int iRes = s.toInt(&bOk);
+    return bOk ? iRes : 0;
+  }
+
+  template<> STimeFragment convert(const QString& s)
+  {
+    STimeFragment tf;
+
+    QStringList parts = s.split("|");
+    if (2 <= parts.size())
+    {
+      tf.startTime = QDateTime::fromString(parts[0], c_sTimeFormat);
+      tf.stopTime = QDateTime::fromString(parts[1], c_sTimeFormat);
+    }
+
+    return tf;
+  }
+
+
+  template<typename T>
+  void writeContainer(QTextStream& stream, const T& container, const QString& sName)
+  {
+    stream << sName << ":";
+    QStringList list;
+    for (const auto& el : container)
+    {
+      list.push_back(convert<typename T::value_type>(el));
+    }
+    stream << list.join(",");
+    stream << endl;
+  }
+
+  template<typename T>
+  bool readContainer(QTextStream& stream, T& container, const QString& sName)
+  {
+    QString sLine = stream.readLine();
+    QStringList list = sLine.split(":");
+    if (1 > list.size())  { return false; }
+
+
+    QString sIdentifier = list[0];
+    if (sIdentifier != sName)  { return false; }
+
+    QStringList elements = list[2].split(",");
+
+    for (const auto& el : elements)
+    {
+      container.push_back(convert<typename T::value_type>(el));
+    }
+
+    return true;
+  }
 }
 
-TextSerializer::TextSerializer()
+MarkdownSerializer::MarkdownSerializer()
 {
   registerParameter(c_sPara_FileName, QVariant::String, true);
 }
 
 
-ESerializingError TextSerializer::initSerialization()
+ESerializingError MarkdownSerializer::initSerialization()
 {
   if (hasParameter(c_sPara_FileName))
   {
@@ -35,8 +105,8 @@ ESerializingError TextSerializer::initSerialization()
     {
       m_stream.setDevice(&m_file);
       m_stream.setCodec("UTF-8");
-      m_stream << QString("task planner") << endl;
-      m_stream << QDateTime::currentDateTime().toString(c_sTimeFormat) << endl;
+      m_stream << QString("=== task planner ===") << endl;
+      m_stream << "change date: " << QDateTime::currentDateTime().toString(c_sTimeFormat) << endl;
       return ESerializingError::eOk;
     }
 
@@ -48,7 +118,7 @@ ESerializingError TextSerializer::initSerialization()
   }
 }
 
-ESerializingError TextSerializer::deinitSerialization()
+ESerializingError MarkdownSerializer::deinitSerialization()
 {
   m_stream.flush();
   m_file.close();
@@ -56,7 +126,7 @@ ESerializingError TextSerializer::deinitSerialization()
 }
 
 
-EDeserializingError TextSerializer::initDeserialization()
+EDeserializingError MarkdownSerializer::initDeserialization()
 {
   if (hasParameter(c_sPara_FileName))
   {
@@ -81,19 +151,16 @@ EDeserializingError TextSerializer::initDeserialization()
   }
 }
 
-EDeserializingError TextSerializer::deinitDeserialization()
+EDeserializingError MarkdownSerializer::deinitDeserialization()
 {
   m_file.close();
   return EDeserializingError::eOk;
 }
 
-ESerializingError TextSerializer::serialize(const SerializableManager& m)
+ESerializingError MarkdownSerializer::serialize(const SerializableManager& m)
 {
   m_stream << c_sManagerHeader << endl;
-  m_stream << m.version() << endl;
-  m_stream << m.groupIds().size() << endl;
-  m_stream << m.taskIds().size() << endl;
-
+  m_stream << "version:" << m.version() << endl;
 
   for (const auto & id : m.groupIds())
   {
@@ -117,7 +184,7 @@ ESerializingError TextSerializer::serialize(const SerializableManager& m)
   return ESerializingError::eOk;
 }
 
-EDeserializingError TextSerializer::deserialize(SerializableManager& m)
+EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
 {
   QString sHeader = m_stream.readLine();
   if (sHeader != c_sManagerHeader)
@@ -131,66 +198,54 @@ EDeserializingError TextSerializer::deserialize(SerializableManager& m)
 
   if (0 == iVersion)
   {
-    int iNofGroups = 0;
-    m_stream >> iNofGroups;
-    m_stream.readLine();
-
-    int iNofTasks = 0;
-    m_stream >> iNofTasks;
-    m_stream.readLine();
-
-    for (int iGroup = 0; iGroup < iNofGroups; ++iGroup)
+    while (!m_stream.atEnd())
     {
-      Group* pGroup = m.addGroup();
-      group_id oldId = pGroup->id();
-      EDeserializingError err = pGroup->deserialize(this);
-      m.changeGroupId(oldId, pGroup->id());
-      if (EDeserializingError::eOk != err)  { return err; }
-    }
-
-
-    for (int iTask = 0; iTask < iNofTasks; ++iTask)
-    {
-      Task* pTask = m.addTask();
-      group_id oldId = pTask->id();
-      EDeserializingError err = pTask->deserialize(this);
-      m.changeTaskId(oldId, pTask->id());
-      if (EDeserializingError::eOk != err)  { return err; }
+      qint64 pos = m_stream.pos();
+      QString sIdentifier = m_stream.readLine();
+      if (c_sGroupHeader == sIdentifier)
+      {
+        m_stream.seek(pos);
+        Group* pGroup = m.addGroup();
+        group_id oldId = pGroup->id();
+        EDeserializingError err = pGroup->deserialize(this);
+        m.changeGroupId(oldId, pGroup->id());
+        if (EDeserializingError::eOk != err)  { return err; }
+      }
+      else if (c_sTaskHeader == sIdentifier)
+      {
+        m_stream.seek(pos);
+        Task* pTask = m.addTask();
+        group_id oldId = pTask->id();
+        EDeserializingError err = pTask->deserialize(this);
+        m.changeTaskId(oldId, pTask->id());
+        if (EDeserializingError::eOk != err)  { return err; }
+      }
     }
   }
 
   return EDeserializingError::eOk;
 }
 
-ESerializingError TextSerializer::serialize(const Task& t)
+ESerializingError MarkdownSerializer::serialize(const Task& t)
 {
   m_stream << c_sTaskHeader << endl;
-  m_stream << t.version() << endl;
-  m_stream << t.id() << endl;
-  m_stream << t.name() << endl;
-  m_stream << t.description() << endl;
+  m_stream << "version:" << t.version() << endl;
+  m_stream << "id:" << t.id() << endl;
+  m_stream << "name:" << t.name() << endl;
+  m_stream << "description:" << t.description() << endl;
 
-  m_stream << t.timeFragments().size() << endl;
-  for (const auto& fragment : t.timeFragments())
-  {
-    m_stream << fragment.startTime.toString(c_sTimeFormat) << endl;
-    m_stream << fragment.stopTime.toString(c_sTimeFormat) << endl;
-  }
+  writeContainer(m_stream, t.timeFragments(), "time_info");
 
 //  m_stream << t.priority();
 
-  m_stream << t.parentTask() << endl;
+  m_stream << "parent:" << t.parentTask() << endl;
 
-  m_stream << t.taskIds().size() << endl;
-  for (const auto& id : t.taskIds())
-  {
-    m_stream << id << endl;
-  }
+  writeContainer(m_stream, t.taskIds(), "children");
 
   return ESerializingError::eOk;
 }
 
-EDeserializingError TextSerializer::deserialize(Task& t)
+EDeserializingError MarkdownSerializer::deserialize(Task& t)
 {
   QString sHeader = m_stream.readLine();
   if (sHeader != c_sTaskHeader)
@@ -222,17 +277,10 @@ EDeserializingError TextSerializer::deserialize(Task& t)
     m_stream.readLine();
 
     std::vector<STimeFragment> vTimeFragments;
-    for (int i = 0; i < iNofTimeFragments; ++i)
+    if (readContainer(m_stream, vTimeFragments, "time_info"))
     {
-      QString sStartTime = m_stream.readLine();
-      QString sStopTime = m_stream.readLine();
-
-      STimeFragment fragment;
-      fragment.startTime = QDateTime::fromString(sStartTime, c_sTimeFormat);
-      fragment.stopTime = QDateTime::fromString(sStopTime, c_sTimeFormat);
-      vTimeFragments.push_back(fragment);
+      t.setTimeFragments(vTimeFragments);
     }
-    t.setTimeFragments(vTimeFragments);
 
     task_id parentId;
     m_stream >> parentId;
@@ -240,18 +288,8 @@ EDeserializingError TextSerializer::deserialize(Task& t)
 
     t.setParentTaskId(parentId);
 
-    int iNofSubTasks = 0;
-    m_stream >> iNofSubTasks;
-    m_stream.readLine();
-
-    for (int i = 0; i < iNofSubTasks; ++i)
-    {
-      task_id id;
-      m_stream >> id;
-      m_stream.readLine();
-
-      t.addTaskId(id);
-    }
+    std::set<task_id> children;
+    //readContainer(m_stream, children, "children");
 
     return EDeserializingError::eOk;
   }
@@ -259,7 +297,7 @@ EDeserializingError TextSerializer::deserialize(Task& t)
   return EDeserializingError::eInternalError;
 }
 
-ESerializingError TextSerializer::serialize(const Group& g)
+ESerializingError MarkdownSerializer::serialize(const Group& g)
 {
   m_stream << c_sGroupHeader << endl;
   m_stream << g.version() << endl;
@@ -276,7 +314,7 @@ ESerializingError TextSerializer::serialize(const Group& g)
   return ESerializingError::eOk;
 }
 
-EDeserializingError TextSerializer::deserialize(Group& g)
+EDeserializingError MarkdownSerializer::deserialize(Group& g)
 {
   QString sHeader = m_stream.readLine();
   if (sHeader != c_sGroupHeader)
