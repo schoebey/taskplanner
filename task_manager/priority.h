@@ -1,15 +1,15 @@
 #ifndef PRIORITY_H
 #define PRIORITY_H
 
-#include <array>
+#include <vector>
 
 struct SPriority
 {
   SPriority()
-    : categories({{0}})
+    : categories({0})
   {}
 
-  std::array<int, 10> categories;
+  std::vector<int> categories;
 };
 
 #endif // PRIORITY_H

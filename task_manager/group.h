@@ -18,6 +18,8 @@ typedef std::shared_ptr<Task> tspTask;
 class Group: public IGroup, public ISerializable
 {
 public:
+  using id_generator<group_id>::setId;
+
   Group(Manager* pManager, group_id id = -1);
 
   int version() const override;

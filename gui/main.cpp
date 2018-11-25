@@ -18,17 +18,16 @@ int main(int argc, char *argv[])
   Manager manager;
 
 
-  tspSerializer spTextWriter = SerializerFactory::create("text");
-  if (!spTextWriter->setParameter("fileName", "serialisation_test.txt"))
+  tspSerializer spTextWriter = SerializerFactory::create("markdown");
+  if (!spTextWriter->setParameter("fileName", "serialisation_markdown.txt"))
   {
     assert(false);
   }
 
   EDeserializingError de = manager.deserializeFrom(spTextWriter.get());
-  assert(EDeserializingError::eOk == de);
 
 
-  if (0 == manager.groupIds().size())
+  if (EDeserializingError::eOk != de | 0 == manager.groupIds().size())
   {
       IGroup* pGroup = manager.addGroup();
       pGroup->setName("backlog");
@@ -51,14 +50,14 @@ int main(int argc, char *argv[])
   assert(ESerializingError::eOk == se);
 
 
-  tspSerializer spMdWriter = SerializerFactory::create("markdown");
-  if (nullptr == spMdWriter ||
-      !spMdWriter->setParameter("fileName", "serialisation_markdown.txt"))
-  {
-    assert(false);
-  }
-  se = manager.serializeTo(spMdWriter.get());
-  assert(ESerializingError::eOk == se);
+//  tspSerializer spMdWriter = SerializerFactory::create("markdown");
+//  if (nullptr == spMdWriter ||
+//      !spMdWriter->setParameter("fileName", "serialisation_markdown.txt"))
+//  {
+//    assert(false);
+//  }
+//  se = manager.serializeTo(spMdWriter.get());
+//  assert(ESerializingError::eOk == se);
 
 
   return iRetVal;

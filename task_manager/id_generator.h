@@ -26,6 +26,7 @@ public:
     return m_id;
   }
 
+protected:
   void setId(T id)
   {
     m_id = id;

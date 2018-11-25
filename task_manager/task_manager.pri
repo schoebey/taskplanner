@@ -17,4 +17,5 @@ HEADERS += \
     $$PWD/serializableinterface.h \
     $$PWD/taskinterface.h \
     $$PWD/groupinterface.h \
-    $$PWD/serializablemanager.h
+    $$PWD/serializablemanager.h \
+    $$PWD/container_utils.h

@@ -12,6 +12,8 @@
 #include <QDebug>
 #include <QFile>
 
+#include <array>
+
 MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
@@ -37,9 +39,9 @@ MainWindow::~MainWindow()
 void MainWindow::load()
 {
   int i = 0;
-  std::array<QImage, 3> images = {QImage(":/task_background_1.png"),
-                                  QImage(":/task_background_2.png"),
-                                  QImage(":/task_background_3.png")};
+  std::array<QImage, 3> images = {{QImage(":/task_background_1.png"),
+                                   QImage(":/task_background_2.png"),
+                                   QImage(":/task_background_3.png")}};
   for (const auto& groupId : m_pManager->groupIds())
   {
     IGroup* pGroup = m_pManager->group(groupId);
@@ -147,12 +149,15 @@ void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
   }
 }
 
-void MainWindow::moveTask(task_id id, group_id groupId, int iPos)
+void MainWindow::moveTask(task_id id, group_id groupId, int /*iPos*/)
 {
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
     pTask->setGroup(groupId);
+
+    // recalculate the priorities based on
+    // the current sort order and the new position of the task
   }
 }
 

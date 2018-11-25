@@ -9,56 +9,6 @@
 #include <cassert>
 #include <cmath>
 
-namespace
-{
-
-  void drawShadowedText(QPainter* pPainter, const QPoint& pt, const QString& sText, QColor shadowColor)
-  {
-    if (nullptr == pPainter)  { return; }
-
-    QFont f(pPainter->font());
-    f.setPointSize(20);
-    QFontMetrics m(f);
-
-    QString sKey = QString("%1_%2x%3_%4").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
-
-    QPixmap* pPixmap = QPixmapCache::find(sKey);
-    if (nullptr == pPixmap)
-    {
-      QImage img(m.width(sText), m.height() + 2, QImage::Format_ARGB32);
-      img.fill(Qt::transparent);
-
-      QPainterPath textPath;
-      textPath.addText(0, img.height()-2, f, sText);
-
-      QPainterPath shadowPath;
-      shadowPath.addText(0, img.height()-1, f, sText);
-
-      QPainter p(&img);
-      p.setPen(Qt::NoPen);
-      p.setBrush(shadowColor);
-      p.setRenderHint(QPainter::Antialiasing, true);
-      p.setRenderHint(QPainter::HighQualityAntialiasing, true);
-      p.setRenderHint(QPainter::SmoothPixmapTransform, true);
-      p.drawPath(shadowPath);
-      p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
-      p.setBrush(QColor(0,0,0,255));
-      p.drawPath(textPath);
-      p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-      p.setBrush(QColor(255,255,255,80));
-      p.drawPath(textPath);
-      QPixmapCache::insert(sKey, QPixmap::fromImage(img));
-      pPixmap = QPixmapCache::find(sKey);
-    }
-
-
-    if (nullptr != pPixmap)
-    {
-      pPainter->drawPixmap(pt.x(), pt.y(), *pPixmap);
-    }
-  }
-}
-
 
 TaskWidget* TaskWidget::m_pDraggingTaskWidget = nullptr;
 
@@ -110,7 +60,7 @@ TaskWidget*TaskWidget::DraggingTaskWidget()
   return m_pDraggingTaskWidget;
 }
 
-bool TaskWidget::eventFilter(QObject* pObj, QEvent* pEvent)
+bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
 {
   if (this == m_pDraggingTaskWidget)
   {
@@ -207,7 +157,7 @@ void TaskWidget::on_pStartStop_toggled(bool bOn)
   }
 }
 
-void TaskWidget::paintEvent(QPaintEvent* pEvent)
+void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
 {
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing, true);

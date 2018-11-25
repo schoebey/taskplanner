@@ -26,6 +26,8 @@ typedef std::weak_ptr<Group> twpGroup;
 class Task : public ITask, public ISerializable
 {
 public:
+  using id_generator<task_id>::setId;
+
   Task(Manager* pManager, task_id id = -1);
 
   int version() const override;
