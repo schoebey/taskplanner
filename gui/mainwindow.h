@@ -35,6 +35,9 @@ private slots:
   void startTimeTracking(task_id taskId);
   void stopTimeTracking(task_id taskId);
 
+signals:
+  void timeTrackingStopped(task_id taskId);
+
 private:
   Ui::MainWindow *ui;
   std::map<group_id, GroupWidget*> m_groupWidgets;

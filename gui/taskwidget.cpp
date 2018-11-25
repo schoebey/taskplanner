@@ -157,6 +157,14 @@ void TaskWidget::on_pStartStop_toggled(bool bOn)
   }
 }
 
+void TaskWidget::onTimeTrackingStopped(task_id id)
+{
+  if (m_taskId == id)
+  {
+    ui->pStartStop->setChecked(false);
+  }
+}
+
 void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
 {
   QPainter painter(this);
@@ -175,7 +183,6 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
   QPointF offset(pos().x()/5, pos().y()/5);
   painter.drawImage(rct, m_backgroundImage,
                     rct.adjusted(offset.x(), offset.y(), offset.x(), offset.y()));
-
 
 
 //  drawShadowedText(&painter, QPoint(100,0), "hello world", QColor(0,0,0,100));

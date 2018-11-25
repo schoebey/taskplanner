@@ -31,6 +31,7 @@ public:
   virtual void startWork() = 0;
   virtual void stopWork() = 0;
 
+  virtual group_id group() const = 0;
   virtual void setGroup(group_id groupId) = 0;
 
 protected:

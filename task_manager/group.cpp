@@ -61,6 +61,9 @@ bool Group::addTask(task_id taskId)
   if (nullptr != pTask && addTaskId(taskId))
   {
     pTask->setGroup(id());
+    SPriority prio = pTask->priority();
+    prio.setPriority(0, static_cast<int>(m_tasksIds.size() - 1));
+    pTask->setPriority(prio);
     return true;
   }
 

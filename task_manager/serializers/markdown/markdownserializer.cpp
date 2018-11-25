@@ -8,6 +8,9 @@
 #include <QString>
 #include <QVariant>
 #include <QFile>
+#include <QStringList>
+
+#include <cassert>
 
 namespace
 {
@@ -32,7 +35,8 @@ namespace
 
   template<> QString convertFrom(const STimeFragment& f)
   {
-    return QString("[%1|%2]").arg(f.startTime.toString(c_sTimeFormat)).arg(f.stopTime.toString(c_sTimeFormat));
+    QDateTime stopTime = f.stopTime.isValid() ? f.stopTime : QDateTime::currentDateTime();
+    return QString("[%1|%2]").arg(f.startTime.toString(c_sTimeFormat)).arg(stopTime.toString(c_sTimeFormat));
   }
 
   template<> QString convertFrom(const SPriority& prio)
@@ -117,23 +121,36 @@ namespace
     stream << endl;
   }
 
-
   template<typename T>
-  bool readFromStream(QTextStream& stream, const QString& sName, T& t)
+  bool readFromMap(const std::map<QString, QString>& values, const QString& sName, T& t)
   {
-    QString sLine = stream.readLine();
-    int idx = sLine.indexOf(":");
-    QStringRef sIdent = sLine.leftRef(idx);
-    QString sPayload = sLine.right(sLine.size() - idx - 1);
 
-    if (sIdent == sName &&
-        !sPayload.isEmpty())
+    auto it = values.find(sName);
+    if (it == values.end())  { return false; }
+
+    if (!it->second.isEmpty())
     {
-      t = convertTo<T>(sPayload);
+      t = convertTo<T>(it->second);
       return true;
     }
 
     return false;
+  }
+
+  std::map<QString, QString> valuesFromStream(QTextStream& stream)
+  {
+    qint64 pos = stream.pos();
+    QString sLine;
+    std::map<QString, QString> values;
+    while (!sLine.startsWith("==") && !stream.atEnd())
+    {
+      pos = stream.pos();
+      sLine = stream.readLine();
+      int idx = sLine.indexOf(":");
+      values[sLine.left(idx)] = sLine.right(sLine.size() - idx - 1);
+    }
+    stream.seek(pos);
+    return values;
   }
 }
 
@@ -240,8 +257,13 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
     return EDeserializingError::eInternalError;
   }
 
+  std::map<QString, QString> values = valuesFromStream(m_stream);
   int iVersion = 0;
-  readFromStream(m_stream, "version", iVersion);
+  if (!readFromMap(values, "version", iVersion))
+  {
+    assert(false && "couldn't read version from stream");
+    return EDeserializingError::eInternalError;
+  }
 
   if (0 == iVersion)
   {
@@ -296,51 +318,57 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
     return EDeserializingError::eInternalError;
   }
 
+  std::map<QString, QString> values = valuesFromStream(m_stream);
+
+
   int iVersion = 0;
-  m_stream >> iVersion;
-  m_stream.readLine();
+  if (!readFromMap(values, "version", iVersion))
+  {
+    assert(false && "couldn't read version from stream");
+    return EDeserializingError::eInternalError;
+  }
 
 
   if (0 == iVersion)
   {
     task_id id;
-    if (readFromStream(m_stream, "id", id))
+    if (readFromMap(values, "id", id))
     {
       t.setId(id);
     }
 
     QString sName;
-    if (readFromStream(m_stream, "name", sName))
+    if (readFromMap(values, "name", sName))
     {
       t.setName(sName);
     }
 
     QString sDesc;
-    if (readFromStream(m_stream, "description", sDesc))
+    if (readFromMap(values, "description", sDesc))
     {
       t.setDescription(sDesc);
     }
 
     std::vector<STimeFragment> vTimeFragments;
-    if (readFromStream(m_stream, "time_info", vTimeFragments))
+    if (readFromMap(values, "time_info", vTimeFragments))
     {
       t.setTimeFragments(vTimeFragments);
     }
 
     SPriority prio;
-    if (readFromStream(m_stream, "priority", prio))
+    if (readFromMap(values, "priority", prio))
     {
       t.setPriority(prio);
     }
 
     task_id parentId;
-    if (readFromStream(m_stream, "parent", parentId))
+    if (readFromMap(values, "parent", parentId))
     {
       t.setParentTaskId(parentId);
     }
 
     std::set<task_id> children;
-    if (readFromStream(m_stream, "children", children))
+    if (readFromMap(values, "children", children))
     {
       for (const auto& childId : children)
       {
@@ -374,33 +402,38 @@ EDeserializingError MarkdownSerializer::deserialize(Group& g)
     return EDeserializingError::eInternalError;
   }
 
+
+  std::map<QString, QString> values = valuesFromStream(m_stream);
   int iVersion = 0;
-  m_stream >> iVersion;
-  m_stream.readLine();
+  if (!readFromMap(values, "version", iVersion))
+  {
+    assert(false && "couldn't read version from stream");
+    return EDeserializingError::eInternalError;
+  }
 
 
   if (0 == iVersion)
   {
     group_id id;
-    if (readFromStream(m_stream, "id", id))
+    if (readFromMap(values, "id", id))
     {
       g.setId(id);
     }
 
     QString sName;
-    if (readFromStream(m_stream, "name", sName))
+    if (readFromMap(values, "name", sName))
     {
       g.setName(sName);
     }
 
     QString sDesc;
-    if (readFromStream(m_stream, "description", sDesc))
+    if (readFromMap(values, "description", sDesc))
     {
       g.setDescription(sDesc);
     }
 
     std::set<task_id> children;
-    if (readFromStream(m_stream, "tasks", children))
+    if (readFromMap(values, "tasks", children))
     {
       for (const auto& childId : children)
       {

@@ -103,6 +103,8 @@ bool Task::addTask(task_id taskId)
 
 bool Task::addTaskId(task_id id)
 {
+  if (id == this->id())  { return false; }
+
   return m_subTaskIds.insert(id).second;
 }
 
@@ -135,7 +137,10 @@ void Task::stopWork()
 {
   if (m_vTimingInfo.empty())  { return; }
 
-  m_vTimingInfo.back().stopTime = QDateTime::currentDateTime();
+  if (!m_vTimingInfo.back().stopTime.isValid())
+  {
+    m_vTimingInfo.back().stopTime = QDateTime::currentDateTime();
+  }
 }
 
 std::vector<STimeFragment> Task::timeFragments() const
@@ -146,6 +151,11 @@ std::vector<STimeFragment> Task::timeFragments() const
 void Task::setTimeFragments(const std::vector<STimeFragment>& vFragments)
 {
   m_vTimingInfo = vFragments;
+}
+
+group_id Task::group() const
+{
+  return m_groupId;
 }
 
 void Task::setGroup(group_id groupId)

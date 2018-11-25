@@ -59,6 +59,7 @@ public:
   std::vector<STimeFragment> timeFragments() const;
   void setTimeFragments(const std::vector<STimeFragment>& vFragments);
 
+  group_id group() const override;
   void setGroup(group_id groupId) override;
 
 private:

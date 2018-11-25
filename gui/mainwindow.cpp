@@ -51,15 +51,25 @@ void MainWindow::load()
       GroupWidget* pGroupWidget = createGroupWidget(groupId);
       pGroupWidget->setBackgroundImage(images[i++ % images.size()]);
       pGroupWidget->setName(pGroup->name());
+      std::map<int, std::vector<ITask*>> tasksByPriority;
       for (const auto& taskId : pGroup->taskIds())
       {
         ITask* pTask = m_pManager->task(taskId);
         if (nullptr != pTask)
         {
-          TaskWidget* pTaskWidget = createTaskWidget(taskId);
+          tasksByPriority[pTask->priority().priority(0)].push_back(pTask);
+        }
+      }
+
+
+      for (const auto& task : tasksByPriority)
+      {
+        for (const auto& pTask : task.second)
+        {
+          TaskWidget* pTaskWidget = createTaskWidget(pTask->id());
           pTaskWidget->setName(pTask->name());
           pTaskWidget->setDescription(pTask->description());
-          pGroupWidget->InsertTask(pTaskWidget);
+          pGroupWidget->InsertTask(pTaskWidget, task.first);
         }
       }
     }
@@ -100,6 +110,7 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   connect(pTaskWidget, SIGNAL(descriptionChanged(task_id, QString)), this, SLOT(changeTaskDescription(task_id, QString)));
   connect(pTaskWidget, SIGNAL(timeTrackingStarted(task_id)), this, SLOT(startTimeTracking(task_id)));
   connect(pTaskWidget, SIGNAL(timeTrackingStopped(task_id)), this, SLOT(stopTimeTracking(task_id)));
+  connect(this, SIGNAL(timeTrackingStopped(task_id)), pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
   m_taskWidgets[id] = pTaskWidget;
 
@@ -149,20 +160,105 @@ void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
   }
 }
 
-void MainWindow::moveTask(task_id id, group_id groupId, int /*iPos*/)
+void MainWindow::moveTask(task_id id, group_id groupId, int iPos)
 {
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
+    group_id oldGroupId = pTask->group();
+
     pTask->setGroup(groupId);
 
-    // recalculate the priorities based on
-    // the current sort order and the new position of the task
+
+    // if the task has moved groups, fill the priority gaps in the old group
+    // by building a sequence, determining the jumps and correcting the priorities
+    // of following tasks.
+    if (oldGroupId != groupId)
+    {
+      IGroup* pOldGroup = m_pManager->group(oldGroupId);
+      if (nullptr != pOldGroup)
+      {
+        std::map<int, ITask*> tasksByPriority;
+        for (const auto& taskId : pOldGroup->taskIds())
+        {
+          ITask* pOtherTask = m_pManager->task(taskId);
+          if (nullptr != pOtherTask)
+          {
+            tasksByPriority[pOtherTask->priority().priority(0)] = pOtherTask;
+          }
+        }
+
+        // determine the gaps
+        int iPrevPrio = -1;
+        int iDelta = 0;
+        for (const auto& el : tasksByPriority)
+        {
+          SPriority prio = el.second->priority();
+          iDelta += el.first - iPrevPrio - 1;
+          iPrevPrio = prio.priority(0);
+          if (0 < iDelta)
+          {
+            prio.setPriority(0, iPrevPrio - iDelta);
+            el.second->setPriority(prio);
+          }
+        }
+      }
+    }
+
+
+
+    SPriority prio = pTask->priority();
+
+    IGroup* pGroup = m_pManager->group(groupId);
+    if (nullptr != pGroup)
+    {
+      // increment the priority of every task that is below the moved task, by one.
+      for (const auto& taskId : pGroup->taskIds())
+      {
+        ITask* pOtherTask = m_pManager->task(taskId);
+        if (nullptr != pOtherTask)
+        {
+          // if the item's priority lies between the old and the new priority, increment it by one
+          SPriority otherPrio = pOtherTask->priority();
+          if (iPos <= otherPrio.priority(0)  &&
+              prio.priority(0) >= otherPrio.priority(0))
+          {
+            otherPrio.setPriority(0, otherPrio.priority(0) + 1);
+          }
+          else if (iPos >= otherPrio.priority(0)  &&
+              prio.priority(0) < otherPrio.priority(0))
+          {
+            otherPrio.setPriority(0, otherPrio.priority(0) - 1);
+          }
+
+          pOtherTask->setPriority(otherPrio);
+        }
+      }
+    }
+
+
+    prio.setPriority(0, iPos);
+    pTask->setPriority(prio);
   }
 }
 
 void MainWindow::startTimeTracking(task_id taskId)
 {
+  for (const auto& otherTaskId : m_pManager->taskIds())
+  {
+    if (otherTaskId != taskId)
+    {
+      ITask* pTask = m_pManager->task(otherTaskId);
+      if (nullptr != pTask)
+      {
+        pTask->stopWork();
+        emit timeTrackingStopped(otherTaskId);
+      }
+
+    }
+  }
+
+
   ITask* pTask = m_pManager->task(taskId);
   if (nullptr != pTask)
   {
@@ -176,5 +272,6 @@ void MainWindow::stopTimeTracking(task_id taskId)
   if (nullptr != pTask)
   {
     pTask->stopWork();
+    emit timeTrackingStopped(taskId);
   }
 }

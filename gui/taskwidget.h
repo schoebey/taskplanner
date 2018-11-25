@@ -36,6 +36,7 @@ private slots:
   void onTitleEdited();
   void onDescriptionEdited();
   void on_pStartStop_toggled(bool bOn);
+  void onTimeTrackingStopped(task_id id);
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;
