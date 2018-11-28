@@ -7,10 +7,10 @@
 template<class T> class Register
 {
 public:
-  Register(const QString& sName)
+  Register(const QString& sName, const QString& sExtension)
   {
     std::function<ISerializer*(void)> fn = []() { return new T(); };
-    SerializerRegistrar::registerCreator(fn, sName);
+    SerializerRegistrar::registerCreator(fn, sName, sExtension);
   }
 
   ~Register()

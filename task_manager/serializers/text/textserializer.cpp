@@ -10,7 +10,7 @@
 
 namespace
 {
-  Register<TextSerializer> s("text");
+  Register<TextSerializer> s("text", "txt");
 
   static const QString c_sPara_FileName = "fileName";
   static const QString c_sManagerHeader = "== manager ==";

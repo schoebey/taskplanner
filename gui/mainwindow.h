@@ -34,6 +34,9 @@ private slots:
   void load();
   void startTimeTracking(task_id taskId);
   void stopTimeTracking(task_id taskId);
+  void on_actionOpen_triggered();
+  void on_actionSaveAs_triggered();
+  void on_actionReport_triggered();
 
 signals:
   void timeTrackingStopped(task_id taskId);

@@ -14,7 +14,7 @@
 
 namespace
 {
-  Register<MarkdownSerializer> s("markdown");
+  Register<MarkdownSerializer> s("markdown", "md");
 
   static const QString c_sPara_FileName = "fileName";
   static const QString c_sManagerHeader = "== manager ==";

@@ -15,4 +15,5 @@ HEADERS += \
     $$PWD/serializerfactory.h \
     $$PWD/serializerfactoryprivate.h \
     $$PWD/serializer.h \
-    $$PWD/serializationenums.h
+    $$PWD/serializationenums.h \
+    $$PWD/serializerinfo.h

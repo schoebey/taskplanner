@@ -6,11 +6,14 @@
 #include "manager.h"
 #include "groupinterface.h"
 #include "taskinterface.h"
+#include "serializerfactory.h"
 
 
 #include <QFileSystemWatcher>
 #include <QDebug>
 #include <QFile>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include <array>
 
@@ -273,5 +276,79 @@ void MainWindow::stopTimeTracking(task_id taskId)
   {
     pTask->stopWork();
     emit timeTrackingStopped(taskId);
+  }
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+  QString sFileName = QFileDialog::getOpenFileName(this, tr("Open task file..."));
+  if (!sFileName.isEmpty())
+  {
+
+  }
+}
+
+void MainWindow::on_actionSaveAs_triggered()
+{
+  QStringList list;
+  auto serializers = SerializerFactory::availableSerializers();
+  for (const auto& name : serializers)
+  {
+    list.append(QString("%1 (*.%2)").arg(name.sName).arg(name.sFileExtension));
+  }
+
+  QString sFilter = list.join(";;");
+  QString sSelectedFilter;
+  QString sFileName = QFileDialog::getSaveFileName(this, tr("Save task file as..."),
+                                                   QString(), sFilter,
+                                                   &sSelectedFilter);
+  if (!sFileName.isEmpty())
+  {
+    int idx = list.indexOf(sSelectedFilter);
+    if (idx < serializers.size())
+    {
+      tspSerializer spWriter = SerializerFactory::create(serializers[idx].sName);
+      if (!spWriter->setParameter("fileName", sFileName))
+      {
+        QMessageBox::critical(this, tr("error writing file"),
+                              tr("parameter 'filename' not supported "
+                                 "for serializer '%1'").arg(serializers[idx].sName));
+      }
+
+      ESerializingError err = m_pManager->serializeTo(spWriter.get());
+      if (ESerializingError::eOk != err)
+      {
+        QString sErrorMessage;
+        switch (err)
+        {
+        case ESerializingError::eInternalError:
+          sErrorMessage = tr("serialisation to '%1' has failed with an internal error.")
+          .arg(sFileName);
+          break;
+        case ESerializingError::eResourceError:
+          sErrorMessage = tr("serialisation to '%1' has failed with a resource error.")
+          .arg(sFileName);
+          break;
+        case ESerializingError::eWrongParameter:
+          sErrorMessage = tr("serialisation to '%1' has failed. Wrong/missing parameter.")
+          .arg(sFileName);
+          break;
+        case ESerializingError::eOk:
+        default:
+          break;
+        }
+
+        QMessageBox::critical(this, tr("error writing file"), sErrorMessage);
+      }
+    }
+  }
+}
+
+void MainWindow::on_actionReport_triggered()
+{
+  QString sFileName = QFileDialog::getSaveFileName(this, tr("save report as..."));
+  if (!sFileName.isEmpty())
+  {
+
   }
 }

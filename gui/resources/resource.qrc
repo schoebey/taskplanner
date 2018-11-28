@@ -6,4 +6,9 @@
         <file>task_background_2.png</file>
         <file>task_background_3.png</file>
     </qresource>
+    <qresource prefix="/icons">
+        <file>disk.png</file>
+        <file>folder.png</file>
+        <file>hourglass_go.png</file>
+    </qresource>
 </RCC>

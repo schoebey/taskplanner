@@ -2,13 +2,13 @@
 #define SERIALIZERFACTORY_H
 
 #include "serializerinterface.h"
+#include "serializerinfo.h"
 
 #include <QString>
 
 #include <vector>
 #include <functional>
 
-typedef std::function<ISerializer*(void)> tFnCreate;
 
 class SerializerFactoryPrivate;
 
@@ -17,7 +17,7 @@ class SerializerFactory
 public:
   SerializerFactory();
 
-  static std::vector<QString> availableSerializers();
+  static std::vector<SSerializerInfo> availableSerializers();
 
   static tspSerializer create(const QString& sName);
 

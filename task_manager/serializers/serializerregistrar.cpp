@@ -5,7 +5,9 @@ SerializerRegistrar::SerializerRegistrar()
 {
 }
 
-bool SerializerRegistrar::registerCreator(tFnCreate fnCreate, const QString& sName)
+bool SerializerRegistrar::registerCreator(tFnCreate fnCreate,
+                                          const QString& sName,
+                                          const QString& sExtension)
 {
-  return p()->registerCreator(fnCreate, sName);
+  return p()->registerCreator(fnCreate, sName, sExtension);
 }
