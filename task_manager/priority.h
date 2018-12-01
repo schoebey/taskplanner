@@ -32,4 +32,5 @@ struct SPriority
   std::vector<int> categories;
 };
 
+
 #endif // PRIORITY_H

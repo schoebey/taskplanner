@@ -9,6 +9,8 @@
 
 #include <set>
 
+template<typename T> class Property;
+
 class ITask : public id_generator<task_id>
 {
 public:
@@ -33,6 +35,9 @@ public:
 
   virtual group_id group() const = 0;
   virtual void setGroup(group_id groupId) = 0;
+
+//  virtual std::vector<QString> propertyNames() const = 0;
+//  IProperty property(const QString& sName);
 
 protected:
   ITask(task_id id = -1) : id_generator<task_id>(id) {}
