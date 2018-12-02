@@ -7,6 +7,7 @@
 #include "groupinterface.h"
 #include "taskinterface.h"
 #include "serializerfactory.h"
+#include "property.h"
 
 
 #include <QFileSystemWatcher>
@@ -72,9 +73,13 @@ void MainWindow::load()
           TaskWidget* pTaskWidget = createTaskWidget(pTask->id());
           pTaskWidget->setName(pTask->name());
           pTaskWidget->setDescription(pTask->description());
-          for (const QString& sName : pTask->propertyNames())
+          for (const QString& sName : Properties::registeredPropertyNames())
           {
-            pTaskWidget->addProperty(sName);
+            QString sPropertyValue = pTask->propertyValue(sName);
+            //if (!sPropertyValue.isEmpty())
+            {
+              pTaskWidget->addProperty(sName, sPropertyValue);
+            }
           }
 
           pGroupWidget->InsertTask(pTaskWidget, task.first);
@@ -356,5 +361,16 @@ void MainWindow::on_actionReport_triggered()
   if (!sFileName.isEmpty())
   {
 
+  }
+}
+
+void MainWindow::onPropertyChanged(task_id taskId,
+                                   const QString& sPropertyName,
+                                   const QString& sValue)
+{
+  ITask* pTask = m_pManager->task(taskId);
+  if (nullptr != pTask)
+  {
+    pTask->setPropertyValue(sPropertyName, sValue);
   }
 }

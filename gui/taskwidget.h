@@ -26,7 +26,7 @@ public:
 
   static TaskWidget* DraggingTaskWidget();
 
-  void addProperty(const QString& sName);
+  void addProperty(const QString& sName, const QString& sValue);
 
 signals:
   void renamed(task_id taskId, const QString& sNewName);
@@ -40,6 +40,7 @@ private slots:
   void onDescriptionEdited();
   void on_pStartStop_toggled(bool bOn);
   void onTimeTrackingStopped(task_id id);
+  void onPropertyEdited();
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;

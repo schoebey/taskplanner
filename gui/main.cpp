@@ -15,16 +15,6 @@
 
 namespace conversion
 {
-  //-- QDateTime
-  static const QString c_sDateTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
-  template<> QDateTime fromString(const QString& sVal)
-  {
-    return QDateTime::fromString(sVal, c_sDateTimeFormat);
-  }
-  template<> QString toString(const QDateTime& dt)
-  {
-    return dt.toString(c_sDateTimeFormat);
-  }
 }
 
 int main(int argc, char *argv[])

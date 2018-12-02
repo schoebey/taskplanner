@@ -196,5 +196,5 @@ QString Task::propertyValue(const QString& sName) const
 
 bool Task::setPropertyValue(const QString& sName, const QString& sValue)
 {
-  return false;
+  return m_properties.set(sName, sValue);
 }

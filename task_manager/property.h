@@ -14,7 +14,8 @@
 
 namespace conversion
 {
-  template<typename T> QString toString(const T& value);
+  template<typename T> typename std::enable_if<!std::is_convertible<T, QString>::value, QString>::type
+  toString(const T& value);
 
   template<typename T> typename std::enable_if<std::is_arithmetic<T>::value, QString>::type
   toString(const T& num)
@@ -28,11 +29,16 @@ namespace conversion
     return QString(val);
   }
 
-
   template<typename T> T fromString(const QString& /*sVal*/)
   {
     static_assert(!std::is_arithmetic<T>::value, "implement for type");
+    return T();
   }
+
+
+  //-- QDateTime
+  template<> QDateTime fromString(const QString& sVal);
+  template<> QString toString(const QDateTime& dt);
 }
 
 
@@ -144,7 +150,7 @@ typedef std::shared_ptr<Property> tspProperty;
 template <typename T> class PropertyTpl : public Property
 {
 public:
-  PropertyTpl(const tspDescriptor& spDescriptor, const T& value)
+  PropertyTpl(const tspDescriptor& spDescriptor, const T& value = T())
     : m_spDescriptor(spDescriptor),
       m_spValue(new PropertyValueTpl<T>(value))
   {}
@@ -245,29 +251,14 @@ public:
       return false;
     }
 
-    return properties.insert(spDescriptor).second;
-  }
-
-  static bool registerProperty(const QString& sName, const QString& sTypeName)
-  {
-    tspDescriptor spDescriptor = nullptr;
-
-    // add known types to tuple for registration
-    std::tuple<int, double, bool, float, qint64, char, short, long, ulong, ushort, QString, Properties, QChar, std::set<int>> types;
-
-    spDescriptor = detail::propertyFromType(types, sName, sTypeName);
-    if (nullptr == spDescriptor)
+    // register the creator function for the new property
+    std::function<tspProperty(const tspDescriptor&)> creatorFct =
+        [](const tspDescriptor& spDescriptor)
     {
-      // typename was not found in known types - must be a custom typename
-      assert(false && "unknown type");
-      return false;
-    }
+      return std::make_shared<PropertyTpl<T>>(spDescriptor);
+    };
+    factory[sName] = creatorFct;
 
-    return properties.insert(spDescriptor).second;
-  }
-
-  static bool registerProperty(const tspDescriptor& spDescriptor)
-  {
     return properties.insert(spDescriptor).second;
   }
 
@@ -300,13 +291,15 @@ public:
       tspDescriptor spDescriptor = descriptor(sPropertyName);
       if (nullptr != spDescriptor)
       {
-        tspPropertyTpl<T> spProp = std::make_shared<PropertyTpl<T>>(spDescriptor, value);
-        vals.insert(spProp);
+        auto itCreator = factory.find(sPropertyName);
+        if (itCreator != factory.end())
+        {
+          tspProperty spProp = itCreator->second(spDescriptor);
+          return vals.insert(spProp).second;
+        }
       }
-      else
-      {
-        return false;
-      }
+
+      return false;
     }
     else
     {
@@ -329,11 +322,12 @@ public:
     return T();
   }
 
-  void set(const QString& sPropertyName, const QString& sValue);
+  bool set(const QString& sPropertyName, const QString& sValue);
   QString get(const QString& sPropertyName);
 
 private:
   static std::set<tspDescriptor> properties; // descriptions, without values
+  static std::map<QString, std::function<tspProperty(const tspDescriptor&)>> factory;
   std::set<tspProperty> vals;  // values
 };
 

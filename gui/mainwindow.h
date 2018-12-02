@@ -37,6 +37,7 @@ private slots:
   void on_actionOpen_triggered();
   void on_actionSaveAs_triggered();
   void on_actionReport_triggered();
+  void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
 
 signals:
   void timeTrackingStopped(task_id taskId);

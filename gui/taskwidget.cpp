@@ -60,7 +60,8 @@ TaskWidget*TaskWidget::DraggingTaskWidget()
   return m_pDraggingTaskWidget;
 }
 
-void TaskWidget::addProperty(const QString& sName)
+void TaskWidget::addProperty(const QString& sName,
+                             const QString& sValue)
 {
   QLayout* pLayout = ui->pProperties->layout();
   if (nullptr != pLayout)
@@ -70,7 +71,9 @@ void TaskWidget::addProperty(const QString& sName)
     {
       QLabel* pLabel = new QLabel(sName);
       EditableLabel* pValue = new EditableLabel(this);
-      pValue->setText("hello world");
+      pValue->setText(sValue);
+      pValue->setProperty("name", sName);
+      connect(pValue, SIGNAL(editingFinished()), this, SLOT(onPropertyEdited()));
       int iRow = pGrid->rowCount();
       pGrid->addWidget(pLabel, iRow, 0);
       pGrid->addWidget(pValue, iRow, 1);
@@ -180,6 +183,16 @@ void TaskWidget::onTimeTrackingStopped(task_id id)
   if (m_taskId == id)
   {
     ui->pStartStop->setChecked(false);
+  }
+}
+
+void TaskWidget::onPropertyEdited()
+{
+  EditableLabel* pSender = dynamic_cast<EditableLabel*>(sender());
+  if (nullptr != pSender)
+  {
+    QString sPropertyName = pSender->property("name").toString();
+    emit propertyChanged(m_taskId, sPropertyName, pSender->text());
   }
 }
 
