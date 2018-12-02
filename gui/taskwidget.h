@@ -26,11 +26,14 @@ public:
 
   static TaskWidget* DraggingTaskWidget();
 
+  void addProperty(const QString& sName);
+
 signals:
   void renamed(task_id taskId, const QString& sNewName);
   void descriptionChanged(task_id taskId, const QString& sNewDescription);
   void timeTrackingStarted(task_id id);
   void timeTrackingStopped(task_id id);
+  void propertyChanged(task_id id, const QString& sName, const QString& sValue);
 
 private slots:
   void onTitleEdited();

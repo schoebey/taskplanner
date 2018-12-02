@@ -72,6 +72,11 @@ void MainWindow::load()
           TaskWidget* pTaskWidget = createTaskWidget(pTask->id());
           pTaskWidget->setName(pTask->name());
           pTaskWidget->setDescription(pTask->description());
+          for (const QString& sName : pTask->propertyNames())
+          {
+            pTaskWidget->addProperty(sName);
+          }
+
           pGroupWidget->InsertTask(pTaskWidget, task.first);
         }
       }
@@ -113,6 +118,7 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   connect(pTaskWidget, SIGNAL(descriptionChanged(task_id, QString)), this, SLOT(changeTaskDescription(task_id, QString)));
   connect(pTaskWidget, SIGNAL(timeTrackingStarted(task_id)), this, SLOT(startTimeTracking(task_id)));
   connect(pTaskWidget, SIGNAL(timeTrackingStopped(task_id)), this, SLOT(stopTimeTracking(task_id)));
+  connect(pTaskWidget, SIGNAL(propertyChanged(task_id, QString, QString)), this, SLOT(onPropertyChanged(task_id, QString, QString)));
   connect(this, SIGNAL(timeTrackingStopped(task_id)), pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
   m_taskWidgets[id] = pTaskWidget;

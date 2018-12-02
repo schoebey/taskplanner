@@ -60,6 +60,24 @@ TaskWidget*TaskWidget::DraggingTaskWidget()
   return m_pDraggingTaskWidget;
 }
 
+void TaskWidget::addProperty(const QString& sName)
+{
+  QLayout* pLayout = ui->pProperties->layout();
+  if (nullptr != pLayout)
+  {
+    QGridLayout* pGrid = dynamic_cast<QGridLayout*>(pLayout);
+    if (nullptr != pGrid)
+    {
+      QLabel* pLabel = new QLabel(sName);
+      EditableLabel* pValue = new EditableLabel(this);
+      pValue->setText("hello world");
+      int iRow = pGrid->rowCount();
+      pGrid->addWidget(pLabel, iRow, 0);
+      pGrid->addWidget(pValue, iRow, 1);
+    }
+  }
+}
+
 bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
 {
   if (this == m_pDraggingTaskWidget)
@@ -183,9 +201,4 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
   QPointF offset(pos().x()/5, pos().y()/5);
   painter.drawImage(rct, m_backgroundImage,
                     rct.adjusted(offset.x(), offset.y(), offset.x(), offset.y()));
-
-
-//  drawShadowedText(&painter, QPoint(100,0), "hello world", QColor(0,0,0,100));
-
-//  drawShadowedText(&painter, QPoint(100,20), "hello world", QColor(255,0,0,100));
 }

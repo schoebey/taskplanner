@@ -4,7 +4,8 @@ SOURCES += \
     $$PWD/group.cpp \
     $$PWD/manager.cpp \
     $$PWD/task.cpp \
-    $$PWD/serializablemanager.cpp
+    $$PWD/serializablemanager.cpp \
+    $$PWD/property.cpp
 
 HEADERS += \
     $$PWD/group.h \

@@ -7,6 +7,7 @@
 #include "id_types.h"
 #include "id_generator.h"
 #include "serializableinterface.h"
+#include "property.h"
 
 #include <QString>
 
@@ -62,6 +63,10 @@ public:
   group_id group() const override;
   void setGroup(group_id groupId) override;
 
+  std::set<QString> propertyNames() const override;
+  QString propertyValue(const QString& sName) const override;
+  bool setPropertyValue(const QString& sName, const QString& sValue) override;
+
 private:
   Manager* m_pManager = nullptr;
   QString m_sName;
@@ -71,6 +76,8 @@ private:
   std::set<task_id> m_subTaskIds;
   group_id m_groupId = -1;
   task_id m_parentTaskId = -1;
+
+  Properties m_properties;
 };
 
 #endif // TASK_H

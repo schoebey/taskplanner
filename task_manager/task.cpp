@@ -183,3 +183,18 @@ void Task::setGroup(group_id groupId)
     if (nullptr != pSubTask)  { pSubTask->setGroup(groupId); }
   }
 }
+
+std::set<QString> Task::propertyNames() const
+{
+  return m_properties.availablePropertyNames();
+}
+
+QString Task::propertyValue(const QString& sName) const
+{
+  return QString();
+}
+
+bool Task::setPropertyValue(const QString& sName, const QString& sValue)
+{
+  return false;
+}

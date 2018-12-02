@@ -2,13 +2,13 @@
 #define PROPERTY_H
 
 #include <QString>
+#include <QDateTime>
 
 #include <memory>
 #include <map>
 #include <set>
 #include <cassert>
-
-
+#include <iostream>
 
 
 
@@ -32,14 +32,6 @@ namespace conversion
   template<typename T> T fromString(const QString& /*sVal*/)
   {
     static_assert(!std::is_arithmetic<T>::value, "implement for type");
-  }
-
-  template<> int fromString(const QString& sVal)
-  {
-    bool bOk = false;
-    int iVal = sVal.toInt(&bOk);
-    if (bOk)  { return iVal; }
-    return 0;
   }
 }
 
@@ -143,17 +135,18 @@ public:
 
   virtual tspDescriptor descriptor() const = 0;
 
-  virtual PropertyValue* value() const = 0;
+  virtual tspValue value() const = 0;
 
 private:
 };
+typedef std::shared_ptr<Property> tspProperty;
 
 template <typename T> class PropertyTpl : public Property
 {
 public:
-  PropertyTpl(const tspDescriptorTpl<T>& spDescriptor, const T& value)
+  PropertyTpl(const tspDescriptor& spDescriptor, const T& value)
     : m_spDescriptor(spDescriptor),
-      m_value(value)
+      m_spValue(new PropertyValueTpl<T>(value))
   {}
 
   tspDescriptor descriptor() const override
@@ -161,17 +154,17 @@ public:
     return m_spDescriptor;
   }
 
-  PropertyValue* value() const override
+  tspValue value() const override
   {
-    return &m_value;
+    return m_spValue;
   }
 
 private:
-  tspDescriptorTpl<T> m_spDescriptor;
-  PropertyValueTpl<T> m_value;
+  tspDescriptor m_spDescriptor;
+  tspValue m_spValue;
 };
 
-
+template<typename T> using tspPropertyTpl = std::shared_ptr<PropertyTpl<T>>;
 
 
 namespace detail
@@ -203,7 +196,9 @@ namespace detail
   inline typename std::enable_if<I < sizeof...(Tp), tspDescriptor>::type
   propertyFromType(std::tuple<Tp...>& t, const QString& sName, const QString& sTypeName)
   {
-    if (sTypeName == typeid(typename std::tuple_element<I, std::tuple<Tp...>>::type).name())
+    std::cout << typeid(typename std::tuple_element<I, std::tuple<Tp...>>::type).name() << std::endl;
+    QString sCurrentTypeName(typeid(typename std::tuple_element<I, std::tuple<Tp...>>::type).name());
+    if (sTypeName == sCurrentTypeName)
     {
        return std::make_shared<PropertyDescriptorTpl<typename std::tuple_element<I, std::tuple<Tp...>>::type>>(sName);
     }
@@ -235,17 +230,30 @@ namespace detail
 //#define PROPERTY(type, name, value) PropertyTpl<type>(name, value, #type)
 
 
-
+#define REGISTER_PROPERTY(name, type) Properties::registerProperty<type>(name, #type);
 
 class Properties
 {
 public:
+  template <typename T> static bool registerProperty(const QString& sName, const QString& sTypeName)
+  {
+    tspDescriptor spDescriptor = std::make_shared<PropertyDescriptorTpl<T>>(sName, sTypeName);
+    if (nullptr == spDescriptor)
+    {
+      // typename was not found in known types - must be a custom typename
+      assert(false && "unknown type");
+      return false;
+    }
+
+    return properties.insert(spDescriptor).second;
+  }
+
   static bool registerProperty(const QString& sName, const QString& sTypeName)
   {
     tspDescriptor spDescriptor = nullptr;
 
     // add known types to tuple for registration
-    std::tuple<int, double, bool, QString> types;
+    std::tuple<int, double, bool, float, qint64, char, short, long, ulong, ushort, QString, Properties, QChar, std::set<int>> types;
 
     spDescriptor = detail::propertyFromType(types, sName, sTypeName);
     if (nullptr == spDescriptor)
@@ -262,6 +270,10 @@ public:
   {
     return properties.insert(spDescriptor).second;
   }
+
+  static std::set<QString> registeredPropertyNames();
+
+  std::set<QString> availablePropertyNames() const;
 
   static tspDescriptor descriptor(const QString& sName)
   {
@@ -281,15 +293,15 @@ public:
   template<typename T> bool set(const QString& sPropertyName, const T& value)
   {
     auto it = std::find_if(vals.begin(), vals.end(),
-                           [sPropertyName](const Property& p)
-    { return sPropertyName == p.descriptor()->name();});
+                           [sPropertyName](const tspProperty& spProp)
+    { return sPropertyName == spProp->descriptor()->name();});
     if (it == vals.end())
     {
       tspDescriptor spDescriptor = descriptor(sPropertyName);
       if (nullptr != spDescriptor)
       {
-        PropertyTpl<T> prop(spDescriptor, value);
-        vals.insert(prop);
+        tspPropertyTpl<T> spProp = std::make_shared<PropertyTpl<T>>(spDescriptor, value);
+        vals.insert(spProp);
       }
       else
       {
@@ -298,7 +310,7 @@ public:
     }
     else
     {
-      it->value()->setValue(conversion::toString(value));
+      (*it)->value()->setValue(conversion::toString(value));
     }
 
     return true;
@@ -307,17 +319,22 @@ public:
   template<typename T> T get(const QString& sPropertyName) const
   {
     auto it = std::find_if(vals.begin(), vals.end(),
-                           [sPropertyName](const Property& p)
-    { return sPropertyName == p.descriptor()->name(); });
+                           [sPropertyName](const tspProperty& p)
+    { return sPropertyName == p->descriptor()->name(); });
     if (it != vals.end())
     {
-      return conversion::fromString<T>(it->value()->value());
+      return conversion::fromString<T>((*it)->value()->value());
     }
+
+    return T();
   }
+
+  void set(const QString& sPropertyName, const QString& sValue);
+  QString get(const QString& sPropertyName);
 
 private:
   static std::set<tspDescriptor> properties; // descriptions, without values
-  std::set<Property> vals;  // values
+  std::set<tspProperty> vals;  // values
 };
 
 

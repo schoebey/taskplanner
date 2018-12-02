@@ -6,11 +6,40 @@
 #include "group.h"
 #include "serializerfactory.h"
 #include "style.h"
+#include "property.h"
+
+#include <QDateTime>
 
 #include <cassert>
 
+
+namespace conversion
+{
+  //-- QDateTime
+  static const QString c_sDateTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
+  template<> QDateTime fromString(const QString& sVal)
+  {
+    return QDateTime::fromString(sVal, c_sDateTimeFormat);
+  }
+  template<> QString toString(const QDateTime& dt)
+  {
+    return dt.toString(c_sDateTimeFormat);
+  }
+}
+
 int main(int argc, char *argv[])
 {
+  // test code for properties
+  REGISTER_PROPERTY("name", QString);
+  REGISTER_PROPERTY("due date", QDateTime);
+//  Properties::registerProperty("name", "QString");
+//  Properties::registerProperty("priority", "int");
+
+  Properties props;
+  props.set("due date", QDateTime::currentDateTime());
+  props.get<QDateTime>("due date");
+
+
   QApplication app(argc, argv);
 
   app.setStyle(new Style());
