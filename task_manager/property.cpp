@@ -6,18 +6,33 @@ std::map<QString, std::function<tspProperty(const tspDescriptor&)>> Properties::
 
 namespace conversion
 {
-  template<> int fromString(const QString& sVal)
+  template<> int fromString<int>(const QString& sVal, bool& bConversionStatus)
   {
-    bool bOk = false;
-    int iVal = sVal.toInt(&bOk);
-    if (bOk)  { return iVal; }
+    bConversionStatus = false;
+    int iVal = sVal.toInt(&bConversionStatus);
+    if (bConversionStatus)  { return iVal; }
     return 0;
   }
 
   static const QString c_sDateTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
-  template<> QDateTime fromString(const QString& sVal)
+  static const std::set<QString> c_sDateTimeFormats = {c_sDateTimeFormat,
+                                                       "yyyy-MM-dd hh:mm:ss",
+                                                       "yyyy-MM-dd hh:mm",
+                                                       "yyyy-MM-dd",
+                                                       "yy-MM-dd",
+                                                       "yyyy MM dd",
+                                                       "yy MM dd",
+                                                       "dd.MM.yyyy",
+                                                       "dd.MM.yy"};
+  template<> QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus)
   {
-    return QDateTime::fromString(sVal, c_sDateTimeFormat);
+    for (const auto& format : c_sDateTimeFormats)
+    {
+      QDateTime dt = QDateTime::fromString(sVal, format);
+      bConversionStatus = dt.isValid();
+      if (bConversionStatus)  { return dt; }
+    }
+    return QDateTime();
   }
   template<> QString toString(const QDateTime& dt)
   {
@@ -59,7 +74,8 @@ bool Properties::set(const QString& sPropertyName, const QString& sValue)
       if (itCreator != factory.end())
       {
         tspProperty spProp = itCreator->second(spDescriptor);
-        return vals.insert(spProp).second;
+        bool bRv = spProp->value()->setValue(sValue);
+        return bRv && vals.insert(spProp).second;
       }
     }
 
@@ -67,13 +83,13 @@ bool Properties::set(const QString& sPropertyName, const QString& sValue)
   }
   else
   {
-    (*it)->value()->setValue(sValue);
+    return (*it)->value()->setValue(sValue);
   }
 
   return true;
 }
 
-QString Properties::get(const QString& sPropertyName)
+QString Properties::get(const QString& sPropertyName) const
 {
   auto it = std::find_if(vals.begin(), vals.end(),
                          [sPropertyName](const tspProperty& p)

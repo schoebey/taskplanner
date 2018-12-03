@@ -9,6 +9,7 @@ namespace Ui {
 }
 
 class GroupWidget;
+class EditableLabel;
 class TaskWidget : public QFrame
 {
   Q_OBJECT
@@ -27,6 +28,7 @@ public:
   static TaskWidget* DraggingTaskWidget();
 
   void addProperty(const QString& sName, const QString& sValue);
+  void setPropertyValue(const QString& sName, const QString& sValue);
 
 signals:
   void renamed(task_id taskId, const QString& sNewName);
@@ -34,6 +36,7 @@ signals:
   void timeTrackingStarted(task_id id);
   void timeTrackingStopped(task_id id);
   void propertyChanged(task_id id, const QString& sName, const QString& sValue);
+  void sizeChanged();
 
 private slots:
   void onTitleEdited();
@@ -41,9 +44,13 @@ private slots:
   void on_pStartStop_toggled(bool bOn);
   void onTimeTrackingStopped(task_id id);
   void onPropertyEdited();
+  void onAddPropertyTriggered();
+  void updateSize();
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;
+
+  void setUpContextMenu();
 
 private:
   Ui::TaskWidget *ui;
@@ -58,6 +65,8 @@ private:
 
   GroupWidget* m_pGroupWidget = nullptr;
   GroupWidget* m_pPreviousGroupWidget = nullptr;
+
+  std::map<QString, EditableLabel*> m_propertyLineEdits;
 
   static TaskWidget* m_pDraggingTaskWidget;
 };

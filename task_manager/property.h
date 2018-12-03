@@ -14,31 +14,39 @@
 
 namespace conversion
 {
-  template<typename T> typename std::enable_if<!std::is_convertible<T, QString>::value, QString>::type
-  toString(const T& value);
+  template<typename T>
+  typename std::enable_if<!std::is_convertible<T, QString>::value, QString>::type
+  toString(const T& /*value*/);
 
-  template<typename T> typename std::enable_if<std::is_arithmetic<T>::value, QString>::type
+  template<typename T>
+  typename std::enable_if<std::is_arithmetic<T>::value, QString>::type
   toString(const T& num)
   {
     return QString::number(num);
   }
 
-  template<typename T> typename std::enable_if<std::is_convertible<T, QString>::value, QString>::type
+  template<typename T>
+  typename std::enable_if<std::is_convertible<T, QString>::value, QString>::type
   toString(const T& val)
   {
     return QString(val);
   }
 
-  template<typename T> T fromString(const QString& /*sVal*/)
+  template<typename T>
+  typename std::enable_if<!std::is_convertible<QString, T>::value, T>::type
+  fromString(const QString& /*sVal*/, bool& bConversionStatus);
+
+  template<typename T>
+  typename std::enable_if<std::is_convertible<QString, T>::value, T>::type
+  fromString(const QString& sVal, bool& bConversionStatus)
   {
-    static_assert(!std::is_arithmetic<T>::value, "implement for type");
-    return T();
+    bConversionStatus = true;
+    return T(sVal);
   }
 
-
-  //-- QDateTime
-  template<> QDateTime fromString(const QString& sVal);
-  template<> QString toString(const QDateTime& dt);
+//-- QDateTime
+template<> QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
+template<> QString toString(const QDateTime& dt);
 }
 
 
@@ -90,7 +98,7 @@ public:
 
   virtual QString value() const = 0;
 
-  virtual void setValue(const QString& sVal) = 0;
+  virtual bool setValue(const QString& sVal) = 0;
 };
 typedef std::shared_ptr<PropertyValue> tspValue;
 
@@ -121,9 +129,12 @@ public:
     return conversion::toString<T>(m_value);
   }
 
-  void setValue(const QString& sVal)
+  bool setValue(const QString& sVal)
   {
-    m_value = conversion::fromString<T>(sVal);
+    bool bRv = false;
+    T val = conversion::fromString<T>(sVal, bRv);
+    if (bRv)  { m_value = val; }
+    return bRv;
   }
 
 private:
@@ -294,7 +305,8 @@ public:
         auto itCreator = factory.find(sPropertyName);
         if (itCreator != factory.end())
         {
-          tspProperty spProp = itCreator->second(spDescriptor);
+          tspPropertyTpl<T> spProp =
+              std::make_shared<PropertyTpl<T>>(spDescriptor, value);
           return vals.insert(spProp).second;
         }
       }
@@ -316,14 +328,15 @@ public:
     { return sPropertyName == p->descriptor()->name(); });
     if (it != vals.end())
     {
-      return conversion::fromString<T>((*it)->value()->value());
+      bool bUnused = false;
+      conversion::fromString<T>((*it)->value()->value(), bUnused);
     }
 
     return T();
   }
 
   bool set(const QString& sPropertyName, const QString& sValue);
-  QString get(const QString& sPropertyName);
+  QString get(const QString& sPropertyName) const;
 
 private:
   static std::set<tspDescriptor> properties; // descriptions, without values

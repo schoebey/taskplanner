@@ -1,6 +1,7 @@
 #include "taskwidget.h"
 #include "ui_taskwidget.h"
 #include "groupwidget.h"
+#include "property.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -19,13 +20,38 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
 {
   ui->setupUi(this);
 
+  connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
   connect(ui->pDescription, SIGNAL(editingFinished()), this, SLOT(onDescriptionEdited()));
+
+  setUpContextMenu();
 }
 
 TaskWidget::~TaskWidget()
 {
   delete ui;
+}
+
+void TaskWidget::setUpContextMenu()
+{
+  setContextMenuPolicy(Qt::ActionsContextMenu);
+  for (const auto& pAction : actions())
+  {
+    removeAction(pAction);
+  }
+
+  for (const auto& sPropertyName : Properties::registeredPropertyNames())
+  {
+    if (m_propertyLineEdits.find(sPropertyName) == m_propertyLineEdits.end() &&
+        "name" != sPropertyName &&
+        "description" != sPropertyName)
+    {
+      QAction* pAction = new QAction(sPropertyName, this);
+      pAction->setProperty("name", sPropertyName);
+      connect(pAction, SIGNAL(triggered()), this, SLOT(onAddPropertyTriggered()));
+      addAction(pAction);
+    }
+  }
 }
 
 task_id TaskWidget::id() const
@@ -60,10 +86,21 @@ TaskWidget*TaskWidget::DraggingTaskWidget()
   return m_pDraggingTaskWidget;
 }
 
+void TaskWidget::onAddPropertyTriggered()
+{
+  QObject* pSender = sender();
+  if (nullptr != pSender)
+  {
+    QString sName = pSender->property("name").toString();
+    QString sValue;
+    addProperty(sName, sValue);
+  }
+}
+
 void TaskWidget::addProperty(const QString& sName,
                              const QString& sValue)
 {
-  QLayout* pLayout = ui->pProperties->layout();
+  QLayout* pLayout = ui->pDynamicProperties->layout();
   if (nullptr != pLayout)
   {
     QGridLayout* pGrid = dynamic_cast<QGridLayout*>(pLayout);
@@ -73,12 +110,31 @@ void TaskWidget::addProperty(const QString& sName,
       EditableLabel* pValue = new EditableLabel(this);
       pValue->setText(sValue);
       pValue->setProperty("name", sName);
+      m_propertyLineEdits[sName] = pValue;
       connect(pValue, SIGNAL(editingFinished()), this, SLOT(onPropertyEdited()));
       int iRow = pGrid->rowCount();
       pGrid->addWidget(pLabel, iRow, 0);
       pGrid->addWidget(pValue, iRow, 1);
+
+      emit sizeChanged();
     }
   }
+
+  setUpContextMenu();
+}
+
+void TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
+{
+  auto it = m_propertyLineEdits.find(sName);
+  if (it != m_propertyLineEdits.end())
+  {
+    it->second->setText(sValue);
+  }
+}
+
+void TaskWidget::updateSize()
+{
+  resize(width(), minimumSizeHint().height());
 }
 
 bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)

@@ -75,6 +75,8 @@ void MainWindow::load()
           pTaskWidget->setDescription(pTask->description());
           for (const QString& sName : Properties::registeredPropertyNames())
           {
+            if (sName == "name" || sName == "description")  { continue; }
+
             QString sPropertyValue = pTask->propertyValue(sName);
             //if (!sPropertyValue.isEmpty())
             {
@@ -372,5 +374,11 @@ void MainWindow::onPropertyChanged(task_id taskId,
   if (nullptr != pTask)
   {
     pTask->setPropertyValue(sPropertyName, sValue);
+
+    auto it = m_taskWidgets.find(taskId);
+    if (it != m_taskWidgets.end())
+    {
+      it->second->setPropertyValue(sPropertyName, pTask->propertyValue(sPropertyName));
+    }
   }
 }

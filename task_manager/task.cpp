@@ -27,22 +27,22 @@ EDeserializingError Task::deserialize(ISerializer* pSerializer)
 
 QString Task::name() const
 {
-  return m_sName;
+  return propertyValue("name");
 }
 
 void Task::setName(const QString& sName)
 {
-  m_sName = sName;
+  setPropertyValue("name", sName);
 }
 
 QString Task::description() const
 {
-  return m_sDescription;
+  return propertyValue("description");
 }
 
 void Task::setDescription(const QString& sDescription)
 {
-  m_sDescription = sDescription;
+  setPropertyValue("description", sDescription);
 }
 
 SPriority Task::priority() const
@@ -191,7 +191,7 @@ std::set<QString> Task::propertyNames() const
 
 QString Task::propertyValue(const QString& sName) const
 {
-  return QString();
+  return m_properties.get(sName);
 }
 
 bool Task::setPropertyValue(const QString& sName, const QString& sValue)

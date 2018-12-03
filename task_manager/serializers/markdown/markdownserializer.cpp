@@ -300,8 +300,12 @@ ESerializingError MarkdownSerializer::serialize(const Task& t)
   m_stream << c_sTaskHeader << endl;
   writeToStream(m_stream, t.version(), "version");
   writeToStream(m_stream, t.id(), "id");
-  writeToStream(m_stream, t.name(), "name");
-  writeToStream(m_stream, t.description(), "description");
+
+  for (const auto& name : t.propertyNames())
+  {
+    writeToStream(m_stream, t.propertyValue(name), name);
+  }
+
   writeToStream(m_stream, t.timeFragments(), "time_info");
   writeToStream(m_stream, t.priority(), "priority");
   writeToStream(m_stream, t.parentTask(), "parent");
@@ -337,18 +341,6 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
       t.setId(id);
     }
 
-    QString sName;
-    if (readFromMap(values, "name", sName))
-    {
-      t.setName(sName);
-    }
-
-    QString sDesc;
-    if (readFromMap(values, "description", sDesc))
-    {
-      t.setDescription(sDesc);
-    }
-
     std::vector<STimeFragment> vTimeFragments;
     if (readFromMap(values, "time_info", vTimeFragments))
     {
@@ -373,6 +365,15 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
       for (const auto& childId : children)
       {
         t.addTaskId(childId);
+      }
+    }
+
+    for (const auto& name : Properties::registeredPropertyNames())
+    {
+      QString sPropertyValue;
+      if (readFromMap(values, name, sPropertyValue))
+      {
+        t.setPropertyValue(name, sPropertyValue);
       }
     }
 

@@ -187,6 +187,8 @@ ESerializingError TextSerializer::serialize(const Task& t)
     m_stream << id << endl;
   }
 
+  // TODO: serialize generic properties
+
   return ESerializingError::eOk;
 }
 
@@ -252,6 +254,8 @@ EDeserializingError TextSerializer::deserialize(Task& t)
 
       t.addTaskId(id);
     }
+
+    // TODO: deserialize generic properties
 
     return EDeserializingError::eOk;
   }

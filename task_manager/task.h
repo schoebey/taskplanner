@@ -69,8 +69,6 @@ public:
 
 private:
   Manager* m_pManager = nullptr;
-  QString m_sName;
-  QString m_sDescription;
   SPriority m_priority;
   std::vector<STimeFragment> m_vTimingInfo;
   std::set<task_id> m_subTaskIds;

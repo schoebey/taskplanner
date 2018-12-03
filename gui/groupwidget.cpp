@@ -87,6 +87,8 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
     pTaskWidget->move(ui->scrollAreaWidgetContents->mapFromGlobal(currentPos));
     pTaskWidget->show();
 
+    TODO: connect sizeChanged signal to reorganizing of task widgets
+
 
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
     //moveWidget(pTaskWidget, origin);

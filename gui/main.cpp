@@ -21,7 +21,9 @@ int main(int argc, char *argv[])
 {
   // test code for properties
   REGISTER_PROPERTY("name", QString);
+  REGISTER_PROPERTY("description", QString);
   REGISTER_PROPERTY("due date", QDateTime);
+  REGISTER_PROPERTY("due date time", QDateTime);
 //  Properties::registerProperty("name", "QString");
 //  Properties::registerProperty("priority", "int");
 
