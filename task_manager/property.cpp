@@ -34,7 +34,8 @@ namespace conversion
     }
     return QDateTime();
   }
-  template<> QString toString(const QDateTime& dt)
+
+  QString toString(const QDateTime& dt)
   {
     return dt.toString(c_sDateTimeFormat);
   }
