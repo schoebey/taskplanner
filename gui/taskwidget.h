@@ -45,7 +45,8 @@ private slots:
   void onTimeTrackingStopped(task_id id);
   void onPropertyEdited();
   void onAddPropertyTriggered();
-  void updateSize();
+  void updateSize();  
+  void setExpanded(bool bExpanded);
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;
