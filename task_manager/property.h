@@ -9,6 +9,7 @@
 #include <set>
 #include <cassert>
 #include <iostream>
+#include <functional>
 
 
 
@@ -44,9 +45,9 @@ namespace conversion
     return T(sVal);
   }
 
-//-- QDateTime
-template<> QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
-template<> QString toString(const QDateTime& dt);
+  //-- QDateTime
+  template<> QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
+  QString toString(const QDateTime& dt);
 }
 
 
