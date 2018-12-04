@@ -77,7 +77,7 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
       std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
   {
     // insert the new widget
-    if (-1 == iPos) iPos = m_vpTaskWidgets.size();
+    if (-1 == iPos) iPos = static_cast<int>(m_vpTaskWidgets.size());
 
     QPoint currentPos = pTaskWidget->mapToGlobal(QPoint(0,0));
     qDebug() << currentPos.x() << currentPos.y();
@@ -87,7 +87,7 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
     pTaskWidget->move(ui->scrollAreaWidgetContents->mapFromGlobal(currentPos));
     pTaskWidget->show();
 
-    TODO: connect sizeChanged signal to reorganizing of task widgets
+    connect(pTaskWidget, SIGNAL(sizeChanged()), this, SLOT(repositionChildren()), Qt::QueuedConnection);
 
 
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
@@ -111,6 +111,8 @@ void GroupWidget::RemoveTask(TaskWidget* pTaskWidget)
 
     pTaskWidget->SetGroupWidget(nullptr);
     pTaskWidget->show();
+
+    disconnect(pTaskWidget, SIGNAL(sizeChanged()), this, SLOT(repositionChildren()));
   }
 }
 
@@ -126,19 +128,24 @@ void GroupWidget::ShowGhost(TaskWidget* pTaskWidget, int iPos)
   }
 }
 
-
-
-
 void GroupWidget::UpdatePositions(int iSpace, int iSpacePos)
 {
   QPoint origin(0,0);
   origin.setY(origin.y() + c_iItemSpacing);
 
-  if (-1 == iSpacePos)  { iSpacePos = m_vpTaskWidgets.size(); }
+  size_t spacePos = 0;
+  if (-1 == iSpacePos)
+  {
+    spacePos = m_vpTaskWidgets.size();
+  }
+  else
+  {
+    spacePos = static_cast<size_t>(iSpacePos);
+  }
 
 
   // find the new widgets position
-  for (int iWidget = 0; iWidget < std::min<size_t>(iSpacePos, m_vpTaskWidgets.size()); ++iWidget)
+  for (size_t iWidget = 0; iWidget < std::min<size_t>(spacePos, m_vpTaskWidgets.size()); ++iWidget)
   {
     QWidget* pWidget = m_vpTaskWidgets[iWidget];
     moveWidget(pWidget, origin);
@@ -146,14 +153,14 @@ void GroupWidget::UpdatePositions(int iSpace, int iSpacePos)
     origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
   }
 
-  if (-1 < iSpace && iSpacePos < m_vpTaskWidgets.size())
+  if (-1 < iSpace && spacePos < m_vpTaskWidgets.size())
   {
     // make room for the new widget
     origin.setY(origin.y() + iSpace + c_iItemSpacing);
   }
 
 
-  for (int iWidget = iSpacePos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
+  for (size_t iWidget = spacePos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
   {
     QWidget* pWidget = m_vpTaskWidgets[iWidget];
     moveWidget(pWidget, origin);
@@ -177,19 +184,19 @@ void GroupWidget::repositionChildren()
   UpdatePositions();
 }
 
-void GroupWidget::resizeEvent(QResizeEvent* pEvent)
+void GroupWidget::resizeEvent(QResizeEvent* /*pEvent*/)
 {
   repositionChildren();
 }
 
-void GroupWidget::moveEvent(QMoveEvent* pEvent)
+void GroupWidget::moveEvent(QMoveEvent* /*pEvent*/)
 {
   repositionChildren();
 }
 
-int GroupWidget::indexFromPoint(QPoint pt)
+size_t GroupWidget::indexFromPoint(QPoint pt)
 {
-  for (int iIdx = 0; iIdx < m_vpTaskWidgets.size(); ++iIdx)
+  for (size_t iIdx = 0; iIdx < m_vpTaskWidgets.size(); ++iIdx)
   {
     QWidget* pWidget = m_vpTaskWidgets[iIdx];
     if (pWidget->mapFrom(this, pt).y() < pWidget->rect().center().y())
@@ -211,7 +218,7 @@ void GroupWidget::setBackgroundImage(const QImage& img)
   m_backgroundImage = img;
 }
 
-bool GroupWidget::eventFilter(QObject* pObj, QEvent* pEvent)
+bool GroupWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
 {
   if (QEvent::MouseButtonRelease == pEvent->type())
   {
@@ -236,7 +243,8 @@ bool GroupWidget::eventFilter(QObject* pObj, QEvent* pEvent)
       if (nullptr != TaskWidget::DraggingTaskWidget())
       {
         pt = mapFromGlobal(pMouseEvent->globalPos());
-        ShowGhost(TaskWidget::DraggingTaskWidget(), indexFromPoint(pt));
+        ShowGhost(TaskWidget::DraggingTaskWidget(),
+                  static_cast<int>(indexFromPoint(pt)));
       }
     }
     else

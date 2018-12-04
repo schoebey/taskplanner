@@ -38,7 +38,7 @@
    <item row="0" column="0">
     <widget class="EditableLabel" name="pTitle">
      <property name="text">
-      <string>TextLabel</string>
+      <string>Title</string>
      </property>
     </widget>
    </item>
@@ -88,7 +88,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>TextLabel</string>
+         <string>Description</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
