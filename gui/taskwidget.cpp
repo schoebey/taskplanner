@@ -23,8 +23,11 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
   connect(ui->pDescription, SIGNAL(editingFinished()), this, SLOT(onDescriptionEdited()));
+  connect(ui->pShowDetails, SIGNAL(toggled(bool)), this, SLOT(setExpanded(bool)));
 
   setUpContextMenu();
+
+  setExpanded(true);
 }
 
 TaskWidget::~TaskWidget()
@@ -224,8 +227,6 @@ void TaskWidget::onDescriptionEdited()
 
 void TaskWidget::on_pStartStop_toggled(bool bOn)
 {
-  ui->pStartStop->setText(bOn ? "stop" : "start");
-
   if (bOn) {
     emit timeTrackingStarted(m_taskId);
   }
@@ -270,4 +271,17 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
   QPointF offset(pos().x()/5, pos().y()/5);
   painter.drawImage(rct, m_backgroundImage,
                     rct.adjusted(offset.x(), offset.y(), offset.x(), offset.y()));
+}
+
+void TaskWidget::setExpanded(bool bExpanded)
+{
+  ui->pProperties->setVisible(bExpanded);
+
+  setProperty("expanded", bExpanded);
+
+  ui->pStartStop->style()->unpolish(ui->pStartStop);
+  ui->pStartStop->style()->polish(ui->pStartStop);
+
+  emit sizeChanged();
+
 }
