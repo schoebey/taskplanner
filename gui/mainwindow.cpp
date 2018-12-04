@@ -42,7 +42,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::load()
 {
-  int i = 0;
+  size_t i = 0;
   std::array<QImage, 3> images = {{QImage(":/task_background_1.png"),
                                    QImage(":/task_background_2.png"),
                                    QImage(":/task_background_3.png")}};
@@ -317,7 +317,7 @@ void MainWindow::on_actionSaveAs_triggered()
                                                    &sSelectedFilter);
   if (!sFileName.isEmpty())
   {
-    int idx = list.indexOf(sSelectedFilter);
+    size_t idx = static_cast<size_t>(list.indexOf(sSelectedFilter));
     if (idx < serializers.size())
     {
       tspSerializer spWriter = SerializerFactory::create(serializers[idx].sName);

@@ -26,7 +26,7 @@ public:
 
   static GroupWidget* GroupWidgetUnderMouse();
 
-  int indexFromPoint(QPoint pt);
+  size_t indexFromPoint(QPoint pt);
 
   QImage backgroundImage() const;
   void setBackgroundImage(const QImage& img);
@@ -41,10 +41,10 @@ protected:
   void moveEvent(QMoveEvent* pEvent);
   bool eventFilter(QObject* pObj, QEvent* pEvent);
   void ShowGhost(TaskWidget* pTaskWidget, int iPos);
-  void repositionChildren();
   void UpdatePositions(int iSpace = -1, int iSpacePos = 0);
 
 protected slots:
+  void repositionChildren();
   void onNewTaskClicked();
   void onTitleEdited();
 
