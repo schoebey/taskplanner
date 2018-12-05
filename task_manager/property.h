@@ -16,7 +16,8 @@
 namespace conversion
 {
   template<typename T>
-  typename std::enable_if<!std::is_convertible<T, QString>::value, QString>::type
+  typename std::enable_if<!std::is_convertible<T, QString>::value &&
+                          !std::is_arithmetic<T>::value, QString>::type
   toString(const T& /*value*/);
 
   template<typename T>
@@ -48,6 +49,9 @@ namespace conversion
   //-- QDateTime
   template<> QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
   QString toString(const QDateTime& dt);
+
+  //-- bool
+  template<> bool fromString<bool>(const QString& sVal, bool& bConversionStatus);
 }
 
 
@@ -62,15 +66,18 @@ public:
   virtual QString name() const = 0;
 
   virtual QString typeName() const = 0;
+
+  virtual bool visible() const = 0;
 };
 typedef std::shared_ptr<PropertyDescriptor> tspDescriptor;
 
 template<typename T> class PropertyDescriptorTpl : public PropertyDescriptor
 {
 public:
-  PropertyDescriptorTpl(const QString& sName, const QString& sTypeName = QString())
+  PropertyDescriptorTpl(const QString& sName, const QString& sTypeName = QString(), bool bVisible = true)
    : m_sName(sName),
-     m_sTypeName(sTypeName)
+     m_sTypeName(sTypeName),
+     m_bVisible(bVisible)
   {
   }
 
@@ -84,9 +91,15 @@ public:
     return m_sTypeName.isEmpty() ? typeid(T).name() : m_sTypeName;
   }
 
+  bool visible() const override
+  {
+    return m_bVisible;
+  }
+
 private:
   QString m_sName;
   QString m_sTypeName;
+  bool m_bVisible = false;
 };
 template <typename T> using tspDescriptorTpl = std::shared_ptr<PropertyDescriptorTpl<T>>;
 
@@ -127,7 +140,7 @@ public:
 
   QString value() const override
   {
-    return conversion::toString<T>(m_value);
+    return conversion::toString(m_value);
   }
 
   bool setValue(const QString& sVal)
@@ -227,35 +240,14 @@ namespace detail
 }
 
 
-
-//// ctor function
-//typedef std::function<Property(name, data, typename)> fnCreate;
-//class PropertyFactory
-//{
-//public:
-////  static bool registerProperty(const QString& sName, const QString& sTypeName)
-////  {
-
-////  }
-
-//private:
-//  PropertyFactory() {}
-//  ~PropertyFactory() {}
-
-//  static std::map<QString, fnCreate> registry;
-//};
-
-//#define PROPERTY(type, name, value) PropertyTpl<type>(name, value, #type)
-
-
-#define REGISTER_PROPERTY(name, type) Properties::registerProperty<type>(name, #type);
+#define REGISTER_PROPERTY(name, type, visible) Properties::registerProperty<type>(name, #type, visible);
 
 class Properties
 {
 public:
-  template <typename T> static bool registerProperty(const QString& sName, const QString& sTypeName)
+  template <typename T> static bool registerProperty(const QString& sName, const QString& sTypeName, bool bVisible)
   {
-    tspDescriptor spDescriptor = std::make_shared<PropertyDescriptorTpl<T>>(sName, sTypeName);
+    tspDescriptor spDescriptor = std::make_shared<PropertyDescriptorTpl<T>>(sName, sTypeName, bVisible);
     if (nullptr == spDescriptor)
     {
       // typename was not found in known types - must be a custom typename
@@ -291,6 +283,17 @@ public:
     if (it != properties.end())  { return *it; }
 
     return nullptr;
+  }
+
+  static bool visible(const QString& sPropertyName)
+  {
+    tspDescriptor spDescriptor = descriptor(sPropertyName);
+    if (nullptr != spDescriptor)
+    {
+      return spDescriptor->visible();
+    }
+
+    return false;
   }
 
   template<typename T> bool set(const QString& sPropertyName, const T& value)

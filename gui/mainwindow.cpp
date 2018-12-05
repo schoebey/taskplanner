@@ -73,9 +73,16 @@ void MainWindow::load()
           TaskWidget* pTaskWidget = createTaskWidget(pTask->id());
           pTaskWidget->setName(pTask->name());
           pTaskWidget->setDescription(pTask->description());
+
+          bool bOk = false;
+          bool bExpanded = conversion::fromString<bool>(pTask->propertyValue("expanded"), bOk);
+
+          // konnte die Property ausgelesen werden, soll der expanded-State wiederhergestellt werden,
+          // sonst soll defaultmässig expandiert sein.
+          pTaskWidget->setExpanded(!bOk || bExpanded);
           for (const QString& sName : Properties::registeredPropertyNames())
           {
-            if (sName == "name" || sName == "description")  { continue; }
+            if (!Properties::visible(sName))  { continue; }
 
             QString sPropertyValue = pTask->propertyValue(sName);
             //if (!sPropertyValue.isEmpty())

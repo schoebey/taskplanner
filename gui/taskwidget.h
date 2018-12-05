@@ -30,6 +30,9 @@ public:
   void addProperty(const QString& sName, const QString& sValue);
   void setPropertyValue(const QString& sName, const QString& sValue);
 
+public slots:
+  void setExpanded(bool bExpanded);
+
 signals:
   void renamed(task_id taskId, const QString& sNewName);
   void descriptionChanged(task_id taskId, const QString& sNewDescription);
@@ -45,8 +48,7 @@ private slots:
   void onTimeTrackingStopped(task_id id);
   void onPropertyEdited();
   void onAddPropertyTriggered();
-  void updateSize();  
-  void setExpanded(bool bExpanded);
+  void updateSize();
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;
