@@ -46,8 +46,7 @@ void TaskWidget::setUpContextMenu()
   for (const auto& sPropertyName : Properties::registeredPropertyNames())
   {
     if (m_propertyLineEdits.find(sPropertyName) == m_propertyLineEdits.end() &&
-        "name" != sPropertyName &&
-        "description" != sPropertyName)
+        Properties::visible(sPropertyName))
     {
       QAction* pAction = new QAction(sPropertyName, this);
       pAction->setProperty("name", sPropertyName);
@@ -276,8 +275,11 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
 void TaskWidget::setExpanded(bool bExpanded)
 {
   ui->pProperties->setVisible(bExpanded);
+  ui->pShowDetails->setChecked(bExpanded);
 
   setProperty("expanded", bExpanded);
+
+  emit propertyChanged(m_taskId, "expanded", bExpanded ? "true" : "false");
 
   ui->pStartStop->style()->unpolish(ui->pStartStop);
   ui->pStartStop->style()->polish(ui->pStartStop);

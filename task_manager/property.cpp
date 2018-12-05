@@ -39,6 +39,21 @@ namespace conversion
   {
     return dt.toString(c_sDateTimeFormat);
   }
+
+  template<>
+  bool fromString<bool>(const QString& sVal, bool& bConversionStatus)
+  {
+    bool bRv = 1 == sVal.toInt(&bConversionStatus);
+    if (!bConversionStatus)
+    {
+      bConversionStatus = 0 == sVal.compare("true", Qt::CaseInsensitive) ||
+                          0 == sVal.compare("false", Qt::CaseInsensitive);
+      return 0 == sVal.compare("true", Qt::CaseInsensitive);
+    }
+
+    return bRv;
+  }
+
 }
 
 std::set<QString> Properties::registeredPropertyNames()
