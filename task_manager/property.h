@@ -74,7 +74,9 @@ typedef std::shared_ptr<PropertyDescriptor> tspDescriptor;
 template<typename T> class PropertyDescriptorTpl : public PropertyDescriptor
 {
 public:
-  PropertyDescriptorTpl(const QString& sName, const QString& sTypeName = QString(), bool bVisible = true)
+  PropertyDescriptorTpl(const QString& sName,
+                        const QString& sTypeName = QString(),
+                        bool bVisible = true)
    : m_sName(sName),
      m_sTypeName(sTypeName),
      m_bVisible(bVisible)
@@ -128,12 +130,12 @@ public:
   {
   }
 
-  operator T() const
+  T get() const
   {
     return m_value;
   }
 
-  void operator= (const T& t)
+  void set(const T& t)
   {
     m_value = t;
   }
@@ -143,7 +145,7 @@ public:
     return conversion::toString(m_value);
   }
 
-  bool setValue(const QString& sVal)
+  bool setValue(const QString& sVal) override
   {
     bool bRv = false;
     T val = conversion::fromString<T>(sVal, bRv);
@@ -166,7 +168,8 @@ public:
 
   virtual tspDescriptor descriptor() const = 0;
 
-  virtual tspValue value() const = 0;
+  virtual QString value() const = 0;
+  virtual bool setValue(const QString& sVal) = 0;
 
 private:
 };
@@ -185,59 +188,74 @@ public:
     return m_spDescriptor;
   }
 
-  tspValue value() const override
+  QString value() const override
   {
-    return m_spValue;
+    return m_spValue->value();
+  }
+
+  bool setValue(const QString& sVal) override
+  {
+    return m_spValue->setValue(sVal);
+  }
+
+  T get() const
+  {
+    return m_spValue->get();
+  }
+
+  void set(const T& val)
+  {
+    m_spValue->set(val);
   }
 
 private:
   tspDescriptor m_spDescriptor;
-  tspValue m_spValue;
+  tspValueTpl<T> m_spValue;
 };
 
 template<typename T> using tspPropertyTpl = std::shared_ptr<PropertyTpl<T>>;
 
 
-namespace detail
-{
-  template <int N, typename... Ts>
-  struct get;
+//namespace detail
+//{
+//  template <int N, typename... Ts>
+//  struct get;
 
-  template <int N, typename T, typename... Ts>
-  struct get<N, std::tuple<T, Ts...>>
-  {
-      using type = typename get<N - 1, std::tuple<Ts...>>::type;
-  };
+//  template <int N, typename T, typename... Ts>
+//  struct get<N, std::tuple<T, Ts...>>
+//  {
+//      using type = typename get<N - 1, std::tuple<Ts...>>::type;
+//  };
 
-  template <typename T, typename... Ts>
-  struct get<0, std::tuple<T, Ts...>>
-  {
-      using type = T;
-  };
-
-
-  template<std::size_t I = 0, typename... Tp>
-  inline typename std::enable_if<I == sizeof...(Tp), tspDescriptor>::type
-  propertyFromType(std::tuple<Tp...>& /*t*/, const QString& /*sName*/, const QString& /*sTypeName*/)
-  {
-    return nullptr;
-  }
-
-  template<std::size_t I = 0, typename... Tp>
-  inline typename std::enable_if<I < sizeof...(Tp), tspDescriptor>::type
-  propertyFromType(std::tuple<Tp...>& t, const QString& sName, const QString& sTypeName)
-  {
-    std::cout << typeid(typename std::tuple_element<I, std::tuple<Tp...>>::type).name() << std::endl;
-    QString sCurrentTypeName(typeid(typename std::tuple_element<I, std::tuple<Tp...>>::type).name());
-    if (sTypeName == sCurrentTypeName)
-    {
-       return std::make_shared<PropertyDescriptorTpl<typename std::tuple_element<I, std::tuple<Tp...>>::type>>(sName);
-    }
+//  template <typename T, typename... Ts>
+//  struct get<0, std::tuple<T, Ts...>>
+//  {
+//      using type = T;
+//  };
 
 
-    return propertyFromType<I + 1, Tp...>(t, sName, sTypeName);
-  }
-}
+//  template<std::size_t I = 0, typename... Tp>
+//  inline typename std::enable_if<I == sizeof...(Tp), tspDescriptor>::type
+//  propertyFromType(std::tuple<Tp...>& /*t*/, const QString& /*sName*/, const QString& /*sTypeName*/)
+//  {
+//    return nullptr;
+//  }
+
+//  template<std::size_t I = 0, typename... Tp>
+//  inline typename std::enable_if<I < sizeof...(Tp), tspDescriptor>::type
+//  propertyFromType(std::tuple<Tp...>& t, const QString& sName, const QString& sTypeName)
+//  {
+//    std::cout << typeid(typename std::tuple_element<I, std::tuple<Tp...>>::type).name() << std::endl;
+//    QString sCurrentTypeName(typeid(typename std::tuple_element<I, std::tuple<Tp...>>::type).name());
+//    if (sTypeName == sCurrentTypeName)
+//    {
+//       return std::make_shared<PropertyDescriptorTpl<typename std::tuple_element<I, std::tuple<Tp...>>::type>>(sName);
+//    }
+
+
+//    return propertyFromType<I + 1, Tp...>(t, sName, sTypeName);
+//  }
+//}
 
 
 #define REGISTER_PROPERTY(name, type, visible) Properties::registerProperty<type>(name, #type, visible);
@@ -319,7 +337,15 @@ public:
     }
     else
     {
-      (*it)->value()->setValue(conversion::toString(value));
+      tspPropertyTpl<T> spProp = nullptr;//dynamic_pointer_cast<tspPropertyTpl<T>>(*it);
+      if (nullptr != spProp)
+      {
+        spProp->set(value);
+      }
+      else
+      {
+        (*it)->setValue(conversion::toString(value));
+      }
     }
 
     return true;
@@ -333,7 +359,7 @@ public:
     if (it != vals.end())
     {
       bool bUnused = false;
-      conversion::fromString<T>((*it)->value()->value(), bUnused);
+      conversion::fromString<T>((*it)->value(), bUnused);
     }
 
     return T();

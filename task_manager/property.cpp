@@ -90,7 +90,7 @@ bool Properties::set(const QString& sPropertyName, const QString& sValue)
       if (itCreator != factory.end())
       {
         tspProperty spProp = itCreator->second(spDescriptor);
-        bool bRv = spProp->value()->setValue(sValue);
+        bool bRv = spProp->setValue(sValue);
         return bRv && vals.insert(spProp).second;
       }
     }
@@ -99,7 +99,7 @@ bool Properties::set(const QString& sPropertyName, const QString& sValue)
   }
   else
   {
-    return (*it)->value()->setValue(sValue);
+    return (*it)->setValue(sValue);
   }
 
   return true;
@@ -112,7 +112,7 @@ QString Properties::get(const QString& sPropertyName) const
   { return sPropertyName == p->descriptor()->name(); });
   if (it != vals.end())
   {
-    return (*it)->value()->value();
+    return (*it)->value();
   }
 
   return QString();
