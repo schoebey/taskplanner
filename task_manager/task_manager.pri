@@ -5,7 +5,8 @@ SOURCES += \
     $$PWD/manager.cpp \
     $$PWD/task.cpp \
     $$PWD/serializablemanager.cpp \
-    $$PWD/property.cpp
+    $$PWD/property.cpp \
+    $$PWD/constraint.cpp
 
 HEADERS += \
     $$PWD/group.h \
@@ -20,4 +21,5 @@ HEADERS += \
     $$PWD/groupinterface.h \
     $$PWD/serializablemanager.h \
     $$PWD/container_utils.h \
-    $$PWD/property.h
+    $$PWD/property.h \
+    $$PWD/constraint.h
