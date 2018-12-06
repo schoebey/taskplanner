@@ -10,15 +10,57 @@
 
 #include <QDateTime>
 
-#include <cassert>
+#include <cassert> test
 
-
-namespace conversion
+namespace grammar
 {
+  // logical
+  #define AND &
+  #define BUT AND
+  #define OR |
+
+  // constraints
+  #define ANY_OF(...) std::make_shared<ConstraintImpl>()
+  #define MIN(a) std::make_shared<ConstraintImpl>()
+  #define MAX(a) std::make_shared<ConstraintImpl>()
+  #define EVEN_NUMBER std::make_shared<ConstraintImpl>()
+
+  class Constraint
+  {
+  public:
+    void blah() {}
+  };
+  typedef std::shared_ptr<Constraint> tspConstraint;
+
+  class ConstraintImpl : public Constraint
+  {
+  public:
+  };
+
+
+  tspConstraint operator&(tspConstraint p, tspConstraint p2)
+  {
+    return std::make_shared<ConstraintImpl>();
+  }
+  tspConstraint operator|(tspConstraint p, tspConstraint p2)
+  {
+    return std::make_shared<ConstraintImpl>();
+  }
 }
+
 
 int main(int argc, char *argv[])
 {
+  // test code for constraints
+  using namespace grammar;
+
+  tspConstraint spA;
+  tspConstraint spA2;
+  std::shared_ptr<ConstraintImpl> spB;
+
+  tspConstraint spResult = ANY_OF('a', 'b', 'c') OR (EVEN_NUMBER BUT MIN(0) AND MAX(100));
+
+
   // test code for properties
   REGISTER_PROPERTY("name", QString);
   REGISTER_PROPERTY("description", QString);
@@ -48,7 +90,7 @@ int main(int argc, char *argv[])
   EDeserializingError de = manager.deserializeFrom(spTextWriter.get());
 
 
-  if (EDeserializingError::eOk != de | 0 == manager.groupIds().size())
+  if (EDeserializingError::eOk != de || 0 == manager.groupIds().size())
   {
       IGroup* pGroup = manager.addGroup();
       pGroup->setName("backlog");
