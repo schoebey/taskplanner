@@ -66,7 +66,14 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY("description", QString, false);
   REGISTER_PROPERTY("expanded", bool, false);
   REGISTER_PROPERTY("due date", QDateTime, true);
-  REGISTER_PROPERTY("due date time", QDateTime, true);
+  REGISTER_PROPERTY("category", QString, true);
+
+//  TODO: customizable enum property (e.g. 'category' with n possible values)
+//  typedef std::array<QString, 3> ar;
+//  REGISTER_PROPERTY("test", ar, true);
+
+//  TODO: configure order of comparison for properties, e.g.:
+//    (due date - expected duration), priority(high,med,low), category(feature,bugfix,refactoring,documentation)
 
   Properties props;
   props.set("due date", QDateTime::currentDateTime());
