@@ -21,7 +21,7 @@ namespace grammar
   #define OR |
 
   // constraints
-  #define ANY_OF(a, ...) tspConstraint<decltype(a)>(make_list<decltype(a)>(a, ## __VA_ARGS__))
+  #define ONE_OF(a, ...) tspConstraint<decltype(a)>(make_list<decltype(a)>(a, ## __VA_ARGS__))
   #define MIN(a) tspConstraint<decltype(a)>(std::make_shared<MinConstraint<decltype(a)>>(a))
   #define MAX(a) tspConstraint<decltype(a)>(std::make_shared<MaxConstraint<decltype(a)>>(a))
   #define EVEN_NUMBER std::make_shared<ConstraintImpl>()
@@ -46,11 +46,11 @@ int main(int argc, char *argv[])
 
   //auto a = ListConstraintTpl<int>(1,2,3,4,5,6);
   //auto a = make_list(1,2,3,4,5);
-//  auto b = ANY_OF(1,2,3);
-  auto sp = ANY_OF(1,2,3) OR MIN(10) AND MAX(20);
-  auto sp2 = ANY_OF(1.5,2.,3.) OR MIN(10.) AND MAX(20.);
-  auto sp25 = ANY_OF(QString("i"), QString("am"), QString("ready"));
-  auto sp3 = ANY_OF(QString("hello"), QString("world"), QString("abc")) OR ANY_OF(QString("i"), QString("am"), QString("ready"));
+//  auto b = ONE_OF(1,2,3);
+  auto sp = ONE_OF(1,2,3) OR MIN(10) AND MAX(20);
+  auto sp2 = ONE_OF(1.5,2.,3.) OR MIN(10.) AND MAX(20.);
+  auto sp25 = ONE_OF(QString("i"), QString("am"), QString("ready"));
+  auto sp3 = ONE_OF(QString("hello"), QString("world"), QString("abc")) OR ONE_OF(QString("i"), QString("am"), QString("ready"));
 
   bool bOk = sp->accepts(12);
   bOk = sp->accepts(8);
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   bOk = sp3->accepts("wrold");
 
 
-//  tspConstraint spResult = ANY_OF('a', 'b', 'c') OR (EVEN_NUMBER BUT MIN(0) AND MAX(100));
+//  tspConstraint spResult = ONE_OF('a', 'b', 'c') OR (EVEN_NUMBER BUT MIN(0) AND MAX(100));
 
 
   // test code for properties
@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY("expanded", bool, false);
   REGISTER_PROPERTY("due date", QDateTime, true);
   REGISTER_PROPERTY("category", QString, true);
+  Properties::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
 
 //  TODO: customizable enum property (e.g. 'category' with n possible values)
 //  typedef std::array<QString, 3> ar;

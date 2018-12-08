@@ -208,7 +208,9 @@ public:
 
   bool setValue(const QString& sVal) override
   {
-    return m_spValue->setValue(sVal);
+    bool bRv = false;
+    T val = conversion::fromString<T>(sVal, bRv);
+    return set(val);
   }
 
   T get() const
@@ -216,9 +218,15 @@ public:
     return m_spValue->get();
   }
 
-  void set(const T& val)
+  bool set(const T& val)
   {
-    m_spValue->set(val);
+    if (nullptr != m_spDescriptor && m_spDescriptor->accepts(val))
+    {
+      m_spValue->set(val);
+      return true;
+    }
+
+    return false;
   }
 
 private:
@@ -254,7 +262,7 @@ public:
     factory[sName] = creatorFct;
 
     descriptors<T>().insert(spDescriptor);
-    return properties.insert(spDescriptor).second;
+    return allDescriptors.insert(spDescriptor).second;
   }
 
   template<typename T> static bool registerConstraint(const QString& sName,
@@ -264,6 +272,11 @@ public:
     if (nullptr != spDescriptor)
     {
       spDescriptor->setConstraint(spConstraint);
+      return true;
+    }
+    else
+    {
+      return false;
     }
   }
 
@@ -279,7 +292,7 @@ public:
 
   template<typename T>
   static T findDescriptor(const QString& sName,
-                                      const std::set<T>& container)
+                          const std::set<T>& container)
   {
     auto it = std::find_if(container.begin(),
                            container.end(),
@@ -293,20 +306,33 @@ public:
 
     return nullptr;
   }
+
+  template<typename T> static std::set<tspPropertyTpl<T>>& properties(const Properties* pOwner)
+  {
+    static std::map<const Properties*, std::set<tspPropertyTpl<T>>> properties;
+    return properties[pOwner];
+  }
+
+  template<typename T>
+  static T findProperty(const QString& sName,
+                        const std::set<T>& set)
+  {
+    auto it = std::find_if(set.begin(),
+                           set.end(),
+                           [sName](const T& spProperty)
+    {
+      return nullptr != spProperty &&
+          sName == spProperty->descriptor()->name();
+    });
+
+    if (it != set.end())  { return *it; }
+
+    return nullptr;
+  }
+
   static tspDescriptor descriptor(const QString& sName)
   {
-    return findDescriptor(sName, properties);
-//    auto it = std::find_if(properties.begin(),
-//                           properties.end(),
-//                           [sName](const tspDescriptor& spDescriptor)
-//    {
-//      return nullptr != spDescriptor &&
-//          sName == spDescriptor->name();
-//    });
-
-//    if (it != properties.end())  { return *it; }
-
-//    return nullptr;
+    return findDescriptor(sName, allDescriptors);
   }
 
   static bool visible(const QString& sPropertyName)
@@ -322,48 +348,37 @@ public:
 
   template<typename T> bool set(const QString& sPropertyName, const T& value)
   {
-    tspDescriptorTpl<T> spDescriptor = findDescriptor(sPropertyName, descriptors<T>());
-    if (nullptr != spDescriptor && spDescriptor->accepts(value))
+    tspPropertyTpl<T> spProperty = findProperty(sPropertyName, properties<T>(this));
+
+    if (nullptr == spProperty)
     {
-      auto it = std::find_if(vals.begin(), vals.end(),
-                             [sPropertyName](const tspProperty& spProp)
-      { return sPropertyName == spProp->descriptor()->name();});
-      if (it == vals.end())
+      auto itCreator = factory.find(sPropertyName);
+      if (itCreator != factory.end())
       {
-        auto itCreator = factory.find(sPropertyName);
-        if (itCreator != factory.end())
+        tspDescriptorTpl<T> spDescriptor = findDescriptor(sPropertyName, descriptors<T>());
+        if (nullptr != spDescriptor && spDescriptor->accepts(value))
         {
           tspPropertyTpl<T> spProp =
               std::make_shared<PropertyTpl<T>>(spDescriptor, value);
-          return vals.insert(spProp).second;
+          properties<T>(this).insert(spProp);
+          return allProperties.insert(spProp).second;
         }
+      }
 
-        return false;
-      }
-      else
-      {
-        tspPropertyTpl<T> spProp = nullptr;//dynamic_pointer_cast<tspPropertyTpl<T>>(*it);
-        if (nullptr != spProp)
-        {
-          spProp->set(value);
-        }
-        else
-        {
-          (*it)->setValue(conversion::toString(value));
-        }
-      }
-      return true;
+      return false;
     }
-
-    return false;
+    else
+    {
+      return spProperty->set(value);
+    }
   }
 
   template<typename T> T get(const QString& sPropertyName) const
   {
-    auto it = std::find_if(vals.begin(), vals.end(),
+    auto it = std::find_if(allProperties.begin(), allProperties.end(),
                            [sPropertyName](const tspProperty& p)
     { return sPropertyName == p->descriptor()->name(); });
-    if (it != vals.end())
+    if (it != allProperties.end())
     {
       bool bUnused = false;
       conversion::fromString<T>((*it)->value(), bUnused);
@@ -376,9 +391,9 @@ public:
   QString get(const QString& sPropertyName) const;
 
 private:
-  static std::set<tspDescriptor> properties; // descriptions, without values
+  static std::set<tspDescriptor> allDescriptors; // descriptions, without values
   static std::map<QString, std::function<tspProperty(void)>> factory; // needed for creating properties of unspecified
-  std::set<tspProperty> vals;  // values
+  std::set<tspProperty> allProperties;  // values
 };
 
 
