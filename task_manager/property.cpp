@@ -2,7 +2,7 @@
 
 
 std::set<tspDescriptor> Properties::properties;
-std::map<QString, std::function<tspProperty(const tspDescriptor&)>> Properties::factory;
+std::map<QString, std::function<tspProperty(void)>> Properties::factory;
 
 namespace conversion
 {
@@ -83,16 +83,12 @@ bool Properties::set(const QString& sPropertyName, const QString& sValue)
   { return sPropertyName == spProp->descriptor()->name();});
   if (it == vals.end())
   {
-    tspDescriptor spDescriptor = descriptor(sPropertyName);
-    if (nullptr != spDescriptor)
+    auto itCreator = factory.find(sPropertyName);
+    if (itCreator != factory.end())
     {
-      auto itCreator = factory.find(sPropertyName);
-      if (itCreator != factory.end())
-      {
-        tspProperty spProp = itCreator->second(spDescriptor);
-        bool bRv = spProp->setValue(sValue);
-        return bRv && vals.insert(spProp).second;
-      }
+      tspProperty spProp = itCreator->second();
+      bool bRv = spProp->setValue(sValue);
+      return bRv && vals.insert(spProp).second;
     }
 
     return false;

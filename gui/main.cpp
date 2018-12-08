@@ -7,10 +7,11 @@
 #include "serializerfactory.h"
 #include "style.h"
 #include "property.h"
+#include "constraint.h"
 
 #include <QDateTime>
 
-#include <cassert> test
+#include <cassert>
 
 namespace grammar
 {
@@ -20,31 +21,20 @@ namespace grammar
   #define OR |
 
   // constraints
-  #define ANY_OF(...) std::make_shared<ConstraintImpl>()
-  #define MIN(a) std::make_shared<ConstraintImpl>()
-  #define MAX(a) std::make_shared<ConstraintImpl>()
+  #define ANY_OF(a, ...) tspConstraint<decltype(a)>(make_list<decltype(a)>(a, ## __VA_ARGS__))
+  #define MIN(a) tspConstraint<decltype(a)>(std::make_shared<MinConstraint<decltype(a)>>(a))
+  #define MAX(a) tspConstraint<decltype(a)>(std::make_shared<MaxConstraint<decltype(a)>>(a))
   #define EVEN_NUMBER std::make_shared<ConstraintImpl>()
 
-  class Constraint
-  {
-  public:
-    void blah() {}
-  };
-  typedef std::shared_ptr<Constraint> tspConstraint;
 
-  class ConstraintImpl : public Constraint
+  template<typename T> tspConstraint<T> operator&(const std::shared_ptr<ConstraintTpl<T>>& p,
+                                                  const std::shared_ptr<ConstraintTpl<T>>& p2)
   {
-  public:
-  };
-
-
-  tspConstraint operator&(tspConstraint p, tspConstraint p2)
-  {
-    return std::make_shared<ConstraintImpl>();
+    return std::make_shared<AndConstraint<T>>(p, p2);
   }
-  tspConstraint operator|(tspConstraint p, tspConstraint p2)
+  template<typename T> tspConstraint<T> operator|(tspConstraint<T> p, tspConstraint<T> p2)
   {
-    return std::make_shared<ConstraintImpl>();
+    return std::make_shared<OrConstraint<T>>(p, p2);
   }
 }
 
@@ -54,11 +44,25 @@ int main(int argc, char *argv[])
   // test code for constraints
   using namespace grammar;
 
-  tspConstraint spA;
-  tspConstraint spA2;
-  std::shared_ptr<ConstraintImpl> spB;
+  //auto a = ListConstraintTpl<int>(1,2,3,4,5,6);
+  //auto a = make_list(1,2,3,4,5);
+//  auto b = ANY_OF(1,2,3);
+  auto sp = ANY_OF(1,2,3) OR MIN(10) AND MAX(20);
+  auto sp2 = ANY_OF(1.5,2.,3.) OR MIN(10.) AND MAX(20.);
+  auto sp25 = ANY_OF(QString("i"), QString("am"), QString("ready"));
+  auto sp3 = ANY_OF(QString("hello"), QString("world"), QString("abc")) OR ANY_OF(QString("i"), QString("am"), QString("ready"));
 
-  tspConstraint spResult = ANY_OF('a', 'b', 'c') OR (EVEN_NUMBER BUT MIN(0) AND MAX(100));
+  bool bOk = sp->accepts(12);
+  bOk = sp->accepts(8);
+  bOk = sp->accepts(22);
+  bOk = sp->accepts(1);
+  bOk = sp->accepts(2);
+  bOk = sp->accepts(3);
+  bOk = sp3->accepts("hello");
+  bOk = sp3->accepts("wrold");
+
+
+//  tspConstraint spResult = ANY_OF('a', 'b', 'c') OR (EVEN_NUMBER BUT MIN(0) AND MAX(100));
 
 
   // test code for properties
