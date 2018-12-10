@@ -6,7 +6,17 @@
 #include <memory>
 #include <functional>
 
-template<typename T> class ConstraintTpl
+class IConstraint
+{
+public:
+  IConstraint() {}
+  ~IConstraint() {}
+
+  //virtual QString toString() const = 0;
+};
+using tspConstraint = std::shared_ptr<IConstraint>;
+
+template<typename T> class ConstraintTpl : public IConstraint
 {
 public:
   ConstraintTpl() {}
@@ -14,7 +24,7 @@ public:
 
   virtual bool accepts(const T& val) const = 0;
 };
-template<typename T> using tspConstraint = std::shared_ptr<ConstraintTpl<T>>;
+template<typename T> using tspConstraintTpl = std::shared_ptr<ConstraintTpl<T>>;
 
 template<typename T> using tFnCheck = std::function<bool(const T&)>;
 template<typename T> class FunctionalConstraint : public ConstraintTpl<T>
@@ -36,8 +46,8 @@ private:
 template<typename T> class AndConstraint : public FunctionalConstraint<T>
 {
 public:
-  AndConstraint(const tspConstraint<T>& spL,
-      const tspConstraint<T>& spR)
+  AndConstraint(const tspConstraintTpl<T>& spL,
+      const tspConstraintTpl<T>& spR)
     : FunctionalConstraint<T>([spL, spR](const T& val) {return spL->accepts(val) && spR->accepts(val); })
   {}
 };
@@ -45,8 +55,8 @@ public:
 template<typename T> class OrConstraint : public FunctionalConstraint<T>
 {
 public:
-  OrConstraint(const tspConstraint<T>& spL,
-      const tspConstraint<T>& spR)
+  OrConstraint(const tspConstraintTpl<T>& spL,
+      const tspConstraintTpl<T>& spR)
     : FunctionalConstraint<T>([spL, spR](const T& val) {return spL->accepts(val) || spR->accepts(val); })
   {}
 };
@@ -74,18 +84,16 @@ class ListConstraintTpl : public ConstraintTpl<T>
 public:
   ListConstraintTpl()
   {
-    qDebug() << "end";
   }
 
   ListConstraintTpl(T t)
     : m_acceptableVal(t)
   {
-    qDebug() << t;
   }
 
   ~ListConstraintTpl() {}
 
-  void setNext(const tspConstraint<T>& sp)
+  void setNext(const tspConstraintTpl<T>& sp)
   {
     m_spNext = sp;
   }
@@ -99,7 +107,7 @@ public:
 
 private:
   T m_acceptableVal;
-  tspConstraint<T> m_spNext;
+  tspConstraintTpl<T> m_spNext;
 };
 
 template<typename T>

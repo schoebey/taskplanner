@@ -2,6 +2,8 @@
 #define PROPERTY_H
 
 #include "constraint.h"
+#include "serializableinterface.h"
+#include "serializerinterface.h"
 
 #include <QString>
 #include <QDateTime>
@@ -56,10 +58,7 @@ namespace conversion
   template<> bool fromString<bool>(const QString& sVal, bool& bConversionStatus);
 }
 
-
-
-
-class PropertyDescriptor
+class PropertyDescriptor : public ISerializable
 {
 public:
   PropertyDescriptor() {}
@@ -70,6 +69,8 @@ public:
   virtual QString typeName() const = 0;
 
   virtual bool visible() const = 0;
+
+  virtual tspConstraint constraint() = 0;
 };
 typedef std::shared_ptr<PropertyDescriptor> tspDescriptor;
 
@@ -83,6 +84,21 @@ public:
      m_sTypeName(sTypeName),
      m_bVisible(bVisible)
   {
+  }
+
+  int version() const
+  {
+    return 0;
+  }
+
+  ESerializingError serialize(ISerializer* pSerializer) const override
+  {
+    return pSerializer->serialize(*this);
+  }
+
+  EDeserializingError deserialize(ISerializer* pSerializer) override
+  {
+    return pSerializer->deserialize(*this);
   }
 
   QString name() const override
@@ -100,9 +116,14 @@ public:
     return m_bVisible;
   }
 
-  void setConstraint(const tspConstraint<T>& spConstraint)
+  void setConstraint(const tspConstraintTpl<T>& spConstraint)
   {
     m_spConstraint = spConstraint;
+  }
+
+  tspConstraint constraint()
+  {
+    return m_spConstraint;
   }
 
   bool accepts(const T& value) const
@@ -114,7 +135,7 @@ private:
   QString m_sName;
   QString m_sTypeName;
   bool m_bVisible = false;
-  tspConstraint<T> m_spConstraint;
+  tspConstraintTpl<T> m_spConstraint;
 };
 template <typename T> using tspDescriptorTpl = std::shared_ptr<PropertyDescriptorTpl<T>>;
 
@@ -266,7 +287,7 @@ public:
   }
 
   template<typename T> static bool registerConstraint(const QString& sName,
-                                                      const tspConstraint<T>& spConstraint)
+                                                      const tspConstraintTpl<T>& spConstraint)
   {
     tspDescriptorTpl<T> spDescriptor = findDescriptor(sName, descriptors<T>());
     if (nullptr != spDescriptor)
