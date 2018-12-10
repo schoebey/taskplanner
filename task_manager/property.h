@@ -2,6 +2,7 @@
 #define PROPERTY_H
 
 #include "constraint.h"
+#include "conversion.h"
 #include "serializableinterface.h"
 #include "serializerinterface.h"
 
@@ -15,49 +16,6 @@
 #include <iostream>
 #include <functional>
 
-
-
-namespace conversion
-{
-  template<typename T>
-  typename std::enable_if<!std::is_convertible<T, QString>::value &&
-                          !std::is_arithmetic<T>::value, QString>::type
-  toString(const T& /*value*/);
-
-  template<typename T>
-  typename std::enable_if<std::is_arithmetic<T>::value, QString>::type
-  toString(const T& num)
-  {
-    return QString::number(num);
-  }
-
-  template<typename T>
-  typename std::enable_if<std::is_convertible<T, QString>::value, QString>::type
-  toString(const T& val)
-  {
-    return QString(val);
-  }
-
-  template<typename T>
-  typename std::enable_if<!std::is_convertible<QString, T>::value, T>::type
-  fromString(const QString& /*sVal*/, bool& bConversionStatus);
-
-  template<typename T>
-  typename std::enable_if<std::is_convertible<QString, T>::value, T>::type
-  fromString(const QString& sVal, bool& bConversionStatus)
-  {
-    bConversionStatus = true;
-    return T(sVal);
-  }
-
-  //-- QDateTime
-  template<> QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
-  QString toString(const QDateTime& dt);
-
-  //-- bool
-  template<> bool fromString<bool>(const QString& sVal, bool& bConversionStatus);
-}
-
 class PropertyDescriptor : public ISerializable
 {
 public:
@@ -70,7 +28,7 @@ public:
 
   virtual bool visible() const = 0;
 
-  virtual tspConstraint constraint() = 0;
+  virtual tspConstraint constraint() const = 0;
 };
 typedef std::shared_ptr<PropertyDescriptor> tspDescriptor;
 
@@ -121,7 +79,7 @@ public:
     m_spConstraint = spConstraint;
   }
 
-  tspConstraint constraint()
+  tspConstraint constraint() const override
   {
     return m_spConstraint;
   }

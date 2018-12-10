@@ -17,9 +17,11 @@ namespace
   Register<MarkdownSerializer> s("markdown", "md");
 
   static const QString c_sPara_FileName = "fileName";
-  static const QString c_sManagerHeader = "== manager ==";
-  static const QString c_sTaskHeader = "== task ==";
-  static const QString c_sGroupHeader = "== group ==";
+  static const QString c_sManagerHeader = "## manager";
+  static const QString c_sTaskHeader = "### task";
+  static const QString c_sGroupHeader = "### group";
+  static const QString c_sPropertyHeader = "#### property";
+  static const QString c_sConstraintHeader = "##### constraint";
   static const QString c_sTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
 
   template<typename T> struct is_container : std::false_type {};
@@ -31,6 +33,11 @@ namespace
   template<> QString convertFrom(const int& i)
   {
     return QString::number(i);
+  }
+
+  template<> QString convertFrom(const bool& b)
+  {
+    return QString(b ? "true" : "false");
   }
 
   template<> QString convertFrom(const STimeFragment& f)
@@ -142,7 +149,7 @@ namespace
     qint64 pos = stream.pos();
     QString sLine;
     std::map<QString, QString> values;
-    while (!sLine.startsWith("==") && !stream.atEnd())
+    while (!sLine.startsWith("### ") && !stream.atEnd())
     {
       pos = stream.pos();
       sLine = stream.readLine();
@@ -170,7 +177,7 @@ ESerializingError MarkdownSerializer::initSerialization()
     {
       m_stream.setDevice(&m_file);
       m_stream.setCodec("UTF-8");
-      m_stream << QString("=== task planner ===") << endl;
+      m_stream << QString("# task planner") << endl;
       m_stream << "change date: " << QDateTime::currentDateTime().toString(c_sTimeFormat) << endl;
       return ESerializingError::eOk;
     }
@@ -303,11 +310,36 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
 
 ESerializingError MarkdownSerializer::serialize(const PropertyDescriptor& descriptor)
 {
-  //descriptor.constraint()->toString();
-  return ESerializingError::eInternalError;
+  m_stream << c_sPropertyHeader << endl;
+  writeToStream(m_stream, descriptor.version(), "version");
+  writeToStream(m_stream, descriptor.name(), "name");
+  writeToStream(m_stream, descriptor.typeName(), "typeName");
+  writeToStream(m_stream, descriptor.visible(), "visible");
+
+  if (nullptr != descriptor.constraint())
+  {
+    descriptor.constraint()->serialize(this);
+  }
+
+  return ESerializingError::eOk;
 }
 
 EDeserializingError MarkdownSerializer::deserialize(PropertyDescriptor& descriptor)
+{
+  return EDeserializingError::eInternalError;
+}
+
+ESerializingError MarkdownSerializer::serialize(const IConstraint& constraint)
+{
+  m_stream << c_sConstraintHeader << endl;
+  writeToStream(m_stream, constraint.version(), "version");
+  writeToStream(m_stream, constraint.name(), "type");
+  writeToStream(m_stream, constraint.toString(), "content");
+
+  return ESerializingError::eOk;
+}
+
+EDeserializingError MarkdownSerializer::deserialize(IConstraint& constraint)
 {
   return EDeserializingError::eInternalError;
 }

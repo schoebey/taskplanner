@@ -172,6 +172,16 @@ EDeserializingError TextSerializer::deserialize(PropertyDescriptor&)
   return EDeserializingError::eInternalError;
 }
 
+ESerializingError TextSerializer::serialize(const IConstraint&)
+{
+  return ESerializingError::eInternalError;
+}
+
+EDeserializingError TextSerializer::deserialize(IConstraint&)
+{
+  return EDeserializingError::eInternalError;
+}
+
 ESerializingError TextSerializer::serialize(const Task& t)
 {
   m_stream << c_sTaskHeader << endl;
