@@ -1,8 +1,11 @@
 #ifndef TASKWIDGET_H
 #define TASKWIDGET_H
 
-#include <QFrame>
 #include "id_types.h"
+
+#include <QFrame>
+
+#include <map>
 
 namespace Ui {
   class TaskWidget;
