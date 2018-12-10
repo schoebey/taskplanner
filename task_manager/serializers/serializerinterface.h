@@ -12,6 +12,7 @@
 class Task;
 class Group;
 class SerializableManager;
+class PropertyDescriptor;
 
 class ISerializer
 {
@@ -37,6 +38,10 @@ public:
   virtual ESerializingError serialize(const SerializableManager&) = 0;
 
   virtual EDeserializingError deserialize(SerializableManager&) = 0;
+
+  virtual ESerializingError serialize(const PropertyDescriptor&) = 0;
+
+  virtual EDeserializingError deserialize(PropertyDescriptor&) = 0;
 
   virtual ESerializingError serialize(const Task&) = 0;
 

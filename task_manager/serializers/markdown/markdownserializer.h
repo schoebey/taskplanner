@@ -2,6 +2,7 @@
 #define MARKDOWNSERIALIZER_H
 
 #include "serializer.h"
+#include "property.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -20,6 +21,10 @@ public:
   ESerializingError serialize(const SerializableManager&) override;
 
   EDeserializingError deserialize(SerializableManager&) override;
+
+  ESerializingError serialize(const PropertyDescriptor&) override;
+
+  EDeserializingError deserialize(PropertyDescriptor&) override;
 
   ESerializingError serialize(const Task&) override;
 

@@ -227,12 +227,18 @@ ESerializingError MarkdownSerializer::serialize(const SerializableManager& m)
   m_stream << c_sManagerHeader << endl;
   writeToStream(m_stream, m.version(), "version");
 
+  for (const QString& sName : Properties::registeredPropertyNames())
+  {
+    tspDescriptor spDescriptor = Properties::descriptor(sName);
+    spDescriptor->serialize(this);
+  }
+
   for (const auto & id : m.groupIds())
   {
     Group* pGroup = m.group(id);
     if (nullptr != pGroup)
     {
-      serialize(*pGroup);
+      pGroup->serialize(this);
     }
   }
 
@@ -241,7 +247,7 @@ ESerializingError MarkdownSerializer::serialize(const SerializableManager& m)
     Task* pTask = m.task(id);
     if (nullptr != pTask)
     {
-      serialize(*pTask);
+      pTask->serialize(this);
     }
   }
 
@@ -293,6 +299,17 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
   }
 
   return EDeserializingError::eOk;
+}
+
+ESerializingError MarkdownSerializer::serialize(const PropertyDescriptor& descriptor)
+{
+  //descriptor.constraint()->toString();
+  return ESerializingError::eInternalError;
+}
+
+EDeserializingError MarkdownSerializer::deserialize(PropertyDescriptor& descriptor)
+{
+  return EDeserializingError::eInternalError;
 }
 
 ESerializingError MarkdownSerializer::serialize(const Task& t)

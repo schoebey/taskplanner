@@ -21,18 +21,18 @@ namespace grammar
   #define OR |
 
   // constraints
-  #define ONE_OF(a, ...) tspConstraint<decltype(a)>(make_list<decltype(a)>(a, ## __VA_ARGS__))
-  #define MIN(a) tspConstraint<decltype(a)>(std::make_shared<MinConstraint<decltype(a)>>(a))
-  #define MAX(a) tspConstraint<decltype(a)>(std::make_shared<MaxConstraint<decltype(a)>>(a))
+  #define ONE_OF(a, ...) tspConstraintTpl<decltype(a)>(make_list<decltype(a)>(a, ## __VA_ARGS__))
+  #define MIN(a) tspConstraintTpl<decltype(a)>(std::make_shared<MinConstraint<decltype(a)>>(a))
+  #define MAX(a) tspConstraintTpl<decltype(a)>(std::make_shared<MaxConstraint<decltype(a)>>(a))
   #define EVEN_NUMBER std::make_shared<ConstraintImpl>()
 
 
-  template<typename T> tspConstraint<T> operator&(const std::shared_ptr<ConstraintTpl<T>>& p,
+  template<typename T> tspConstraintTpl<T> operator&(const std::shared_ptr<ConstraintTpl<T>>& p,
                                                   const std::shared_ptr<ConstraintTpl<T>>& p2)
   {
     return std::make_shared<AndConstraint<T>>(p, p2);
   }
-  template<typename T> tspConstraint<T> operator|(tspConstraint<T> p, tspConstraint<T> p2)
+  template<typename T> tspConstraintTpl<T> operator|(tspConstraintTpl<T> p, tspConstraintTpl<T> p2)
   {
     return std::make_shared<OrConstraint<T>>(p, p2);
   }
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   bOk = sp3->accepts("wrold");
 
 
-//  tspConstraint spResult = ONE_OF('a', 'b', 'c') OR (EVEN_NUMBER BUT MIN(0) AND MAX(100));
+//  tspConstraintTpl spResult = ONE_OF('a', 'b', 'c') OR (EVEN_NUMBER BUT MIN(0) AND MAX(100));
 
 
   // test code for properties
