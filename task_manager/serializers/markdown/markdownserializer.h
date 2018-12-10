@@ -26,6 +26,10 @@ public:
 
   EDeserializingError deserialize(PropertyDescriptor&) override;
 
+  ESerializingError serialize(const IConstraint&) override;
+
+  EDeserializingError deserialize(IConstraint&) override;
+
   ESerializingError serialize(const Task&) override;
 
   EDeserializingError deserialize(Task&) override;
