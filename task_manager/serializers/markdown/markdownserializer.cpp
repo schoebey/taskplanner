@@ -24,6 +24,98 @@ namespace
   static const QString c_sConstraintHeader = "##### constraint";
   static const QString c_sTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
 
+  class StreamSwapper
+  {
+  public:
+    StreamSwapper(QTextStream** ppStream, const QString& sHeader)
+      : m_ppStream(ppStream),
+        m_sHeader(sHeader)
+    { }
+
+    virtual ~StreamSwapper()
+    { }
+  protected:
+    QString m_string;
+    QTextStream m_stream;
+    QTextStream** m_ppStream;
+    QTextStream* m_pOriginalStream;
+    QString m_sHeader;
+  };
+
+  class StreamWriter : public StreamSwapper
+  {
+  public:
+    StreamWriter(QTextStream** ppStream, const QString& sHeader)
+      : StreamSwapper(ppStream, sHeader)
+    {
+      m_stream.setString(&m_string);
+      m_pOriginalStream = *m_ppStream;
+      *m_ppStream = &m_stream;
+    }
+
+    ~StreamWriter() override
+    {
+      m_stream.flush();
+      *m_ppStream = m_pOriginalStream;
+      **m_ppStream << m_sHeader << ":" << m_string.size() << endl;
+      **m_ppStream << m_string;
+    }
+  };
+
+  class StreamReader : public StreamSwapper
+  {
+  public:
+    StreamReader(QTextStream** ppStream, const QString& sHeader,
+                 const QString& sContents = QString())
+      : StreamSwapper(ppStream, sHeader)
+    {
+      if (sContents.isEmpty())
+      {
+        QString sStreamHeader = (*ppStream)->readLine();
+        if (sStreamHeader.startsWith(sHeader))
+        {
+          QStringList list = sStreamHeader.split(":");
+          bool bOk(false);
+          if (1 < list.size())
+          {
+            int iSize = list[1].toInt(&bOk);
+            if (bOk)
+            {
+              m_string = (*ppStream)->read(iSize);
+            }
+          }
+
+          m_bStatus = true;
+        }
+      }
+      else
+      {
+        m_string = sContents;
+        m_bStatus = true;
+      }
+
+      if (m_bStatus)
+      {
+        m_stream.setString(&m_string);
+        m_pOriginalStream = *m_ppStream;
+        *m_ppStream = &m_stream;
+      }
+    }
+
+    ~StreamReader() override
+    {
+      *m_ppStream = m_pOriginalStream;
+    }
+
+    operator bool() const
+    {
+      return m_bStatus;
+    }
+
+  private:
+    bool m_bStatus = false;
+  };
+
   template<typename T> struct is_container : std::false_type {};
   template<typename T> struct is_container<std::vector<T>> : std::true_type {};
   template<typename T> struct is_container<std::set<T>> : std::true_type {};
@@ -129,34 +221,44 @@ namespace
   }
 
   template<typename T>
-  bool readFromMap(const std::map<QString, QString>& values, const QString& sName, T& t)
+  bool readFromMap(const std::map<QString, std::vector<QString>>& values,
+                   const QString& sName, T& t, size_t index = 0)
   {
 
     auto it = values.find(sName);
     if (it == values.end())  { return false; }
 
-    if (!it->second.isEmpty())
+    if (index < it->second.size() && !it->second.at(index).isEmpty())
     {
-      t = convertTo<T>(it->second);
+      t = convertTo<T>(it->second.at(index));
       return true;
     }
 
     return false;
   }
 
-  std::map<QString, QString> valuesFromStream(QTextStream& stream)
+  std::map<QString, std::vector<QString>> valuesFromStream(QTextStream& stream)
   {
-    qint64 pos = stream.pos();
     QString sLine;
-    std::map<QString, QString> values;
-    while (!sLine.startsWith("### ") && !stream.atEnd())
+    std::map<QString, std::vector<QString>> values;
+    while (!stream.atEnd())
     {
-      pos = stream.pos();
       sLine = stream.readLine();
       int idx = sLine.indexOf(":");
-      values[sLine.left(idx)] = sLine.right(sLine.size() - idx - 1);
+      QString sData = sLine.right(sLine.size() - idx - 1);
+      if (sLine.startsWith("#"))
+      {
+        bool bOk(false);
+        int iPayloadSize = sData.toInt(&bOk);
+        if (bOk)
+        {
+          sData = sLine + "\n" + stream.read(iPayloadSize);
+        }
+      }
+
+      values[sLine.left(idx)].push_back(sData);
     }
-    stream.seek(pos);
+
     return values;
   }
 }
@@ -173,12 +275,16 @@ ESerializingError MarkdownSerializer::initSerialization()
   {
     QString sFileName = parameter(c_sPara_FileName).toString();
     m_file.setFileName(sFileName);
-    if (m_file.open(QIODevice::ReadWrite | QIODevice::Text))
+    if (m_file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {
-      m_stream.setDevice(&m_file);
-      m_stream.setCodec("UTF-8");
-      m_stream << QString("# task planner") << endl;
-      m_stream << "change date: " << QDateTime::currentDateTime().toString(c_sTimeFormat) << endl;
+      if (nullptr == m_pStream)
+      {
+        m_pStream = new QTextStream();
+      }
+      m_pStream->setDevice(&m_file);
+      m_pStream->setCodec("UTF-8");
+      *m_pStream << QString("# task planner") << endl;
+      *m_pStream << "change date: " << QDateTime::currentDateTime().toString(c_sTimeFormat) << endl;
       return ESerializingError::eOk;
     }
 
@@ -192,7 +298,7 @@ ESerializingError MarkdownSerializer::initSerialization()
 
 ESerializingError MarkdownSerializer::deinitSerialization()
 {
-  m_stream.flush();
+  m_pStream->flush();
   m_file.close();
   return ESerializingError::eOk;
 }
@@ -206,11 +312,15 @@ EDeserializingError MarkdownSerializer::initDeserialization()
     m_file.setFileName(sFileName);
     if (m_file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-      m_stream.setDevice(&m_file);
-      m_stream.setCodec("UTF-8");
+      if (nullptr == m_pStream)
+      {
+        m_pStream = new QTextStream();
+      }
+      m_pStream->setDevice(&m_file);
+      m_pStream->setCodec("UTF-8");
 
-      QString sHeader = m_stream.readLine();
-      QString sWriteTimestamp = m_stream.readLine();
+      QString sHeader = m_pStream->readLine();
+      QString sWriteTimestamp = m_pStream->readLine();
 
       return EDeserializingError::eOk;
     }
@@ -230,9 +340,10 @@ EDeserializingError MarkdownSerializer::deinitDeserialization()
 }
 
 ESerializingError MarkdownSerializer::serialize(const SerializableManager& m)
-{
-  m_stream << c_sManagerHeader << endl;
-  writeToStream(m_stream, m.version(), "version");
+{ 
+  StreamWriter s(&m_pStream, c_sManagerHeader);
+
+  writeToStream(*m_pStream, m.version(), "version");
 
   for (const QString& sName : Properties::registeredPropertyNames())
   {
@@ -258,19 +369,15 @@ ESerializingError MarkdownSerializer::serialize(const SerializableManager& m)
     }
   }
 
-
   return ESerializingError::eOk;
 }
 
 EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
 {
-  QString sHeader = m_stream.readLine();
-  if (sHeader != c_sManagerHeader)
-  {
-    return EDeserializingError::eInternalError;
-  }
+  StreamReader r(&m_pStream, c_sManagerHeader);
+  if (!r)  { return EDeserializingError::eInternalError; }
 
-  std::map<QString, QString> values = valuesFromStream(m_stream);
+  std::map<QString, std::vector<QString>> values = valuesFromStream(*m_pStream);
   int iVersion = 0;
   if (!readFromMap(values, "version", iVersion))
   {
@@ -280,28 +387,29 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
 
   if (0 == iVersion)
   {
-    while (!m_stream.atEnd())
+    QString sPayload;
+    size_t index(0);
+    while (readFromMap(values, c_sGroupHeader, sPayload, index++))
     {
-      qint64 pos = m_stream.pos();
-      QString sIdentifier = m_stream.readLine();
-      if (c_sGroupHeader == sIdentifier)
-      {
-        m_stream.seek(pos);
-        Group* pGroup = m.addGroup();
-        group_id oldId = pGroup->id();
-        EDeserializingError err = pGroup->deserialize(this);
-        m.changeGroupId(oldId, pGroup->id());
-        if (EDeserializingError::eOk != err)  { return err; }
-      }
-      else if (c_sTaskHeader == sIdentifier)
-      {
-        m_stream.seek(pos);
-        Task* pTask = m.addTask();
-        group_id oldId = pTask->id();
-        EDeserializingError err = pTask->deserialize(this);
-        m.changeTaskId(oldId, pTask->id());
-        if (EDeserializingError::eOk != err)  { return err; }
-      }
+      Group* pGroup = m.addGroup();
+      group_id oldId = pGroup->id();
+
+      StreamReader g(&m_pStream, c_sGroupHeader, sPayload);
+      EDeserializingError err = pGroup->deserialize(this);
+      m.changeGroupId(oldId, pGroup->id());
+      if (EDeserializingError::eOk != err)  { return err; }
+    }
+
+    index = 0;
+    while (readFromMap(values, c_sTaskHeader, sPayload, index++))
+    {
+      Task* pTask = m.addTask();
+      group_id oldId = pTask->id();
+
+      StreamReader t(&m_pStream, c_sTaskHeader, sPayload);
+      EDeserializingError err = pTask->deserialize(this);
+      m.changeTaskId(oldId, pTask->id());
+      if (EDeserializingError::eOk != err)  { return err; }
     }
   }
 
@@ -310,11 +418,12 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
 
 ESerializingError MarkdownSerializer::serialize(const PropertyDescriptor& descriptor)
 {
-  m_stream << c_sPropertyHeader << endl;
-  writeToStream(m_stream, descriptor.version(), "version");
-  writeToStream(m_stream, descriptor.name(), "name");
-  writeToStream(m_stream, descriptor.typeName(), "typeName");
-  writeToStream(m_stream, descriptor.visible(), "visible");
+  StreamWriter s(&m_pStream, c_sPropertyHeader);
+
+  writeToStream(*m_pStream, descriptor.version(), "version");
+  writeToStream(*m_pStream, descriptor.name(), "name");
+  writeToStream(*m_pStream, descriptor.typeName(), "typeName");
+  writeToStream(*m_pStream, descriptor.visible(), "visible");
 
   if (nullptr != descriptor.constraint())
   {
@@ -331,10 +440,11 @@ EDeserializingError MarkdownSerializer::deserialize(PropertyDescriptor& descript
 
 ESerializingError MarkdownSerializer::serialize(const IConstraint& constraint)
 {
-  m_stream << c_sConstraintHeader << endl;
-  writeToStream(m_stream, constraint.version(), "version");
-  writeToStream(m_stream, constraint.name(), "type");
-  writeToStream(m_stream, constraint.toString(), "content");
+  StreamWriter s(&m_pStream, c_sConstraintHeader);
+
+  writeToStream(*m_pStream, constraint.version(), "version");
+  writeToStream(*m_pStream, constraint.name(), "type");
+  writeToStream(*m_pStream, constraint.toString(), "content");
 
   return ESerializingError::eOk;
 }
@@ -346,32 +456,33 @@ EDeserializingError MarkdownSerializer::deserialize(IConstraint& constraint)
 
 ESerializingError MarkdownSerializer::serialize(const Task& t)
 {
-  m_stream << c_sTaskHeader << endl;
-  writeToStream(m_stream, t.version(), "version");
-  writeToStream(m_stream, t.id(), "id");
+  StreamWriter s(&m_pStream, c_sTaskHeader);
+
+  writeToStream(*m_pStream, t.version(), "version");
+  writeToStream(*m_pStream, t.id(), "id");
 
   for (const auto& name : t.propertyNames())
   {
-    writeToStream(m_stream, t.propertyValue(name), name);
+    writeToStream(*m_pStream, t.propertyValue(name), name);
   }
 
-  writeToStream(m_stream, t.timeFragments(), "time_info");
-  writeToStream(m_stream, t.priority(), "priority");
-  writeToStream(m_stream, t.parentTask(), "parent");
-  writeToStream(m_stream, t.taskIds(), "children");
+  writeToStream(*m_pStream, t.timeFragments(), "time_info");
+  writeToStream(*m_pStream, t.priority(), "priority");
+  writeToStream(*m_pStream, t.parentTask(), "parent");
+  writeToStream(*m_pStream, t.taskIds(), "children");
 
   return ESerializingError::eOk;
 }
 
 EDeserializingError MarkdownSerializer::deserialize(Task& t)
 {
-  QString sHeader = m_stream.readLine();
-  if (sHeader != c_sTaskHeader)
+  QString sHeader = m_pStream->readLine();
+  if (!sHeader.startsWith(c_sTaskHeader))
   {
     return EDeserializingError::eInternalError;
   }
 
-  std::map<QString, QString> values = valuesFromStream(m_stream);
+  std::map<QString, std::vector<QString>> values = valuesFromStream(*m_pStream);
 
 
   int iVersion = 0;
@@ -434,26 +545,27 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
 
 ESerializingError MarkdownSerializer::serialize(const Group& g)
 {
-  m_stream << c_sGroupHeader << endl;
-  writeToStream(m_stream, g.version(), "version");
-  writeToStream(m_stream, g.id(), "id");
-  writeToStream(m_stream, g.name(), "name");
-  writeToStream(m_stream, g.description(), "description");
-  writeToStream(m_stream, g.taskIds(), "tasks");
+  StreamWriter s(&m_pStream, c_sGroupHeader);
+
+  writeToStream(*m_pStream, g.version(), "version");
+  writeToStream(*m_pStream, g.id(), "id");
+  writeToStream(*m_pStream, g.name(), "name");
+  writeToStream(*m_pStream, g.description(), "description");
+  writeToStream(*m_pStream, g.taskIds(), "tasks");
 
   return ESerializingError::eOk;
 }
 
 EDeserializingError MarkdownSerializer::deserialize(Group& g)
 {
-  QString sHeader = m_stream.readLine();
-  if (sHeader != c_sGroupHeader)
+  QString sHeader = m_pStream->readLine();
+  if (!sHeader.startsWith(c_sGroupHeader))
   {
     return EDeserializingError::eInternalError;
   }
 
 
-  std::map<QString, QString> values = valuesFromStream(m_stream);
+  std::map<QString, std::vector<QString>> values = valuesFromStream(*m_pStream);
   int iVersion = 0;
   if (!readFromMap(values, "version", iVersion))
   {

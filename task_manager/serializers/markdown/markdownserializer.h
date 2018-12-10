@@ -40,7 +40,7 @@ public:
 
 private:
   QFile m_file;
-  QTextStream m_stream;
+  QTextStream* m_pStream = nullptr;
 };
 
 #endif // MARKDOWNSERIALIZER_H
