@@ -4,11 +4,57 @@
 #include "serializableinterface.h"
 #include "serializerinterface.h"
 #include "conversion.h"
+#include "constraintfactory.h"
 
 #include <QDebug>
 
 #include <memory>
 #include <functional>
+
+
+namespace detail
+{
+template<typename T, typename U>
+std::shared_ptr<U> fnUnaryCreator(const QString& sName,
+                                  const QString& sConfiguration)
+{
+  QRegExp rx("(.*):(.*)");
+  if (-1 != rx.indexIn(sConfiguration))
+  {
+    if (sName == rx.cap(1))
+    {
+      QString sConfig = rx.cap(2);
+      bool bDummy(false);
+      return std::make_shared<U>(conversion::fromString<T>(sConfig, bDummy));
+    }
+  }
+  return nullptr;
+}
+
+template<typename T, typename U>
+std::shared_ptr<U> fnBinaryCreator(const QString& sName,
+                                   const QString& sConfiguration)
+{
+  QRegExp rx(R"(([^:]+):\[([^\]]+)\];\[(.*)\])");
+  if (-1 != rx.indexIn(sConfiguration))
+  {
+    QString sType = rx.cap(1);
+    QString sLeftConfig = rx.cap(2);
+    QString sRightConfig = rx.cap(3);
+    if (sName == rx.cap(1))
+    {
+      QString sLeftName = sLeftConfig.left(sLeftConfig.indexOf(":"));
+      QString sRightName = sRightConfig.left(sRightConfig.indexOf(":"));
+      tspConstraintTpl<T> spL = ConstraintFactory::create<T>(sLeftName, rx.cap(2));
+      tspConstraintTpl<T> spR = ConstraintFactory::create<T>(sRightName, rx.cap(3));
+
+      return std::make_shared<U>(spL, spR);
+    }
+  }
+  return nullptr;
+}
+}
+
 
 class IConstraint : public ISerializable
 {
@@ -81,11 +127,20 @@ public:
     : FunctionalConstraint<T>("And", [spL, spR](const T& val) {return spL->accepts(val) && spR->accepts(val); }),
       m_spL(spL),
       m_spR(spR)
-  {}
+  {
+
+  }
+
+  static void registerCreator()
+  {
+    tFnCreator<T> fn = std::bind(&detail::fnBinaryCreator<T, AndConstraint<T>>,
+                                 QString("And"), std::placeholders::_1);
+    ConstraintFactory::registerCreator("And", fn);
+  }
 
   QString toString() const override
   {
-    return m_spL->toString() + ";" + m_spR->toString();
+    return QString("%1:[%2];[%3]").arg(this->name()).arg(m_spL->toString()).arg(m_spR->toString());
   }
 private:
   tspConstraintTpl<T> m_spL;
@@ -102,9 +157,16 @@ public:
       m_spR(spR)
   {}
 
+  static void registerCreator()
+  {
+    tFnCreator<T> fn = std::bind(&detail::fnBinaryCreator<T, OrConstraint<T>>,
+                                 QString("Or"), std::placeholders::_1);
+    ConstraintFactory::registerCreator("Or", fn);
+  }
+
   QString toString() const override
   {
-    return m_spL->toString() + ";" + m_spR->toString();
+    return QString("%1:[%2];[%3]").arg(this->name()).arg(m_spL->toString()).arg(m_spR->toString());
   }
 private:
   tspConstraintTpl<T> m_spL;
@@ -119,9 +181,16 @@ public:
       m_min(min)
   {}
 
+  static void registerCreator()
+  {
+    tFnCreator<T> fn = std::bind(&detail::fnUnaryCreator<T, MinConstraint<T>>,
+                                 QString("Min"), std::placeholders::_1);
+    ConstraintFactory::registerCreator("Min", fn);
+  }
+
   QString toString() const override
   {
-    return QString::number(m_min);
+    return QString("%1:%2").arg(this->name()).arg(conversion::toString(m_min));
   }
 private:
   T m_min;
@@ -135,70 +204,57 @@ public:
       m_max(max)
   {}
 
+  static void registerCreator()
+  {
+    tFnCreator<T> fn = std::bind(&detail::fnUnaryCreator<T, MaxConstraint<T>>,
+                                 QString("Max"), std::placeholders::_1);
+    ConstraintFactory::registerCreator("Max", fn);
+  }
+
   QString toString() const override
   {
-    return QString::number(m_max);
+    return QString("%1:%2").arg(this->name()).arg(conversion::toString(m_max));
   }
 private:
   T m_max;
 };
 
-
-template<typename T>
-class ListConstraintTpl : public ConstraintTpl<T>
+template<typename T> class EqualsConstraint : public FunctionalConstraint<T>
 {
 public:
-  ListConstraintTpl()
-    : ConstraintTpl<T>("List")
-  {
-  }
+  EqualsConstraint(const T& val)
+    : FunctionalConstraint<T>("==", [val](const T& nominal) {return nominal == val; }),
+      m_val(val)
+  {}
 
-  ListConstraintTpl(T t)
-    : ConstraintTpl<T>("List"),
-      m_acceptableVal(t)
+  static void registerCreator()
   {
-  }
-
-  ~ListConstraintTpl() {}
-
-  void setNext(const tspConstraintTpl<T>& sp)
-  {
-    m_spNext = sp;
-  }
-
-  bool accepts(const T& val) const override
-  {
-    if (val == m_acceptableVal)  { return true; }
-    if (nullptr == m_spNext)  { return false; }
-    return m_spNext->accepts(val);
+    tFnCreator<T> fn = std::bind(&detail::fnUnaryCreator<T, EqualsConstraint<T>>,
+                                 QString("=="), std::placeholders::_1);
+    ConstraintFactory::registerCreator("==", fn);
   }
 
   QString toString() const override
   {
-    QString sRv = conversion::toString(m_acceptableVal);
-    if (m_spNext)
-    {
-      sRv += ";" + m_spNext->toString();
-    }
-    return sRv;
+    return QString("%1:%2").arg(this->name()).arg(conversion::toString(m_val));
   }
-
 private:
-  T m_acceptableVal;
-  tspConstraintTpl<T> m_spNext;
+  T m_val;
 };
 
 template<typename T>
-std::shared_ptr<ListConstraintTpl<T>> make_list(T t)
+tspConstraintTpl<T> make_list(T t)
 {
-  return std::make_shared<ListConstraintTpl<T>>(t);;
+  return std::make_shared<EqualsConstraint<T>>(t);
 }
 
 template<typename T, typename... Ts>
-std::shared_ptr<ListConstraintTpl<T>> make_list(T t, Ts... ts)
+tspConstraintTpl<T> make_list(T t, Ts... ts)
 {
-  auto sp = std::make_shared<ListConstraintTpl<T>>(t);
-  sp->setNext(make_list(ts...));
+  auto lhs = std::make_shared<EqualsConstraint<T>>(t);
+  auto rhs = make_list(ts...);
+
+  auto sp = std::make_shared<OrConstraint<T>>(lhs, rhs);
   return sp;
 }
 

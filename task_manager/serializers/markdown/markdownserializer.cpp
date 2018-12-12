@@ -90,8 +90,11 @@ namespace
       }
       else
       {
-        m_string = sContents;
-        m_bStatus = true;
+        if (sContents.startsWith(sHeader))
+        {
+          m_string = sContents.right(sContents.size() - sContents.indexOf("\n") - 1);
+          m_bStatus = true;
+        }
       }
 
       if (m_bStatus)
@@ -387,8 +390,28 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
 
   if (0 == iVersion)
   {
+    // property descriptors
     QString sPayload;
     size_t index(0);
+    while (readFromMap(values, c_sPropertyHeader, sPayload, index++))
+    {
+      StreamReader p(&m_pStream, c_sPropertyHeader, sPayload);
+
+      std::map<QString, std::vector<QString>> propertyDescriptionValues = valuesFromStream(*m_pStream);
+
+      QString sName;
+      tspDescriptor spDescriptor;
+      if (readFromMap(propertyDescriptionValues, "name", sName)&&
+          nullptr != (spDescriptor = Properties::descriptor(sName)))
+      {
+        StreamReader p2(&m_pStream, c_sPropertyHeader, sPayload);
+        EDeserializingError err = spDescriptor->deserialize(this);
+        if (EDeserializingError::eOk != err)  { return err; }
+      }
+    }
+
+    // groups
+    index = 0;
     while (readFromMap(values, c_sGroupHeader, sPayload, index++))
     {
       Group* pGroup = m.addGroup();
@@ -400,6 +423,7 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
       if (EDeserializingError::eOk != err)  { return err; }
     }
 
+    // tasks
     index = 0;
     while (readFromMap(values, c_sTaskHeader, sPayload, index++))
     {
@@ -435,7 +459,29 @@ ESerializingError MarkdownSerializer::serialize(const PropertyDescriptor& descri
 
 EDeserializingError MarkdownSerializer::deserialize(PropertyDescriptor& descriptor)
 {
-  return EDeserializingError::eInternalError;
+  std::map<QString, std::vector<QString>> values = valuesFromStream(*m_pStream);
+
+  QString sPayload;
+  if (readFromMap(values, c_sConstraintHeader, sPayload))
+  {
+    StreamReader c(&m_pStream, c_sConstraintHeader, sPayload);
+
+    std::map<QString, std::vector<QString>> constraintValues = valuesFromStream(*m_pStream);
+    QString sType;
+    QString sContent;
+    if (readFromMap(constraintValues, "type", sType) &&
+        readFromMap(constraintValues, "content", sContent))
+    {
+      descriptor.addConstraint(sType, sContent);
+    }
+
+    // TODO: Read all constraint properties, call factory method to create
+    // a new constraint 'name' with content 'content'
+    // constraintfactory::create(sName, sContent);
+    // descriptor.setConstraint(constraint);
+  }
+
+  return EDeserializingError::eOk;
 }
 
 ESerializingError MarkdownSerializer::serialize(const IConstraint& constraint)
@@ -449,8 +495,9 @@ ESerializingError MarkdownSerializer::serialize(const IConstraint& constraint)
   return ESerializingError::eOk;
 }
 
-EDeserializingError MarkdownSerializer::deserialize(IConstraint& constraint)
+EDeserializingError MarkdownSerializer::deserialize(IConstraint& /*constraint*/)
 {
+  // this should never be called, since constraints don't deserialize themselves...
   return EDeserializingError::eInternalError;
 }
 
@@ -476,12 +523,6 @@ ESerializingError MarkdownSerializer::serialize(const Task& t)
 
 EDeserializingError MarkdownSerializer::deserialize(Task& t)
 {
-  QString sHeader = m_pStream->readLine();
-  if (!sHeader.startsWith(c_sTaskHeader))
-  {
-    return EDeserializingError::eInternalError;
-  }
-
   std::map<QString, std::vector<QString>> values = valuesFromStream(*m_pStream);
 
 
@@ -558,13 +599,6 @@ ESerializingError MarkdownSerializer::serialize(const Group& g)
 
 EDeserializingError MarkdownSerializer::deserialize(Group& g)
 {
-  QString sHeader = m_pStream->readLine();
-  if (!sHeader.startsWith(c_sGroupHeader))
-  {
-    return EDeserializingError::eInternalError;
-  }
-
-
   std::map<QString, std::vector<QString>> values = valuesFromStream(*m_pStream);
   int iVersion = 0;
   if (!readFromMap(values, "version", iVersion))

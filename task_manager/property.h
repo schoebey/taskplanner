@@ -29,6 +29,9 @@ public:
   virtual bool visible() const = 0;
 
   virtual tspConstraint constraint() const = 0;
+
+  virtual void addConstraint(const QString& sName,
+                             const QString& sConfiguration) = 0;
 };
 typedef std::shared_ptr<PropertyDescriptor> tspDescriptor;
 
@@ -42,6 +45,10 @@ public:
      m_sTypeName(sTypeName),
      m_bVisible(bVisible)
   {
+    // TODO: call all static register functions for all known constraints
+    AndConstraint<T>::registerCreator();
+    OrConstraint<T>::registerCreator();
+    EqualsConstraint<T>::registerCreator();
   }
 
   int version() const
@@ -82,6 +89,12 @@ public:
   tspConstraint constraint() const override
   {
     return m_spConstraint;
+  }
+
+  void addConstraint(const QString& sName,
+                     const QString& sConfiguration)
+  {
+    m_spConstraint = ConstraintFactory::create<T>(sName, sConfiguration);
   }
 
   bool accepts(const T& value) const
