@@ -17,7 +17,8 @@ HEADERS += \
     gui/taskwidget.h \
     $$PWD/style.h \
     $$PWD/highlightanimation.h \
-    $$PWD/taskwidgetoverlay.h
+    $$PWD/taskwidgetoverlay.h \
+    $$PWD/highlightmethod.h
 
 FORMS += \
     gui/groupwidget.ui \

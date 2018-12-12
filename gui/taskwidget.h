@@ -2,6 +2,7 @@
 #define TASKWIDGET_H
 
 #include "id_types.h"
+#include "highlightmethod.h"
 
 #include <QFrame>
 
@@ -10,12 +11,6 @@
 namespace Ui {
   class TaskWidget;
 }
-
-enum class EHighlightMethod
-{
-  eValueAccepted,
-  eValueRejected
-};
 
 class GroupWidget;
 class EditableLabel;
@@ -40,7 +35,8 @@ public:
   void addProperty(const QString& sName, const QString& sValue);
   void setPropertyValue(const QString& sName, const QString& sValue);
 
-  void highlight(EHighlightMethod method);
+  void setHighlight(HighlightingMethod method);
+  HighlightingMethod highlight() const;
 
 public slots:
   void setExpanded(bool bExpanded);

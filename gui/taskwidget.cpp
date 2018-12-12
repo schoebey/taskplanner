@@ -8,6 +8,7 @@
 #include <QPixmapCache>
 #include <QPainter>
 
+#include <QPropertyAnimation>
 #include <cassert>
 #include <cmath>
 
@@ -136,16 +137,31 @@ void TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
   }
 }
 
-void TaskWidget::highlight(EHighlightMethod method)
+HighlightingMethod TaskWidget::highlight() const
 {
-  switch (method)
+  return m_pOverlay->highlight();
+}
+
+
+void TaskWidget::setHighlight(HighlightingMethod method)
+{
+  m_pOverlay->setHighlight(method);
+
+  if (EHighlightMethod::eValueRejected == method)
   {
-  case EHighlightMethod::eValueAccepted:
-    break;
-  case EHighlightMethod::eValueRejected:
-    break;
-  default:
-    break;
+    QPropertyAnimation* pAnimation = new QPropertyAnimation(this, "pos");
+    static const double c_dDuration = 250;
+    pAnimation->setDuration(c_dDuration);
+    pAnimation->setStartValue(pos() - QPoint(20,0));
+    static const double c_dNofShakes = 5;
+    for (int i = 0; i < c_dNofShakes; ++i)
+    {
+      pAnimation->setKeyValueAt(2 * i / c_dNofShakes, pos() - QPoint(20, 0));
+      pAnimation->setKeyValueAt((2 * i + 1) / c_dNofShakes, pos() - QPoint(-20, 0));
+    }
+    pAnimation->setEndValue(pos());
+    pAnimation->setEasingCurve(QEasingCurve::Linear);
+    pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
   }
 }
 
@@ -243,9 +259,11 @@ void TaskWidget::on_pStartStop_toggled(bool bOn)
 {
   if (bOn) {
     emit timeTrackingStarted(m_taskId);
+    setHighlight(EHighlightMethod::eTimeTrackingActive);
   }
   else {
     emit timeTrackingStopped(m_taskId);
+    setHighlight(EHighlightMethod::eNoHighlight);
   }
 }
 

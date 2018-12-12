@@ -202,7 +202,7 @@ public:
   {
     bool bRv = false;
     T val = conversion::fromString<T>(sVal, bRv);
-    return set(val);
+    return bRv ? set(val) : bRv;
   }
 
   T get() const
