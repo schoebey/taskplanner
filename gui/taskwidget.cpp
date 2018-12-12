@@ -2,6 +2,7 @@
 #include "ui_taskwidget.h"
 #include "groupwidget.h"
 #include "property.h"
+#include "taskwidgetoverlay.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -16,7 +17,8 @@ TaskWidget* TaskWidget::m_pDraggingTaskWidget = nullptr;
 TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   QFrame(parent),
   ui(new Ui::TaskWidget),
-  m_taskId(id)
+  m_taskId(id),
+  m_pOverlay(new TaskWidgetOverlay(this))
 {
   ui->setupUi(this);
 
@@ -131,6 +133,19 @@ void TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
   if (it != m_propertyLineEdits.end())
   {
     it->second->setText(sValue);
+  }
+}
+
+void TaskWidget::highlight(EHighlightMethod method)
+{
+  switch (method)
+  {
+  case EHighlightMethod::eValueAccepted:
+    break;
+  case EHighlightMethod::eValueRejected:
+    break;
+  default:
+    break;
   }
 }
 
@@ -270,6 +285,15 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
   QPointF offset(pos().x()/5, pos().y()/5);
   painter.drawImage(rct, m_backgroundImage,
                     rct.adjusted(offset.x(), offset.y(), offset.x(), offset.y()));
+}
+
+void TaskWidget::resizeEvent(QResizeEvent* pEvent)
+{
+  QWidget::resizeEvent(pEvent);
+
+  m_pOverlay->move(0, 0);
+  m_pOverlay->resize(size());
+
 }
 
 void TaskWidget::setExpanded(bool bExpanded)
