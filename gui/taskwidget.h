@@ -11,8 +11,15 @@ namespace Ui {
   class TaskWidget;
 }
 
+enum class EHighlightMethod
+{
+  eValueAccepted,
+  eValueRejected
+};
+
 class GroupWidget;
 class EditableLabel;
+class TaskWidgetOverlay;
 class TaskWidget : public QFrame
 {
   Q_OBJECT
@@ -32,6 +39,8 @@ public:
 
   void addProperty(const QString& sName, const QString& sValue);
   void setPropertyValue(const QString& sName, const QString& sValue);
+
+  void highlight(EHighlightMethod method);
 
 public slots:
   void setExpanded(bool bExpanded);
@@ -64,6 +73,7 @@ private:
   void mousePressEvent(QMouseEvent* pMouseEvent) override;
   void mouseMoveEvent(QMouseEvent* pMouseEvent) override;
   void paintEvent(QPaintEvent* pEvent) override;
+  void resizeEvent(QResizeEvent* pEvent) override;
 
   bool m_bMouseDown = false;
   QPoint m_mouseDownPos;
@@ -71,6 +81,8 @@ private:
 
   GroupWidget* m_pGroupWidget = nullptr;
   GroupWidget* m_pPreviousGroupWidget = nullptr;
+
+  TaskWidgetOverlay* m_pOverlay;
 
   std::map<QString, EditableLabel*> m_propertyLineEdits;
 

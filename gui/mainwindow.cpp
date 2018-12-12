@@ -380,11 +380,14 @@ void MainWindow::onPropertyChanged(task_id taskId,
   ITask* pTask = m_pManager->task(taskId);
   if (nullptr != pTask)
   {
-    pTask->setPropertyValue(sPropertyName, sValue);
+    bool bNewValueAccepted = pTask->setPropertyValue(sPropertyName, sValue);
+
 
     auto it = m_taskWidgets.find(taskId);
     if (it != m_taskWidgets.end())
     {
+      it->second->highlight(bNewValueAccepted ? EHighlightMethod::eValueAccepted :
+                                                EHighlightMethod::eValueRejected);
       it->second->setPropertyValue(sPropertyName, pTask->propertyValue(sPropertyName));
     }
   }
