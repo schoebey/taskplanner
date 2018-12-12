@@ -7,7 +7,8 @@ SOURCES += \
     $$PWD/serializablemanager.cpp \
     $$PWD/property.cpp \
     $$PWD/constraint.cpp \
-    $$PWD/conversion.cpp
+    $$PWD/conversion.cpp \
+    $$PWD/constraintfactory.cpp
 
 HEADERS += \
     $$PWD/group.h \
@@ -24,4 +25,5 @@ HEADERS += \
     $$PWD/container_utils.h \
     $$PWD/property.h \
     $$PWD/constraint.h \
-    $$PWD/conversion.h
+    $$PWD/conversion.h \
+    $$PWD/constraintfactory.h
