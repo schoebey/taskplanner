@@ -5,6 +5,39 @@
 #include <QPainter>
 #include <QPropertyAnimation>
 
+namespace
+{
+  std::pair<QColor, QColor> colorsFromMethod(HighlightingMethod method)
+  {
+    QColor borderColor(0,0,0,0);
+    QColor highlightColor(0,0,0,0);
+
+    // determine colors in descending ascending of importance
+    // the last tested flag will overwrite all other colors
+    if (method.testFlag(EHighlightMethod::eTimeTrackingActive))
+    {
+      borderColor = QColor(255, 200, 0);
+      highlightColor = QColor(255, 200, 0, 50);
+    }
+    if (method.testFlag(EHighlightMethod::eFocus))
+    {
+      borderColor = QColor(140, 180, 255);
+    }
+    if (method.testFlag(EHighlightMethod::eValueAccepted))
+    {
+      borderColor = Qt::green;
+      highlightColor = QColor(0, 255, 0, 100);
+     }
+    if (method.testFlag(EHighlightMethod::eValueRejected))
+    {
+      borderColor = Qt::red;
+      highlightColor = QColor(255, 0, 0, 100);
+     }
+
+    return std::make_pair(borderColor, highlightColor);
+  }
+}
+
 TaskWidgetOverlay::TaskWidgetOverlay(TaskWidget *parent)
   : QWidget(parent),
     m_pParent(parent)
@@ -19,49 +52,91 @@ HighlightingMethod TaskWidgetOverlay::highlight() const
 
 void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
 {
-  m_method = method;
+  HighlightingMethod newlySetFlags = (m_method ^ method) & method;
+  HighlightingMethod newlyRemovedFlags = (m_method ^ method) & m_method;
 
-  if (m_method.testFlag(EHighlightMethod::eValueAccepted))
-  {
-    QColor currentColor(m_borderColor);
-    QColor currentHighlightColor(m_highlightColor);
-    setBorderColor(Qt::green);
-    setBorderColor(currentColor, 1500);
-    setHighlightColor(QColor(0, 255, 0, 100));
-    setHighlightColor(currentHighlightColor, 1500);
-   }
-  if (m_method.testFlag(EHighlightMethod::eValueRejected))
-  {
-    QColor currentColor(m_borderColor);
-    QColor currentHighlightColor(m_highlightColor);
-    setBorderColor(Qt::red);
-    setBorderColor(currentColor, 1500);
-    setHighlightColor(QColor(255, 0, 0, 100));
-    setHighlightColor(currentHighlightColor, 1500);
-   }
-  if (m_method.testFlag(EHighlightMethod::eTimeTrackingActive))
-  {
-    setBorderColor(QColor(255, 200, 0), 500);
-    setHighlightColor(QColor(255, 200, 0, 100));
-    setHighlightColor(QColor(255, 200, 0, 50), 1500);
-  }
-  if (m_method.testFlag(EHighlightMethod::eFocus))
-  {
-    QColor currentColor(m_borderColor);
-    QColor currentHighlightColor(m_highlightColor);
-    setBorderColor(Qt::green);
-    setBorderColor(currentColor, 1500);
-   }
-  if (m_method.testFlag(EHighlightMethod::eNoHighlight))
-  {
-    QColor b(m_borderColor);
-    b.setAlpha(0);
-    setBorderColor(b, 500);
 
-    QColor c(m_highlightColor);
-    c.setAlpha(0);
-    setHighlightColor(c, 500);
+  // first, backup current colors
+  QColor currentBorderColor(m_borderColor);
+  QColor currentHighlightColor(m_highlightColor);
+
+
+  // remove all non-permanent flags
+  m_method = method & ~EHighlightMethod::eValueAccepted
+                    & ~EHighlightMethod::eValueRejected;
+
+
+  // then, determine the new colors based on the given method
+  auto colors = colorsFromMethod(method);
+  QColor newBorderColor(colors.first);
+  QColor newHighlightColor(colors.second);
+
+
+  // then, determine the animations based on the state changes of 'method'
+  // (once for flags that have been set, once for flags that have been unset)
+  if (newlySetFlags.testFlag(EHighlightMethod::eValueAccepted) ||
+      newlySetFlags.testFlag(EHighlightMethod::eValueRejected))
+  {
+    // compute colors without the non-permanent flags
+    // and use those as the new colors
+    auto newColors = colorsFromMethod(m_method);
+    if (newBorderColor.isValid())
+    {
+      setBorderColor(newBorderColor);
+      setBorderColor(newColors.first, 1500);
+    }
+
+    if (newHighlightColor.isValid())
+    {
+      setHighlightColor(newHighlightColor);
+      setHighlightColor(newColors.second, 1500);
+    }
   }
+
+
+  // animate highlight color fade
+  if (newlySetFlags.testFlag(EHighlightMethod::eTimeTrackingActive))
+  {
+    if (newHighlightColor.isValid())
+    {
+      QColor emphasis(newHighlightColor);
+      emphasis.setAlpha(100);
+      setHighlightColor(emphasis);
+      setHighlightColor(newHighlightColor, 1500);
+    }
+  }
+  else if (newlyRemovedFlags.testFlag(EHighlightMethod::eTimeTrackingActive))
+  {
+    if (newHighlightColor.isValid())
+    {
+      setHighlightColor(newHighlightColor, 1500);
+    }
+  }
+
+
+  // animate border color fade
+  if (newlySetFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
+      newlyRemovedFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
+      newlySetFlags.testFlag(EHighlightMethod::eFocus) ||
+      newlyRemovedFlags.testFlag(EHighlightMethod::eFocus))
+  {
+    if (newBorderColor.isValid())
+    {
+      setBorderColor(newBorderColor, 250);
+    }
+  }
+
+
+//  if (newlySetFlags.testFlag(EHighlightMethod::eNoHighlight))
+//  {
+//    currentBorderColor.setAlpha(0);
+//    setBorderColor(currentBorderColor, 500);
+
+//    currentHighlightColor.setAlpha(0);
+//    setHighlightColor(currentHighlightColor, 500);
+//  }
+
+
 }
 
 QColor TaskWidgetOverlay::highlightColor() const
@@ -93,6 +168,7 @@ QColor TaskWidgetOverlay::borderColor() const
 void TaskWidgetOverlay::setBorderColor(const QColor& color)
 {
   m_borderColor = color;
+  update();
 }
 
 void TaskWidgetOverlay::setBorderColor(const QColor& color, int iMsecs)
