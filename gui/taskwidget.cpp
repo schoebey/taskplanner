@@ -147,7 +147,7 @@ void TaskWidget::setHighlight(HighlightingMethod method)
 {
   m_pOverlay->setHighlight(method);
 
-  if (EHighlightMethod::eValueRejected == method)
+  if (method.testFlag(EHighlightMethod::eValueRejected))
   {
     QPropertyAnimation* pAnimation = new QPropertyAnimation(this, "pos");
     static const double c_dDuration = 250;
@@ -259,11 +259,11 @@ void TaskWidget::on_pStartStop_toggled(bool bOn)
 {
   if (bOn) {
     emit timeTrackingStarted(m_taskId);
-    setHighlight(EHighlightMethod::eTimeTrackingActive);
+    setHighlight(highlight() | EHighlightMethod::eTimeTrackingActive);
   }
   else {
     emit timeTrackingStopped(m_taskId);
-    setHighlight(EHighlightMethod::eNoHighlight);
+    setHighlight(highlight() & ~EHighlightMethod::eTimeTrackingActive);
   }
 }
 
@@ -311,7 +311,18 @@ void TaskWidget::resizeEvent(QResizeEvent* pEvent)
 
   m_pOverlay->move(0, 0);
   m_pOverlay->resize(size());
+}
 
+void TaskWidget::focusInEvent(QFocusEvent* pEvent)
+{
+  QWidget::focusInEvent(pEvent);
+  m_pOverlay->setHighlight(m_pOverlay->highlight() | EHighlightMethod::eFocus);
+}
+
+void TaskWidget::focusOutEvent(QFocusEvent* pEvent)
+{
+  QWidget::focusOutEvent(pEvent);
+  m_pOverlay->setHighlight(m_pOverlay->highlight() & ~EHighlightMethod::eFocus);
 }
 
 void TaskWidget::setExpanded(bool bExpanded)
