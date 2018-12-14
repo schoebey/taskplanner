@@ -26,7 +26,7 @@ public:
 
   static GroupWidget* GroupWidgetUnderMouse();
 
-  size_t indexFromPoint(QPoint pt);
+  int indexFromPoint(QPoint pt);
 
   QImage backgroundImage() const;
   void setBackgroundImage(const QImage& img);

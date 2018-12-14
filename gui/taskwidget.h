@@ -72,6 +72,8 @@ private:
   void resizeEvent(QResizeEvent* pEvent) override;
   void focusInEvent(QFocusEvent* pEvent) override;
   void focusOutEvent(QFocusEvent* pEvent) override;
+  void enterEvent(QEvent* pEvent) override;
+  void leaveEvent(QEvent* pEvent) override;
 
   bool m_bMouseDown = false;
   QPoint m_mouseDownPos;
