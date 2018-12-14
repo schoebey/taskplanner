@@ -23,6 +23,10 @@ namespace
     {
       borderColor = QColor(140, 180, 255);
     }
+    if (method.testFlag(EHighlightMethod::eHover))
+    {
+      highlightColor = QColor(255, 255, 255, 50);
+    }
     if (method.testFlag(EHighlightMethod::eValueAccepted))
     {
       borderColor = Qt::green;
@@ -95,7 +99,8 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
 
 
   // animate highlight color fade
-  if (newlySetFlags.testFlag(EHighlightMethod::eTimeTrackingActive))
+  if (newlySetFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
+      newlySetFlags.testFlag(EHighlightMethod::eHover))
   {
     if (newHighlightColor.isValid())
     {
@@ -105,7 +110,8 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
       setHighlightColor(newHighlightColor, 1500);
     }
   }
-  else if (newlyRemovedFlags.testFlag(EHighlightMethod::eTimeTrackingActive))
+  else if (newlyRemovedFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
+           newlyRemovedFlags.testFlag(EHighlightMethod::eHover))
   {
     if (newHighlightColor.isValid())
     {

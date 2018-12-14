@@ -325,6 +325,16 @@ void TaskWidget::focusOutEvent(QFocusEvent* pEvent)
   m_pOverlay->setHighlight(m_pOverlay->highlight() & ~EHighlightMethod::eFocus);
 }
 
+void TaskWidget::enterEvent(QEvent* pEvent)
+{
+  setHighlight(highlight() | EHighlightMethod::eHover);
+}
+
+void TaskWidget::leaveEvent(QEvent* pEvent)
+{
+  setHighlight(highlight() & ~EHighlightMethod::eHover);
+}
+
 void TaskWidget::setExpanded(bool bExpanded)
 {
   ui->pProperties->setVisible(bExpanded);
@@ -338,5 +348,4 @@ void TaskWidget::setExpanded(bool bExpanded)
   ui->pStartStop->style()->polish(ui->pStartStop);
 
   emit sizeChanged();
-
 }

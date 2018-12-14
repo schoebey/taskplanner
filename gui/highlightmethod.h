@@ -5,11 +5,12 @@
 
 enum EHighlightMethod
 {
-  eNoHighlight = 0,
-  eFocus = 1,
-  eValueAccepted = 2, // non-permanent flag
-  eValueRejected = 4, // non-permanent flag
-  eTimeTrackingActive = 8,
+  eNoHighlight = 0x0,
+  eFocus = 0x1,
+  eValueAccepted = 0x2, // non-permanent flag
+  eValueRejected = 0x4, // non-permanent flag
+  eTimeTrackingActive = 0x8,
+  eHover = 0x10
 };
 Q_DECLARE_FLAGS(HighlightingMethod, EHighlightMethod)
 

@@ -194,18 +194,26 @@ void GroupWidget::moveEvent(QMoveEvent* /*pEvent*/)
   repositionChildren();
 }
 
-size_t GroupWidget::indexFromPoint(QPoint pt)
+int GroupWidget::indexFromPoint(QPoint pt)
 {
+  static const int c_iBorderSize = 20;
   for (size_t iIdx = 0; iIdx < m_vpTaskWidgets.size(); ++iIdx)
   {
     QWidget* pWidget = m_vpTaskWidgets[iIdx];
-    if (pWidget->mapFrom(this, pt).y() < pWidget->rect().center().y())
+    QRect widgetRect(pWidget->rect());
+    int iRelativeY = pWidget->mapFrom(this, pt).y();
+    if (iRelativeY < widgetRect.top() + c_iBorderSize)
     {
-      return iIdx;
+      return static_cast<int>(iIdx);
+    }
+    else if (iRelativeY < widgetRect.bottom() - c_iBorderSize)
+    {
+      // "neutral" zone of the widget
+      return -1;
     }
   }
 
-  return m_vpTaskWidgets.size();
+  return static_cast<int>(m_vpTaskWidgets.size());
 }
 
 QImage GroupWidget::backgroundImage() const
@@ -242,9 +250,15 @@ bool GroupWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
 
       if (nullptr != TaskWidget::DraggingTaskWidget())
       {
+        // if dragging the widget into the drop zone
+        // of the task (for sub tasks), the ghost should
+        // not change position.
         pt = mapFromGlobal(pMouseEvent->globalPos());
-        ShowGhost(TaskWidget::DraggingTaskWidget(),
-                  static_cast<int>(indexFromPoint(pt)));
+        int iPos = indexFromPoint(pt);
+        if (-1 != iPos)
+        {
+          ShowGhost(TaskWidget::DraggingTaskWidget(), iPos);
+        }
       }
     }
     else
