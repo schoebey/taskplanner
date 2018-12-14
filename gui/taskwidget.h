@@ -31,6 +31,8 @@ public:
   void SetGroupWidget(GroupWidget* pGroupWidget);
 
   static TaskWidget* DraggingTaskWidget();
+  static void SetTaskWidgetUnderMouse(TaskWidget* pTaskWidget);
+  static TaskWidget* TaskWidgetUnderMoue();
 
   void addProperty(const QString& sName, const QString& sValue);
   void setPropertyValue(const QString& sName, const QString& sValue);
@@ -48,6 +50,7 @@ signals:
   void timeTrackingStopped(task_id id);
   void propertyChanged(task_id id, const QString& sName, const QString& sValue);
   void sizeChanged();
+  void taskAdded(task_id parentId, task_id childId);
 
 private slots:
   void onTitleEdited();
@@ -57,6 +60,7 @@ private slots:
   void onPropertyEdited();
   void onAddPropertyTriggered();
   void updateSize();
+  void addTask(TaskWidget* pTaskWidget);
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;
@@ -87,6 +91,7 @@ private:
   std::map<QString, EditableLabel*> m_propertyLineEdits;
 
   static TaskWidget* m_pDraggingTaskWidget;
+  static TaskWidget* m_pTaskWidgetUnderMouse;
 };
 
 #endif // TASKWIDGET_H

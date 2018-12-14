@@ -27,6 +27,10 @@ namespace
     {
       highlightColor = QColor(255, 255, 255, 50);
     }
+    if (method.testFlag(EHighlightMethod::eInsertPossible))
+    {
+      borderColor = Qt::red;
+    }
     if (method.testFlag(EHighlightMethod::eValueAccepted))
     {
       borderColor = Qt::green;
@@ -96,6 +100,13 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
       setHighlightColor(newColors.second, 1500);
     }
   }
+  else
+  {
+    if (newBorderColor.isValid())
+    {
+      setBorderColor(newBorderColor, 250);
+    }
+  }
 
 
   // animate highlight color fade
@@ -118,31 +129,6 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
       setHighlightColor(newHighlightColor, 1500);
     }
   }
-
-
-  // animate border color fade
-  if (newlySetFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
-      newlyRemovedFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
-      newlySetFlags.testFlag(EHighlightMethod::eFocus) ||
-      newlyRemovedFlags.testFlag(EHighlightMethod::eFocus))
-  {
-    if (newBorderColor.isValid())
-    {
-      setBorderColor(newBorderColor, 250);
-    }
-  }
-
-
-//  if (newlySetFlags.testFlag(EHighlightMethod::eNoHighlight))
-//  {
-//    currentBorderColor.setAlpha(0);
-//    setBorderColor(currentBorderColor, 500);
-
-//    currentHighlightColor.setAlpha(0);
-//    setHighlightColor(currentHighlightColor, 500);
-//  }
-
-
 }
 
 QColor TaskWidgetOverlay::highlightColor() const

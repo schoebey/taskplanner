@@ -171,9 +171,6 @@ void GroupWidget::UpdatePositions(int iSpace, int iSpacePos)
   ui->scrollAreaWidgetContents->setMinimumHeight(origin.y());
 }
 
-
-
-
 GroupWidget* GroupWidget::GroupWidgetUnderMouse()
 {
   return m_pMouseHoveringOver;
@@ -216,6 +213,21 @@ int GroupWidget::indexFromPoint(QPoint pt)
   return static_cast<int>(m_vpTaskWidgets.size());
 }
 
+TaskWidget* GroupWidget::taskWidgetAt(QPoint pt)
+{
+  for (size_t iIdx = 0; iIdx < m_vpTaskWidgets.size(); ++iIdx)
+  {
+    TaskWidget* pWidget = m_vpTaskWidgets[iIdx];
+    QRect widgetRect(pWidget->rect());
+    if (widgetRect.contains(pWidget->mapFrom(this, pt)))
+    {
+      return pWidget;
+    }
+  }
+
+  return nullptr;
+}
+
 QImage GroupWidget::backgroundImage() const
 {
   return m_backgroundImage;
@@ -236,7 +248,7 @@ bool GroupWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
       if (ui->scrollAreaWidgetContents->rect().contains(ui->scrollAreaWidgetContents->mapFrom(this, pMouseEvent->pos())) &&
           nullptr != TaskWidget::DraggingTaskWidget())
       {
-        InsertTask(TaskWidget::DraggingTaskWidget());
+//        InsertTask(TaskWidget::DraggingTaskWidget());
       }
     }
   }
@@ -248,12 +260,16 @@ bool GroupWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
     {
       m_pMouseHoveringOver = this;
 
+
+      pt = mapFromGlobal(pMouseEvent->globalPos());
+      TaskWidget* pTaskWidget = taskWidgetAt(pt);
+      TaskWidget::SetTaskWidgetUnderMouse(pTaskWidget);
+
       if (nullptr != TaskWidget::DraggingTaskWidget())
       {
         // if dragging the widget into the drop zone
         // of the task (for sub tasks), the ghost should
         // not change position.
-        pt = mapFromGlobal(pMouseEvent->globalPos());
         int iPos = indexFromPoint(pt);
         if (-1 != iPos)
         {
@@ -266,6 +282,7 @@ bool GroupWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
       if (m_pMouseHoveringOver == this)
       {
         m_pMouseHoveringOver = nullptr;
+        TaskWidget::SetTaskWidgetUnderMouse(nullptr);
       }
       ShowGhost(nullptr, -1);
     }
