@@ -42,6 +42,7 @@ protected:
   bool eventFilter(QObject* pObj, QEvent* pEvent);
   void ShowGhost(TaskWidget* pTaskWidget, int iPos);
   void UpdatePositions(int iSpace = -1, int iSpacePos = 0);
+  TaskWidget* taskWidgetAt(QPoint pt);
 
 protected slots:
   void repositionChildren();

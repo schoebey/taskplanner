@@ -14,6 +14,7 @@
 
 
 TaskWidget* TaskWidget::m_pDraggingTaskWidget = nullptr;
+TaskWidget* TaskWidget::m_pTaskWidgetUnderMouse = nullptr;
 
 TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   QFrame(parent),
@@ -82,13 +83,42 @@ void TaskWidget::SetGroupWidget(GroupWidget* pGroupWidget)
   {
     m_backgroundImage = m_pGroupWidget->backgroundImage();
     m_pPreviousGroupWidget = m_pGroupWidget;
-    m_pDraggingTaskWidget = nullptr;
+    m_pDraggingTaskWidget = nullptr; 
   }
 }
 
 TaskWidget*TaskWidget::DraggingTaskWidget()
 {
   return m_pDraggingTaskWidget;
+}
+
+void TaskWidget::SetTaskWidgetUnderMouse(TaskWidget* pTaskWidget)
+{
+  if (pTaskWidget != m_pTaskWidgetUnderMouse)
+  {
+    if (nullptr != m_pTaskWidgetUnderMouse)
+    {
+      m_pTaskWidgetUnderMouse->setHighlight(m_pTaskWidgetUnderMouse->highlight() &
+                                            ~EHighlightMethod::eHover &
+                                            ~EHighlightMethod::eInsertPossible);
+    }
+
+    m_pTaskWidgetUnderMouse = pTaskWidget;
+
+    if (nullptr != m_pTaskWidgetUnderMouse)
+    {
+      m_pTaskWidgetUnderMouse->setHighlight(m_pTaskWidgetUnderMouse->highlight() |
+                                            EHighlightMethod::eHover |
+                                            (nullptr != DraggingTaskWidget() ?
+                                             EHighlightMethod::eInsertPossible :
+                                             EHighlightMethod::eNoHighlight));
+    }
+  }
+}
+
+TaskWidget*TaskWidget::TaskWidgetUnderMoue()
+{
+  return m_pTaskWidgetUnderMouse;
 }
 
 void TaskWidget::onAddPropertyTriggered()
@@ -183,7 +213,14 @@ bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
     {
       m_bMouseDown = false;
       GroupWidget* pGroupWidgetUnderMouse = GroupWidget::GroupWidgetUnderMouse();
-      if (nullptr != pGroupWidgetUnderMouse)
+      TaskWidget* pTaskWidgetUnderMouse = TaskWidgetUnderMoue();
+      if (nullptr != pTaskWidgetUnderMouse)
+      {
+        // insert dragging task as sub-task...
+        pTaskWidgetUnderMouse->addTask(this);
+        m_pDraggingTaskWidget = nullptr;
+      }
+      else if (nullptr != pGroupWidgetUnderMouse)
       {
         QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
         QPoint pt = pGroupWidgetUnderMouse->mapFromGlobal(pMouseEvent->globalPos());
@@ -317,6 +354,7 @@ void TaskWidget::focusInEvent(QFocusEvent* pEvent)
 {
   QWidget::focusInEvent(pEvent);
   m_pOverlay->setHighlight(m_pOverlay->highlight() | EHighlightMethod::eFocus);
+  SetTaskWidgetUnderMouse(this);
 }
 
 void TaskWidget::focusOutEvent(QFocusEvent* pEvent)
@@ -348,4 +386,19 @@ void TaskWidget::setExpanded(bool bExpanded)
   ui->pStartStop->style()->polish(ui->pStartStop);
 
   emit sizeChanged();
+}
+
+void TaskWidget::addTask(TaskWidget* pTaskWidget)
+{
+  QLayout* pLayout = ui->pSubTasks->layout();
+  if (nullptr != pLayout)
+  {
+    QGridLayout* pGrid = dynamic_cast<QGridLayout*>(pLayout);
+    if (nullptr != pGrid)
+    {
+      pGrid->addWidget(pTaskWidget, pGrid->rowCount(), 0);
+
+      emit sizeChanged();
+    }
+  }
 }
