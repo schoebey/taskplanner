@@ -21,8 +21,8 @@ public:
 
   void setName(const QString& sName);
 
-  void InsertTask(TaskWidget* pTaskWidget, int iPos = -1);
-  void RemoveTask(TaskWidget* pTaskWidget);
+  void insertTask(TaskWidget* pTaskWidget, int iPos = -1);
+  void removeTask(TaskWidget* pTaskWidget);
 
   static GroupWidget* GroupWidgetUnderMouse();
 

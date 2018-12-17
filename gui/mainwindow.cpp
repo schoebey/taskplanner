@@ -91,7 +91,32 @@ void MainWindow::load()
             }
           }
 
-          pGroupWidget->InsertTask(pTaskWidget, task.first);
+          auto pParentTask = m_pManager->task(pTask->parentTask());
+          if (nullptr == pParentTask)
+          {
+            pGroupWidget->insertTask(pTaskWidget);
+          }
+        }
+      }
+    }
+  }
+
+
+  // after having created all task widgets, build the hierarchy
+  for (const auto& taskId : m_pManager->taskIds())
+  {
+    auto pTask = m_pManager->task(taskId);
+    if (nullptr != pTask)
+    {
+      auto it = m_taskWidgets.find(taskId);
+      if (it != m_taskWidgets.end() &&
+          nullptr != it->second)
+      {
+        auto parentIt = m_taskWidgets.find(pTask->parentTask());
+        if (parentIt != m_taskWidgets.end() &&
+            nullptr != parentIt->second)
+        {
+          parentIt->second->addTask(it->second);
         }
       }
     }
@@ -133,6 +158,8 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   connect(pTaskWidget, SIGNAL(timeTrackingStarted(task_id)), this, SLOT(startTimeTracking(task_id)));
   connect(pTaskWidget, SIGNAL(timeTrackingStopped(task_id)), this, SLOT(stopTimeTracking(task_id)));
   connect(pTaskWidget, SIGNAL(propertyChanged(task_id, QString, QString)), this, SLOT(onPropertyChanged(task_id, QString, QString)));
+  connect(pTaskWidget, SIGNAL(taskAdded(task_id, task_id)), this, SLOT(onTaskAdded(task_id, task_id)));
+  connect(pTaskWidget, SIGNAL(taskRemoved(task_id, task_id)), this, SLOT(onTaskRemoved(task_id, task_id)));
   connect(this, SIGNAL(timeTrackingStopped(task_id)), pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
   m_taskWidgets[id] = pTaskWidget;
@@ -151,7 +178,7 @@ void MainWindow::createNewTask(group_id groupId)
    auto it = m_groupWidgets.find(groupId);
    if (it != m_groupWidgets.end())
    {
-     it->second->InsertTask(createTaskWidget(pTask->id()));
+     it->second->insertTask(createTaskWidget(pTask->id()));
    }
   }
 }
@@ -391,5 +418,23 @@ void MainWindow::onPropertyChanged(task_id taskId,
                                                    EHighlightMethod::eValueRejected));
       it->second->setPropertyValue(sPropertyName, pTask->propertyValue(sPropertyName));
     }
+  }
+}
+
+void MainWindow::onTaskAdded(task_id parentTaskId, task_id childTaskId)
+{
+  ITask* pTask = m_pManager->task(parentTaskId);
+  if (nullptr != pTask)
+  {
+    pTask->addTask(childTaskId);
+  }
+}
+
+void MainWindow::onTaskRemoved(task_id parentTaskId, task_id childTaskId)
+{
+  ITask* pTask = m_pManager->task(parentTaskId);
+  if (nullptr != pTask)
+  {
+    pTask->removeTask(childTaskId);
   }
 }
