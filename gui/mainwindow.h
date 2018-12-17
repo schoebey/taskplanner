@@ -38,6 +38,8 @@ private slots:
   void on_actionSaveAs_triggered();
   void on_actionReport_triggered();
   void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
+  void onTaskRemoved(task_id parentTaskId, task_id childTaskId);
+  void onTaskAdded(task_id parentTaskId, task_id childTaskId);
 
 signals:
   void timeTrackingStopped(task_id taskId);

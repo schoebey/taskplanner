@@ -71,7 +71,7 @@ void GroupWidget::setName(const QString& sName)
   ui->pTitle->setText(sName);
 }
 
-void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
+void GroupWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
 {
   if (m_vpTaskWidgets.end() ==
       std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
@@ -100,7 +100,7 @@ void GroupWidget::InsertTask(TaskWidget* pTaskWidget, int iPos)
   }
 }
 
-void GroupWidget::RemoveTask(TaskWidget* pTaskWidget)
+void GroupWidget::removeTask(TaskWidget* pTaskWidget)
 {
   auto it = std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget);
   if (m_vpTaskWidgets.end() != it)
@@ -248,7 +248,7 @@ bool GroupWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
       if (ui->scrollAreaWidgetContents->rect().contains(ui->scrollAreaWidgetContents->mapFrom(this, pMouseEvent->pos())) &&
           nullptr != TaskWidget::DraggingTaskWidget())
       {
-//        InsertTask(TaskWidget::DraggingTaskWidget());
+//        insertTask(TaskWidget::DraggingTaskWidget());
       }
     }
   }

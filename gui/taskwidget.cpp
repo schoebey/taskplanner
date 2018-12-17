@@ -7,6 +7,8 @@
 #include <QMouseEvent>
 #include <QPixmapCache>
 #include <QPainter>
+#include <QDebug>
+#include <QTimer>
 
 #include <QPropertyAnimation>
 #include <cassert>
@@ -172,6 +174,28 @@ HighlightingMethod TaskWidget::highlight() const
   return m_pOverlay->highlight();
 }
 
+void TaskWidget::setParentTask(TaskWidget* pParentTask)
+{
+  if (pParentTask != m_pParentTask)
+  {
+    TaskWidget* pFormerParent = m_pParentTask;
+    m_pParentTask = pParentTask;
+    if (nullptr != pFormerParent)
+    {
+      pFormerParent->removeTask(this);
+    }
+    if (nullptr != m_pParentTask)
+    {
+      m_pParentTask->addTask(this);
+    }
+  }
+}
+
+TaskWidget*TaskWidget::parentTask() const
+{
+  return m_pParentTask;
+}
+
 
 void TaskWidget::setHighlight(HighlightingMethod method)
 {
@@ -225,11 +249,11 @@ bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
         QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
         QPoint pt = pGroupWidgetUnderMouse->mapFromGlobal(pMouseEvent->globalPos());
         int iInsertionIndex = pGroupWidgetUnderMouse->indexFromPoint(pt);
-        pGroupWidgetUnderMouse->InsertTask(this, iInsertionIndex);
+        pGroupWidgetUnderMouse->insertTask(this, iInsertionIndex);
       }
       else if (nullptr != m_pPreviousGroupWidget)
       {
-        m_pPreviousGroupWidget->InsertTask(this);
+        m_pPreviousGroupWidget->insertTask(this);
       }
       else
       {
@@ -267,7 +291,12 @@ void TaskWidget::mouseMoveEvent(QMouseEvent* pMouseEvent)
 
       if (nullptr != m_pGroupWidget)
       {
-        m_pGroupWidget->RemoveTask(this);
+        m_pGroupWidget->removeTask(this);
+      }
+
+      if (nullptr != m_pParentTask)
+      {
+        m_pParentTask->removeTask(this);
       }
 
       qApp->installEventFilter(this);
@@ -329,17 +358,24 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
   painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
   painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
-  painter.drawImage(rect(), QImage(":/dropshadow.png"));
+  if (nullptr != m_pParentTask)
+  {
+  }
+  else
+  {
+    painter.drawImage(rect(), QImage(":/dropshadow.png"));
 
-  static const int c_iBorderOffset = 5;
-  QRectF rct(rect().adjusted(c_iBorderOffset, c_iBorderOffset, -c_iBorderOffset, -c_iBorderOffset));
+    static const int c_iBorderOffset = 5;
+    QRectF rct(rect().adjusted(c_iBorderOffset, c_iBorderOffset, -c_iBorderOffset, -c_iBorderOffset));
 
-  QPainterPath path;
-  path.addRoundedRect(rct, 5, 5);
-  painter.setClipPath(path);
-  QPointF offset(pos().x()/5, pos().y()/5);
-  painter.drawImage(rct, m_backgroundImage,
-                    rct.adjusted(offset.x(), offset.y(), offset.x(), offset.y()));
+    QPainterPath path;
+    path.addRoundedRect(rct, 5, 5);
+    painter.setClipPath(path);
+    QPointF offset(pos().x()/5, pos().y()/5);
+    QBrush b(m_backgroundImage);
+    painter.setBrush(b);
+    painter.drawRect(rct);
+  }
 }
 
 void TaskWidget::resizeEvent(QResizeEvent* pEvent)
@@ -385,7 +421,7 @@ void TaskWidget::setExpanded(bool bExpanded)
   ui->pStartStop->style()->unpolish(ui->pStartStop);
   ui->pStartStop->style()->polish(ui->pStartStop);
 
-  emit sizeChanged();
+  QMetaObject::invokeMethod(this, "sizeChanged", Qt::QueuedConnection);
 }
 
 void TaskWidget::addTask(TaskWidget* pTaskWidget)
@@ -397,8 +433,25 @@ void TaskWidget::addTask(TaskWidget* pTaskWidget)
     if (nullptr != pGrid)
     {
       pGrid->addWidget(pTaskWidget, pGrid->rowCount(), 0);
+      pTaskWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+      connect(pTaskWidget, SIGNAL(sizeChanged()), this, SIGNAL(sizeChanged()), Qt::QueuedConnection);
+      pTaskWidget->setParentTask(this);
+
+      emit taskAdded(id(), pTaskWidget->id());
 
       emit sizeChanged();
     }
   }
+}
+
+void TaskWidget::removeTask(TaskWidget* pTaskWidget)
+{
+  disconnect(pTaskWidget, SIGNAL(sizeChanged()), this, SIGNAL(sizeChanged()));
+  pTaskWidget->setParentTask(nullptr);
+
+  emit taskRemoved(id(), pTaskWidget->id());
+
+  ui->pSubTasks->layout()->removeWidget(pTaskWidget);
+
+  QMetaObject::invokeMethod(this, "sizeChanged", Qt::QueuedConnection);
 }

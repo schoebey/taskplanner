@@ -40,8 +40,13 @@ public:
   void setHighlight(HighlightingMethod method);
   HighlightingMethod highlight() const;
 
+  void setParentTask(TaskWidget* pParentTask);
+  TaskWidget* parentTask() const;
+
 public slots:
   void setExpanded(bool bExpanded);
+  void addTask(TaskWidget* pTaskWidget);
+  void removeTask(TaskWidget* pTaskWidget);
 
 signals:
   void renamed(task_id taskId, const QString& sNewName);
@@ -51,6 +56,7 @@ signals:
   void propertyChanged(task_id id, const QString& sName, const QString& sValue);
   void sizeChanged();
   void taskAdded(task_id parentId, task_id childId);
+  void taskRemoved(task_id parentId, task_id childId);
 
 private slots:
   void onTitleEdited();
@@ -60,7 +66,6 @@ private slots:
   void onPropertyEdited();
   void onAddPropertyTriggered();
   void updateSize();
-  void addTask(TaskWidget* pTaskWidget);
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;
@@ -89,6 +94,8 @@ private:
   TaskWidgetOverlay* m_pOverlay;
 
   std::map<QString, EditableLabel*> m_propertyLineEdits;
+
+  TaskWidget* m_pParentTask = nullptr;
 
   static TaskWidget* m_pDraggingTaskWidget;
   static TaskWidget* m_pTaskWidgetUnderMouse;
