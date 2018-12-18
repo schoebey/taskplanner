@@ -2,6 +2,7 @@
 #define SERIALIZER_INTERFACE_H
 
 #include "serializationenums.h"
+#include "parametrizable.h"
 
 #include <QString>
 #include <QVariant>
@@ -15,21 +16,9 @@ class SerializableManager;
 class PropertyDescriptor;
 class IConstraint;
 
-class ISerializer
+class ISerializer : public Parametrizable
 {
 public:
-  struct SParameter
-  {
-    QVariant value;
-    bool bRequired;
-  };
-
-  virtual std::map<QString, SParameter> parameters() const = 0;
-
-  virtual QVariant parameter(const QString& sName) const = 0;
-
-  virtual bool setParameter(const QString& sName, const QVariant& value) = 0;
-
   virtual ESerializingError initSerialization() = 0;
   virtual ESerializingError deinitSerialization() = 0;
 

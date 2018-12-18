@@ -1,13 +1,13 @@
 #ifndef MARKDOWNSERIALIZER_H
 #define MARKDOWNSERIALIZER_H
 
-#include "serializer.h"
+#include "serializerinterface.h"
 #include "property.h"
 
 #include <QFile>
 #include <QTextStream>
 
-class MarkdownSerializer : public Serializer
+class MarkdownSerializer : public ISerializer
 {
 public:
   MarkdownSerializer();

@@ -1,19 +1,19 @@
-#ifndef SERIALIZER_H
-#define SERIALIZER_H
+#ifndef PARAMETRIZABLE_H
+#define PARAMETRIZABLE_H
 
-#include "serializerinterface.h"
+#include "parametrizableinterface.h"
 
-class Serializer : public ISerializer
+class Parametrizable : public IParametrizable
 {
 public:
-  Serializer();
-  virtual ~Serializer();
+  Parametrizable();
+  virtual ~Parametrizable();
 
   void registerParameter(const QString& sName, QVariant::Type type, bool bRequired);
 
   bool hasParameter(const QString& sName) const;
 
-  std::map<QString, ISerializer::SParameter> parameters() const override;
+  std::map<QString, SParameter> parameters() const override;
 
   QVariant parameter(const QString& sName) const override;
 
@@ -23,4 +23,4 @@ protected:
   std::map<QString, SParameter> m_parameters;
 };
 
-#endif // SERIALIZER_H
+#endif // PARAMETRIZABLE_H

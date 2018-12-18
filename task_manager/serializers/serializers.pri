@@ -5,8 +5,7 @@ INCLUDEPATH += $$PWD/../ \
 
 SOURCES += \
     $$PWD/serializerregistrar.cpp \
-    $$PWD/serializerfactory.cpp \
-    $$PWD/serializer.cpp
+    $$PWD/serializerfactory.cpp
 
 HEADERS += \
     $$PWD/serializerregistrar.h \
@@ -14,6 +13,5 @@ HEADERS += \
     $$PWD/register.h \
     $$PWD/serializerfactory.h \
     $$PWD/serializerfactoryprivate.h \
-    $$PWD/serializer.h \
     $$PWD/serializationenums.h \
     $$PWD/serializerinfo.h
