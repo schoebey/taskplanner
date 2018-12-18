@@ -2,6 +2,7 @@
 #define TASKINTERFACE_H
 
 #include "priority.h"
+#include "timefragment.h"
 #include "id_types.h"
 #include "id_generator.h"
 
@@ -30,6 +31,7 @@ public:
 
   virtual void startWork() = 0;
   virtual void stopWork() = 0;
+  virtual std::vector<STimeFragment> timeFragments() const = 0;
 
   virtual group_id group() const = 0;
   virtual void setGroup(group_id groupId) = 0;

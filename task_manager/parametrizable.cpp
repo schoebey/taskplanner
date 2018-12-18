@@ -1,24 +1,22 @@
-#include "serializer.h"
-#include <QVariant>
-#include <QDebug>
+#include "parametrizable.h"
 
-Serializer::Serializer()
-{  
-}
-
-Serializer::~Serializer()
+Parametrizable::Parametrizable()
 {
 }
 
-void Serializer::registerParameter(const QString& sName, QVariant::Type type, bool bRequired)
+Parametrizable::~Parametrizable()
 {
-  ISerializer::SParameter param;
+}
+
+void Parametrizable::registerParameter(const QString& sName, QVariant::Type type, bool bRequired)
+{
+  SParameter param;
   param.value = QVariant(type);
   param.bRequired = bRequired;
   m_parameters[sName] = param;
 }
 
-bool Serializer::hasParameter(const QString& sName) const
+bool Parametrizable::hasParameter(const QString& sName) const
 {
   auto it = m_parameters.find(sName);
   if (m_parameters.end() != it)
@@ -30,12 +28,12 @@ bool Serializer::hasParameter(const QString& sName) const
   return false;
 }
 
-std::map<QString, ISerializer::SParameter> Serializer::parameters() const
+std::map<QString, SParameter> Parametrizable::parameters() const
 {
   return m_parameters;
 }
 
-QVariant Serializer::parameter(const QString& sName) const
+QVariant Parametrizable::parameter(const QString& sName) const
 {
   auto it = m_parameters.find(sName);
   if (it != m_parameters.end())
@@ -46,7 +44,7 @@ QVariant Serializer::parameter(const QString& sName) const
   return QVariant();
 }
 
-bool Serializer::setParameter(const QString& sName, const QVariant& value)
+bool Parametrizable::setParameter(const QString& sName, const QVariant& value)
 {
   auto it = m_parameters.find(sName);
   if (it != m_parameters.end() &&
@@ -58,4 +56,3 @@ bool Serializer::setParameter(const QString& sName, const QVariant& value)
 
   return false;
 }
-

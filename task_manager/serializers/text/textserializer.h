@@ -1,12 +1,13 @@
 #ifndef TEXTSERIALIZER_H
 #define TEXTSERIALIZER_H
 
-#include "serializer.h"
+#include "serializerinterface.h"
+#include "parametrizable.h"
 
 #include <QFile>
 #include <QTextStream>
 
-class TextSerializer : public Serializer
+class TextSerializer : public ISerializer
 {
 public:
   TextSerializer();

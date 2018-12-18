@@ -8,7 +8,8 @@ SOURCES += \
     $$PWD/property.cpp \
     $$PWD/constraint.cpp \
     $$PWD/conversion.cpp \
-    $$PWD/constraintfactory.cpp
+    $$PWD/constraintfactory.cpp \
+    $$PWD/parametrizable.cpp
 
 HEADERS += \
     $$PWD/group.h \
@@ -26,4 +27,7 @@ HEADERS += \
     $$PWD/property.h \
     $$PWD/constraint.h \
     $$PWD/conversion.h \
-    $$PWD/constraintfactory.h
+    $$PWD/constraintfactory.h \
+    $$PWD/parametrizable.h \
+    $$PWD/parameter.h \
+    $$PWD/parametrizableinterface.h
