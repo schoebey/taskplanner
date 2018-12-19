@@ -338,10 +338,10 @@ void MainWindow::on_actionOpen_triggered()
 void MainWindow::on_actionSaveAs_triggered()
 {
   QStringList list;
-  auto serializers = SerializerFactory::availableSerializers();
-  for (const auto& name : serializers)
+  auto serializers = SerializerFactory::classes();
+  for (const auto& element : serializers)
   {
-    list.append(QString("%1 (*.%2)").arg(name.sName).arg(name.sFileExtension));
+    list.append(QString("%1 (*.%2)").arg(element.first).arg(element.second));
   }
 
   QString sFilter = list.join(";;");
@@ -351,15 +351,17 @@ void MainWindow::on_actionSaveAs_triggered()
                                                    &sSelectedFilter);
   if (!sFileName.isEmpty())
   {
-    size_t idx = static_cast<size_t>(list.indexOf(sSelectedFilter));
-    if (idx < serializers.size())
+    auto it = std::find_if(serializers.begin(), serializers.end(),
+                           [sSelectedFilter](const std::pair<QString, QString>& p)
+    { return p.second == sSelectedFilter; });
+    if (it != serializers.end())
     {
-      tspSerializer spWriter = SerializerFactory::create(serializers[idx].sName);
+      tspSerializer spWriter = SerializerFactory::create(it->first);
       if (!spWriter->setParameter("fileName", sFileName))
       {
         QMessageBox::critical(this, tr("error writing file"),
                               tr("parameter 'filename' not supported "
-                                 "for serializer '%1'").arg(serializers[idx].sName));
+                                 "for serializer '%1'").arg(it->first));
       }
 
       ESerializingError err = m_pManager->serializeTo(spWriter.get());

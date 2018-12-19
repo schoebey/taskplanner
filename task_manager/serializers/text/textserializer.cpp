@@ -1,5 +1,5 @@
 #include "textserializer.h"
-#include "register.h"
+#include "serializerregister.h"
 #include "serializablemanager.h"
 #include "group.h"
 #include "task.h"
@@ -10,7 +10,7 @@
 
 namespace
 {
-  Register<TextSerializer> s("text", "txt");
+  RegisterSerializer<TextSerializer> s("text", "txt");
 
   static const QString c_sPara_FileName = "fileName";
   static const QString c_sManagerHeader = "== manager ==";

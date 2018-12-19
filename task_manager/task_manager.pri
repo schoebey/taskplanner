@@ -1,4 +1,6 @@
 include(serializers/serializers.pri)
+include(reports/reports.pri)
+include(patterns/patterns.pri)
 
 SOURCES += \
     $$PWD/group.cpp \
@@ -31,3 +33,4 @@ HEADERS += \
     $$PWD/parametrizable.h \
     $$PWD/parameter.h \
     $$PWD/parametrizableinterface.h
+

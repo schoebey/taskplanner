@@ -1,5 +1,5 @@
 #include "markdownserializer.h"
-#include "register.h"
+#include "serializerregister.h"
 #include "serializablemanager.h"
 #include "group.h"
 #include "task.h"
@@ -14,7 +14,7 @@
 
 namespace
 {
-  Register<MarkdownSerializer> s("markdown", "md");
+  RegisterSerializer<MarkdownSerializer> s("markdown", "md");
 
   static const QString c_sPara_FileName = "fileName";
   static const QString c_sManagerHeader = "## manager";

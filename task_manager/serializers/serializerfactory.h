@@ -2,27 +2,11 @@
 #define SERIALIZERFACTORY_H
 
 #include "serializerinterface.h"
-#include "serializerinfo.h"
+#include "patterns/factory/factory.h"
 
 #include <QString>
 
-#include <vector>
-#include <functional>
-
-
-class SerializerFactoryPrivate;
-
-class SerializerFactory
-{
-public:
-  SerializerFactory();
-
-  static std::vector<SSerializerInfo> availableSerializers();
-
-  static tspSerializer create(const QString& sName);
-
-protected:
-  static SerializerFactoryPrivate* p();
-};
+class SerializerFactory : public Factory<ISerializer, QString>
+{};
 
 #endif // SERIALIZERFACTORY_H

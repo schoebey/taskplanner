@@ -19,6 +19,8 @@ class IConstraint;
 class ISerializer : public Parametrizable
 {
 public:
+  virtual ~ISerializer() {}
+
   virtual ESerializingError initSerialization() = 0;
   virtual ESerializingError deinitSerialization() = 0;
 
@@ -47,10 +49,6 @@ public:
 
 protected:
   ISerializer() {}
-
-  virtual ~ISerializer() {}
-
-  friend class SerializerFactoryPrivate;
 };
 typedef std::shared_ptr<ISerializer> tspSerializer;
 
