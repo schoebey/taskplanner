@@ -1,6 +1,5 @@
 #include "textreport.h"
-#include "patterns/factory/register.h"
-#include "patterns/factory/registrar.h"
+#include "reportregister.h"
 #include "group.h"
 #include "task.h"
 
@@ -10,7 +9,7 @@
 
 namespace
 {
-//  Register<TextReport, IReport> s("text");
+  RegisterReport<TextReport> s("text");
 
   static const QString c_sPara_FileName = "fileName";
   static const QString c_sManagerHeader = "== manager ==";

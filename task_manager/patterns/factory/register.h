@@ -18,7 +18,7 @@ public:
   Register(const QString& sName, const MetaInfo& info = MetaInfo())
   {
     std::function<Interface*(void)> fn = []() { return new T(); };
-    Registrar<Interface, QString>::registerCreator(fn, sName, info);
+    Registrar<Interface, MetaInfo>::registerCreator(fn, sName, info);
   }
 
   ~Register()

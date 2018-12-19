@@ -5,4 +5,5 @@ INCLUDEPATH += $$PWD/../ \
 SOURCES += \
 
 HEADERS += \
-    $$PWD/reportinterface.h
+    $$PWD/reportinterface.h \
+    $$PWD/reportregister.h
