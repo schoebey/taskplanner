@@ -1,0 +1,2 @@
+include(factory/factory.pri)
+
