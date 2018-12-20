@@ -37,6 +37,7 @@ public:
   virtual void setGroup(group_id groupId) = 0;
 
   virtual std::set<QString> propertyNames() const = 0;
+  virtual bool hasPropertyValue(const QString& sName) const = 0;
   virtual QString propertyValue(const QString& sName) const = 0;
   virtual bool setPropertyValue(const QString& sName, const QString& sValue) = 0;
 

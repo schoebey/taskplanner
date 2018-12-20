@@ -189,6 +189,11 @@ std::set<QString> Task::propertyNames() const
   return m_properties.availablePropertyNames();
 }
 
+bool Task::hasPropertyValue(const QString& sName) const
+{
+  return m_properties.isValid(sName);
+}
+
 QString Task::propertyValue(const QString& sName) const
 {
   return m_properties.get(sName);
