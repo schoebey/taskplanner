@@ -17,6 +17,8 @@ public:
 
   virtual bool setParameter(const QString& sName, const QVariant& value) = 0;
 
+  virtual bool checkRequiredParameters() const = 0;
+
 protected:
   IParametrizable() {}
   ~IParametrizable() {}

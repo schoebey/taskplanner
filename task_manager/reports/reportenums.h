@@ -1,20 +1,13 @@
-#ifndef SERIALIZATIONENUMS_H
-#define SERIALIZATIONENUMS_H
+#ifndef REPORTENUMS_H
+#define REPORTENUMS_H
 
-enum class ESerializingError
+enum class EReportError
 {
   eOk,
   eWrongParameter,
+  eParameterMissing,
   eResourceError,
   eInternalError
 };
 
-enum class EDeserializingError
-{
-  eOk,
-  eWrongParameter,
-  eResourceError,
-  eInternalError
-};
-
-#endif // SERIALIZATIONENUMS_H
+#endif // REPORTENUMS_H

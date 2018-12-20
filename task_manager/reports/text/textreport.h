@@ -1,20 +1,16 @@
 #ifndef TEXTREPORT_H
 #define TEXTREPORT_H
 
-#include "reportinterface.h"
-#include "parametrizable.h"
+#include "report.h"
 
-#include <QFile>
-#include <QTextStream>
-
-class TextReport : public IReport
+class TextReport : public Report
 {
 public:
   TextReport();
 
+  EReportError create_impl(const Manager& manager) const override;
+
 private:
-  QFile m_file;
-  QTextStream m_stream;
 };
 
 #endif // TEXTREPORT_H

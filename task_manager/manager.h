@@ -28,13 +28,13 @@ public:
   EDeserializingError deserializeFrom(ISerializer* pSerializer);
 
   ITask* addTask(task_id taskId = -1);
-  ITask* task(task_id id);
-  std::set<task_id> taskIds();
+  ITask* task(task_id id) const;
+  std::set<task_id> taskIds() const;
   bool removeTask(task_id);
 
   IGroup* addGroup(group_id groupId = -1);
-  IGroup* group(group_id id);
-  std::set<group_id> groupIds();
+  IGroup* group(group_id id) const;
+  std::set<group_id> groupIds() const;
   bool removeGroup(group_id id);
 
 

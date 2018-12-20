@@ -4,11 +4,11 @@
 #include "patterns/factory/register.h"
 #include "reportinterface.h"
 
-template<typename T> class RegisterReport : public Register<T, IReport, bool>
+template<typename T> class RegisterReport : public Register<T, IReport, QString>
 {
 public:
-  RegisterReport(const QString& sName)
-    : Register<T, IReport, bool>(sName, false)
+  RegisterReport(const QString& sName, const QString& sExtension)
+    : Register<T, IReport, QString>(sName, sExtension)
   {}
 };
 
