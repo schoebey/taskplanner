@@ -19,6 +19,8 @@ public:
 
   bool setParameter(const QString& sName, const QVariant& value) override;
 
+  bool checkRequiredParameters() const override;
+
 protected:
   std::map<QString, SParameter> m_parameters;
 };

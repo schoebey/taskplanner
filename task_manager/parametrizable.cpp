@@ -56,3 +56,16 @@ bool Parametrizable::setParameter(const QString& sName, const QVariant& value)
 
   return false;
 }
+
+bool Parametrizable::checkRequiredParameters() const
+{
+  for (const auto& param : m_parameters)
+  {
+    if (param.second.bRequired && !hasParameter(param.first))
+    {
+      return false;
+    }
+  }
+
+  return true;
+}

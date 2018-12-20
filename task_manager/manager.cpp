@@ -24,12 +24,12 @@ ITask* Manager::addTask(task_id taskId)
   return m_spPrivate->addTask(taskId);
 }
 
-ITask* Manager::task(task_id id)
+ITask* Manager::task(task_id id) const
 {
   return m_spPrivate->task(id);
 }
 
-std::set<task_id> Manager::taskIds()
+std::set<task_id> Manager::taskIds() const
 {
   return m_spPrivate->taskIds();
 }
@@ -44,12 +44,12 @@ IGroup* Manager::addGroup(group_id groupId)
   return m_spPrivate->addGroup(groupId);
 }
 
-IGroup* Manager::group(group_id id)
+IGroup* Manager::group(group_id id) const
 {
   return m_spPrivate->group(id);
 }
 
-std::set<group_id> Manager::groupIds()
+std::set<group_id> Manager::groupIds() const
 {
   return m_spPrivate->groupIds();
 }
