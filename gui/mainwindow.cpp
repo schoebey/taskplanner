@@ -85,9 +85,9 @@ void MainWindow::load()
           {
             if (!Properties::visible(sName))  { continue; }
 
-            QString sPropertyValue = pTask->propertyValue(sName);
-            //if (!sPropertyValue.isEmpty())
+            if (pTask->hasPropertyValue(sName))
             {
+              QString sPropertyValue = pTask->propertyValue(sName);
               pTaskWidget->addProperty(sName, sPropertyValue);
             }
           }

@@ -64,6 +64,7 @@ public:
   void setGroup(group_id groupId) override;
 
   std::set<QString> propertyNames() const override;
+  bool hasPropertyValue(const QString& sName) const override;
   QString propertyValue(const QString& sName) const override;
   bool setPropertyValue(const QString& sName, const QString& sValue) override;
 

@@ -382,6 +382,8 @@ public:
   bool set(const QString& sPropertyName, const QString& sValue);
   QString get(const QString& sPropertyName) const;
 
+  bool isValid(const QString& sPropertyName) const;
+
 private:
   static std::set<tspDescriptor> allDescriptors; // descriptions, without values
   static std::map<QString, std::function<tspProperty(void)>> factory; // needed for creating properties of unspecified

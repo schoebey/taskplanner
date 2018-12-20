@@ -61,3 +61,12 @@ QString Properties::get(const QString& sPropertyName) const
 
   return QString();
 }
+
+bool Properties::isValid(const QString& sPropertyName) const
+{
+  auto it = std::find_if(allProperties.begin(), allProperties.end(),
+                         [sPropertyName](const tspProperty& p)
+  { return sPropertyName == p->descriptor()->name(); });
+
+  return it != allProperties.end();
+}
