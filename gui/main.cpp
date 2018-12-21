@@ -36,6 +36,8 @@ namespace grammar
   {
     return std::make_shared<OrConstraint<T>>(p, p2);
   }
+
+  // todo: not operator: inverts the rhs constraint
 }
 
 
