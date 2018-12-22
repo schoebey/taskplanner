@@ -12,26 +12,29 @@ namespace
   RegisterReport<TextReport> s("text", "txt");
 
   static const QString c_sPara_FileName = "fileName";
+  static const QString c_sPara_Device = "device";
   static const QString c_sTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
 }
 
 TextReport::TextReport()
 {
-  registerParameter(c_sPara_FileName, QVariant::String, true);
+  //registerParameter(c_sPara_FileName, QVariant::String, true);
+  registerParameter(c_sPara_Device, QVariant::UserType, true);
 }
 
 EReportError TextReport::create_impl(const Manager& manager) const
 {
-  QString sFileName = parameter(c_sPara_FileName).toString();
+  QIODevice* pDevice = parameter(c_sPara_Device).value<QIODevice*>();
 
-  QFile f(sFileName);
-  if (!f.open(QIODevice::ReadWrite | QIODevice::Truncate))
+  if (!pDevice->isOpen() &&
+      !pDevice->open(QIODevice::ReadWrite | QIODevice::Truncate))
   {
+    qDebug() << pDevice->errorString();
     return EReportError::eInternalError;
   }
 
 
-  QTextStream s(&f);
+  QTextStream s(pDevice);
 
   // generate a report for the past five days
   QDateTime startDate(QDate::currentDate().addDays(-4));
@@ -109,8 +112,6 @@ EReportError TextReport::create_impl(const Manager& manager) const
     startOfDay = endOfDay;
     endOfDay = endOfDay.addDays(1);
   }
-
-  f.close();
 
   return EReportError::eOk;
 }

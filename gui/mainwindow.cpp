@@ -16,6 +16,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QBuffer>
 
 #include <array>
 
@@ -394,6 +395,19 @@ void MainWindow::on_actionSaveAs_triggered()
   }
 }
 
+//void MainWindow::on_actionShowReport_triggered()
+//{
+//  tspReport spReport = ReportFactory::create(it->first);
+//  if (nullptr != spReport)
+//  {
+//    QByteArray ba;
+//    QBuffer buffer(&ba);
+//    QString s(ba.data());
+//    spReport->setParameter("device", &buffer);
+//    spReport->create(*m_pManager);
+//  }
+//}
+
 void MainWindow::on_actionReport_triggered()
 {
   auto supportedReports = ReportFactory::classes();
@@ -412,14 +426,20 @@ void MainWindow::on_actionReport_triggered()
   {
     auto it = std::find_if(supportedReports.begin(), supportedReports.end(),
                            [sSelectedFilter](const std::pair<QString, QString>& p)
-    { return p.second == sSelectedFilter; });
+    { return QString("%1 (*.%2)").arg(p.first).arg(p.second) == sSelectedFilter; });
     if (it != supportedReports.end())
     {
-      tspReport spReport = ReportFactory::create("text");
+      tspReport spReport = ReportFactory::create(it->first);
       if (nullptr != spReport)
       {
-        spReport->setParameter("fileName", sFileName);
-        spReport->create(*m_pManager);
+        QFile f(sFileName);
+        if (f.open(QIODevice::ReadWrite | QIODevice::Truncate))
+        {
+          spReport->setParameter("device", QVariant::fromValue<QIODevice*>(&f));
+          spReport->setParameter("fileName", sFileName);
+          spReport->create(*m_pManager);
+          f.close();
+        }
       }
     }
   }
