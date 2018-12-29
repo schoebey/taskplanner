@@ -65,33 +65,40 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
                          const QPalette& pal, bool enabled, const QString& text,
                          QPalette::ColorRole textRole) const
 {
-  QPoint pt(rect.topLeft());
-  if (flags & Qt::AlignLeft)
+  if (text.contains("\n"))
   {
-    pt.setX(rect.left());
+   QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
   }
-  else if (flags & Qt::AlignHCenter)
+  else
   {
-    pt.setX(rect.center().x() - painter->fontMetrics().width(text) / 2);
-  }
-  else if (flags & Qt::AlignRight)
-  {
-    pt.setX(rect.right() - painter->fontMetrics().width(text));
-  }
+    QPoint pt(rect.topLeft());
+    if (flags & Qt::AlignLeft)
+    {
+      pt.setX(rect.left());
+    }
+    else if (flags & Qt::AlignHCenter)
+    {
+      pt.setX(rect.center().x() - painter->fontMetrics().width(text) / 2);
+    }
+    else if (flags & Qt::AlignRight)
+    {
+      pt.setX(rect.right() - painter->fontMetrics().width(text));
+    }
 
-  int iHeight = painter->fontMetrics().height();
-  if (flags & Qt::AlignTop)
-  {
-    pt.setY(rect.top() - 2);
-  }
-  else if (flags & Qt::AlignVCenter)
-  {
-    pt.setY(rect.center().y() - iHeight / 2.0 - 2);
-  }
-  else if (flags & Qt::AlignBottom)
-  {
-    pt.setY(rect.bottom() - iHeight);
-  }
+    int iHeight = painter->fontMetrics().height();
+    if (flags & Qt::AlignTop)
+    {
+      pt.setY(rect.top() - 2);
+    }
+    else if (flags & Qt::AlignVCenter)
+    {
+      pt.setY(rect.center().y() - iHeight / 2.0 - 2);
+    }
+    else if (flags & Qt::AlignBottom)
+    {
+      pt.setY(rect.bottom() - iHeight);
+    }
 
-  drawShadowedText(painter, pt, text, pal.color(textRole), QColor(0,0,0,100));
+    drawShadowedText(painter, pt, text, pal.color(textRole), QColor(0,0,0,100));
+  }
 }

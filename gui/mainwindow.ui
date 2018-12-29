@@ -38,7 +38,6 @@
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
@@ -61,6 +60,7 @@
    <addaction name="actionOpen"/>
    <addaction name="actionSaveAs"/>
    <addaction name="separator"/>
+   <addaction name="actionDisplayReport"/>
    <addaction name="actionReport"/>
   </widget>
   <action name="actionOpen">
@@ -88,6 +88,15 @@
    </property>
    <property name="text">
     <string>Report...</string>
+   </property>
+  </action>
+  <action name="actionDisplayReport">
+   <property name="icon">
+    <iconset resource="resources/resource.qrc">
+     <normaloff>:/icons/hourglass_go.png</normaloff>:/icons/hourglass_go.png</iconset>
+   </property>
+   <property name="text">
+    <string>DisplayReport</string>
    </property>
   </action>
  </widget>
