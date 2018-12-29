@@ -8,7 +8,8 @@ SOURCES += \
     $$PWD/main.cpp \
     $$PWD/style.cpp \
     $$PWD/highlightanimation.cpp \
-    $$PWD/taskwidgetoverlay.cpp
+    $$PWD/taskwidgetoverlay.cpp \
+    $$PWD/overlaywidget.cpp
 
 HEADERS += \
     gui/editablelabel.h \
@@ -18,7 +19,8 @@ HEADERS += \
     $$PWD/style.h \
     $$PWD/highlightanimation.h \
     $$PWD/taskwidgetoverlay.h \
-    $$PWD/highlightmethod.h
+    $$PWD/highlightmethod.h \
+    $$PWD/overlaywidget.h
 
 FORMS += \
     gui/groupwidget.ui \

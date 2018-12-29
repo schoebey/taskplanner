@@ -9,6 +9,7 @@
 #include "serializerfactory.h"
 #include "reportfactory.h"
 #include "property.h"
+#include "overlaywidget.h"
 
 
 #include <QFileSystemWatcher>
@@ -17,6 +18,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QBuffer>
+#include <QLabel>
 
 #include <array>
 
@@ -395,18 +397,26 @@ void MainWindow::on_actionSaveAs_triggered()
   }
 }
 
-//void MainWindow::on_actionShowReport_triggered()
-//{
-//  tspReport spReport = ReportFactory::create(it->first);
-//  if (nullptr != spReport)
-//  {
-//    QByteArray ba;
-//    QBuffer buffer(&ba);
-//    QString s(ba.data());
-//    spReport->setParameter("device", &buffer);
-//    spReport->create(*m_pManager);
-//  }
-//}
+void MainWindow::on_actionDisplayReport_triggered()
+{
+  tspReport spReport = ReportFactory::create("text");
+  if (nullptr != spReport)
+  {
+    QByteArray ba;
+    QBuffer buffer(&ba);
+    spReport->setParameter("device", QVariant::fromValue<QIODevice*>(&buffer));
+    spReport->create(*m_pManager);
+
+    QString s(ba.data());
+
+    OverlayWidget* pOverlay = new OverlayWidget(this);
+    QLabel* pLabel = new QLabel(s);
+    pLabel->setObjectName("report");
+    pLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    pOverlay->addWidget(pLabel);
+    pOverlay->appear();
+  }
+}
 
 void MainWindow::on_actionReport_triggered()
 {
