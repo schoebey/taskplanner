@@ -12,6 +12,7 @@ namespace Ui {
 class GroupWidget;
 class TaskWidget;
 class Manager;
+class TaskCreationDialog;
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -40,7 +41,8 @@ private slots:
   void on_actionDisplayReport_triggered();
   void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
   void onTaskRemoved(task_id parentTaskId, task_id childTaskId);
-  void onTaskAdded(task_id parentTaskId, task_id childTaskId);
+  void onTaskAdded(task_id parentTaskId, task_id childTaskId);  
+  void onNewTaskAccepted();
 
 signals:
   void timeTrackingStopped(task_id taskId);
@@ -50,6 +52,7 @@ private:
   std::map<group_id, GroupWidget*> m_groupWidgets;
   std::map<task_id, TaskWidget*> m_taskWidgets;
   Manager* m_pManager = nullptr;
+  TaskCreationDialog* m_pTaskCreationDialog = nullptr;
 };
 
 #endif // MAINWINDOW_H

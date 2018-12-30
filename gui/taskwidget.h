@@ -25,7 +25,10 @@ public:
 
   task_id id() const;
 
+  QString name() const;
   void setName(const QString& sName);
+
+  QString description() const;
   void setDescription(const QString& sDescription);
 
   void SetGroupWidget(GroupWidget* pGroupWidget);
@@ -43,6 +46,9 @@ public:
   void setParentTask(TaskWidget* pParentTask);
   TaskWidget* parentTask() const;
 
+  void setBackgroundImage(const QImage& image);
+
+  void edit();
 public slots:
   void setExpanded(bool bExpanded);
   void addTask(TaskWidget* pTaskWidget);

@@ -67,9 +67,19 @@ task_id TaskWidget::id() const
   return m_taskId;
 }
 
+QString TaskWidget::name() const
+{
+  return ui->pTitle->text();
+}
+
 void TaskWidget::setName(const QString& sName)
 {
   ui->pTitle->setText(sName);
+}
+
+QString TaskWidget::description() const
+{
+  return ui->pDescription->text();
 }
 
 void TaskWidget::setDescription(const QString& sDescription)
@@ -83,10 +93,19 @@ void TaskWidget::SetGroupWidget(GroupWidget* pGroupWidget)
 
   if (nullptr != m_pGroupWidget)
   {
-    m_backgroundImage = m_pGroupWidget->backgroundImage();
+    setBackgroundImage(m_pGroupWidget->backgroundImage());
     m_pPreviousGroupWidget = m_pGroupWidget;
     m_pDraggingTaskWidget = nullptr; 
   }
+}
+
+void TaskWidget::setBackgroundImage(const QImage& image)
+{
+  m_backgroundImage = image;
+}
+void TaskWidget::edit()
+{
+  ui->pTitle->edit();
 }
 
 TaskWidget*TaskWidget::DraggingTaskWidget()

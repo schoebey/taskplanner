@@ -10,6 +10,7 @@
 #include "reportfactory.h"
 #include "property.h"
 #include "overlaywidget.h"
+#include "taskcreationdialog.h"
 
 
 #include <QFileSystemWatcher>
@@ -19,6 +20,7 @@
 #include <QMessageBox>
 #include <QBuffer>
 #include <QLabel>
+#include <QPushButton>
 
 #include <array>
 
@@ -75,25 +77,6 @@ void MainWindow::load()
         for (const auto& pTask : task.second)
         {
           TaskWidget* pTaskWidget = createTaskWidget(pTask->id());
-          pTaskWidget->setName(pTask->name());
-          pTaskWidget->setDescription(pTask->description());
-
-          bool bOk = false;
-          bool bExpanded = conversion::fromString<bool>(pTask->propertyValue("expanded"), bOk);
-
-          // konnte die Property ausgelesen werden, soll der expanded-State wiederhergestellt werden,
-          // sonst soll defaultmässig expandiert sein.
-          pTaskWidget->setExpanded(!bOk || bExpanded);
-          for (const QString& sName : Properties::registeredPropertyNames())
-          {
-            if (!Properties::visible(sName))  { continue; }
-
-            if (pTask->hasPropertyValue(sName))
-            {
-              QString sPropertyValue = pTask->propertyValue(sName);
-              pTaskWidget->addProperty(sName, sPropertyValue);
-            }
-          }
 
           auto pParentTask = m_pManager->task(pTask->parentTask());
           if (nullptr == pParentTask)
@@ -166,6 +149,31 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   connect(pTaskWidget, SIGNAL(taskRemoved(task_id, task_id)), this, SLOT(onTaskRemoved(task_id, task_id)));
   connect(this, SIGNAL(timeTrackingStopped(task_id)), pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
+
+  auto pTask = m_pManager->task(id);
+  if (nullptr != pTask)
+  {
+    pTaskWidget->setName(pTask->name());
+    pTaskWidget->setDescription(pTask->description());
+  }
+
+  bool bOk = false;
+  bool bExpanded = conversion::fromString<bool>(pTask->propertyValue("expanded"), bOk);
+
+  // konnte die Property ausgelesen werden, soll der expanded-State wiederhergestellt werden,
+  // sonst soll defaultmässig expandiert sein.
+  pTaskWidget->setExpanded(!bOk || bExpanded);
+  for (const QString& sName : Properties::registeredPropertyNames())
+  {
+    if (!Properties::visible(sName))  { continue; }
+
+    if (pTask->hasPropertyValue(sName))
+    {
+      QString sPropertyValue = pTask->propertyValue(sName);
+      pTaskWidget->addProperty(sName, sPropertyValue);
+    }
+  }
+
   m_taskWidgets[id] = pTaskWidget;
 
   return pTaskWidget;
@@ -176,14 +184,33 @@ void MainWindow::createNewTask(group_id groupId)
   IGroup* pGroup = m_pManager->group(groupId);
   if (nullptr != pGroup)
   {
-   ITask* pTask = m_pManager->addTask();
-   pGroup->addTask(pTask->id());
+    auto it = m_groupWidgets.find(groupId);
+    if (it != m_groupWidgets.end())
+    {
+      delete m_pTaskCreationDialog;
+      m_pTaskCreationDialog = new TaskCreationDialog(this);
+      m_pTaskCreationDialog->setProperty("groupId", groupId);
+      connect(m_pTaskCreationDialog, SIGNAL(accepted()), this, SLOT(onNewTaskAccepted()));
+      m_pTaskCreationDialog->show();
 
-   auto it = m_groupWidgets.find(groupId);
-   if (it != m_groupWidgets.end())
-   {
-     it->second->insertTask(createTaskWidget(pTask->id()));
-   }
+    }
+  }
+}
+
+void MainWindow::onNewTaskAccepted()
+{
+  group_id groupId = m_pTaskCreationDialog->property("groupId").value<group_id>();
+
+  IGroup* pGroup = m_pManager->group(groupId);
+  auto it = m_groupWidgets.find(groupId);
+  if (nullptr != pGroup &&
+      it != m_groupWidgets.end())
+  {
+    ITask* pTask = m_pManager->addTask();
+    pTask->setName(m_pTaskCreationDialog->name());
+    pTask->setDescription(m_pTaskCreationDialog->description());
+    pGroup->addTask(pTask->id());
+    it->second->insertTask(createTaskWidget(pTask->id()));
   }
 }
 
@@ -413,6 +440,7 @@ void MainWindow::on_actionDisplayReport_triggered()
     QLabel* pLabel = new QLabel(s);
     pLabel->setObjectName("report");
     pLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    pOverlay->setAutoDeleteOnClose(true);
     pOverlay->addWidget(pLabel);
     pOverlay->appear();
   }
