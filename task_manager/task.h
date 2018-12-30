@@ -73,6 +73,10 @@ public:
   {
     return m_properties.get<T>(sName);
   }
+  template<typename T> bool setProperty(const QString& sName, const T& val)
+  {
+    return m_properties.set(sName, val);
+  }
 
 private:
   Manager* m_pManager = nullptr;

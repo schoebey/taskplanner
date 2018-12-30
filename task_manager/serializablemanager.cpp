@@ -17,6 +17,7 @@ int SerializableManager::version() const
 Task* SerializableManager::addTask(task_id taskId)
 {
   tspTask spTask = std::make_shared<Task>(m_pManager, taskId);
+  spTask->setProperty<QDateTime>("added date", QDateTime::currentDateTime());
   m_tasks[spTask->id()] = spTask;
   return spTask.get();
 }

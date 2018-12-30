@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY("duration (days)", int, true);
   REGISTER_PROPERTY("category", QString, true);
   Properties::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
+  Properties::registerConstraint("duration (days)", MIN(0));
 
 //  TODO: customizable enum property (e.g. 'category' with n possible values)
 //  typedef std::array<QString, 3> ar;
