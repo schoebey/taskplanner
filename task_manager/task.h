@@ -46,6 +46,8 @@ public:
   SPriority priority() const override;
   void setPriority(const SPriority& priority) override;
 
+  double autoPriority() const;
+
   task_id parentTask() const override;
   void setParentTaskId(task_id parentTaskId);
   void setParentTask(task_id parentTaskId) override;
@@ -67,6 +69,10 @@ public:
   bool hasPropertyValue(const QString& sName) const override;
   QString propertyValue(const QString& sName) const override;
   bool setPropertyValue(const QString& sName, const QString& sValue) override;
+  template<typename T> T property(const QString& sName) const
+  {
+    return m_properties.get<T>(sName);
+  }
 
 private:
   Manager* m_pManager = nullptr;

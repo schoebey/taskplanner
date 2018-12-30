@@ -55,6 +55,53 @@ void Task::setPriority(const SPriority& priority)
   m_priority = priority;
 }
 
+double Task::autoPriority() const
+{
+  // TODO: iterate over all registered priority-relevant properties
+  // compute a priority value for each available property
+  // assume 0 for any unavailable property
+  // for now: sum them up and return the result
+
+
+  // ideally, constraints could be used to compute a priority value.
+  // the problem is that constraints can theoretically be rather complex constructs
+  // that make it hard to compute such a value.
+  // an and constraint would need to query both sub-branches and somehow interpolate between them
+  // e.g.  min(5) and max(10) would need to interpolate between the priority values of 5 and 10
+  // (min(5) and max(10)) or (min(12) and max(19)) would need to do so for the sub-branch that accepts the given value.
+  // meaning: and-constaints would need to query left and right for (min,max) values and assigned priorities
+  // or-constraints would need to delegate the call to the left or right sub-branch, depending on which one accepts the value.
+
+
+  // for now: use due date, added date and duration as a base for computing the priority
+  int iNofDaysInProgress = 0;
+  QDateTime dueDate = property<QDateTime>("due date");
+  if (dueDate.isValid())
+  {
+    int iNofDays = property<int>("duration (days");
+    QDateTime startDate = dueDate.addDays(-iNofDays);
+
+    int iNofDaysToStart = QDateTime::currentDateTime().daysTo(startDate);
+    if (0 >= iNofDaysToStart)
+    {
+      int iNofDaysToDue = QDateTime::currentDateTime().daysTo(dueDate);
+      iNofDaysInProgress = iNofDays - iNofDaysToDue;
+    }
+  }
+
+
+  int iNofDaysInSystem = 0;
+  QDateTime addedDate = property<QDateTime>("added date");
+  if (addedDate.isValid())
+  {
+    iNofDaysInSystem = addedDate.daysTo(QDateTime::currentDateTime());
+  }
+
+
+  // TODO: replace with std::tie
+  return iNofDaysInProgress + iNofDaysInSystem / 100.;
+}
+
 task_id Task::parentTask() const
 {
   return m_parentTaskId;

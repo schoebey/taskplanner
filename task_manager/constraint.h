@@ -55,7 +55,8 @@ std::shared_ptr<U> fnBinaryCreator(const QString& sName,
 }
 }
 
-
+//---------------------------------------------------------------------------------------
+//
 class IConstraint : public ISerializable
 {
 public:
@@ -68,6 +69,8 @@ public:
 };
 using tspConstraint = std::shared_ptr<IConstraint>;
 
+//---------------------------------------------------------------------------------------
+//
 template<typename T> class ConstraintTpl : public IConstraint
 {
 public:
@@ -101,7 +104,11 @@ private:
 };
 template<typename T> using tspConstraintTpl = std::shared_ptr<ConstraintTpl<T>>;
 
+
+//---------------------------------------------------------------------------------------
+//
 template<typename T> using tFnCheck = std::function<bool(const T&)>;
+template<typename T> using tFnInterpolate = std::function<double(const T&)>;
 template<typename T> class FunctionalConstraint : public ConstraintTpl<T>
 {
 public:
@@ -119,6 +126,8 @@ private:
   tFnCheck<T> m_fnCheck;
 };
 
+//---------------------------------------------------------------------------------------
+//
 template<typename T> class AndConstraint : public FunctionalConstraint<T>
 {
 public:
@@ -147,6 +156,8 @@ private:
   tspConstraintTpl<T> m_spR;
 };
 
+//---------------------------------------------------------------------------------------
+//
 template<typename T> class OrConstraint : public FunctionalConstraint<T>
 {
 public:
@@ -173,6 +184,8 @@ private:
   tspConstraintTpl<T> m_spR;
 };
 
+//---------------------------------------------------------------------------------------
+//
 template<typename T> class MinConstraint : public FunctionalConstraint<T>
 {
 public:
@@ -196,6 +209,8 @@ private:
   T m_min;
 };
 
+//---------------------------------------------------------------------------------------
+//
 template<typename T> class MaxConstraint : public FunctionalConstraint<T>
 {
 public:
@@ -219,6 +234,8 @@ private:
   T m_max;
 };
 
+//---------------------------------------------------------------------------------------
+//
 template<typename T> class EqualsConstraint : public FunctionalConstraint<T>
 {
 public:
@@ -242,12 +259,16 @@ private:
   T m_val;
 };
 
+//---------------------------------------------------------------------------------------
+//
 template<typename T>
 tspConstraintTpl<T> make_list(T t)
 {
   return std::make_shared<EqualsConstraint<T>>(t);
 }
 
+//---------------------------------------------------------------------------------------
+//
 template<typename T, typename... Ts>
 tspConstraintTpl<T> make_list(T t, Ts... ts)
 {
