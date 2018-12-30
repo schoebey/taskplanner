@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QStyle>
 #include <QPropertyAnimation>
+#include <QPaintEvent>
 
 OverlayWidget::OverlayWidget(QWidget *parent)
   : QFrame(parent->window()),
@@ -23,9 +24,14 @@ OverlayWidget::OverlayWidget(QWidget *parent)
   m_pLayout->setMargin(0);
 }
 
+void OverlayWidget::setAutoDeleteOnClose(bool bAutoDelete)
+{
+  m_bAutoDeleteOnClose = bAutoDelete;
+}
+
 void OverlayWidget::addWidget(QWidget* pWidget)
 {
-  m_pLayout->addWidget(pWidget);
+  m_pLayout->addWidget(pWidget, m_pLayout->rowCount(), 0, 1, 2, Qt::AlignHCenter | Qt::AlignVCenter);
 }
 
 void OverlayWidget::appear()
@@ -35,7 +41,7 @@ void OverlayWidget::appear()
   pAnimation->setEndValue(QPoint(0,0));
   pAnimation->setDuration(200);
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-  pAnimation->setEasingCurve(QEasingCurve::OutQuad);
+  pAnimation->setEasingCurve(QEasingCurve::OutCubic);
   show();
 }
 
@@ -46,8 +52,12 @@ void OverlayWidget::disappear()
   pAnimation->setEndValue(QPoint(0,window()->height()));
   pAnimation->setDuration(200);
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-  pAnimation->setEasingCurve(QEasingCurve::InQuad);
-  connect(pAnimation, SIGNAL(finished()), this, SLOT(deleteLater()));
+  pAnimation->setEasingCurve(QEasingCurve::InCubic);
+
+  if (m_bAutoDeleteOnClose)
+  {
+    connect(pAnimation, SIGNAL(finished()), this, SLOT(deleteLater()));
+  }
 }
 
 void OverlayWidget::resizeEvent(QResizeEvent* pEvent)
@@ -64,4 +74,15 @@ bool OverlayWidget::eventFilter(QObject* pObject, QEvent* pEvent)
     resize(m_pParent->size());
   }
   return false;
+}
+
+void OverlayWidget::keyPressEvent(QKeyEvent* pEvent)
+{
+  switch (pEvent->key())
+  {
+  case Qt::Key_Escape:
+    disappear();
+  default:
+    break;
+  }
 }

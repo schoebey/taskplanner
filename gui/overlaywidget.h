@@ -11,7 +11,11 @@ class OverlayWidget : public QFrame
 public:
   explicit OverlayWidget(QWidget *parent = nullptr);
 
+  void setAutoDeleteOnClose(bool bAutoDelete);
+
   void addWidget(QWidget* pWidget);
+
+  void keyPressEvent(QKeyEvent* pEvent) override;
 
 signals:
 
@@ -24,6 +28,7 @@ private:
   bool eventFilter(QObject* pObject, QEvent* pEvent) override;
 
 private:
+  bool m_bAutoDeleteOnClose = false;
   QWidget* m_pParent = nullptr;
   QGridLayout* m_pLayout = nullptr;
   QPushButton* m_pCloseButton = nullptr;

@@ -5,6 +5,7 @@
         <file>dropshadow.png</file>
         <file>task_background_2.png</file>
         <file>task_background_3.png</file>
+        <file>new_task_background.png</file>
     </qresource>
     <qresource prefix="/icons">
         <file>disk.png</file>

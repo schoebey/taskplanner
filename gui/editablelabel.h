@@ -13,6 +13,8 @@ public:
 
   void mouseDoubleClickEvent(QMouseEvent* pMouseEvent);
 
+  void edit();
+
 signals:
   void editingFinished();
 };

@@ -9,11 +9,15 @@ EditableLabel::EditableLabel(QWidget* pParent)
 
 }
 
-
 void EditableLabel::mouseDoubleClickEvent(QMouseEvent* pMouseEvent)
 {
   QLabel::mouseDoubleClickEvent(pMouseEvent);
 
+  edit();
+}
+
+void EditableLabel::edit()
+{
   QLineEdit* pEdit = new QLineEdit(this);
   pEdit->setText(text());
   pEdit->selectAll();

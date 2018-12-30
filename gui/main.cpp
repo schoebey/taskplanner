@@ -71,7 +71,9 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY("name", QString, false);
   REGISTER_PROPERTY("description", QString, false);
   REGISTER_PROPERTY("expanded", bool, false);
+  REGISTER_PROPERTY("added date", QDateTime, false);
   REGISTER_PROPERTY("due date", QDateTime, true);
+  REGISTER_PROPERTY("duration (days)", int, true);
   REGISTER_PROPERTY("category", QString, true);
   Properties::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
 
