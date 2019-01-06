@@ -13,6 +13,7 @@ OverlayWidget::OverlayWidget(QWidget *parent)
     m_pLayout(new QGridLayout(this)),
     m_pCloseButton(new QPushButton("X", this))
 {
+  setFocusPolicy(Qt::StrongFocus);
   m_pParent->installEventFilter(this);
   connect(m_pCloseButton, SIGNAL(clicked()), this, SLOT(disappear()));
   QLabel* pTitle = new QLabel("title");
@@ -29,9 +30,9 @@ void OverlayWidget::setAutoDeleteOnClose(bool bAutoDelete)
   m_bAutoDeleteOnClose = bAutoDelete;
 }
 
-void OverlayWidget::addWidget(QWidget* pWidget)
+void OverlayWidget::addWidget(QWidget* pWidget, Qt::Alignment alignment)
 {
-  m_pLayout->addWidget(pWidget, m_pLayout->rowCount(), 0, 1, 2, Qt::AlignHCenter | Qt::AlignVCenter);
+  m_pLayout->addWidget(pWidget, m_pLayout->rowCount(), 0, 1, 2, alignment);
 }
 
 void OverlayWidget::appear()
@@ -43,6 +44,7 @@ void OverlayWidget::appear()
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
   pAnimation->setEasingCurve(QEasingCurve::OutCubic);
   show();
+  setFocus();
 }
 
 void OverlayWidget::disappear()

@@ -20,7 +20,7 @@ void TaskCreationDialog::show()
 
   m_pTaskWidget = new TaskWidget(-1);
   m_pTaskWidget->setBackgroundImage(QImage(":/new_task_background.png"));
-  // TODO: lock unnecessary tasks
+  // TODO: lock unnecessary functions
   pLayout->addWidget(m_pTaskWidget, 0, 0, 1, 2);
 
   QPushButton* pCancel(new QPushButton(tr("Cancel")));
@@ -34,7 +34,7 @@ void TaskCreationDialog::show()
   connect(pOk, SIGNAL(clicked()), this, SLOT(accept()));
   pLayout->addWidget(pOk, 1, 1);
   pWidget->setObjectName("pInsertTask");
-  addWidget(pWidget);
+  addWidget(pWidget, Qt::AlignCenter);
   appear();
 
   QWidget::setTabOrder(pCancel, pOk);
