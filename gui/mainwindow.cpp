@@ -442,6 +442,7 @@ void MainWindow::on_actionDisplayReport_triggered()
     pLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     pOverlay->setAutoDeleteOnClose(true);
     pOverlay->addWidget(pLabel);
+    pLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     pOverlay->appear();
   }
 }

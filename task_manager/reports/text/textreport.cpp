@@ -65,7 +65,7 @@ EReportError TextReport::create_impl(const Manager& manager) const
       .arg(startDate.toString(QString("dddd, MMMM dd'%1', yyyy")
                               .arg(numerationFromInt(startDate.date().day()))))
       .arg(stopDate.addDays(-1).toString(QString("dddd, MMMM dd'%1', yyyy")
-                                         .arg(numerationFromInt(startDate.date().day()))));
+                                         .arg(numerationFromInt(stopDate.date().day()))));
   s << sFirstLine << endl;
   s << QString("=").repeated(sFirstLine.size()) << endl << endl;
 
