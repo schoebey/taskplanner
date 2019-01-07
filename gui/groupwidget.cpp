@@ -53,6 +53,7 @@ GroupWidget::GroupWidget(group_id id, QWidget *parent) :
   ui->setupUi(this);
   connect(ui->pAddTask, SIGNAL(clicked()), this, SLOT(onNewTaskClicked()));
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
+  connect(ui->pSortTasks, SIGNAL(clicked()), this, SIGNAL(onSortClicked()));
   qApp->installEventFilter(this);
 }
 
@@ -238,6 +239,30 @@ void GroupWidget::setBackgroundImage(const QImage& img)
   m_backgroundImage = img;
 }
 
+void GroupWidget::reorderTasks(const std::vector<task_id>& vIds)
+{
+  std::vector<TaskWidget*> vpTaskWidgets;
+  for (const auto& id : vIds)
+  {
+    auto it = std::find_if(m_vpTaskWidgets.begin(),
+                           m_vpTaskWidgets.end(),
+                           [id](const TaskWidget* pTaskWidget)
+    {
+      return nullptr != pTaskWidget &&
+          pTaskWidget->id() == id;
+    });
+    if (it != m_vpTaskWidgets.end())
+    {
+      vpTaskWidgets.push_back(*it);
+    }
+  }
+
+  if (vpTaskWidgets != m_vpTaskWidgets)
+  {
+    UpdatePositions();
+  }
+}
+
 bool GroupWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
 {
   if (QEvent::MouseButtonRelease == pEvent->type())
@@ -299,4 +324,9 @@ void GroupWidget::onNewTaskClicked()
 void GroupWidget::onTitleEdited()
 {
   emit renamed(m_groupId, ui->pTitle->text());
+}
+
+void GroupWidget::onSortClicked()
+{
+  emit sortClicked(m_groupId);
 }

@@ -21,6 +21,7 @@ public:
 
   virtual SPriority priority() const = 0;
   virtual void setPriority(const SPriority& priority) = 0;
+  virtual double autoPriority() const = 0;
 
   virtual task_id parentTask() const = 0;
   virtual void setParentTask(task_id parentTaskId) = 0;

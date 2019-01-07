@@ -31,10 +31,13 @@ public:
   QImage backgroundImage() const;
   void setBackgroundImage(const QImage& img);
 
+  void reorderTasks(const std::vector<task_id>& vIds);
+
 signals:
   void taskMovedTo(task_id taskId, group_id groupId, int iPos);
   void renamed(group_id groupId, const QString& sNewName);
   void newTaskClicked(group_id);
+  void sortClicked(group_id);
 
 protected:
   void resizeEvent(QResizeEvent* pEvent);
@@ -48,6 +51,7 @@ protected slots:
   void repositionChildren();
   void onNewTaskClicked();
   void onTitleEdited();
+  void onSortClicked();
 
 private:
   Ui::GroupWidget *ui;

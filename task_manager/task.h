@@ -46,7 +46,7 @@ public:
   SPriority priority() const override;
   void setPriority(const SPriority& priority) override;
 
-  double autoPriority() const;
+  double autoPriority() const override;
 
   task_id parentTask() const override;
   void setParentTaskId(task_id parentTaskId);

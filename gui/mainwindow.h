@@ -43,6 +43,8 @@ private slots:
   void onTaskRemoved(task_id parentTaskId, task_id childTaskId);
   void onTaskAdded(task_id parentTaskId, task_id childTaskId);  
   void onNewTaskAccepted();
+  void sortGroup(group_id);
+  void sortGroups();
 
 signals:
   void timeTrackingStopped(task_id taskId);

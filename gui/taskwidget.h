@@ -79,8 +79,6 @@ private:
   void setUpContextMenu();
 
 private:
-  Ui::TaskWidget *ui;
-  task_id m_taskId;
   void mousePressEvent(QMouseEvent* pMouseEvent) override;
   void mouseMoveEvent(QMouseEvent* pMouseEvent) override;
   void paintEvent(QPaintEvent* pEvent) override;
@@ -89,6 +87,9 @@ private:
   void focusOutEvent(QFocusEvent* pEvent) override;
   void enterEvent(QEvent* pEvent) override;
   void leaveEvent(QEvent* pEvent) override;
+
+  Ui::TaskWidget *ui;
+  task_id m_taskId;
 
   bool m_bMouseDown = false;
   QPoint m_mouseDownPos;
