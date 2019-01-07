@@ -526,14 +526,15 @@ void MainWindow::onTaskRemoved(task_id parentTaskId, task_id childTaskId)
 
 void MainWindow::sortGroup(group_id groupId)
 {
-  std::map<double, task_id> sortedTaskIds;
+  std::map<double, std::vector<task_id>> sortedTaskIds;
   for (const auto& id : m_pManager->taskIds())
   {
     ITask* pTask = m_pManager->task(id);
     if (nullptr != pTask &&
         groupId == pTask->group())
     {
-      sortedTaskIds[pTask->autoPriority()] = id;
+      qDebug() << pTask->autoPriority();
+      sortedTaskIds[pTask->autoPriority()].push_back(id);
     }
   }
 
@@ -542,9 +543,14 @@ void MainWindow::sortGroup(group_id groupId)
   if (it != m_groupWidgets.end())
   {
     std::vector<task_id> vIds;
-    for (const auto& id : sortedTaskIds)
+    for (const auto& el : sortedTaskIds)
     {
-      vIds.push_back(id.second);
+      std::vector<task_id> vIdsOfSamePrio;
+      for (const auto& id : el.second)
+      {
+        vIdsOfSamePrio.push_back(id);
+      }
+      vIds.insert(vIds.begin(), vIdsOfSamePrio.begin(), vIdsOfSamePrio.end());
     }
     it->second->reorderTasks(vIds);
   }

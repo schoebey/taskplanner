@@ -77,7 +77,7 @@ double Task::autoPriority() const
   QDateTime dueDate = property<QDateTime>("due date");
   if (dueDate.isValid())
   {
-    int iNofDays = property<int>("duration (days");
+    int iNofDays = property<int>("duration (days)");
     QDateTime startDate = dueDate.addDays(-iNofDays);
 
     int iNofDaysToStart = QDateTime::currentDateTime().daysTo(startDate);
@@ -99,7 +99,9 @@ double Task::autoPriority() const
 
   // TODO: incorporate factor (hi/med/lo)
   // TODO: replace with std::tie
-  return iNofDaysInProgress + iNofDaysInSystem / 100.;
+  return (dueDate.isValid() ? 1 : 0) +
+      iNofDaysInProgress +
+      static_cast<double>(iNofDaysInSystem) / 100.;
 }
 
 task_id Task::parentTask() const

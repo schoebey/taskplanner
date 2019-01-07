@@ -373,7 +373,7 @@ public:
     if (it != allProperties.end())
     {
       bool bUnused = false;
-      conversion::fromString<T>((*it)->value(), bUnused);
+      return conversion::fromString<T>((*it)->value(), bUnused);
     }
 
     return T();
