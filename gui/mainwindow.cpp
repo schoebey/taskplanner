@@ -130,6 +130,7 @@ GroupWidget* MainWindow::createGroupWidget(group_id id)
   connect(pGroupWidget, SIGNAL(renamed(group_id, QString)), this, SLOT(renameGroup(group_id, QString)));
   connect(pGroupWidget, SIGNAL(newTaskClicked(group_id)), this, SLOT(createNewTask(group_id)));
   connect(pGroupWidget, SIGNAL(taskMovedTo(task_id, group_id, int)), this, SLOT(moveTask(task_id, group_id, int)));
+  connect(pGroupWidget, SIGNAL(sortClicked(group_id)), this, SLOT(sortGroup(group_id)));
 
   m_groupWidgets[id] = pGroupWidget;
 
@@ -520,5 +521,42 @@ void MainWindow::onTaskRemoved(task_id parentTaskId, task_id childTaskId)
   if (nullptr != pTask)
   {
     pTask->removeTask(childTaskId);
+  }
+}
+
+void MainWindow::sortGroup(group_id groupId)
+{
+  std::map<double, task_id> sortedTaskIds;
+  for (const auto& id : m_pManager->taskIds())
+  {
+    ITask* pTask = m_pManager->task(id);
+    if (nullptr != pTask &&
+        groupId == pTask->group())
+    {
+      sortedTaskIds[pTask->autoPriority()] = id;
+    }
+  }
+
+
+  auto it = m_groupWidgets.find(groupId);
+  if (it != m_groupWidgets.end())
+  {
+    std::vector<task_id> vIds;
+    for (const auto& id : sortedTaskIds)
+    {
+      vIds.push_back(id.second);
+    }
+    it->second->reorderTasks(vIds);
+  }
+}
+
+void MainWindow::sortGroups()
+{
+  for (const auto& el : m_groupWidgets)
+  {
+    if (nullptr != el.second)
+    {
+      sortGroup(el.second->id());
+    }
   }
 }

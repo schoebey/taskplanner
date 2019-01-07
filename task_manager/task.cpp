@@ -57,7 +57,6 @@ void Task::setPriority(const SPriority& priority)
 
 double Task::autoPriority() const
 {
-  // TODO: iterate over all registered priority-relevant properties
   // compute a priority value for each available property
   // assume 0 for any unavailable property
   // for now: sum them up and return the result
@@ -98,6 +97,7 @@ double Task::autoPriority() const
   }
 
 
+  // TODO: incorporate factor (hi/med/lo)
   // TODO: replace with std::tie
   return iNofDaysInProgress + iNofDaysInSystem / 100.;
 }
