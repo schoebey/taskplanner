@@ -53,7 +53,7 @@ GroupWidget::GroupWidget(group_id id, QWidget *parent) :
   ui->setupUi(this);
   connect(ui->pAddTask, SIGNAL(clicked()), this, SLOT(onNewTaskClicked()));
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
-  connect(ui->pSortTasks, SIGNAL(clicked()), this, SIGNAL(onSortClicked()));
+  connect(ui->pSortTasks, SIGNAL(clicked()), this, SLOT(onSortClicked()));
   qApp->installEventFilter(this);
 }
 
@@ -259,6 +259,7 @@ void GroupWidget::reorderTasks(const std::vector<task_id>& vIds)
 
   if (vpTaskWidgets != m_vpTaskWidgets)
   {
+    m_vpTaskWidgets = vpTaskWidgets;
     UpdatePositions();
   }
 }
