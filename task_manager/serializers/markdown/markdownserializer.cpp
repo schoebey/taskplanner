@@ -240,26 +240,70 @@ namespace
     return false;
   }
 
+  QString startTagFromString(const QString& s)
+  {
+    if (!s.isEmpty())
+    {
+      QRegExp rx("^#+");
+      if (0 == rx.indexIn(s))
+      {
+        return rx.cap(0);
+      }
+    }
+
+    return QString();
+  }
+
   std::map<QString, std::vector<QString>> valuesFromStream(QTextStream& stream)
   {
+    qint64 iLastValidPos = 0;
     QString sLine;
+    QString sData;
     std::map<QString, std::vector<QString>> values;
     while (!stream.atEnd())
     {
       sLine = stream.readLine();
+
+      QString sStartSequence = startTagFromString(sLine);
+
       int idx = sLine.indexOf(":");
-      QString sData = sLine.right(sLine.size() - idx - 1);
-      if (sLine.startsWith("#"))
+      QString sTag = sLine.left(idx);
+      QString sData;
+      if (sStartSequence.isEmpty())
       {
-        bool bOk(false);
-        int iPayloadSize = sData.toInt(&bOk);
-        if (bOk)
+        // separate tag from value, store it
+        sData = sLine.right(sLine.size() - idx - 1);
+      }
+      else
+      {
+        // read every line that has either no start sequence or
+        // a start sequence that indicates a child of the current
+        // element.
+        // separate tag from size if available, then keep reading
+        // until another line with a higher priority start tag is read
+        sData = sLine;
+        QString sChildStartTag = sStartSequence + "#";
+        while (!stream.atEnd())
         {
-          sData = sLine + "\n" + stream.read(iPayloadSize);
+          // remember this position to be later able to jump back to it
+          // if content has been read that doesn't belong to the current section.
+          iLastValidPos = stream.pos();
+
+          sLine = stream.readLine();
+          if (sLine.startsWith(sChildStartTag) ||
+              !sLine.startsWith("#"))
+          {
+            sData += "\n" + sLine;
+          }
+          else
+          {
+            stream.seek(iLastValidPos);
+            break;
+          }
         }
       }
 
-      values[sLine.left(idx)].push_back(sData);
+      values[sTag].push_back(sData);
     }
 
     return values;
