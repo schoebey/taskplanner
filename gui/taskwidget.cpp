@@ -377,24 +377,30 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
   painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
   painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
+  static const double c_dBorderOffset = 4.5;
+  QRectF rct(rect());
+  rct.adjust(c_dBorderOffset, c_dBorderOffset, -c_dBorderOffset, -c_dBorderOffset);
+
   if (nullptr != m_pParentTask)
   {
+    painter.setBrush(QColor(255, 255, 255, 30));
   }
   else
   {
     painter.drawImage(rect(), QImage(":/dropshadow.png"));
-
-    static const int c_iBorderOffset = 5;
-    QRectF rct(rect().adjusted(c_iBorderOffset, c_iBorderOffset, -c_iBorderOffset, -c_iBorderOffset));
-
+    painter.save();
     QPainterPath path;
-    path.addRoundedRect(rct, 5, 5);
+    path.addRoundedRect(rct, 7, 7);
     painter.setClipPath(path);
     QPointF offset(pos().x()/5, pos().y()/5);
     QBrush b(m_backgroundImage);
     painter.setBrush(b);
     painter.drawRect(rct);
+    painter.restore();
   }
+
+  painter.setPen(QColor(255, 255, 255, 80));
+  painter.drawRoundedRect(rct.adjusted(1, 1, -1, -1), 5, 5);
 }
 
 void TaskWidget::resizeEvent(QResizeEvent* pEvent)
