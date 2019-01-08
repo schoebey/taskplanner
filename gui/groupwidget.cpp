@@ -53,7 +53,7 @@ GroupWidget::GroupWidget(group_id id, QWidget *parent) :
   ui->setupUi(this);
   connect(ui->pAddTask, SIGNAL(clicked()), this, SLOT(onNewTaskClicked()));
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
-  connect(ui->pSortTasks, SIGNAL(clicked()), this, SLOT(onSortClicked()));
+  connect(ui->pSortTasks, SIGNAL(clicked(bool)), this, SLOT(onSortClicked(bool)));
   qApp->installEventFilter(this);
 }
 
@@ -327,7 +327,14 @@ void GroupWidget::onTitleEdited()
   emit renamed(m_groupId, ui->pTitle->text());
 }
 
-void GroupWidget::onSortClicked()
+void GroupWidget::onSortClicked(bool bChecked)
 {
-  emit sortClicked(m_groupId);
+  if (bChecked)
+  {
+    emit autoSortEnabled(m_groupId);
+  }
+  else
+  {
+    emit autoSortDisabled(m_groupId);
+  }
 }
