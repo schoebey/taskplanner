@@ -21,16 +21,20 @@
 #include <QBuffer>
 #include <QLabel>
 #include <QPushButton>
+#include <QTimer>
+#include <QSignalMapper>
 
 #include <array>
 
 MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
-  m_pManager(pManager)
+  m_pManager(pManager),
+  m_pTimeoutGroupIdMapper(new QSignalMapper(this))
 {
   ui->setupUi(this);
 
+  connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
   QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
   pWatcher->addPath("stylesheet.css");
@@ -130,7 +134,8 @@ GroupWidget* MainWindow::createGroupWidget(group_id id)
   connect(pGroupWidget, SIGNAL(renamed(group_id, QString)), this, SLOT(renameGroup(group_id, QString)));
   connect(pGroupWidget, SIGNAL(newTaskClicked(group_id)), this, SLOT(createNewTask(group_id)));
   connect(pGroupWidget, SIGNAL(taskMovedTo(task_id, group_id, int)), this, SLOT(moveTask(task_id, group_id, int)));
-  connect(pGroupWidget, SIGNAL(sortClicked(group_id)), this, SLOT(sortGroup(group_id)));
+  connect(pGroupWidget, SIGNAL(autoSortEnabled(group_id)), this, SLOT(setAutoSortEnabled(group_id)));
+  connect(pGroupWidget, SIGNAL(autoSortDisabled(group_id)), this, SLOT(setAutoSortDisabled(group_id)));
 
   m_groupWidgets[id] = pGroupWidget;
 
@@ -503,6 +508,14 @@ void MainWindow::onPropertyChanged(task_id taskId,
                                                    EHighlightMethod::eValueRejected));
       it->second->setPropertyValue(sPropertyName, pTask->propertyValue(sPropertyName));
     }
+
+    auto itTimer = m_autoSortTimers.find(pTask->group());
+    if (itTimer != m_autoSortTimers.end() &&
+        nullptr != itTimer->second &&
+        itTimer->second->isActive())
+    {
+      sortGroup(pTask->group());
+    }
   }
 }
 
@@ -522,6 +535,35 @@ void MainWindow::onTaskRemoved(task_id parentTaskId, task_id childTaskId)
   {
     pTask->removeTask(childTaskId);
   }
+}
+
+void MainWindow::setAutoSortEnabled(group_id groupId)
+{
+  if (m_autoSortTimers.find(groupId) ==
+      m_autoSortTimers.end())
+  {
+    m_autoSortTimers[groupId] = new QTimer(this);
+    m_pTimeoutGroupIdMapper->setMapping(m_autoSortTimers[groupId], groupId);
+    connect(m_autoSortTimers[groupId], SIGNAL(timeout()), m_pTimeoutGroupIdMapper, SLOT(map()));
+  }
+
+  m_autoSortTimers[groupId]->start(60000);
+
+  sortGroup(groupId);
+}
+
+void MainWindow::setAutoSortDisabled(group_id groupId)
+{
+  auto it = m_autoSortTimers.find(groupId);
+  if (it != m_autoSortTimers.end())
+  {
+    it->second->stop();
+  }
+}
+
+void MainWindow::onSortGroupTriggered(int iGroupId)
+{
+  sortGroup(static_cast<group_id>(iGroupId));
 }
 
 void MainWindow::sortGroup(group_id groupId)

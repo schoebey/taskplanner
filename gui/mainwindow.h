@@ -13,6 +13,7 @@ class GroupWidget;
 class TaskWidget;
 class Manager;
 class TaskCreationDialog;
+class QSignalMapper;
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -43,7 +44,10 @@ private slots:
   void onTaskRemoved(task_id parentTaskId, task_id childTaskId);
   void onTaskAdded(task_id parentTaskId, task_id childTaskId);  
   void onNewTaskAccepted();
-  void sortGroup(group_id);
+  void setAutoSortEnabled(group_id);
+  void setAutoSortDisabled(group_id);
+  void onSortGroupTriggered(int iGroupId);
+  void sortGroup(group_id groupId);
   void sortGroups();
 
 signals:
@@ -55,6 +59,8 @@ private:
   std::map<task_id, TaskWidget*> m_taskWidgets;
   Manager* m_pManager = nullptr;
   TaskCreationDialog* m_pTaskCreationDialog = nullptr;
+  std::map<group_id, QTimer*> m_autoSortTimers;
+  QSignalMapper* m_pTimeoutGroupIdMapper;
 };
 
 #endif // MAINWINDOW_H
