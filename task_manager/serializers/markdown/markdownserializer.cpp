@@ -24,6 +24,20 @@ namespace
   static const QString c_sConstraintHeader = "##### constraint";
   static const QString c_sTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
 
+  QString startTagFromString(const QString& s)
+  {
+    if (!s.isEmpty())
+    {
+      QRegExp rx("^#+");
+      if (0 == rx.indexIn(s))
+      {
+        return rx.cap(0);
+      }
+    }
+
+    return QString();
+  }
+
   class StreamSwapper
   {
   public:
@@ -57,7 +71,7 @@ namespace
     {
       m_stream.flush();
       *m_ppStream = m_pOriginalStream;
-      **m_ppStream << m_sHeader << ":" << m_string.size() << endl;
+      **m_ppStream << m_sHeader << endl;
       **m_ppStream << m_string;
     }
   };
@@ -74,14 +88,22 @@ namespace
         QString sStreamHeader = (*ppStream)->readLine();
         if (sStreamHeader.startsWith(sHeader))
         {
-          QStringList list = sStreamHeader.split(":");
-          bool bOk(false);
-          if (1 < list.size())
+          QString sStartTag = startTagFromString(sStreamHeader);
+          QString sChildStartTag = sStartTag + "#";
+
+          while (!(*ppStream)->atEnd())
           {
-            int iSize = list[1].toInt(&bOk);
-            if (bOk)
+            qint64 iLastValidPos = (*ppStream)->pos();
+            QString sLine = (*ppStream)->readLine();
+            if (sLine.startsWith(sChildStartTag) ||
+                !sLine.startsWith("#"))
             {
-              m_string = (*ppStream)->read(iSize);
+              m_string += "\n" + sLine;
+            }
+            else
+            {
+              (*ppStream)->seek(iLastValidPos);
+              break;
             }
           }
 
@@ -240,20 +262,6 @@ namespace
     return false;
   }
 
-  QString startTagFromString(const QString& s)
-  {
-    if (!s.isEmpty())
-    {
-      QRegExp rx("^#+");
-      if (0 == rx.indexIn(s))
-      {
-        return rx.cap(0);
-      }
-    }
-
-    return QString();
-  }
-
   std::map<QString, std::vector<QString>> valuesFromStream(QTextStream& stream)
   {
     qint64 iLastValidPos = 0;
@@ -349,7 +357,6 @@ ESerializingError MarkdownSerializer::deinitSerialization()
   m_file.close();
   return ESerializingError::eOk;
 }
-
 
 EDeserializingError MarkdownSerializer::initDeserialization()
 {
