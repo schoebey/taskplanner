@@ -153,6 +153,7 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   connect(pTaskWidget, SIGNAL(propertyChanged(task_id, QString, QString)), this, SLOT(onPropertyChanged(task_id, QString, QString)));
   connect(pTaskWidget, SIGNAL(taskAdded(task_id, task_id)), this, SLOT(onTaskAdded(task_id, task_id)));
   connect(pTaskWidget, SIGNAL(taskRemoved(task_id, task_id)), this, SLOT(onTaskRemoved(task_id, task_id)));
+  connect(pTaskWidget, SIGNAL(taskDeleted(task_id)), this, SLOT(onTaskDeleted(task_id)));
   connect(this, SIGNAL(timeTrackingStopped(task_id)), pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
 
@@ -534,6 +535,19 @@ void MainWindow::onTaskRemoved(task_id parentTaskId, task_id childTaskId)
   if (nullptr != pTask)
   {
     pTask->removeTask(childTaskId);
+  }
+}
+
+void MainWindow::onTaskDeleted(task_id id)
+{
+  if (m_pManager->removeTask(id))
+  {
+    auto it = m_taskWidgets.find(id);
+    if (it != m_taskWidgets.end())
+    {
+      m_taskWidgets.erase(it);
+      delete it->second;
+    }
   }
 }
 

@@ -63,6 +63,7 @@ signals:
   void sizeChanged();
   void taskAdded(task_id parentId, task_id childId);
   void taskRemoved(task_id parentId, task_id childId);
+  void taskDeleted(task_id id);
 
 private slots:
   void onTitleEdited();
@@ -71,7 +72,8 @@ private slots:
   void onTimeTrackingStopped(task_id id);
   void onPropertyEdited();
   void onAddPropertyTriggered();
-  void updateSize();
+  void updateSize();  
+  void onDeleteTriggered();
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;

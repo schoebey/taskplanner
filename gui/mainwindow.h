@@ -49,6 +49,7 @@ private slots:
   void onSortGroupTriggered(int iGroupId);
   void sortGroup(group_id groupId);
   void sortGroups();
+  void onTaskDeleted(task_id id);
 
 signals:
   void timeTrackingStopped(task_id taskId);
