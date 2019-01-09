@@ -38,8 +38,8 @@ public:
   bool addTask(task_id id) override;
   bool removeTask(task_id id) override;
 
-
   bool addTaskId(task_id taskId);
+
 private:
   Manager* m_pManager = nullptr;
   QString m_sName;

@@ -48,6 +48,19 @@ bool SerializableManager::removeTask(task_id id)
   auto it = m_tasks.find(id);
   if (it != m_tasks.end())
   {
+    // remove all children from the manager
+    for (const auto& childId : it->second->taskIds())
+    {
+      removeTask(childId);
+    }
+
+    // remove the task from its group
+    IGroup* pGroup = group(it->second->group());
+    if (nullptr != pGroup)
+    {
+      pGroup->removeTask(id);
+    }
+
     m_tasks.erase(it);
     return true;
   }

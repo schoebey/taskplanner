@@ -38,6 +38,21 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
 
 TaskWidget::~TaskWidget()
 {
+  if (m_pTaskWidgetUnderMouse == this)
+  {
+    m_pTaskWidgetUnderMouse = nullptr;
+  }
+
+  if (m_pDraggingTaskWidget == this)
+  {
+    m_pDraggingTaskWidget = nullptr;
+  }
+
+  if (nullptr != m_pGroupWidget)
+  {
+    m_pGroupWidget->removeTask(this);
+  }
+
   delete ui;
 }
 
@@ -48,6 +63,12 @@ void TaskWidget::setUpContextMenu()
   {
     removeAction(pAction);
   }
+
+  QAction* pDeleteAction = new QAction(tr("delete"), this);
+  pDeleteAction->setShortcuts(QList<QKeySequence>() << Qt::Key_Delete << Qt::Key_Backspace);
+  pDeleteAction->setShortcutContext(Qt::WidgetShortcut);
+  addAction(pDeleteAction);
+  connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(onDeleteTriggered()));
 
   for (const auto& sPropertyName : Properties::registeredPropertyNames())
   {
@@ -479,4 +500,9 @@ void TaskWidget::removeTask(TaskWidget* pTaskWidget)
   ui->pSubTasks->layout()->removeWidget(pTaskWidget);
 
   QMetaObject::invokeMethod(this, "sizeChanged", Qt::QueuedConnection);
+}
+
+void TaskWidget::onDeleteTriggered()
+{
+  emit taskDeleted(id());
 }
