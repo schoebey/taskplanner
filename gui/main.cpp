@@ -41,6 +41,7 @@ namespace grammar
 }
 
 
+
 int main(int argc, char *argv[])
 {
   // test code for constraints
@@ -68,15 +69,17 @@ int main(int argc, char *argv[])
 
 
   // test code for properties
-  REGISTER_PROPERTY("name", QString, false);
-  REGISTER_PROPERTY("description", QString, false);
-  REGISTER_PROPERTY("expanded", bool, false);
-  REGISTER_PROPERTY("added date", QDateTime, false);
-  REGISTER_PROPERTY("due date", QDateTime, true);
-  REGISTER_PROPERTY("duration (days)", int, true);
-  REGISTER_PROPERTY("category", QString, true);
-  Properties::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
-  Properties::registerConstraint("duration (days)", MIN(0));
+  REGISTER_PROPERTY(Task, "name", QString, false);
+  REGISTER_PROPERTY(Task, "description", QString, false);
+  REGISTER_PROPERTY(Task, "expanded", bool, false);
+  REGISTER_PROPERTY(Task, "added date", QDateTime, false);
+  REGISTER_PROPERTY(Task, "due date", QDateTime, true);
+  REGISTER_PROPERTY(Task, "duration (days)", int, true);
+  REGISTER_PROPERTY(Task, "category", QString, true);
+  Properties<Task>::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
+  Properties<Task>::registerConstraint("duration (days)", MIN(0));
+
+  REGISTER_PROPERTY(Group, "autoSorting", bool, false);
 
 //  TODO: customizable enum property (e.g. 'category' with n possible values)
 //  typedef std::array<QString, 3> ar;
@@ -85,7 +88,7 @@ int main(int argc, char *argv[])
 //  TODO: configure order of comparison for properties, e.g.:
 //    (due date - expected duration), priority(high,med,low), category(feature,bugfix,refactoring,documentation)
 
-  Properties props;
+  Properties<Task> props;
   props.set("due date", QDateTime::currentDateTime());
   props.get<QDateTime>("due date");
 

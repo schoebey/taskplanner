@@ -87,7 +87,7 @@ private:
   group_id m_groupId = -1;
   task_id m_parentTaskId = -1;
 
-  Properties m_properties;
+  Properties<Task> m_properties;
 };
 
 #endif // TASK_H

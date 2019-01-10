@@ -399,9 +399,9 @@ ESerializingError MarkdownSerializer::serialize(const SerializableManager& m)
 
   writeToStream(*m_pStream, m.version(), "version");
 
-  for (const QString& sName : Properties::registeredPropertyNames())
+  for (const QString& sName : Properties<Task>::registeredPropertyNames())
   {
-    tspDescriptor spDescriptor = Properties::descriptor(sName);
+    tspDescriptor spDescriptor = Properties<Task>::descriptor(sName);
     spDescriptor->serialize(this);
   }
 
@@ -453,7 +453,7 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
       QString sName;
       tspDescriptor spDescriptor;
       if (readFromMap(propertyDescriptionValues, "name", sName)&&
-          nullptr != (spDescriptor = Properties::descriptor(sName)))
+          nullptr != (spDescriptor = Properties<Task>::descriptor(sName)))
       {
         StreamReader p2(&m_pStream, c_sPropertyHeader, sPayload);
         EDeserializingError err = spDescriptor->deserialize(this);
@@ -620,7 +620,7 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
       }
     }
 
-    for (const auto& name : Properties::registeredPropertyNames())
+    for (const auto& name : Properties<Task>::registeredPropertyNames())
     {
       QString sPropertyValue;
       if (readFromMap(values, name, sPropertyValue))

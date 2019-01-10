@@ -230,8 +230,9 @@ template<typename T> using tspPropertyTpl = std::shared_ptr<PropertyTpl<T>>;
 
 
 
-#define REGISTER_PROPERTY(name, type, visible) Properties::registerProperty<type>(name, #type, visible);
+#define REGISTER_PROPERTY(scope, name, type, visible) Properties<scope>::registerProperty<type>(name, #type, visible);
 
+template<typename SCOPE>
 class Properties
 {
 public:
@@ -251,10 +252,10 @@ public:
     {
       return std::make_shared<PropertyTpl<T>>(spDescriptor);
     };
-    factory[sName] = creatorFct;
+    factory()[sName] = creatorFct;
 
     descriptors<T>().insert(spDescriptor);
-    return allDescriptors.insert(spDescriptor).second;
+    return allDescriptors().insert(spDescriptor).second;
   }
 
   template<typename T> static bool registerConstraint(const QString& sName,
@@ -272,9 +273,25 @@ public:
     }
   }
 
-  static std::set<QString> registeredPropertyNames();
+  static std::set<QString> registeredPropertyNames()
+  {
+    std::set<QString> names;
+    for (const auto& el : allDescriptors())
+    {
+      names.insert(el->name());
+    }
+    return names;
+  }
 
-  std::set<QString> availablePropertyNames() const;
+  std::set<QString> availablePropertyNames() const
+  {
+    std::set<QString> names;
+    for (const auto& el : allProperties)
+    {
+      names.insert(el->descriptor()->name());
+    }
+    return names;
+  }
 
   template<typename T> static std::set<tspDescriptorTpl<T>>& descriptors()
   {
@@ -324,7 +341,7 @@ public:
 
   static tspDescriptor descriptor(const QString& sName)
   {
-    return findDescriptor(sName, allDescriptors);
+    return findDescriptor(sName, allDescriptors());
   }
 
   static bool visible(const QString& sPropertyName)
@@ -344,8 +361,8 @@ public:
 
     if (nullptr == spProperty)
     {
-      auto itCreator = factory.find(sPropertyName);
-      if (itCreator != factory.end())
+      auto itCreator = factory().find(sPropertyName);
+      if (itCreator != factory().end())
       {
         tspDescriptorTpl<T> spDescriptor = findDescriptor(sPropertyName, descriptors<T>());
         if (nullptr != spDescriptor && spDescriptor->accepts(value))
@@ -379,14 +396,67 @@ public:
     return T();
   }
 
-  bool set(const QString& sPropertyName, const QString& sValue);
-  QString get(const QString& sPropertyName) const;
+  bool set(const QString& sPropertyName, const QString& sValue)
+  {
+    auto it = std::find_if(allProperties.begin(), allProperties.end(),
+                           [sPropertyName](const tspProperty& spProp)
+    { return sPropertyName == spProp->descriptor()->name();});
+    if (it == allProperties.end())
+    {
+      auto itCreator = factory().find(sPropertyName);
+      if (itCreator != factory().end())
+      {
+        tspProperty spProp = itCreator->second();
+        bool bRv = spProp->setValue(sValue);
+        return bRv && allProperties.insert(spProp).second;
+      }
 
-  bool isValid(const QString& sPropertyName) const;
+      return false;
+    }
+    else
+    {
+      return (*it)->setValue(sValue);
+    }
+
+    return true;
+  }
+
+  QString get(const QString& sPropertyName) const
+  {
+    auto it = std::find_if(allProperties.begin(), allProperties.end(),
+                           [sPropertyName](const tspProperty& p)
+    { return sPropertyName == p->descriptor()->name(); });
+    if (it != allProperties.end())
+    {
+      return (*it)->value();
+    }
+
+    return QString();
+  }
+
+  bool isValid(const QString& sPropertyName) const
+  {
+    auto it = std::find_if(allProperties.begin(), allProperties.end(),
+                           [sPropertyName](const tspProperty& p)
+    { return sPropertyName == p->descriptor()->name(); });
+
+    return it != allProperties.end();
+  }
 
 private:
-  static std::set<tspDescriptor> allDescriptors; // descriptions, without values
-  static std::map<QString, std::function<tspProperty(void)>> factory; // needed for creating properties of unspecified
+  static std::set<tspDescriptor>& allDescriptors()
+  {
+    static std::set<tspDescriptor> descriptors;
+    return descriptors;
+  }
+
+  static std::map<QString, std::function<tspProperty(void)>>& factory()
+  {
+    static std::map<QString, std::function<tspProperty(void)>> f;
+    return f;
+  }
+
+private:
   std::set<tspProperty> allProperties;  // values
 };
 

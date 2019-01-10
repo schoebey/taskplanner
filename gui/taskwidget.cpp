@@ -70,10 +70,10 @@ void TaskWidget::setUpContextMenu()
   addAction(pDeleteAction);
   connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(onDeleteTriggered()));
 
-  for (const auto& sPropertyName : Properties::registeredPropertyNames())
+  for (const auto& sPropertyName : Properties<Task>::registeredPropertyNames())
   {
     if (m_propertyLineEdits.find(sPropertyName) == m_propertyLineEdits.end() &&
-        Properties::visible(sPropertyName))
+        Properties<Task>::visible(sPropertyName))
     {
       QAction* pAction = new QAction(sPropertyName, this);
       pAction->setProperty("name", sPropertyName);

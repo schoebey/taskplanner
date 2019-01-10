@@ -3,12 +3,13 @@
 
 #include "id_types.h"
 #include "id_generator.h"
+#include "propertyproviderinterface.h"
 
 #include <QString>
 
 #include <set>
 
-class IGroup : public id_generator<group_id>
+class IGroup : public id_generator<group_id>, public IPropertyProvider
 {
 public:
   virtual QString name() const = 0;
