@@ -5,12 +5,13 @@
 #include "timefragment.h"
 #include "id_types.h"
 #include "id_generator.h"
+#include "propertyproviderinterface.h"
 
 #include <QString>
 
 #include <set>
 
-class ITask : public id_generator<task_id>
+class ITask : public id_generator<task_id>, public IPropertyProvider
 {
 public:
   virtual QString name() const = 0;
@@ -36,12 +37,6 @@ public:
 
   virtual group_id group() const = 0;
   virtual void setGroup(group_id groupId) = 0;
-
-  virtual std::set<QString> propertyNames() const = 0;
-  virtual bool hasPropertyValue(const QString& sName) const = 0;
-  virtual QString propertyValue(const QString& sName) const = 0;
-  virtual bool setPropertyValue(const QString& sName, const QString& sValue) = 0;
-
 
 protected:
   ITask(task_id id = -1) : id_generator<task_id>(id) {}

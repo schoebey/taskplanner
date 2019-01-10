@@ -4,6 +4,7 @@
 #include "groupinterface.h"
 #include "id_types.h"
 #include "serializableinterface.h"
+#include "property.h"
 
 #include <QString>
 
@@ -42,11 +43,24 @@ public:
 
   bool addTaskId(task_id taskId);
 
+  std::set<QString> propertyNames() const override;
+  bool hasPropertyValue(const QString& sName) const override;
+  QString propertyValue(const QString& sName) const override;
+  bool setPropertyValue(const QString& sName, const QString& sValue) override;
+  template<typename T> T property(const QString& sName) const
+  {
+    return m_properties.get<T>(sName);
+  }
+  template<typename T> bool setProperty(const QString& sName, const T& val)
+  {
+    return m_properties.set(sName, val);
+  }
 private:
   Manager* m_pManager = nullptr;
   QString m_sName;
   QString m_sDescription;
   std::set<task_id> m_tasksIds;
+  Properties<Group> m_properties;
 };
 
 #endif // GROUP_H

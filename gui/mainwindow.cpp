@@ -170,9 +170,9 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   // konnte die Property ausgelesen werden, soll der expanded-State wiederhergestellt werden,
   // sonst soll defaultmässig expandiert sein.
   pTaskWidget->setExpanded(!bOk || bExpanded);
-  for (const QString& sName : Properties::registeredPropertyNames())
+  for (const QString& sName : Properties<Task>::registeredPropertyNames())
   {
-    if (!Properties::visible(sName))  { continue; }
+    if (!Properties<Task>::visible(sName))  { continue; }
 
     if (pTask->hasPropertyValue(sName))
     {

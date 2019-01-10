@@ -93,3 +93,23 @@ bool Group::removeTask(task_id taskId)
 
   return false;
 }
+
+std::set<QString> Group::propertyNames() const
+{
+  return m_properties.availablePropertyNames();
+}
+
+bool Group::hasPropertyValue(const QString& sName) const
+{
+  return m_properties.isValid(sName);
+}
+
+QString Group::propertyValue(const QString& sName) const
+{
+  return m_properties.get(sName);
+}
+
+bool Group::setPropertyValue(const QString& sName, const QString& sValue)
+{
+  return m_properties.set(sName, sValue);
+}
