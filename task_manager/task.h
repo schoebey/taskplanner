@@ -30,6 +30,7 @@ public:
   using id_generator<task_id>::setId;
 
   Task(Manager* pManager, task_id id = -1);
+  virtual ~Task();
 
   int version() const override;
 

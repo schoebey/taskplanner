@@ -10,6 +10,11 @@ Group::Group(Manager* pManager, group_id id)
 
 }
 
+Group::~Group()
+{
+
+}
+
 int Group::version() const
 {
   return 0;
