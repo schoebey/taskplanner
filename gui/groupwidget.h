@@ -47,6 +47,7 @@ protected:
   void ShowGhost(TaskWidget* pTaskWidget, int iPos);
   void UpdatePositions(int iSpace = -1, int iSpacePos = 0);
   TaskWidget* taskWidgetAt(QPoint pt);
+  void setUpContextMenu();
 
 protected slots:
   void repositionChildren();

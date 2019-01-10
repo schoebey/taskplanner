@@ -55,11 +55,28 @@ GroupWidget::GroupWidget(group_id id, QWidget *parent) :
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
   connect(ui->pSortTasks, SIGNAL(clicked(bool)), this, SLOT(onSortClicked(bool)));
   qApp->installEventFilter(this);
+
+  setUpContextMenu();
 }
 
 GroupWidget::~GroupWidget()
 {
   delete ui;
+}
+
+void GroupWidget::setUpContextMenu()
+{
+  setContextMenuPolicy(Qt::ActionsContextMenu);
+  for (const auto& pAction : actions())
+  {
+    removeAction(pAction);
+  }
+
+  QAction* pAddTaskAction = new QAction(tr("new task"), this);
+  pAddTaskAction->setShortcut(Qt::CTRL + Qt::Key_N);
+  pAddTaskAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  addAction(pAddTaskAction);
+  connect(pAddTaskAction, SIGNAL(triggered()), this, SLOT(onNewTaskClicked()));
 }
 
 group_id GroupWidget::id() const
