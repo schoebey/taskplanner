@@ -10,6 +10,11 @@ Task::Task(Manager* pManager, task_id id)
 
 }
 
+Task::~Task()
+{
+
+}
+
 int Task::version() const
 {
   return 0;

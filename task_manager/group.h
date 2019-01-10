@@ -22,6 +22,8 @@ public:
 
   Group(Manager* pManager, group_id id = -1);
 
+  virtual ~Group();
+
   int version() const override;
 
   ESerializingError serialize(ISerializer* pSerializer) const override;
