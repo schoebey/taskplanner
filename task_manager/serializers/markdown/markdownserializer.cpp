@@ -18,6 +18,8 @@ namespace
 
   static const QString c_sPara_FileName = "fileName";
   static const QString c_sManagerHeader = "## manager";
+  static const QString c_sTaskPropertiesHeader = "### task properties";
+  static const QString c_sGroupPropertiesHeader = "### group properties";
   static const QString c_sTaskHeader = "### task";
   static const QString c_sGroupHeader = "### group";
   static const QString c_sPropertyHeader = "#### property";
@@ -399,10 +401,22 @@ ESerializingError MarkdownSerializer::serialize(const SerializableManager& m)
 
   writeToStream(*m_pStream, m.version(), "version");
 
-  for (const QString& sName : Properties<Task>::registeredPropertyNames())
   {
-    tspDescriptor spDescriptor = Properties<Task>::descriptor(sName);
-    spDescriptor->serialize(this);
+    StreamWriter p(&m_pStream, c_sTaskPropertiesHeader);
+    for (const QString& sName : Properties<Task>::registeredPropertyNames())
+    {
+      tspDescriptor spDescriptor = Properties<Task>::descriptor(sName);
+      spDescriptor->serialize(this);
+    }
+  }
+
+  {
+    StreamWriter p(&m_pStream, c_sGroupPropertiesHeader);
+    for (const QString& sName : Properties<Group>::registeredPropertyNames())
+    {
+      tspDescriptor spDescriptor = Properties<Group>::descriptor(sName);
+      spDescriptor->serialize(this);
+    }
   }
 
   for (const auto & id : m.groupIds())
@@ -441,6 +455,7 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
 
   if (0 == iVersion)
   {
+    StreamReader r(&m_pStream, c_sTaskPropertiesHeader);
     // property descriptors
     QString sPayload;
     size_t index(0);
@@ -460,6 +475,28 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
         if (EDeserializingError::eOk != err)  { return err; }
       }
     }
+
+
+    StreamReader r2(&m_pStream, c_sGroupPropertiesHeader);
+    // property descriptors
+    index = 0;
+    while (readFromMap(values, c_sPropertyHeader, sPayload, index++))
+    {
+      StreamReader p(&m_pStream, c_sPropertyHeader, sPayload);
+
+      std::map<QString, std::vector<QString>> propertyDescriptionValues = valuesFromStream(*m_pStream);
+
+      QString sName;
+      tspDescriptor spDescriptor;
+      if (readFromMap(propertyDescriptionValues, "name", sName)&&
+          nullptr != (spDescriptor = Properties<Task>::descriptor(sName)))
+      {
+        StreamReader p2(&m_pStream, c_sPropertyHeader, sPayload);
+        EDeserializingError err = spDescriptor->deserialize(this);
+        if (EDeserializingError::eOk != err)  { return err; }
+      }
+    }
+
 
     // groups
     index = 0;
@@ -645,6 +682,11 @@ ESerializingError MarkdownSerializer::serialize(const Group& g)
   writeToStream(*m_pStream, g.description(), "description");
   writeToStream(*m_pStream, g.taskIds(), "tasks");
 
+  for (const auto& name : g.propertyNames())
+  {
+    writeToStream(*m_pStream, g.propertyValue(name), name);
+  }
+
   return ESerializingError::eOk;
 }
 
@@ -685,6 +727,15 @@ EDeserializingError MarkdownSerializer::deserialize(Group& g)
       for (const auto& childId : children)
       {
         g.addTaskId(childId);
+      }
+    }
+
+    for (const auto& name : Properties<Group>::registeredPropertyNames())
+    {
+      QString sPropertyValue;
+      if (readFromMap(values, name, sPropertyValue))
+      {
+        g.setPropertyValue(name, sPropertyValue);
       }
     }
 

@@ -33,6 +33,8 @@ public:
 
   void reorderTasks(const std::vector<task_id>& vIds);
 
+  void setAutoSortingEnabled(bool bEnabled);
+
 signals:
   void taskMovedTo(task_id taskId, group_id groupId, int iPos);
   void renamed(group_id groupId, const QString& sNewName);
