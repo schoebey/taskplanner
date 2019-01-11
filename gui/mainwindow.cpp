@@ -65,6 +65,11 @@ void MainWindow::load()
       GroupWidget* pGroupWidget = createGroupWidget(groupId);
       pGroupWidget->setBackgroundImage(images[i++ % images.size()]);
       pGroupWidget->setName(pGroup->name());
+
+      bool bOk(false);
+      bool bAutoSortingEnabled = conversion::fromString<bool>(pGroup->propertyValue("autoSorting"), bOk);
+      if (bOk)  { pGroupWidget->setAutoSortingEnabled(bAutoSortingEnabled); }
+
       std::map<int, std::vector<ITask*>> tasksByPriority;
       for (const auto& taskId : pGroup->taskIds())
       {
@@ -564,6 +569,12 @@ void MainWindow::setAutoSortEnabled(group_id groupId)
   m_autoSortTimers[groupId]->start(60000);
 
   sortGroup(groupId);
+
+  IGroup* pGroup = m_pManager->group(groupId);
+  if (nullptr != pGroup)
+  {
+    pGroup->setPropertyValue("autoSorting", conversion::toString<bool>(true));
+  }
 }
 
 void MainWindow::setAutoSortDisabled(group_id groupId)
@@ -572,6 +583,13 @@ void MainWindow::setAutoSortDisabled(group_id groupId)
   if (it != m_autoSortTimers.end())
   {
     it->second->stop();
+  }
+
+
+  IGroup* pGroup = m_pManager->group(groupId);
+  if (nullptr != pGroup)
+  {
+    pGroup->setPropertyValue("autoSorting", conversion::toString<bool>(false));
   }
 }
 
