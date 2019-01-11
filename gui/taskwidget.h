@@ -15,6 +15,7 @@ namespace Ui {
 class GroupWidget;
 class EditableLabel;
 class TaskWidgetOverlay;
+class QMenu;
 class TaskWidget : public QFrame
 {
   Q_OBJECT
@@ -89,6 +90,7 @@ private:
   void focusOutEvent(QFocusEvent* pEvent) override;
   void enterEvent(QEvent* pEvent) override;
   void leaveEvent(QEvent* pEvent) override;
+  void contextMenuEvent(QContextMenuEvent* pEvent) override;
 
   Ui::TaskWidget *ui;
   task_id m_taskId;
@@ -105,6 +107,8 @@ private:
   std::map<QString, EditableLabel*> m_propertyLineEdits;
 
   TaskWidget* m_pParentTask = nullptr;
+
+  QMenu* m_pContextMenu = nullptr;
 
   static TaskWidget* m_pDraggingTaskWidget;
   static TaskWidget* m_pTaskWidgetUnderMouse;

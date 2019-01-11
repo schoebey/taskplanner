@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <QTimer>
+#include <QMenu>
 
 #include <QPropertyAnimation>
 #include <cassert>
@@ -58,18 +59,27 @@ TaskWidget::~TaskWidget()
 
 void TaskWidget::setUpContextMenu()
 {
-  setContextMenuPolicy(Qt::ActionsContextMenu);
-  for (const auto& pAction : actions())
+  if (nullptr == m_pContextMenu)
   {
-    removeAction(pAction);
+    m_pContextMenu = new QMenu();
   }
 
-  QAction* pDeleteAction = new QAction(tr("delete"), this);
+  setContextMenuPolicy(Qt::DefaultContextMenu);
+  for (const auto& pAction : m_pContextMenu->actions())
+  {
+    m_pContextMenu->removeAction(pAction);
+    delete pAction;
+  }
+
+  QAction* pDeleteAction = new QAction(tr("Delete"), this);
   pDeleteAction->setShortcuts(QList<QKeySequence>() << Qt::Key_Delete << Qt::Key_Backspace);
   pDeleteAction->setShortcutContext(Qt::WidgetShortcut);
-  addAction(pDeleteAction);
+  m_pContextMenu->addAction(pDeleteAction);
   connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(onDeleteTriggered()));
 
+  m_pContextMenu->addSeparator();
+
+  QMenu* pPropertiesMenu = m_pContextMenu->addMenu(tr("Add properties"));
   for (const auto& sPropertyName : Properties<Task>::registeredPropertyNames())
   {
     if (m_propertyLineEdits.find(sPropertyName) == m_propertyLineEdits.end() &&
@@ -78,7 +88,7 @@ void TaskWidget::setUpContextMenu()
       QAction* pAction = new QAction(sPropertyName, this);
       pAction->setProperty("name", sPropertyName);
       connect(pAction, SIGNAL(triggered()), this, SLOT(onAddPropertyTriggered()));
-      addAction(pAction);
+      pPropertiesMenu->addAction(pAction);
     }
   }
 }
@@ -453,6 +463,20 @@ void TaskWidget::enterEvent(QEvent* pEvent)
 void TaskWidget::leaveEvent(QEvent* pEvent)
 {
   setHighlight(highlight() & ~EHighlightMethod::eHover);
+}
+
+void TaskWidget::contextMenuEvent(QContextMenuEvent* pEvent)
+{
+
+  if (nullptr != m_pContextMenu)
+  {
+    pEvent->accept();
+    m_pContextMenu->exec(pEvent->globalPos());
+  }
+  else
+  {
+    pEvent->ignore();
+  }
 }
 
 void TaskWidget::setExpanded(bool bExpanded)
