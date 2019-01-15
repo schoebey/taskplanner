@@ -8,6 +8,8 @@
 
 namespace conversion
 {
+  int stringToInt(const QString& sNumber, int iStartValue = 0);
+
   template<typename T>
   typename std::enable_if<!std::is_convertible<T, QString>::value &&
                           !std::is_arithmetic<T>::value, QString>::type

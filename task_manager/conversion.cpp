@@ -4,9 +4,71 @@
 #include <set>
 #include <vector>
 #include <functional>
+#include <cmath>
 
 namespace conversion
 {
+  int stringToInt(const QString& sNumber, int iStartValue)
+  {
+    QString sNumberCopy(sNumber);
+    static const std::vector<QString> ones = {"-", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+                                              "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
+                                              "eighteen", "nineteen"};
+    static const std::vector<QString> tens = {"-", "-", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"};
+    static const QString hundred = "hundred";
+    static const std::vector<QString> powers = {"-", "thousand", "million", "billion", "trillion"};
+    static const QString sAnd = "and";
+
+    int iResult = 0;
+    if (sNumberCopy.startsWith(sAnd))
+    {
+      sNumberCopy.remove(0, sAnd.size());
+    }
+
+
+    for (int i = 0; i < tens.size(); ++i)
+    {
+      if (sNumberCopy.startsWith(tens[i]))
+      {
+        iResult += i * 10;
+        sNumberCopy.remove(0, tens[i].size());
+      }
+    }
+
+    for (int i = 0; i < ones.size(); ++i)
+    {
+      if (sNumberCopy.startsWith(ones[i]))
+      {
+        iResult += i;
+        sNumberCopy.remove(0, ones[i].size());
+      }
+    }
+
+    if (sNumberCopy.startsWith(hundred))
+    {
+      iResult *= 100;
+      sNumberCopy.remove(0, hundred.size());
+    }
+
+    for (int i = 0; i < powers.size(); ++i)
+    {
+      if (sNumberCopy.startsWith(powers[i]))
+      {
+        iResult *= std::pow(1000, i);
+        sNumberCopy.remove(0, powers[i].size());
+      }
+    }
+
+    iResult += iStartValue;
+    if (iStartValue != iResult)
+    {
+      return stringToInt(sNumberCopy, iResult);
+    }
+
+    return iResult;
+  }
+
+
   template<> int fromString<int>(const QString& sVal, bool& bConversionStatus)
   {
     bConversionStatus = false;
