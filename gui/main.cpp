@@ -44,6 +44,11 @@ namespace grammar
 
 int main(int argc, char *argv[])
 {
+  int iTest = conversion::stringToInt("ninehundredfiftytwo");
+  iTest = conversion::stringToInt("fiftyonethousandsevenhundredandfive");
+  iTest = conversion::stringToInt("seventytwomillionandthree");
+
+
   // test code for constraints
   using namespace grammar;
 
