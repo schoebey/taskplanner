@@ -44,9 +44,28 @@ namespace grammar
 
 int main(int argc, char *argv[])
 {
-  int iTest = conversion::stringToInt("ninehundredfiftytwo");
-  iTest = conversion::stringToInt("fiftyonethousandsevenhundredandfive");
-  iTest = conversion::stringToInt("seventytwomillionandthree");
+  QRegExp relativeToNow("^in ((?:\\S*\\s*)*)\\s+(\\S+){1}$");
+  QString s("in a hundred years");
+  if (0 == relativeToNow.indexIn(s))
+  {
+    QString s1 = relativeToNow.cap(1);
+    QString s2 = relativeToNow.cap(2);
+    QString s3 = relativeToNow.cap(3);
+  }
+
+
+  bool bIsInt = false;
+  int iTest = conversion::stringToInt("ninehundredfiftytwo", &bIsInt);
+  assert(bIsInt && iTest == 952);
+
+  iTest = conversion::stringToInt("fiftyonethousandsevenhundredandfive", &bIsInt);
+  assert(bIsInt && iTest == 51705);
+
+  iTest = conversion::stringToInt("seventytwomillionandthree", &bIsInt);
+  assert(bIsInt && iTest == 72000003);
+
+  iTest = conversion::stringToInt("hello world", &bIsInt);
+  assert(!bIsInt);
 
 
   // test code for constraints
