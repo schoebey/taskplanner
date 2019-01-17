@@ -8,9 +8,11 @@
 
 namespace conversion
 {
-  int stringToInt(const QString& sNumber, int iStartValue)
+  int stringToInt(const QString& sNumber, bool* pbStatus, int iStartValue)
   {
-    QString sNumberCopy(sNumber);
+    QString sNumberCopy(sNumber.simplified());
+    sNumberCopy.remove(" ");
+    static const std::vector<QString> one_variants = {"one", "a", "an"};
     static const std::vector<QString> ones = {"-", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
                                               "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
                                               "eighteen", "nineteen"};
@@ -25,6 +27,14 @@ namespace conversion
       sNumberCopy.remove(0, sAnd.size());
     }
 
+    for (const auto& one : one_variants)
+    {
+      if (sNumberCopy.startsWith(one))
+      {
+        iResult += 1;
+        sNumberCopy.remove(0, one.size());
+      }
+    }
 
     for (int i = 0; i < tens.size(); ++i)
     {
@@ -62,7 +72,12 @@ namespace conversion
     iResult += iStartValue;
     if (iStartValue != iResult)
     {
-      return stringToInt(sNumberCopy, iResult);
+      return stringToInt(sNumberCopy, pbStatus, iResult);
+    }
+
+    if (nullptr != pbStatus)
+    {
+      *pbStatus = sNumberCopy.isEmpty();
     }
 
     return iResult;
@@ -74,7 +89,7 @@ namespace conversion
     bConversionStatus = false;
     int iVal = sVal.toInt(&bConversionStatus);
     if (bConversionStatus)  { return iVal; }
-    return 0;
+    return stringToInt(sVal, &bConversionStatus);
   }
 
   static const QString c_sDateTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
@@ -104,6 +119,9 @@ in 2 days
 in 2 weeks
 in 2h
 in 17 hours
+in two and a half weeks
+in 5mins
+in a hundred years
 */
     std::function<void(QDateTime&, int)> addMins = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(60 * iOffset); };
     std::function<void(QDateTime&, int)> addHours = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(3600 * iOffset); };
@@ -118,13 +136,16 @@ in 17 hours
     addUnitQuantity.push_back(std::make_pair(QRegExp("w(?:eek)?(?:s)?"), addWeeks));
     addUnitQuantity.push_back(std::make_pair(QRegExp("month(?:s)?"), addMonths));
     addUnitQuantity.push_back(std::make_pair(QRegExp("y(?:ear)?(?:s)?"), addYears));
-    QRegExp relativeToNow("^in ([0-9]+)[\\s]*(\\w*)");
+    QRegExp relativeToNow("^in ((?:\\S*\\s*)*)\\s+(\\S+){1}$");
 
     if (0 == relativeToNow.indexIn(sVal))
     {
       QString sQuantity = relativeToNow.cap(1);
+      QString sTest = relativeToNow.cap(2);
+      QString sB = relativeToNow.cap(3);
+      QString sWhole = relativeToNow.cap(0);
       bool bIsInt(false);
-      int iQuantity = sQuantity.toInt(&bIsInt);
+      int iQuantity = fromString<int>(sQuantity, bIsInt);
       if (bIsInt)
       {
         QString sUnit = relativeToNow.cap(2);
