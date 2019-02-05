@@ -192,7 +192,7 @@ in a hundred years
                                                 QRegExp("oct(?:ober)?"),
                                                 QRegExp("nov(?:ember)?"),
                                                 QRegExp("dec(?:ember)?")};
-    static const std::map<QRegExp, QString> namedDates = {{QRegExp("xmas|christmas"), "Dec 24th"}};
+    //static const std::map<QRegExp, QString> namedDates = {{QRegExp("xmas|christmas"), "Dec 24th"}};
     QDateTime dt = QDateTime::currentDateTime();
     QRegExp nextInstance("^next (\\S*\\s*)");
     if (0 == nextInstance.indexIn(sVal))
