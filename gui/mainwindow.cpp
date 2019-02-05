@@ -37,10 +37,10 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
   QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
-  pWatcher->addPath("stylesheet.css");
+  pWatcher->addPath("../../../gui/resources/stylesheet.css");
   connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
 
-  reloadStylesheet("stylesheet.css");
+  reloadStylesheet(":/stylesheet.css");
 
   QMetaObject::invokeMethod(this, "load", Qt::QueuedConnection);
 }
