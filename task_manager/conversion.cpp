@@ -3,6 +3,7 @@
 #include <QRegExp>
 #include <set>
 #include <vector>
+#include <map>
 #include <functional>
 #include <cmath>
 
@@ -111,6 +112,10 @@ namespace conversion
       if (bConversionStatus)  { return dt; }
     }
 
+    // if standard Qt date format didn't match, try custom matching
+    // e.g. aug 25th (without year would match the next occurrence)
+    // TODO: implement
+
     // try to match natural language input
     /*
 in 5 minutes
@@ -160,6 +165,87 @@ in a hundred years
           }
         }
       }
+    }
+
+
+    // 2nd type of offset: 'next' instance of
+    // "next week", "next tuesday", "next full moon", etc.
+    // will set the date to the end of the provided unit
+    // e.g. next day will set the date to the end of the next day
+    // (end of work day and end of week will have to be configured,
+    // like 5pm, friday
+    static const std::vector<QRegExp> weekdays = {QRegExp("mon(?:day)?"),
+                                                  QRegExp("tue(?:sday)?"),
+                                                  QRegExp("wed(?:nesday)?"),
+                                                  QRegExp("thu(?:rsday)?"),
+                                                  QRegExp("fri(?:day)?"),
+                                                  QRegExp("sat(?:urday)?"),
+                                                  QRegExp("sun(?:day)?")};
+    static const std::vector<QRegExp> months = {QRegExp("jan(?:uary)?"),
+                                                QRegExp("feb(?:ruary)?"),
+                                                QRegExp("mar(?:ch)?"),
+                                                QRegExp("may"),
+                                                QRegExp("jun(?:e)?"),
+                                                QRegExp("jul(?:y)?"),
+                                                QRegExp("aug(?:ust)?"),
+                                                QRegExp("sep(?:t(?:empber)?)?"),
+                                                QRegExp("oct(?:ober)?"),
+                                                QRegExp("nov(?:ember)?"),
+                                                QRegExp("dec(?:ember)?")};
+    static const std::map<QRegExp, QString> namedDates = {{QRegExp("xmas|christmas"), "Dec 24th"}};
+    QDateTime dt = QDateTime::currentDateTime();
+    QRegExp nextInstance("^next (\\S*\\s*)");
+    if (0 == nextInstance.indexIn(sVal))
+    {
+      QString sType = nextInstance.cap(1);
+
+      // unit (see above)?
+      for (const auto& el : addUnitQuantity)
+      {
+        if (el.first.exactMatch(sType))
+        {
+          // for now, we will calculate the same timepoint in the next unit
+          // (e.g. the same time tomorrow, same day next week, etc.)
+          // ideal would be the last feasible timepoint in the desired unit
+          // (e.g. friday, 5pm next week, 5pm tomorrow, last day next month)
+          el.second(dt, 1);
+          bConversionStatus = true;
+          return dt;
+        }
+      }
+
+      // weekday (mon-sun)? for this, string format "on XY" would also work
+      for (int i = 0; i < weekdays.size(); ++i)
+      {
+        if (0 == weekdays[i].indexIn(sType))
+        {
+          int iCurrentDay = dt.date().dayOfWeek() - 1;
+          int iOffset = i - iCurrentDay;
+          if (iOffset <= 0)  iOffset += 7;
+          dt = dt.addDays(iOffset);
+          bConversionStatus = true;
+          return dt;
+        }
+      }
+
+
+      // month (jan-dec)?
+      for (int i = 0; i < months.size(); ++i)
+      {
+        if (0 == months[i].indexIn(sType))
+        {
+          int iCurrentMonth = dt.date().month() - 1;
+          int iOffset = i - iCurrentMonth;
+          if (iOffset <= 0)  iOffset += 12;
+          dt = dt.addMonths(iOffset);
+          bConversionStatus = true;
+          return dt;
+        }
+      }
+
+
+      // named days (holidays, e.g. 'christmas')?
+      // TODO: could benefit from working implementation of 'dateFromTrivialString("dec 24th")'
     }
 
     return QDateTime();
