@@ -403,35 +403,44 @@ void TaskWidget::onPropertyEdited()
 
 void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
 {
-  QPainter painter(this);
-  painter.setRenderHint(QPainter::Antialiasing, true);
-  painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-  painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-
-  static const double c_dBorderOffset = 4.5;
-  QRectF rct(rect());
-  rct.adjust(c_dBorderOffset, c_dBorderOffset, -c_dBorderOffset, -c_dBorderOffset);
-
-  if (nullptr != m_pParentTask)
+  if (m_cache.isNull())
   {
-    painter.setBrush(QColor(255, 255, 255, 30));
-  }
-  else
-  {
-    painter.drawImage(rect(), QImage(":/dropshadow.png"));
-    painter.save();
-    QPainterPath path;
-    path.addRoundedRect(rct, 7, 7);
-    painter.setClipPath(path);
-    QPointF offset(pos().x()/5, pos().y()/5);
-    QBrush b(m_backgroundImage);
-    painter.setBrush(b);
-    painter.drawRect(rct);
-    painter.restore();
-  }
+    m_cache = QPixmap(width(), height());
+    m_cache.fill(Qt::transparent);
+    QPainter painter(&m_cache);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
-  painter.setPen(QColor(255, 255, 255, 80));
-  painter.drawRoundedRect(rct.adjusted(1, 1, -1, -1), 5, 5);
+    static const double c_dBorderOffset = 4.5;
+    QRectF rct(rect());
+    rct.adjust(c_dBorderOffset, c_dBorderOffset, -c_dBorderOffset, -c_dBorderOffset);
+
+    if (nullptr != m_pParentTask)
+    {
+      painter.setBrush(QColor(255, 255, 255, 30));
+    }
+    else
+    {
+      painter.drawImage(rect(), QImage(":/dropshadow.png"));
+      painter.save();
+      QPainterPath path;
+      path.addRoundedRect(rct, 7, 7);
+      painter.setClipPath(path);
+      QPointF offset(pos().x()/5, pos().y()/5);
+      QBrush b(m_backgroundImage);
+      painter.setBrush(b);
+      painter.drawRect(rct);
+      painter.restore();
+    }
+
+    painter.setPen(QColor(255, 255, 255, 80));
+    painter.drawRoundedRect(rct.adjusted(1, 1, -1, -1), 5, 5);
+  }
+  else {
+    QPainter painter(this);
+    painter.drawPixmap(0, 0, m_cache);
+  }
 }
 
 void TaskWidget::resizeEvent(QResizeEvent* pEvent)
@@ -440,6 +449,8 @@ void TaskWidget::resizeEvent(QResizeEvent* pEvent)
 
   m_pOverlay->move(0, 0);
   m_pOverlay->resize(size());
+
+  m_cache = QPixmap();
 }
 
 void TaskWidget::focusInEvent(QFocusEvent* pEvent)
