@@ -4,6 +4,7 @@
 #include <QString>
 
 #include <functional>
+#include <memory>
 #include <map>
 
 template<typename T> class ConstraintTpl;

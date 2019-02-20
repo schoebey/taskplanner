@@ -26,6 +26,8 @@
 
 #include <array>
 
+Q_DECLARE_METATYPE(QIODevice*)
+
 MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
@@ -37,7 +39,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
   QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
-  pWatcher->addPath("../../../gui/resources/stylesheet.css");
+  pWatcher->addPath("gui/resources/stylesheet.css");
   connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
 
   reloadStylesheet(":/stylesheet.css");
@@ -396,7 +398,7 @@ void MainWindow::on_actionSaveAs_triggered()
   {
     auto it = std::find_if(serializers.begin(), serializers.end(),
                            [sSelectedFilter](const std::pair<QString, QString>& p)
-    { return p.second == sSelectedFilter; });
+    { return QString("%1 (*.%2)").arg(p.first).arg(p.second) == sSelectedFilter; });
     if (it != serializers.end())
     {
       tspSerializer spWriter = SerializerFactory::create(it->first);
