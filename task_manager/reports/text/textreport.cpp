@@ -16,6 +16,8 @@ namespace
   static const QString c_sTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
 }
 
+Q_DECLARE_METATYPE(QIODevice*)
+
 TextReport::TextReport()
 {
   //registerParameter(c_sPara_FileName, QVariant::String, true);

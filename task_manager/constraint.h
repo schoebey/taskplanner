@@ -102,7 +102,6 @@ public:
 private:
   QString m_sName;
 };
-template<typename T> using tspConstraintTpl = std::shared_ptr<ConstraintTpl<T>>;
 
 
 //---------------------------------------------------------------------------------------

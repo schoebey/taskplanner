@@ -127,7 +127,7 @@ TaskWidget[expanded=true] > #pStartStop {
   padding-left: 4px;
   padding-top: -6px;
   padding-right: 4px;
-  font-size: 11pt;
+  font-size: 10pt;
   color: rgba(255, 255, 255, 120);
   min-height: 25px;
 }
@@ -149,7 +149,7 @@ TaskWidget[expanded=true] > #pStartStop {
 
 TaskWidget #pTitle {
   padding-left: 4px;
-  font-size: 14pt;
+  font-size: 11pt;
   color: rgba(255, 255, 255, 192);
 }
 
