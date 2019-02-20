@@ -93,6 +93,8 @@ private:
   void contextMenuEvent(QContextMenuEvent* pEvent) override;
 
   Ui::TaskWidget *ui;
+  QPixmap m_cache;
+
   task_id m_taskId;
 
   bool m_bMouseDown = false;
