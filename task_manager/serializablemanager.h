@@ -27,6 +27,7 @@ public:
   bool removeGroup(group_id id);
   bool changeGroupId(group_id oldId, group_id newId);
 
+  void clear();
 private:
   std::map<task_id, tspTask> m_tasks;
   std::map<group_id, tspGroup> m_groups;

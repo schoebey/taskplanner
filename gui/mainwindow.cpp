@@ -54,6 +54,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::load()
 {
+  for (const auto& el : m_taskWidgets)
+  {
+    delete el.second;
+  }
+
+  for (const auto& el : m_groupWidgets)
+  {
+    delete el.second;
+  }
+
   size_t i = 0;
   std::array<QImage, 3> images = {{QImage(":/task_background_1.png"),
                                    QImage(":/task_background_2.png"),
@@ -376,8 +386,29 @@ void MainWindow::on_actionOpen_triggered()
   QString sFileName = QFileDialog::getOpenFileName(this, tr("Open task file..."));
   if (!sFileName.isEmpty())
   {
+    tspSerializer spReader = SerializerFactory::create("markdown");
+    if (!spReader->setParameter("fileName", sFileName))
+    {
+      assert(false);
+    }
 
+    EDeserializingError de = m_pManager->deserializeFrom(spReader.get());
+
+
+    if (EDeserializingError::eOk != de || 0 == m_pManager->groupIds().size())
+    {
+      IGroup* pGroup = m_pManager->addGroup();
+      pGroup->setName("backlog");
+
+      pGroup = m_pManager->addGroup();
+      pGroup->setName("in progress");
+
+      pGroup = m_pManager->addGroup();
+      pGroup->setName("done");
+    }
   }
+
+  load();
 }
 
 void MainWindow::on_actionSaveAs_triggered()

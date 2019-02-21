@@ -14,6 +14,12 @@ int SerializableManager::version() const
   return 0;
 }
 
+void SerializableManager::clear()
+{
+  m_tasks.clear();
+  m_groups.clear();
+}
+
 Task* SerializableManager::addTask(task_id taskId)
 {
   tspTask spTask = std::make_shared<Task>(m_pManager, taskId);
@@ -154,6 +160,8 @@ ESerializingError SerializableManager::serialize(ISerializer* pSerializer) const
 
 EDeserializingError SerializableManager::deserialize(ISerializer* pSerializer)
 {
+  clear();
+
   EDeserializingError err;
   err= pSerializer->initDeserialization();
   if (EDeserializingError::eOk != err)  { return err; }
