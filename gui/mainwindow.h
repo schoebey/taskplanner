@@ -3,6 +3,7 @@
 
 #include "id_types.h"
 #include <QMainWindow>
+#include <QPointer>
 #include <map>
 
 namespace Ui {
@@ -56,8 +57,8 @@ signals:
 
 private:
   Ui::MainWindow *ui;
-  std::map<group_id, GroupWidget*> m_groupWidgets;
-  std::map<task_id, TaskWidget*> m_taskWidgets;
+  std::map<group_id, QPointer<GroupWidget>> m_groupWidgets;
+  std::map<task_id, QPointer<TaskWidget>> m_taskWidgets;
   Manager* m_pManager = nullptr;
   TaskCreationDialog* m_pTaskCreationDialog = nullptr;
   std::map<group_id, QTimer*> m_autoSortTimers;
