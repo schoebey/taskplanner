@@ -39,7 +39,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
   QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
-  pWatcher->addPath("gui/resources/stylesheet.css");
+  pWatcher->addPath("stylesheet.css");
   connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
 
   reloadStylesheet(":/stylesheet.css");
@@ -552,8 +552,8 @@ void MainWindow::onTaskDeleted(task_id id)
     auto it = m_taskWidgets.find(id);
     if (it != m_taskWidgets.end())
     {
-      m_taskWidgets.erase(it);
       delete it->second;
+      m_taskWidgets.erase(it);
     }
   }
 }

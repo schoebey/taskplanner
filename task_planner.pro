@@ -10,4 +10,5 @@ include(task_manager/task_manager.pri)
 include(gui/gui.pri)
 
 DISTFILES += \
-    notes.txt
+    notes.txt \
+    todos.md
