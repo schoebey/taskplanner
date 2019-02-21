@@ -37,6 +37,7 @@ EReportError TextReport::create_impl(const Manager& manager) const
 
 
   QTextStream s(pDevice);
+  s.setCodec("UTF-8");
 
   // generate a report for the past five days
   QDateTime startDate(QDate::currentDate().addDays(-4));
