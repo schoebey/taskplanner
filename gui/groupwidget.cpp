@@ -306,15 +306,17 @@ bool GroupWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
     QPoint pt = ui->scrollAreaWidgetContents->mapFromGlobal(pMouseEvent->globalPos());
     if (ui->scrollAreaWidgetContents->rect().contains(pt))
     {
-      m_pMouseHoveringOver = this;
-
-
       pt = mapFromGlobal(pMouseEvent->globalPos());
       TaskWidget* pTaskWidget = taskWidgetAt(pt);
       TaskWidget::SetTaskWidgetUnderMouse(pTaskWidget);
 
       if (nullptr != TaskWidget::DraggingTaskWidget())
-      {
+      {        
+        if (this != m_pMouseHoveringOver)
+        {
+          TaskWidget::DraggingTaskWidget()->setBackgroundImage(backgroundImage());
+        }
+
         // if dragging the widget into the drop zone
         // of the task (for sub tasks), the ghost should
         // not change position.
@@ -324,6 +326,8 @@ bool GroupWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
           ShowGhost(TaskWidget::DraggingTaskWidget(), iPos);
         }
       }
+
+      m_pMouseHoveringOver = this;
     }
     else
     {

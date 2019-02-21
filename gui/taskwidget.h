@@ -49,6 +49,10 @@ public:
 
   void setBackgroundImage(const QImage& image);
 
+  Q_PROPERTY(double backgroundImageBlendFactor READ backgroundImageBlendFactor WRITE setBackgroundImageBlendFactor)
+  double backgroundImageBlendFactor() const;
+  void setBackgroundImageBlendFactor(double dFactor);
+
   void edit();
 public slots:
   void setExpanded(bool bExpanded);
@@ -99,7 +103,8 @@ private:
 
   bool m_bMouseDown = false;
   QPoint m_mouseDownPos;
-  QImage m_backgroundImage;
+  QImage m_backgroundImage[2];
+  double m_dBackgroundImageBlendFactor = 0;
 
   GroupWidget* m_pGroupWidget = nullptr;
   GroupWidget* m_pPreviousGroupWidget = nullptr;

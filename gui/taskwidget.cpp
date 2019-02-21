@@ -132,8 +132,30 @@ void TaskWidget::SetGroupWidget(GroupWidget* pGroupWidget)
 
 void TaskWidget::setBackgroundImage(const QImage& image)
 {
-  m_backgroundImage = image;
+  m_backgroundImage[1] = m_backgroundImage[0];
+  m_backgroundImage[0] = image;
+  m_dBackgroundImageBlendFactor = 1;
+
+  QPropertyAnimation* pAnimation = new QPropertyAnimation(this, "backgroundImageBlendFactor");
+  static const double c_dDuration = 1000;
+  pAnimation->setDuration(c_dDuration);
+  pAnimation->setStartValue(1);
+  pAnimation->setEndValue(0);
+  pAnimation->setEasingCurve(QEasingCurve::Linear);
+  pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 }
+
+double TaskWidget::backgroundImageBlendFactor() const
+{
+  return m_dBackgroundImageBlendFactor;
+}
+
+void TaskWidget::setBackgroundImageBlendFactor(double dFactor)
+{
+  m_dBackgroundImageBlendFactor = dFactor;
+  update();
+}
+
 void TaskWidget::edit()
 {
   ui->pTitle->edit();
@@ -403,7 +425,8 @@ void TaskWidget::onPropertyEdited()
 
 void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
 {
-  if (m_cache.isNull())
+  bool bRefreshCache = m_cache.isNull() || !qFuzzyIsNull(m_dBackgroundImageBlendFactor);
+  if (bRefreshCache)
   {
     m_cache = QPixmap(width(), height());
     m_cache.fill(Qt::transparent);
@@ -428,16 +451,24 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
       path.addRoundedRect(rct, 7, 7);
       painter.setClipPath(path);
       QPointF offset(pos().x()/5, pos().y()/5);
-      QBrush b(m_backgroundImage);
+      QBrush b(m_backgroundImage[0]);
       painter.setBrush(b);
       painter.drawRect(rct);
+
+
+      QBrush f(m_backgroundImage[1]);
+      painter.setOpacity(m_dBackgroundImageBlendFactor);
+      painter.setBrush(f);
+      painter.drawRect(rct);
+
       painter.restore();
     }
 
     painter.setPen(QColor(255, 255, 255, 80));
     painter.drawRoundedRect(rct.adjusted(1, 1, -1, -1), 5, 5);
   }
-  else {
+  //else
+  {
     QPainter painter(this);
     painter.drawPixmap(0, 0, m_cache);
   }
