@@ -27,6 +27,10 @@ public:
   GroupWidget* createGroupWidget(group_id id);
   TaskWidget* createTaskWidget(task_id id);
 
+  bool loadFile(const QString& sFileName, QString* psErrorMessage = nullptr);
+  
+  bool saveFile(const QString& sFileName, QString* psErrorMessage = nullptr);
+  
 private slots:
   void createNewTask(group_id groupId);
   void renameGroup(group_id id, const QString& sNewName);
@@ -34,7 +38,7 @@ private slots:
   void changeTaskDescription(task_id id, const QString& sNewDescr);
   void moveTask(task_id id, group_id groupId, int iPos);
   void reloadStylesheet(const QString& sPath);
-  void load();
+  void initUi();
   void startTimeTracking(task_id taskId);
   void stopTimeTracking(task_id taskId);
   void on_actionOpen_triggered();
@@ -57,6 +61,7 @@ signals:
 
 private:
   Ui::MainWindow *ui;
+  QString m_sFileName;
   std::map<group_id, QPointer<GroupWidget>> m_groupWidgets;
   std::map<task_id, QPointer<TaskWidget>> m_taskWidgets;
   Manager* m_pManager = nullptr;
