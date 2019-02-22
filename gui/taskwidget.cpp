@@ -91,6 +91,14 @@ void TaskWidget::setUpContextMenu()
       pPropertiesMenu->addAction(pAction);
     }
   }
+
+  m_pContextMenu->addSeparator();
+
+
+
+  QAction* pAction = new QAction(tr("Add subtask"), this);
+  connect(pAction, SIGNAL(triggered()), this, SLOT(onAddSubtaskTriggered()));
+  m_pContextMenu->addAction(pAction);
 }
 
 task_id TaskWidget::id() const
@@ -239,6 +247,11 @@ void TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
   {
     it->second->setText(sValue);
   }
+}
+
+void TaskWidget::onAddSubtaskTriggered()
+{
+  emit newSubTaskRequested(id());
 }
 
 HighlightingMethod TaskWidget::highlight() const

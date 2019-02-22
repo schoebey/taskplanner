@@ -49,6 +49,8 @@ private slots:
   void onTaskRemoved(task_id parentTaskId, task_id childTaskId);
   void onTaskAdded(task_id parentTaskId, task_id childTaskId);  
   void onNewTaskAccepted();
+  void createNewSubTask(task_id taskId);
+  void onNewSubTaskAccepted();
   void setAutoSortEnabled(group_id);
   void setAutoSortDisabled(group_id);
   void onSortGroupTriggered(int iGroupId);

@@ -66,6 +66,7 @@ signals:
   void timeTrackingStopped(task_id id);
   void propertyChanged(task_id id, const QString& sName, const QString& sValue);
   void sizeChanged();
+  void newSubTaskRequested(task_id taskId);
   void taskAdded(task_id parentId, task_id childId);
   void taskRemoved(task_id parentId, task_id childId);
   void taskDeleted(task_id id);
@@ -79,6 +80,7 @@ private slots:
   void onAddPropertyTriggered();
   void updateSize();  
   void onDeleteTriggered();
+  void onAddSubtaskTriggered();
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;

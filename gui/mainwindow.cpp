@@ -175,6 +175,7 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   connect(pTaskWidget, SIGNAL(taskAdded(task_id, task_id)), this, SLOT(onTaskAdded(task_id, task_id)));
   connect(pTaskWidget, SIGNAL(taskRemoved(task_id, task_id)), this, SLOT(onTaskRemoved(task_id, task_id)));
   connect(pTaskWidget, SIGNAL(taskDeleted(task_id)), this, SLOT(onTaskDeleted(task_id)));
+  connect(pTaskWidget, SIGNAL(newSubTaskRequested(task_id)), this, SLOT(createNewSubTask(task_id)));
   connect(this, SIGNAL(timeTrackingStopped(task_id)), pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
 
@@ -220,7 +221,6 @@ void MainWindow::createNewTask(group_id groupId)
       m_pTaskCreationDialog->setProperty("groupId", groupId);
       connect(m_pTaskCreationDialog, SIGNAL(accepted()), this, SLOT(onNewTaskAccepted()));
       m_pTaskCreationDialog->show();
-
     }
   }
 }
@@ -239,6 +239,40 @@ void MainWindow::onNewTaskAccepted()
     pTask->setDescription(m_pTaskCreationDialog->description());
     pGroup->addTask(pTask->id());
     it->second->insertTask(createTaskWidget(pTask->id()));
+  }
+}
+
+void MainWindow::createNewSubTask(task_id taskId)
+{
+  ITask* pTask = m_pManager->task(taskId);
+  if (nullptr != pTask)
+  {
+    auto it = m_taskWidgets.find(taskId);
+    if (it != m_taskWidgets.end())
+    {
+      delete m_pTaskCreationDialog;
+      m_pTaskCreationDialog = new TaskCreationDialog(this);
+      m_pTaskCreationDialog->setProperty("taskId", taskId);
+      connect(m_pTaskCreationDialog, SIGNAL(accepted()), this, SLOT(onNewSubTaskAccepted()));
+      m_pTaskCreationDialog->show();
+    }
+  }
+}
+
+void MainWindow::onNewSubTaskAccepted()
+{
+  task_id taskId = m_pTaskCreationDialog->property("taskId").value<group_id>();
+
+  ITask* pParentTask = m_pManager->task(taskId);
+  auto it = m_taskWidgets.find(taskId);
+  if (nullptr != pParentTask &&
+      it != m_taskWidgets.end())
+  {
+    ITask* pTask = m_pManager->addTask();
+    pTask->setName(m_pTaskCreationDialog->name());
+    pTask->setDescription(m_pTaskCreationDialog->description());
+    pParentTask->addTask(pTask->id());
+    it->second->addTask(createTaskWidget(pTask->id()));
   }
 }
 
