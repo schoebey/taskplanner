@@ -58,11 +58,13 @@ void MainWindow::load()
   {
     delete el.second;
   }
+  m_taskWidgets.clear();
 
   for (const auto& el : m_groupWidgets)
   {
     delete el.second;
   }
+  m_groupWidgets.clear();
 
   size_t i = 0;
   std::array<QImage, 3> images = {{QImage(":/task_background_1.png"),
