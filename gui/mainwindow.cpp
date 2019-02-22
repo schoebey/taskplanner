@@ -44,15 +44,16 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
   reloadStylesheet(":/stylesheet.css");
 
-  QMetaObject::invokeMethod(this, "load", Qt::QueuedConnection);
+  initUi();
 }
 
 MainWindow::~MainWindow()
 {
+  saveFile(m_sFileName);
   delete ui;
 }
 
-void MainWindow::load()
+void MainWindow::initUi()
 {
   for (const auto& el : m_taskWidgets)
   {
@@ -65,6 +66,7 @@ void MainWindow::load()
     delete el.second;
   }
   m_groupWidgets.clear();
+
 
   size_t i = 0;
   std::array<QImage, 3> images = {{QImage(":/task_background_1.png"),
@@ -383,35 +385,142 @@ void MainWindow::stopTimeTracking(task_id taskId)
   }
 }
 
-void MainWindow::on_actionOpen_triggered()
+bool MainWindow::loadFile(const QString& sFileName, QString* psErrorMessage)
 {
-  QString sFileName = QFileDialog::getOpenFileName(this, tr("Open task file..."));
   if (!sFileName.isEmpty())
   {
-    tspSerializer spReader = SerializerFactory::create("markdown");
-    if (!spReader->setParameter("fileName", sFileName))
+    QFileInfo info(sFileName);
+    QString sSuffix = info.suffix();
+
+    auto serializers = SerializerFactory::classes();
+    auto it = std::find_if(serializers.begin(), serializers.end(),
+                           [sSuffix](const std::pair<QString, QString>& p)
+    { return p.second == sSuffix; });
+
+    if (it != serializers.end())
     {
-      assert(false);
-    }
+      tspSerializer spReader = SerializerFactory::create(it->first);
+      if (!spReader->setParameter("fileName", sFileName))
+      {
+        if (nullptr != psErrorMessage)
+        {
+          *psErrorMessage = tr("parameter 'fileName' not supported "
+                               "for serializer '%1'").arg(it->first);
+        }
 
-    EDeserializingError de = m_pManager->deserializeFrom(spReader.get());
+        return false;
+      }
+
+      EDeserializingError de = m_pManager->deserializeFrom(spReader.get());
 
 
-    if (EDeserializingError::eOk != de || 0 == m_pManager->groupIds().size())
-    {
-      IGroup* pGroup = m_pManager->addGroup();
-      pGroup->setName("backlog");
+      if (EDeserializingError::eOk == de)
+      {
+        m_sFileName = sFileName;
 
-      pGroup = m_pManager->addGroup();
-      pGroup->setName("in progress");
+        setWindowTitle(QString("%1[*] - %2").arg(m_sFileName).arg(QGuiApplication::applicationDisplayName()));
 
-      pGroup = m_pManager->addGroup();
-      pGroup->setName("done");
+        initUi();
+
+        return true;
+      }
+      else
+      {
+        if (nullptr != psErrorMessage)
+        {
+          switch (de)
+          {
+          case EDeserializingError::eInternalError:
+            *psErrorMessage = tr("internal error");
+            break;
+          case EDeserializingError::eResourceError:
+            *psErrorMessage = tr("resource error");
+            break;
+          case EDeserializingError::eWrongParameter:
+            *psErrorMessage = tr("wrong parameter");
+            break;
+          case EDeserializingError::eOk:
+          default:
+            break;
+          }
+        }
+      }
     }
   }
 
-  load();
+  return false;
 }
+
+
+bool MainWindow::saveFile(const QString& sFileName, QString* psErrorMessage)
+{
+  if (!sFileName.isEmpty())
+  {
+    QFileInfo info(sFileName);
+    QString sSuffix = info.suffix();
+
+    auto serializers = SerializerFactory::classes();
+    auto it = std::find_if(serializers.begin(), serializers.end(),
+                           [sSuffix](const std::pair<QString, QString>& p)
+    { return p.second == sSuffix; });
+    if (it != serializers.end())
+    {
+      tspSerializer spWriter = SerializerFactory::create(it->first);
+      if (!spWriter->setParameter("fileName", sFileName))
+      {
+        if (nullptr != psErrorMessage)
+        {
+          *psErrorMessage = tr("parameter 'fileName' not supported "
+                               "for serializer '%1'").arg(it->first);
+        }
+
+        return false;
+      }
+
+      QString sErrorMessage;
+      ESerializingError err = m_pManager->serializeTo(spWriter.get());
+      switch (err)
+      {
+      case ESerializingError::eInternalError:
+        sErrorMessage = tr("serialisation to '%1' has failed with an internal error.")
+            .arg(sFileName);
+        break;
+      case ESerializingError::eResourceError:
+        sErrorMessage = tr("serialisation to '%1' has failed with a resource error.")
+            .arg(sFileName);
+        break;
+      case ESerializingError::eWrongParameter:
+        sErrorMessage = tr("serialisation to '%1' has failed. Wrong/missing parameter.")
+            .arg(sFileName);
+        break;
+      case ESerializingError::eOk:
+      default:
+        break;
+      }
+
+      if (nullptr != psErrorMessage)
+      {
+        *psErrorMessage = sErrorMessage;
+      }
+
+      return ESerializingError::eOk == err;
+    }
+  }
+
+  return false;
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+  QString sFileName = QFileDialog::getOpenFileName(this, tr("Open task file..."));
+
+  QString sErrorMessage;
+  if (!loadFile(sFileName, &sErrorMessage))
+  {
+    QMessageBox::critical(this, tr("error loading file"), sErrorMessage);
+  }
+}
+
 
 void MainWindow::on_actionSaveAs_triggered()
 {
@@ -427,47 +536,11 @@ void MainWindow::on_actionSaveAs_triggered()
   QString sFileName = QFileDialog::getSaveFileName(this, tr("Save task file as..."),
                                                    QString(), sFilter,
                                                    &sSelectedFilter);
-  if (!sFileName.isEmpty())
+
+  QString sErrorMessage;
+  if (!saveFile(sFileName, &sErrorMessage))
   {
-    auto it = std::find_if(serializers.begin(), serializers.end(),
-                           [sSelectedFilter](const std::pair<QString, QString>& p)
-    { return QString("%1 (*.%2)").arg(p.first).arg(p.second) == sSelectedFilter; });
-    if (it != serializers.end())
-    {
-      tspSerializer spWriter = SerializerFactory::create(it->first);
-      if (!spWriter->setParameter("fileName", sFileName))
-      {
-        QMessageBox::critical(this, tr("error writing file"),
-                              tr("parameter 'filename' not supported "
-                                 "for serializer '%1'").arg(it->first));
-      }
-
-      ESerializingError err = m_pManager->serializeTo(spWriter.get());
-      if (ESerializingError::eOk != err)
-      {
-        QString sErrorMessage;
-        switch (err)
-        {
-        case ESerializingError::eInternalError:
-          sErrorMessage = tr("serialisation to '%1' has failed with an internal error.")
-          .arg(sFileName);
-          break;
-        case ESerializingError::eResourceError:
-          sErrorMessage = tr("serialisation to '%1' has failed with a resource error.")
-          .arg(sFileName);
-          break;
-        case ESerializingError::eWrongParameter:
-          sErrorMessage = tr("serialisation to '%1' has failed. Wrong/missing parameter.")
-          .arg(sFileName);
-          break;
-        case ESerializingError::eOk:
-        default:
-          break;
-        }
-
-        QMessageBox::critical(this, tr("error writing file"), sErrorMessage);
-      }
-    }
+    QMessageBox::critical(this, tr("error writing file"), sErrorMessage);
   }
 }
 
