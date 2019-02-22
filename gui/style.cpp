@@ -16,7 +16,7 @@ namespace
 
     QString sKey = QString("%1_%2x%3_%4").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
 
-    QPixmap* pPixmap = nullptr;//QPixmapCache::find(sKey);
+    QPixmap* pPixmap = QPixmapCache::find(sKey);
     if (nullptr == pPixmap)
     {
       QImage img(m.width(sText), m.height() + 2, QImage::Format_ARGB32);
