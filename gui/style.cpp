@@ -65,6 +65,8 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
                          const QPalette& pal, bool enabled, const QString& text,
                          QPalette::ColorRole textRole) const
 {
+  QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
+  return;
   if (text.contains("\n"))
   {
    QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);

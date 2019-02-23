@@ -306,7 +306,7 @@ void TaskWidget::setHighlight(HighlightingMethod method)
 
 void TaskWidget::updateSize()
 {
-  resize(width(), minimumSizeHint().height());
+  resize(width(), sizeHint().height());
 }
 
 bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
@@ -401,8 +401,7 @@ void TaskWidget::onTitleEdited()
 
 void TaskWidget::onDescriptionEdited()
 {
-  int iMinHeight = minimumSizeHint().height();
-  resize(width(), iMinHeight);
+  resize(width(), sizeHint().height());
   emit descriptionChanged(m_taskId, ui->pDescription->text());
 }
 
