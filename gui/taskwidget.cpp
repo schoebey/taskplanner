@@ -306,7 +306,12 @@ void TaskWidget::setHighlight(HighlightingMethod method)
 
 void TaskWidget::updateSize()
 {
-  resize(width(), sizeHint().height());
+  int iWidth = ui->pProperties->width();
+  ui->pDescription->suggestWidth(iWidth);
+  int iSuggestedDescHeight = ui->pDescription->sizeHint().height();
+
+  int iSuggestedHeight = sizeHint().height();
+  resize(width(), iSuggestedHeight);
 }
 
 bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
@@ -401,7 +406,7 @@ void TaskWidget::onTitleEdited()
 
 void TaskWidget::onDescriptionEdited()
 {
-  resize(width(), sizeHint().height());
+  updateSize();
   emit descriptionChanged(m_taskId, ui->pDescription->text());
 }
 
@@ -493,6 +498,8 @@ void TaskWidget::resizeEvent(QResizeEvent* pEvent)
   m_pOverlay->move(0, 0);
   m_pOverlay->resize(size());
 
+  QMetaObject::invokeMethod(this, "updateSize", Qt::QueuedConnection);
+
   m_cache = QPixmap();
 }
 
@@ -509,12 +516,12 @@ void TaskWidget::focusOutEvent(QFocusEvent* pEvent)
   m_pOverlay->setHighlight(m_pOverlay->highlight() & ~EHighlightMethod::eFocus);
 }
 
-void TaskWidget::enterEvent(QEvent* pEvent)
+void TaskWidget::enterEvent(QEvent* /*pEvent*/)
 {
   setHighlight(highlight() | EHighlightMethod::eHover);
 }
 
-void TaskWidget::leaveEvent(QEvent* pEvent)
+void TaskWidget::leaveEvent(QEvent* /*pEvent*/)
 {
   setHighlight(highlight() & ~EHighlightMethod::eHover);
 }
@@ -545,6 +552,7 @@ void TaskWidget::setExpanded(bool bExpanded)
   ui->pStartStop->style()->unpolish(ui->pStartStop);
   ui->pStartStop->style()->polish(ui->pStartStop);
 
+  updateSize();
   QMetaObject::invokeMethod(this, "sizeChanged", Qt::QueuedConnection);
 }
 

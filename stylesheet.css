@@ -6,6 +6,42 @@ MainWindow {
 
 MainWindow #frame {
   border: 0px;
+  padding: -12px;
+}
+
+QToolBar {
+  border: 0px;  
+  background: rgba(255,255,255,20);
+  min-height: 50px;
+}
+
+QPushButton {
+  border: 1px solid rgba(70, 70, 70, 255);
+  background-color: rgba(255,255,255,10);
+  padding: 5px;
+  min-height: 15px;
+  width: 50px;  
+  color: rgba(255, 255, 255, 128);
+}
+
+QPushButton:hover {
+  border: 1px solid rgba(255, 255, 255, 30);
+  background-color: rgba(255, 255, 255, 20);
+}
+
+QPushButton:focus {
+  border: 1px solid rgba(0, 255, 255, 80);
+  background-color: rgba(0, 255, 255, 20);
+}
+
+QPushButton:focus:hover {
+  background-color: rgba(0, 255, 255, 30);
+}
+
+QPushButton:pressed,
+QPushButton:checked {
+  background-color: rgba(0, 0, 0, 20);
+  padding: 1px 0 0 0;
 }
 
 QScrollArea {
@@ -19,7 +55,6 @@ QScrollArea #scrollAreaWidgetContents {
 }
 
 GroupWidget {
-  /*border: 1px solid green;*/
   background-color: rgba(255,255,255,10);
   width: 150px;
   border-radius: 7px;
@@ -29,35 +64,142 @@ GroupWidget > #pTitle {
   color: #777;
 }
 
+GroupWidget > #pAddTask, 
+OverlayWidget > #pClose {
+  border-top-right-radius: 5px;
+} 
+
+ 
 TaskWidget {
-  margin: 5px 5px 0px 5px;
-  /*border: 3px solid rgba(40, 40, 40, 100);*/
-  /*background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 rgb(70, 70, 70), 
-                stop:1 rgb(60, 60, 60));*/
-  /*background: red;*/
-  /*background-image: url(:/task_background_1.png);*/
-  /*border-radius: 5px;*/
+  margin: 5px 5px 5px 5px;
   padding: 0px;
 }
 
+TaskWidget #pShowDetails {
+  border: 1px solid rgba(255,255,255,50);
+  background-color: rgba(255,255,255,40);
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  padding: 5px;
+  min-height: 15px;
+  width: 20px;
+  color: rgba(255, 255, 255, 128);
+  background-image: url(:/icons/arrow_right.png);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+TaskWidget #pShowDetails:checked {
+  border-bottom-left-radius: 0px;
+  background-image: url(:/icons/arrow_down.png);
+}
+
 TaskWidget #pStartStop {
-  border: 1px solid rgba(255,255,255,20);
-  background-color: rgba(255,255,255,10);
+  border: 1px solid rgba(255,255,255,50);
+  background-color: rgba(255,255,255,40);
   border-top-right-radius: 5px;
   padding: 5px;
   min-height: 15px;
+  width: 20px;
+  color: rgba(255, 255, 255, 128);
+  background-image: url(:/icons/timer_start.png);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+TaskWidget #pStartStop:checked {
+  background-image: url(:/icons/timer_stop.png);
+}
+
+TaskWidget[expanded=false] > #pStartStop {
+  border-bottom-right-radius: 5px;
+}
+
+TaskWidget[expanded=true] > #pStartStop {
+  border-bottom-right-radius: 0px;
+}
+
+#pProperties {
+  padding: 10px 0px 0px 0px;
+  border: 1px solid #00ff00;
+}
+
+#pProperties QLabel {
+  padding-left: 4px;
+  padding-top: 0px;
+  padding-right: 4px;
+  font-size: 10pt;
+  color: rgba(255, 255, 255, 120);
+  border: 1px solid red;
+}
+
+#pSeparator {
+  border-top: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
+                stop:0 rgba(0, 0, 0, 0), 
+                stop:0.4 rgba(0, 0, 0, 80), 
+                stop:0.6 rgba(0, 0, 0, 80), 
+                stop:1 rgba(0, 0, 0, 0));
+  border-bottom: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
+                stop:0 rgba(255, 255, 255, 0), 
+                stop:0.4 rgba(255, 255, 255, 80), 
+                stop:0.6 rgba(255, 255, 255, 80), 
+                stop:1 rgba(255, 255, 255, 0));
+  min-height: 0px;
+  margin: 5px 10px 5px 10px;
 }
 
 TaskWidget #pTitle {
-  padding: 2px;
-  border: 0px solid red;
-  color: #fff;
+  padding-left: 4px;
+  font-size: 11pt;
+  color: rgba(255, 255, 255, 192);
 }
 
-
-TaskWidget #pDescription {
-  padding: 2px;
+#pSubTasks {
   border: 0px solid red;
-  color: rgba(255,255,255,150);
 }
+
+OverlayWidget {
+  border: 0px;
+  border-radius: 10px;
+  background: rgba(50, 50, 50, 240);
+  margin: 62 12 12 12;
+  padding: 12px;
+}
+
+OverlayWidget QLabel {
+  color: rgba(200, 200, 200, 255);
+}
+
+OverlayWidget #report {
+  font-family: courier;
+  background: rgba(255, 255, 255, 10);
+}
+
+#pInsertTask {
+  min-width: 450px;
+  max-width: 450px;
+  min-height: 250px;
+  max-height: 250px;
+}
+
+#pInsertTask TaskWidget {
+  min-width: 415px;
+}
+
+#pInsertTask TaskWidget #pShowDetails,
+#pInsertTask TaskWidget #pStartStop {
+  min-height: 0px;
+  max-height: 0px;
+  width: 0px;
+  padding: 0px;
+  border: 0px;
+}
+
+#pInsertTask #pOk{
+  border-bottom-right-radius: 5px;
+}
+
+#pInsertTask #pCancel {
+  border-bottom-left-radius: 5px;
+}
+

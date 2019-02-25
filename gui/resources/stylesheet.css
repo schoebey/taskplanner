@@ -1,6 +1,6 @@
 MainWindow {
   background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgb(50, 50, 50), 
+                stop:0 rgb(50, 50, 50),
                 stop:1 rgb(30, 30, 30));
 }
 
@@ -10,7 +10,7 @@ MainWindow #frame {
 }
 
 QToolBar {
-  border: 0px;  
+  border: 0px;
   background: rgba(255,255,255,20);
   min-height: 50px;
 }
@@ -20,7 +20,7 @@ QPushButton {
   background-color: rgba(255,255,255,10);
   padding: 5px;
   min-height: 15px;
-  width: 50px;  
+  width: 50px;
   color: rgba(255, 255, 255, 128);
 }
 
@@ -64,12 +64,12 @@ GroupWidget > #pTitle {
   color: #777;
 }
 
-GroupWidget > #pAddTask, 
+GroupWidget > #pAddTask,
 OverlayWidget > #pClose {
   border-top-right-radius: 5px;
-} 
+}
 
- 
+
 TaskWidget {
   margin: 5px 5px 5px 5px;
   padding: 0px;
@@ -121,27 +121,32 @@ TaskWidget[expanded=true] > #pStartStop {
 
 #pProperties {
   padding: 10px 0px 0px 0px;
+  border: 1px solid #00ff00;
 }
 
 #pProperties QLabel {
   padding-left: 4px;
-  padding-top: -6px;
+  padding-top: 0px;
   padding-right: 4px;
-  font-size: 10pt;
+  font-size: 12pt;
   color: rgba(255, 255, 255, 120);
-  min-height: 25px;
+  border: 1px solid red;
+}
+
+#pDescriptionFrame {
+  border: 1px solid blue;
 }
 
 #pSeparator {
   border-top: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
-                stop:0 rgba(0, 0, 0, 0), 
-                stop:0.4 rgba(0, 0, 0, 80), 
-                stop:0.6 rgba(0, 0, 0, 80), 
+                stop:0 rgba(0, 0, 0, 0),
+                stop:0.4 rgba(0, 0, 0, 80),
+                stop:0.6 rgba(0, 0, 0, 80),
                 stop:1 rgba(0, 0, 0, 0));
   border-bottom: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
-                stop:0 rgba(255, 255, 255, 0), 
-                stop:0.4 rgba(255, 255, 255, 80), 
-                stop:0.6 rgba(255, 255, 255, 80), 
+                stop:0 rgba(255, 255, 255, 0),
+                stop:0.4 rgba(255, 255, 255, 80),
+                stop:0.6 rgba(255, 255, 255, 80),
                 stop:1 rgba(255, 255, 255, 0));
   min-height: 0px;
   margin: 5px 10px 5px 10px;
