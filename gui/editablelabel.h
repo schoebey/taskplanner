@@ -15,8 +15,15 @@ public:
 
   void edit();
 
+  void suggestWidth(int iWidth);
+
+  QSize sizeHint() const override;
+
 signals:
   void editingFinished();
+
+private:
+  int m_iSuggestedWidth = -1;
 };
 
 #endif // EDITABLELABEL_H

@@ -101,7 +101,7 @@ void GroupWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
     qDebug() << currentPos.x() << currentPos.y();
     pTaskWidget->setParent(ui->scrollAreaWidgetContents);
     pTaskWidget->SetGroupWidget(this);
-    pTaskWidget->resize(ui->scrollAreaWidgetContents->width(), pTaskWidget->minimumSizeHint().height());
+    pTaskWidget->resize(ui->scrollAreaWidgetContents->width(), pTaskWidget->sizeHint().height());
     pTaskWidget->move(ui->scrollAreaWidgetContents->mapFromGlobal(currentPos));
     pTaskWidget->show();
 
