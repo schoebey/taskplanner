@@ -9,6 +9,7 @@ MainWindow #frame {
   padding: -12px;
 }
 
+
 QToolBar {
   border: 0px;
   background: rgba(255,255,255,20);
@@ -121,7 +122,7 @@ TaskWidget[expanded=true] > #pStartStop {
 
 #pProperties {
   padding: 10px 0px 0px 0px;
-  border: 1px solid #00ff00;
+  border: 0px solid #00ff00;
 }
 
 #pProperties QLabel {
@@ -129,12 +130,12 @@ TaskWidget[expanded=true] > #pStartStop {
   padding-top: 0px;
   padding-right: 4px;
   font-size: 12pt;
-  color: rgba(255, 255, 255, 120);
-  border: 1px solid red;
+  color: rgba(255, 255, 255, 200);
+  border: 0px solid red;
 }
 
 #pDescriptionFrame {
-  border: 1px solid blue;
+  border: 0px solid blue;
 }
 
 #pSeparator {
@@ -155,7 +156,7 @@ TaskWidget[expanded=true] > #pStartStop {
 TaskWidget #pTitle {
   padding-left: 4px;
   font-size: 11pt;
-  color: rgba(255, 255, 255, 192);
+  color: rgba(255, 255, 255, 224);
 }
 
 #pSubTasks {
