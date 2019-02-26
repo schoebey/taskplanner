@@ -1,12 +1,19 @@
 #include "style.h"
 
+#include "editablelabel.h"
+
 #include <QPainter>
 #include <QPixmap>
 #include <QPixmapCache>
+#include <QTextLayout>
+
+#include <cmath>
+
+
 
 namespace
 {
-  void drawShadowedText(QPainter* pPainter, const QPoint& pt, const QString& sText,
+  void drawShadowedText(QPainter* pPainter, const QPointF& pt, const QString& sText,
                         const QColor& col, const QColor& shadowColor)
   {
     if (nullptr == pPainter)  { return; }
@@ -54,6 +61,195 @@ namespace
       pPainter->drawPixmap(pt.x(), pt.y(), *pPixmap);
     }
   }
+
+
+  todo: move function to separate file so that sizehint of EditableLabel can use it to compute its size
+  void qt_format_text(const QFont &fnt, const QRectF &_r,
+                      int tf, const QTextOption *option, const QString& str, QRectF *brect,
+                      QPainter *painter, const QColor& textColor, const QColor& shadowColor)
+  {
+      Q_ASSERT( !((tf & ~Qt::TextDontPrint)!=0 && option!=0) ); // we either have an option or flags
+      if (option) {
+          tf |= option->alignment();
+          if (option->wrapMode() != QTextOption::NoWrap)
+              tf |= Qt::TextWordWrap;
+          if (option->flags() & QTextOption::IncludeTrailingSpaces)
+              tf |= Qt::TextIncludeTrailingSpaces;
+      }
+      // we need to copy r here to protect against the case (&r == brect).
+      QRectF r(_r);
+      bool dontclip  = (tf & Qt::TextDontClip);
+      bool wordwrap  = (tf & Qt::TextWordWrap) || (tf & Qt::TextWrapAnywhere);
+      bool singleline = (tf & Qt::TextSingleLine);
+      bool showmnemonic = (tf & Qt::TextShowMnemonic);
+      bool hidemnmemonic = (tf & Qt::TextHideMnemonic);
+      Qt::LayoutDirection layout_direction;
+      if (tf & Qt::TextForceLeftToRight)
+          layout_direction = Qt::LeftToRight;
+      else if (tf & Qt::TextForceRightToLeft)
+          layout_direction = Qt::RightToLeft;
+      else if (option)
+          layout_direction = option->textDirection();
+      else if (painter)
+          layout_direction = painter->layoutDirection();
+      else
+          layout_direction = Qt::LeftToRight;
+      bool isRightToLeft = layout_direction == Qt::RightToLeft;
+      bool expandtabs = ((tf & Qt::TextExpandTabs) &&
+                          (((tf & Qt::AlignLeft) && !isRightToLeft) ||
+                            ((tf & Qt::AlignRight) && isRightToLeft)));
+      if (!painter)
+          tf |= Qt::TextDontPrint;
+      uint maxUnderlines = 0;
+      QFontMetricsF fm(fnt);
+      QString text = str;
+      int offset = 0;
+  start_lengthVariant:
+      bool hasMoreLengthVariants = false;
+      // compatible behaviour to the old implementation. Replace
+      // tabs by spaces
+      int old_offset = offset;
+      for (; offset < text.length(); offset++) {
+          QChar chr = text.at(offset);
+          if (chr == QLatin1Char('\r') || (singleline && chr == QLatin1Char('\n'))) {
+              text[offset] = QLatin1Char(' ');
+          } else if (chr == QLatin1Char('\n')) {
+              text[offset] = QChar::LineSeparator;
+          } else if (chr == QLatin1Char('&')) {
+              ++maxUnderlines;
+          } else if (chr == QLatin1Char('\t')) {
+              if (!expandtabs) {
+                  text[offset] = QLatin1Char(' ');
+              }
+          } else if (chr == QChar(ushort(0x9c))) {
+              // string with multiple length variants
+              hasMoreLengthVariants = true;
+              break;
+          }
+      }
+      QVector<QTextLayout::FormatRange> underlineFormats;
+      int length = offset - old_offset;
+      if ((hidemnmemonic || showmnemonic) && maxUnderlines > 0) {
+          QChar *cout = text.data() + old_offset;
+          QChar *cout0 = cout;
+          QChar *cin = cout;
+          int l = length;
+          while (l) {
+              if (*cin == QLatin1Char('&')) {
+                  ++cin;
+                  --length;
+                  --l;
+                  if (!l)
+                      break;
+                  if (*cin != QLatin1Char('&') && !hidemnmemonic && !(tf & Qt::TextDontPrint)) {
+                      QTextLayout::FormatRange range;
+                      range.start = cout - cout0;
+                      range.length = 1;
+                      range.format.setFontUnderline(true);
+                      underlineFormats.append(range);
+                  }
+  #ifdef Q_OS_MAC
+              } else if (hidemnmemonic && *cin == QLatin1Char('(') && l >= 4 &&
+                         cin[1] == QLatin1Char('&') && cin[2] != QLatin1Char('&') &&
+                         cin[3] == QLatin1Char(')')) {
+                  int n = 0;
+                  while ((cout - n) > cout0 && (cout - n - 1)->isSpace())
+                      ++n;
+                  cout -= n;
+                  cin += 4;
+                  length -= n + 4;
+                  l -= 4;
+                  continue;
+  #endif //Q_OS_MAC
+              }
+              *cout = *cin;
+              ++cout;
+              ++cin;
+              --l;
+          }
+      }
+      qreal height = 0;
+      qreal width = 0;
+      QString finalText = text.mid(old_offset, length);
+
+
+      QTextLayout textLayout(finalText);
+      textLayout.setCacheEnabled(true);
+      if (finalText.isEmpty()) {
+          height = fm.height();
+          width = 0;
+          tf |= Qt::TextDontPrint;
+      } else {
+          qreal lineWidth = 0x01000000;
+          if (wordwrap || (tf & Qt::TextJustificationForced))
+              lineWidth = qMax<qreal>(0, r.width());
+          if(!wordwrap)
+              tf |= Qt::TextIncludeTrailingSpaces;
+          textLayout.beginLayout();
+          qreal leading = fm.leading();
+          height = -leading;
+          while (1) {
+              QTextLine l = textLayout.createLine();
+              if (!l.isValid())
+                  break;
+              l.setLineWidth(lineWidth);
+              height += leading;
+              // Make sure lines are positioned on whole pixels
+              height = ceil(height);
+              l.setPosition(QPointF(0., height));
+              height += l.height();
+              width = qMax(width, l.naturalTextWidth());
+              if (!dontclip && !brect && height >= r.height())
+                  break;
+          }
+          textLayout.endLayout();
+      }
+      qreal yoff = -2;
+      qreal xoff = 0;
+      if (tf & Qt::AlignBottom)
+          yoff = r.height() - height;
+      else if (tf & Qt::AlignVCenter)
+          yoff = (r.height() - height)/2 - 2;
+      if (tf & Qt::AlignRight)
+          xoff = r.width() - width;
+      else if (tf & Qt::AlignHCenter)
+          xoff = (r.width() - width)/2;
+      QRectF bounds = QRectF(r.x() + xoff, r.y() + yoff, width, height);
+      if (hasMoreLengthVariants && !(tf & Qt::TextLongestVariant) && !r.contains(bounds)) {
+          offset++;
+          goto start_lengthVariant;
+      }
+      if (brect)
+          *brect = bounds;
+      if (!(tf & Qt::TextDontPrint)) {
+          bool restore = false;
+          if (!dontclip && !r.contains(bounds)) {
+              restore = true;
+              painter->save();
+              painter->setClipRect(r, Qt::IntersectClip);
+          }
+          for (int i = 0; i < textLayout.lineCount(); i++) {
+              QTextLine line = textLayout.lineAt(i);
+
+              xoff = 0;
+              if (tf & Qt::AlignRight) {
+                xoff = r.width() - width;
+              }
+              else if (tf & Qt::AlignHCenter)
+                xoff = (r.width() - width) / 2;
+
+              //line.draw(painter, QPointF(r.x() + xoff, r.y() + yoff));
+              drawShadowedText(painter, QPointF(line.x() + r.x() + xoff, line.y() + r.y() + yoff),
+                               finalText.mid(line.textStart(),
+                                             line.textLength()),
+                                textColor, shadowColor);
+          }
+          if (restore) {
+              painter->restore();
+          }
+      }
+  }
+
 }
 
 Style::Style()
@@ -65,14 +261,13 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
                          const QPalette& pal, bool enabled, const QString& text,
                          QPalette::ColorRole textRole) const
 {
-  QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
-  return;
-  if (text.contains("\n"))
+  bool bDrawShadowed = 0x0 != (flags & EditableLabel::eDrawShadowedText);
+
+  if (false)
   {
-   QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
-  }
-  else
-  {
+    QString sText(text);
+
+
     QPoint pt(rect.topLeft());
     if (flags & Qt::AlignLeft)
     {
@@ -102,5 +297,10 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
     }
 
     drawShadowedText(painter, pt, text, pal.color(textRole), QColor(0,0,0,100));
+  }
+  else
+  {
+    qt_format_text(painter->font(), rect, flags, nullptr, text, nullptr, painter, pal.color(textRole), QColor(0,0,0,100));
+//    QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
   }
 }

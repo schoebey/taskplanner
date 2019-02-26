@@ -3,6 +3,8 @@
 #include <QFocusEvent>
 #include <QLineEdit>
 #include <QStyle>
+#include <QPainter>
+#include <QStyleOption>
 
 
 EditableLabel::EditableLabel(QWidget* pParent)
@@ -59,4 +61,19 @@ QSize EditableLabel::sizeHint() const
   }
 
   return QSize(-1 == m_iSuggestedWidth ? width() : m_iSuggestedWidth, r.height());
+}
+
+void EditableLabel::paintEvent(QPaintEvent* pEvent)
+{
+  return QLabel::paintEvent(pEvent);
+  QPainter painter(this);
+
+  int iFlags = alignment();
+  if (wordWrap())  { iFlags |= Qt::TextWordWrap; }
+  else             { iFlags |= EditableLabel::eDrawShadowedText;}
+
+  int align = QStyle::visualAlignment(Qt::LeftToRight, QFlag(alignment()));
+
+
+  style()->drawItemText(&painter, contentsRect(), align, palette(), isEnabled(), text(), QPalette::Foreground);
 }
