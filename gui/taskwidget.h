@@ -32,7 +32,7 @@ public:
   QString description() const;
   void setDescription(const QString& sDescription);
 
-  void SetGroupWidget(GroupWidget* pGroupWidget);
+  void setGroupWidget(GroupWidget* pGroupWidget);
 
   static TaskWidget* DraggingTaskWidget();
   static void SetTaskWidgetUnderMouse(TaskWidget* pTaskWidget);
@@ -78,7 +78,8 @@ private slots:
   void onTimeTrackingStopped(task_id id);
   void onPropertyEdited();
   void onAddPropertyTriggered();
-  void updateSize();  
+  void updateSize();
+  void updateSize2();
   void onDeleteTriggered();
   void onAddSubtaskTriggered();
 
@@ -97,6 +98,7 @@ private:
   void enterEvent(QEvent* pEvent) override;
   void leaveEvent(QEvent* pEvent) override;
   void contextMenuEvent(QContextMenuEvent* pEvent) override;
+  void showEvent(QShowEvent* pEvent) override;
 
   Ui::TaskWidget *ui;
   QPixmap m_cache;

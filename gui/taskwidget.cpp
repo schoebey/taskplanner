@@ -124,9 +124,10 @@ QString TaskWidget::description() const
 void TaskWidget::setDescription(const QString& sDescription)
 {
   ui->pDescription->setText(sDescription);
+  emit sizeChanged();
 }
 
-void TaskWidget::SetGroupWidget(GroupWidget* pGroupWidget)
+void TaskWidget::setGroupWidget(GroupWidget* pGroupWidget)
 {
   m_pGroupWidget = pGroupWidget;
 
@@ -310,6 +311,11 @@ void TaskWidget::updateSize()
   ui->pDescription->suggestWidth(iWidth);
   int iSuggestedDescHeight = ui->pDescription->sizeHint().height();
 
+  QMetaObject::invokeMethod(this, "updateSize2", Qt::QueuedConnection);
+}
+
+void TaskWidget::updateSize2()
+{
   int iSuggestedHeight = sizeHint().height();
   resize(width(), iSuggestedHeight);
 }
@@ -406,8 +412,8 @@ void TaskWidget::onTitleEdited()
 
 void TaskWidget::onDescriptionEdited()
 {
-  updateSize();
   emit descriptionChanged(m_taskId, ui->pDescription->text());
+  emit sizeChanged();
 }
 
 void TaskWidget::on_pStartStop_toggled(bool bOn)
@@ -498,7 +504,7 @@ void TaskWidget::resizeEvent(QResizeEvent* pEvent)
   m_pOverlay->move(0, 0);
   m_pOverlay->resize(size());
 
-  QMetaObject::invokeMethod(this, "updateSize", Qt::QueuedConnection);
+  emit sizeChanged();
 
   m_cache = QPixmap();
 }
@@ -552,8 +558,7 @@ void TaskWidget::setExpanded(bool bExpanded)
   ui->pStartStop->style()->unpolish(ui->pStartStop);
   ui->pStartStop->style()->polish(ui->pStartStop);
 
-  updateSize();
-  QMetaObject::invokeMethod(this, "sizeChanged", Qt::QueuedConnection);
+  emit sizeChanged();
 }
 
 void TaskWidget::addTask(TaskWidget* pTaskWidget)
@@ -585,10 +590,15 @@ void TaskWidget::removeTask(TaskWidget* pTaskWidget)
 
   ui->pSubTasks->layout()->removeWidget(pTaskWidget);
 
-  QMetaObject::invokeMethod(this, "sizeChanged", Qt::QueuedConnection);
+  emit sizeChanged();
 }
 
 void TaskWidget::onDeleteTriggered()
 {
   emit taskDeleted(id());
+}
+
+void TaskWidget::showEvent(QShowEvent* pEvent)
+{
+  emit sizeChanged();
 }

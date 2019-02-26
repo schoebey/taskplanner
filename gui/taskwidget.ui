@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>214</width>
-    <height>149</height>
+    <width>201</width>
+    <height>60</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -195,7 +195,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>1-------------------------------- 2-------------------------------- 3-------------------------------- 4-------------------------------- 5-------------------------------- 6-------------------------------- 7-------------------------------- 8--------------------------------</string>
+            <string/>
            </property>
            <property name="textFormat">
             <enum>Qt::PlainText</enum>
