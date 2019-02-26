@@ -100,7 +100,7 @@ void GroupWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
     QPoint currentPos = pTaskWidget->mapToGlobal(QPoint(0,0));
     qDebug() << currentPos.x() << currentPos.y();
     pTaskWidget->setParent(ui->scrollAreaWidgetContents);
-    pTaskWidget->SetGroupWidget(this);
+    pTaskWidget->setGroupWidget(this);
     pTaskWidget->resize(ui->scrollAreaWidgetContents->width(), pTaskWidget->sizeHint().height());
     pTaskWidget->move(ui->scrollAreaWidgetContents->mapFromGlobal(currentPos));
     pTaskWidget->show();
@@ -127,7 +127,7 @@ void GroupWidget::removeTask(TaskWidget* pTaskWidget)
 
     UpdatePositions();
 
-    pTaskWidget->SetGroupWidget(nullptr);
+    pTaskWidget->setGroupWidget(nullptr);
     pTaskWidget->show();
 
     disconnect(pTaskWidget, SIGNAL(sizeChanged()), this, SLOT(repositionChildren()));
