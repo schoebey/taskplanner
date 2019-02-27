@@ -40,6 +40,8 @@ void EditableLabel::suggestWidth(int iWidth)
   {
     m_iSuggestedWidth = iWidth;
 
+    setMinimumHeight(sizeHint().height());
+
     updateGeometry();
   }
 }
@@ -48,32 +50,34 @@ QSize EditableLabel::sizeHint() const
 {
   QFontMetrics fm(font());
 
-  QRect r;
+  int iL = contentsRect().left() - rect().left() + 2;
+  int iR = rect().right() - contentsRect().right() + 2;
 
-  if (wordWrap())
-  {
-    r = fm.boundingRect(QRect(0, 0, -1 == m_iSuggestedWidth ? width() : m_iSuggestedWidth, 10000),
-                        Qt::AlignLeft | Qt::TextWordWrap, text());
-  }
-  else
-  {
-    r = fm.boundingRect(QRect(0, 0, 10000, fm.height()), 0, text());
-  }
+  QRect r(iL, 0, (-1 == m_iSuggestedWidth ? contentsRect().width() : m_iSuggestedWidth) - iR, 10000);
 
-  return QSize(-1 == m_iSuggestedWidth ? width() : m_iSuggestedWidth, r.height());
+  int iFlags = alignment();
+  if (wordWrap())  { iFlags |= Qt::TextWordWrap; }
+  QRect boundingRect = style()->itemTextRect(fm, r, iFlags, true, text());
+
+
+  return boundingRect.size();
+}
+
+void EditableLabel::resizeEvent(QResizeEvent*)
+{
+  updateGeometry();
 }
 
 void EditableLabel::paintEvent(QPaintEvent* pEvent)
 {
-  return QLabel::paintEvent(pEvent);
-  QPainter painter(this);
+  QLabel::paintEvent(pEvent);
 
-  int iFlags = alignment();
-  if (wordWrap())  { iFlags |= Qt::TextWordWrap; }
-  else             { iFlags |= EditableLabel::eDrawShadowedText;}
+//  int iFlags = alignment();
+//  if (wordWrap())  { iFlags |= Qt::TextWordWrap; }
 
-  int align = QStyle::visualAlignment(Qt::LeftToRight, QFlag(alignment()));
+//  //int align = QStyle::visualAlignment(Qt::LeftToRight, QFlag(alignment()));
 
 
-  style()->drawItemText(&painter, contentsRect(), align, palette(), isEnabled(), text(), QPalette::Foreground);
+//  QRect crect = contentsRect();
+//  style()->drawItemText(&painter, crect, iFlags, palette(), isEnabled(), text(), QPalette::Foreground);
 }

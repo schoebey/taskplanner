@@ -167,7 +167,7 @@ void GroupWidget::UpdatePositions(int iSpace, int iSpacePos)
   {
     QWidget* pWidget = m_vpTaskWidgets[iWidget];
     moveWidget(pWidget, origin);
-    pWidget->resize(ui->scrollAreaWidgetContents->width(), pWidget->height());
+    pWidget->resize(ui->scrollAreaWidgetContents->width(), pWidget->sizeHint().height());
     origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
   }
 
@@ -182,7 +182,7 @@ void GroupWidget::UpdatePositions(int iSpace, int iSpacePos)
   {
     QWidget* pWidget = m_vpTaskWidgets[iWidget];
     moveWidget(pWidget, origin);
-    pWidget->resize(ui->scrollAreaWidgetContents->width(), pWidget->height());
+    pWidget->resize(ui->scrollAreaWidgetContents->width(), pWidget->sizeHint().height());
     origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
   }
 

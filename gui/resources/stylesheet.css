@@ -9,6 +9,9 @@ MainWindow #frame {
   padding: -12px;
 }
 
+EditableLabel {
+  border: 0px solid red;
+}
 
 QToolBar {
   border: 0px;
@@ -126,16 +129,11 @@ TaskWidget[expanded=true] > #pStartStop {
 }
 
 #pProperties QLabel {
-  padding-left: 4px;
+  padding-left: 0px;
   padding-top: 0px;
-  padding-right: 4px;
+  padding-right: 0px;
   font-size: 12pt;
   color: rgba(255, 255, 255, 200);
-  border: 0px solid red;
-}
-
-#pDescriptionFrame {
-  border: 0px solid blue;
 }
 
 #pSeparator {
