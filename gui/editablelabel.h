@@ -10,12 +10,6 @@ class EditableLabel : public QLabel
 {
   Q_OBJECT
 public:
-  enum EditableLabelFlags
-  {
-    eDrawShadowedText = 0x10000000,
-  };
-
-
   EditableLabel(QWidget* pParent);
 
   void mouseDoubleClickEvent(QMouseEvent* pMouseEvent);
@@ -27,6 +21,7 @@ public:
   QSize sizeHint() const override;
 
   void paintEvent(QPaintEvent* pEvent) override;
+  void resizeEvent(QResizeEvent*);
 signals:
   void editingFinished();
 

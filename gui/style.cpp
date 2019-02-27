@@ -63,10 +63,15 @@ namespace
   }
 
 
-  todo: move function to separate file so that sizehint of EditableLabel can use it to compute its size
-  void qt_format_text(const QFont &fnt, const QRectF &_r,
-                      int tf, const QTextOption *option, const QString& str, QRectF *brect,
-                      QPainter *painter, const QColor& textColor, const QColor& shadowColor)
+  void qt_format_text(const QFont& font,
+                      const QRectF &_r,
+                      int tf,
+                      const QTextOption *option,
+                      const QString& str,
+                      QRectF *brect,
+                      QPainter *painter = nullptr,
+                      const QColor& textColor = QColor(),
+                      const QColor& shadowColor = QColor())
   {
       Q_ASSERT( !((tf & ~Qt::TextDontPrint)!=0 && option!=0) ); // we either have an option or flags
       if (option) {
@@ -101,7 +106,7 @@ namespace
       if (!painter)
           tf |= Qt::TextDontPrint;
       uint maxUnderlines = 0;
-      QFontMetricsF fm(fnt);
+
       QString text = str;
       int offset = 0;
   start_lengthVariant:
@@ -173,7 +178,8 @@ namespace
       QString finalText = text.mid(old_offset, length);
 
 
-      QTextLayout textLayout(finalText);
+      QFontMetricsF fm(font);
+      QTextLayout textLayout(finalText, font);
       textLayout.setCacheEnabled(true);
       if (finalText.isEmpty()) {
           height = fm.height();
@@ -198,6 +204,7 @@ namespace
               height = ceil(height);
               l.setPosition(QPointF(0., height));
               height += l.height();
+              QString s = finalText.mid(l.textStart(), l.textLength());
               width = qMax(width, l.naturalTextWidth());
               if (!dontclip && !brect && height >= r.height())
                   break;
@@ -244,6 +251,8 @@ namespace
                                              line.textLength()),
                                 textColor, shadowColor);
           }
+          painter->setPen(Qt::yellow);
+          painter->drawRect(bounds);
           if (restore) {
               painter->restore();
           }
@@ -261,46 +270,58 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
                          const QPalette& pal, bool enabled, const QString& text,
                          QPalette::ColorRole textRole) const
 {
-  bool bDrawShadowed = 0x0 != (flags & EditableLabel::eDrawShadowedText);
-
-  if (false)
-  {
-    QString sText(text);
+//  if (false)
+//  {
+//    QString sText(text);
 
 
-    QPoint pt(rect.topLeft());
-    if (flags & Qt::AlignLeft)
-    {
-      pt.setX(rect.left());
-    }
-    else if (flags & Qt::AlignHCenter)
-    {
-      pt.setX(rect.center().x() - painter->fontMetrics().width(text) / 2);
-    }
-    else if (flags & Qt::AlignRight)
-    {
-      pt.setX(rect.right() - painter->fontMetrics().width(text));
-    }
+//    QPoint pt(rect.topLeft());
+//    if (flags & Qt::AlignLeft)
+//    {
+//      pt.setX(rect.left());
+//    }
+//    else if (flags & Qt::AlignHCenter)
+//    {
+//      pt.setX(rect.center().x() - painter->fontMetrics().width(text) / 2);
+//    }
+//    else if (flags & Qt::AlignRight)
+//    {
+//      pt.setX(rect.right() - painter->fontMetrics().width(text));
+//    }
 
-    int iHeight = painter->fontMetrics().height();
-    if (flags & Qt::AlignTop)
-    {
-      pt.setY(rect.top() - 2);
-    }
-    else if (flags & Qt::AlignVCenter)
-    {
-      pt.setY(rect.center().y() - iHeight / 2.0 - 2);
-    }
-    else if (flags & Qt::AlignBottom)
-    {
-      pt.setY(rect.bottom() - iHeight);
-    }
+//    int iHeight = painter->fontMetrics().height();
+//    if (flags & Qt::AlignTop)
+//    {
+//      pt.setY(rect.top() - 2);
+//    }
+//    else if (flags & Qt::AlignVCenter)
+//    {
+//      pt.setY(rect.center().y() - iHeight / 2.0 - 2);
+//    }
+//    else if (flags & Qt::AlignBottom)
+//    {
+//      pt.setY(rect.bottom() - iHeight);
+//    }
 
-    drawShadowedText(painter, pt, text, pal.color(textRole), QColor(0,0,0,100));
-  }
-  else
+//    drawShadowedText(painter, pt, text, pal.color(textRole), QColor(0,0,0,100));
+//  }
+//  else
   {
     qt_format_text(painter->font(), rect, flags, nullptr, text, nullptr, painter, pal.color(textRole), QColor(0,0,0,100));
-//    QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
   }
+}
+
+QRect Style::itemTextRect(const QFontMetrics & metrics,
+                          const QRect & rectangle,
+                          int alignment,
+                          bool /*enabled*/,
+                          const QString & text) const
+{
+
+  return metrics.boundingRect(rectangle, alignment, text);
+
+  QRectF rect;
+  //qt_format_text(metrics, rectangle, alignment, nullptr, text, &rect);
+
+  return rect.toRect();
 }
