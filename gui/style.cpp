@@ -267,7 +267,7 @@ Style::Style()
 }
 
 void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
-                         const QPalette& pal, bool enabled, const QString& text,
+                         const QPalette& pal, bool /*enabled*/, const QString& text,
                          QPalette::ColorRole textRole) const
 {
 //  if (false)
