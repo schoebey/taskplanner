@@ -118,7 +118,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test </string>
+            <string/>
            </property>
            <property name="textFormat">
             <enum>Qt::PlainText</enum>
