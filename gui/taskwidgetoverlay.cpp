@@ -173,7 +173,7 @@ void TaskWidgetOverlay::setBorderColor(const QColor& color, int iMsecs)
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
-void TaskWidgetOverlay::paintEvent(QPaintEvent* pEvent)
+void TaskWidgetOverlay::paintEvent(QPaintEvent* /*pEvent*/)
 {
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing, true);
