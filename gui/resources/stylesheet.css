@@ -64,6 +64,10 @@ GroupWidget {
   border-radius: 7px;
 }
 
+#backlog { qproperty-backgroundImage: url(:/task_background_1.png); } 
+#inprogress { qproperty-backgroundImage: url(:/task_background_2.png); } 
+#done { qproperty-backgroundImage: url(:/task_background_3.png); }
+
 GroupWidget > #pTitle {
   color: #777;
 }

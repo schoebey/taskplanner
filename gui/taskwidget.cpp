@@ -152,6 +152,11 @@ void TaskWidget::setBackgroundImage(const QImage& image)
   pAnimation->setEndValue(0);
   pAnimation->setEasingCurve(QEasingCurve::Linear);
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+
+  for (auto pSubTask : m_subTasks)
+  {
+    pSubTask->setBackgroundImage(image);
+  }
 }
 
 double TaskWidget::backgroundImageBlendFactor() const
@@ -162,6 +167,18 @@ double TaskWidget::backgroundImageBlendFactor() const
 void TaskWidget::setBackgroundImageBlendFactor(double dFactor)
 {
   m_dBackgroundImageBlendFactor = dFactor;
+  update();
+}
+
+bool TaskWidget::dropShadow() const
+{
+  return m_bDropShadow;
+}
+
+void TaskWidget::setDropShadow(bool bOn)
+{
+  m_bDropShadow = bOn;
+  m_cache = QPixmap();
   update();
 }
 
@@ -467,7 +484,10 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
     }
     else
     {
-      painter.drawImage(rect(), QImage(":/dropshadow.png"));
+      if (m_bDropShadow)
+      {
+        painter.drawImage(rect(), QImage(":/dropshadow.png"));
+      }
       painter.save();
       QPainterPath path;
       path.addRoundedRect(rct, 7, 7);
@@ -576,6 +596,8 @@ void TaskWidget::addTask(TaskWidget* pTaskWidget)
       emit taskAdded(id(), pTaskWidget->id());
 
       emit sizeChanged();
+
+      m_subTasks.insert(pTaskWidget);
     }
   }
 }
@@ -590,6 +612,8 @@ void TaskWidget::removeTask(TaskWidget* pTaskWidget)
   ui->pSubTasks->layout()->removeWidget(pTaskWidget);
 
   emit sizeChanged();
+
+  m_subTasks.erase(pTaskWidget);
 }
 
 void TaskWidget::onDeleteTriggered()

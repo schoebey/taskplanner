@@ -42,7 +42,16 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   pWatcher->addPath("gui/resources/stylesheet.css");
   connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
 
-  reloadStylesheet(":/stylesheet.css");
+  if (QFileInfo("stylesheet.css").exists())
+  {
+    reloadStylesheet("stylesheet.css");
+    pWatcher->addPath("stylesheet.css");
+    connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
+  }
+  else
+  {
+    reloadStylesheet(":/stylesheet.css");
+  }
 
   initUi();
 }

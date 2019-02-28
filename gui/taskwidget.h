@@ -7,6 +7,7 @@
 #include <QFrame>
 
 #include <map>
+#include <set>
 
 namespace Ui {
   class TaskWidget;
@@ -52,6 +53,10 @@ public:
   Q_PROPERTY(double backgroundImageBlendFactor READ backgroundImageBlendFactor WRITE setBackgroundImageBlendFactor)
   double backgroundImageBlendFactor() const;
   void setBackgroundImageBlendFactor(double dFactor);
+
+  Q_PROPERTY(bool dropShadow READ dropShadow WRITE setDropShadow)
+  bool dropShadow() const;
+  void setDropShadow(bool bOn);
 
   void edit();
 public slots:
@@ -109,6 +114,7 @@ private:
   QPoint m_mouseDownPos;
   QImage m_backgroundImage[2];
   double m_dBackgroundImageBlendFactor = 0;
+  bool m_bDropShadow = true;
 
   GroupWidget* m_pGroupWidget = nullptr;
   GroupWidget* m_pPreviousGroupWidget = nullptr;
@@ -120,6 +126,8 @@ private:
   TaskWidget* m_pParentTask = nullptr;
 
   QMenu* m_pContextMenu = nullptr;
+
+  std::set<TaskWidget*> m_subTasks;
 
   static TaskWidget* m_pDraggingTaskWidget;
   static TaskWidget* m_pTaskWidgetUnderMouse;
