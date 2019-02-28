@@ -68,16 +68,3 @@ void EditableLabel::resizeEvent(QResizeEvent*)
   updateGeometry();
 }
 
-void EditableLabel::paintEvent(QPaintEvent* pEvent)
-{
-  QLabel::paintEvent(pEvent);
-
-//  int iFlags = alignment();
-//  if (wordWrap())  { iFlags |= Qt::TextWordWrap; }
-
-//  //int align = QStyle::visualAlignment(Qt::LeftToRight, QFlag(alignment()));
-
-
-//  QRect crect = contentsRect();
-//  style()->drawItemText(&painter, crect, iFlags, palette(), isEnabled(), text(), QPalette::Foreground);
-}

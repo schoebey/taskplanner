@@ -129,9 +129,9 @@ TaskWidget[expanded=true] > #pStartStop {
 }
 
 #pProperties QLabel {
-  padding-left: 0px;
+  padding-left: 4px;
   padding-top: 0px;
-  padding-right: 0px;
+  padding-right: 4px;
   font-size: 12pt;
   color: rgba(255, 255, 255, 200);
 }

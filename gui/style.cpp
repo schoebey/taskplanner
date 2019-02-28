@@ -251,8 +251,8 @@ namespace
                                              line.textLength()),
                                 textColor, shadowColor);
           }
-          painter->setPen(Qt::yellow);
-          painter->drawRect(bounds);
+//          painter->setPen(Qt::yellow);
+//          painter->drawRect(bounds);
           if (restore) {
               painter->restore();
           }

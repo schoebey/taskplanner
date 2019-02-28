@@ -20,6 +20,8 @@ void TaskCreationDialog::show()
 
   m_pTaskWidget = new TaskWidget(-1);
   m_pTaskWidget->setBackgroundImage(QImage(":/new_task_background.png"));
+  m_pTaskWidget->setMinimumSize(300, 200);
+  m_pTaskWidget->setMaximumSize(300, 200);
   // TODO: lock unnecessary functions
   pLayout->addWidget(m_pTaskWidget, 0, 0, 1, 2);
 

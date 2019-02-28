@@ -12,7 +12,7 @@ class EditableLabel : public QLabel
 public:
   EditableLabel(QWidget* pParent);
 
-  void mouseDoubleClickEvent(QMouseEvent* pMouseEvent);
+  void mouseDoubleClickEvent(QMouseEvent* pMouseEvent) override;
 
   void edit();
 
@@ -20,8 +20,7 @@ public:
 
   QSize sizeHint() const override;
 
-  void paintEvent(QPaintEvent* pEvent) override;
-  void resizeEvent(QResizeEvent*);
+  void resizeEvent(QResizeEvent*) override;
 signals:
   void editingFinished();
 

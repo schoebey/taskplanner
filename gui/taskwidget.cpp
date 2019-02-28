@@ -146,8 +146,8 @@ void TaskWidget::setBackgroundImage(const QImage& image)
   m_dBackgroundImageBlendFactor = 1;
 
   QPropertyAnimation* pAnimation = new QPropertyAnimation(this, "backgroundImageBlendFactor");
-  static const double c_dDuration = 1000;
-  pAnimation->setDuration(c_dDuration);
+  static const int c_iDuration = 1000;
+  pAnimation->setDuration(c_iDuration);
   pAnimation->setStartValue(1);
   pAnimation->setEndValue(0);
   pAnimation->setEasingCurve(QEasingCurve::Linear);
@@ -290,10 +290,10 @@ void TaskWidget::setHighlight(HighlightingMethod method)
   if (method.testFlag(EHighlightMethod::eValueRejected))
   {
     QPropertyAnimation* pAnimation = new QPropertyAnimation(this, "pos");
-    static const double c_dDuration = 250;
-    pAnimation->setDuration(c_dDuration);
+    static const int c_iDuration = 250;
+    pAnimation->setDuration(c_iDuration);
     pAnimation->setStartValue(pos() - QPoint(20,0));
-    static const double c_dNofShakes = 5;
+    static const int c_dNofShakes = 5;
     for (int i = 0; i < c_dNofShakes; ++i)
     {
       pAnimation->setKeyValueAt(2 * i / c_dNofShakes, pos() - QPoint(20, 0));
@@ -309,7 +309,6 @@ void TaskWidget::updateSize()
 {
   int iWidth = ui->pProperties->width();
   ui->pDescription->suggestWidth(iWidth);
-  int iSuggestedDescHeight = ui->pDescription->sizeHint().height();
 
   QMetaObject::invokeMethod(this, "updateSize2", Qt::QueuedConnection);
 }
@@ -598,7 +597,7 @@ void TaskWidget::onDeleteTriggered()
   emit taskDeleted(id());
 }
 
-void TaskWidget::showEvent(QShowEvent* pEvent)
+void TaskWidget::showEvent(QShowEvent* /*pEvent*/)
 {
   emit sizeChanged();
 }
