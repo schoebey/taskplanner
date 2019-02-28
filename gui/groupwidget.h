@@ -28,6 +28,7 @@ public:
 
   int indexFromPoint(QPoint pt);
 
+  Q_PROPERTY(QImage backgroundImage READ backgroundImage WRITE setBackgroundImage)
   QImage backgroundImage() const;
   void setBackgroundImage(const QImage& img);
 

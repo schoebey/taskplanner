@@ -87,6 +87,10 @@ group_id GroupWidget::id() const
 void GroupWidget::setName(const QString& sName)
 {
   ui->pTitle->setText(sName);
+  setObjectName(QString(sName).remove(" "));
+
+  style()->unpolish(this);
+  style()->polish(this);
 }
 
 void GroupWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
@@ -254,6 +258,11 @@ QImage GroupWidget::backgroundImage() const
 void GroupWidget::setBackgroundImage(const QImage& img)
 {
   m_backgroundImage = img;
+
+  for (auto pTaskWidget : m_vpTaskWidgets)
+  {
+    pTaskWidget->setBackgroundImage(m_backgroundImage);
+  }
 }
 
 void GroupWidget::reorderTasks(const std::vector<task_id>& vIds)
