@@ -169,6 +169,9 @@ void MainWindow::reloadStylesheet(const QString& sPath)
 void MainWindow::onDocumentModified()
 {
   setWindowModified(true);
+
+  // save modifications to a temp file
+  saveFile("~" + m_sFileName);
 }
 
 GroupWidget* MainWindow::createGroupWidget(group_id id)

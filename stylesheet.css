@@ -40,7 +40,6 @@ TaskWidget #pStartStop {
   border: 1px solid rgba(255,255,255,50);
   background-color: rgba(255,255,255,40);
   border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px; 
   padding: 5px;
   min-height: 15px;
   width: 20px;
@@ -48,6 +47,10 @@ TaskWidget #pStartStop {
   background-image: url(:/icons/timer_start.png);
   background-repeat: no-repeat;
   background-position: center center;
+}
+
+TaskWidget[expanded=false] #pStartStop {
+  border-bottom-right-radius: 5px; 
 }
 
 TaskWidget #pStartStop:checked {
