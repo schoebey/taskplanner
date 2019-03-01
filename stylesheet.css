@@ -4,6 +4,12 @@
 #done { qproperty-backgroundImage: url(:/task_background_3.png); }
 
 
+TaskWidget {
+  border: 1px solid black;
+  border-radius: 7px;
+  margin: 4px;
+  qproperty-dropShadow: false;
+}
 
 TaskWidget #pShowDetails {
   border: 1px solid rgba(255,255,255,50);
@@ -41,4 +47,3 @@ TaskWidget #pStartStop:checked {
   background-image: url(:/icons/timer_stop.png);
 }
 
-TaskWidget { qproperty-dropShadow: false; }
