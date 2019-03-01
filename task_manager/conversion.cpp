@@ -1,6 +1,8 @@
 #include "conversion.h"
 
 #include <QRegExp>
+#include <QString>
+#include <QStringList>
 #include <set>
 #include <vector>
 #include <map>
@@ -268,6 +270,34 @@ in a hundred years
     }
 
     return bRv;
+  }
+
+  template<>
+  std::vector<QUrl> fromString<std::vector<QUrl> >(const QString& sVal, bool& bConversionStatus)
+  {
+    std::vector<QUrl> vUrls;
+
+    auto list = sVal.split("|");
+    for (const auto& el : list)
+    {
+      vUrls.push_back(QUrl(el));
+    }
+
+    bConversionStatus = true;
+
+    return vUrls;
+  }
+
+  QString toString(const std::vector<QUrl>& vUrls)
+  {
+    QStringList list;
+
+    for (const auto& el : vUrls)
+    {
+      list.append(el.toString());
+    }
+
+    return list.join("|");
   }
 
 }
