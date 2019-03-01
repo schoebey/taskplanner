@@ -494,6 +494,7 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
       painter.setClipPath(path);
       QPointF offset(pos().x()/5, pos().y()/5);
       QBrush b(m_backgroundImage[0]);
+      painter.setPen(Qt::NoPen);
       painter.setBrush(b);
       painter.drawRect(rct);
 
