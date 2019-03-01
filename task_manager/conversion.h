@@ -3,8 +3,11 @@
 
 #include <type_traits>
 
+#include <vector>
+
 #include <QString>
 #include <QDateTime>
+#include <QUrl>
 
 namespace conversion
 {
@@ -47,6 +50,11 @@ namespace conversion
 
   //-- bool
   template<> bool fromString<bool>(const QString& sVal, bool& bConversionStatus);
+
+
+  //-- std::vector<QUrl>
+  template<> std::vector<QUrl> fromString<std::vector<QUrl>>(const QString& sVal, bool& bConversionStatus);
+  QString toString(const std::vector<QUrl>& vUrls);
 }
 
 #endif // CONVERSION_H
