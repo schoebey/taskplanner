@@ -53,6 +53,10 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
     reloadStylesheet(":/stylesheet.css");
   }
 
+  bool bOk = connect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
+  assert(bOk);
+  Q_UNUSED(bOk)
+
   initUi();
 }
 
@@ -64,6 +68,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::initUi()
 {
+  bool bOk = disconnect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
+  assert(bOk);
+
   for (const auto& el : m_taskWidgets)
   {
     delete el.second;
@@ -142,6 +149,11 @@ void MainWindow::initUi()
       }
     }
   }
+
+
+  // reconnect to the modified signal so that we get all the modifications from now on
+  bOk = connect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
+  assert(bOk);
 }
 
 void MainWindow::reloadStylesheet(const QString& sPath)
@@ -152,6 +164,11 @@ void MainWindow::reloadStylesheet(const QString& sPath)
   {
     setStyleSheet(QString::fromUtf8(f.readAll()));
   }
+}
+
+void MainWindow::onDocumentModified()
+{
+  setWindowModified(true);
 }
 
 GroupWidget* MainWindow::createGroupWidget(group_id id)
@@ -248,6 +265,8 @@ void MainWindow::onNewTaskAccepted()
     pTask->setDescription(m_pTaskCreationDialog->description());
     pGroup->addTask(pTask->id());
     it->second->insertTask(createTaskWidget(pTask->id()));
+
+    emit documentModified();
   }
 }
 
@@ -282,6 +301,8 @@ void MainWindow::onNewSubTaskAccepted()
     pTask->setDescription(m_pTaskCreationDialog->description());
     pParentTask->addTask(pTask->id());
     it->second->addTask(createTaskWidget(pTask->id()));
+
+    emit documentModified();
   }
 }
 
@@ -291,6 +312,8 @@ void MainWindow::renameGroup(group_id id, const QString& sNewName)
   if (nullptr != pGroup)
   {
     pGroup->setName(sNewName);
+
+    emit documentModified();
   }
 }
 
@@ -300,6 +323,8 @@ void MainWindow::renameTask(task_id id, const QString& sNewName)
   if (nullptr != pTask)
   {
     pTask->setName(sNewName);
+
+    emit documentModified();
   }
 }
 
@@ -309,6 +334,8 @@ void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
   if (nullptr != pTask)
   {
     pTask->setDescription(sNewDescr);
+
+    emit documentModified();
   }
 }
 
@@ -391,6 +418,8 @@ void MainWindow::moveTask(task_id id, group_id groupId, int iPos)
 
     prio.setPriority(0, iPos);
     pTask->setPriority(prio);
+
+    emit documentModified();
   }
 }
 
@@ -416,6 +445,8 @@ void MainWindow::startTimeTracking(task_id taskId)
   {
     pTask->startWork();
   }
+
+  emit documentModified();
 }
 
 void MainWindow::stopTimeTracking(task_id taskId)
@@ -425,6 +456,8 @@ void MainWindow::stopTimeTracking(task_id taskId)
   {
     pTask->stopWork();
     emit timeTrackingStopped(taskId);
+
+    emit documentModified();
   }
 }
 
@@ -546,6 +579,7 @@ bool MainWindow::saveFile(const QString& sFileName, QString* psErrorMessage)
         *psErrorMessage = sErrorMessage;
       }
 
+      setWindowModified(false);
       return ESerializingError::eOk == err;
     }
   }
@@ -673,6 +707,8 @@ void MainWindow::onPropertyChanged(task_id taskId,
     {
       sortGroup(pTask->group());
     }
+
+    emit documentModified();
   }
 }
 
@@ -682,6 +718,8 @@ void MainWindow::onTaskAdded(task_id parentTaskId, task_id childTaskId)
   if (nullptr != pTask)
   {
     pTask->addTask(childTaskId);
+
+    emit documentModified();
   }
 }
 
@@ -691,6 +729,8 @@ void MainWindow::onTaskRemoved(task_id parentTaskId, task_id childTaskId)
   if (nullptr != pTask)
   {
     pTask->removeTask(childTaskId);
+
+    emit documentModified();
   }
 }
 
@@ -703,6 +743,8 @@ void MainWindow::onTaskDeleted(task_id id)
     {
       delete it->second;
       m_taskWidgets.erase(it);
+
+      emit documentModified();
     }
   }
 }
@@ -726,6 +768,8 @@ void MainWindow::setAutoSortEnabled(group_id groupId)
   {
     pGroup->setPropertyValue("autoSorting", conversion::toString<bool>(true));
   }
+
+  emit documentModified();
 }
 
 void MainWindow::setAutoSortDisabled(group_id groupId)
@@ -742,6 +786,8 @@ void MainWindow::setAutoSortDisabled(group_id groupId)
   {
     pGroup->setPropertyValue("autoSorting", conversion::toString<bool>(false));
   }
+
+  emit documentModified();
 }
 
 void MainWindow::onSortGroupTriggered(int iGroupId)
