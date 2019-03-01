@@ -57,9 +57,11 @@ private slots:
   void sortGroup(group_id groupId);
   void sortGroups();
   void onTaskDeleted(task_id id);
+  void onDocumentModified();
 
 signals:
   void timeTrackingStopped(task_id taskId);
+  void documentModified();
 
 private:
   Ui::MainWindow *ui;

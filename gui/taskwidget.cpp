@@ -570,14 +570,17 @@ void TaskWidget::setExpanded(bool bExpanded)
   ui->pProperties->setVisible(bExpanded);
   ui->pShowDetails->setChecked(bExpanded);
 
-  setProperty("expanded", bExpanded);
+  if (property("expanded").toBool() ^ bExpanded)
+  {
+    setProperty("expanded", bExpanded);
 
-  emit propertyChanged(m_taskId, "expanded", bExpanded ? "true" : "false");
+    emit propertyChanged(m_taskId, "expanded", bExpanded ? "true" : "false");
 
-  ui->pStartStop->style()->unpolish(ui->pStartStop);
-  ui->pStartStop->style()->polish(ui->pStartStop);
+    ui->pStartStop->style()->unpolish(ui->pStartStop);
+    ui->pStartStop->style()->polish(ui->pStartStop);
 
-  emit sizeChanged();
+    emit sizeChanged();
+  }
 }
 
 void TaskWidget::addTask(TaskWidget* pTaskWidget)
