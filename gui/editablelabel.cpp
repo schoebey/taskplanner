@@ -50,10 +50,10 @@ QSize EditableLabel::sizeHint() const
 {
   QFontMetrics fm(font());
 
-  int iL = contentsRect().left() - rect().left() + 2;
-  int iR = rect().right() - contentsRect().right() + 2;
+  int iL = contentsRect().left() - rect().left();
+  int iR = rect().right() - contentsRect().right();
 
-  QRect r(iL, 0, (-1 == m_iSuggestedWidth ? contentsRect().width() : m_iSuggestedWidth) - iR, 10000);
+  QRect r(iL, 0, (-1 == m_iSuggestedWidth ? contentsRect().width() : m_iSuggestedWidth) - iR - iL, 10000);
 
   int iFlags = alignment();
   if (wordWrap())  { iFlags |= Qt::TextWordWrap; }
