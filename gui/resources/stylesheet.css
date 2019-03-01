@@ -106,6 +106,7 @@ TaskWidget #pStartStop {
   border: 1px solid rgba(255,255,255,50);
   background-color: rgba(255,255,255,40);
   border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
   padding: 5px;
   min-height: 15px;
   width: 20px;

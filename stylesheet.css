@@ -5,10 +5,16 @@
 
 
 TaskWidget {
-  border: 1px solid black;
+  border: 1px solid rgba(50, 50, 50, 128);
   border-radius: 7px;
   margin: 4px;
   qproperty-dropShadow: false;
+}
+
+TaskWidget #pDescription {
+  padding: 0 10 0 10;
+  border: 0px solid red;
+  color: black;
 }
 
 TaskWidget #pShowDetails {
@@ -34,6 +40,7 @@ TaskWidget #pStartStop {
   border: 1px solid rgba(255,255,255,50);
   background-color: rgba(255,255,255,40);
   border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px; 
   padding: 5px;
   min-height: 15px;
   width: 20px;
