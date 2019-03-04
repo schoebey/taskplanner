@@ -10,7 +10,9 @@ SOURCES += \
     $$PWD/highlightanimation.cpp \
     $$PWD/taskwidgetoverlay.cpp \
     $$PWD/overlaywidget.cpp \
-    $$PWD/taskcreationdialog.cpp
+    $$PWD/taskcreationdialog.cpp \
+    $$PWD/flowlayout.cpp \
+    $$PWD/linkwidget.cpp
 
 HEADERS += \
     gui/editablelabel.h \
@@ -22,7 +24,9 @@ HEADERS += \
     $$PWD/taskwidgetoverlay.h \
     $$PWD/highlightmethod.h \
     $$PWD/overlaywidget.h \
-    $$PWD/taskcreationdialog.h
+    $$PWD/taskcreationdialog.h \
+    $$PWD/flowlayout.h \
+    $$PWD/linkwidget.h
 
 FORMS += \
     gui/groupwidget.ui \

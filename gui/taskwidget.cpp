@@ -3,6 +3,8 @@
 #include "groupwidget.h"
 #include "property.h"
 #include "taskwidgetoverlay.h"
+#include "flowlayout.h"
+#include "linkwidget.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -10,6 +12,8 @@
 #include <QDebug>
 #include <QTimer>
 #include <QMenu>
+#include <QMimeData>
+#include <QClipboard>
 
 #include <QPropertyAnimation>
 #include <cassert>
@@ -27,14 +31,21 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
 {
   ui->setupUi(this);
 
+  FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks);
+  ui->pLinks->setLayout(pFlowLayout);
+//  pFlowLayout->setMargin(0);
+  pFlowLayout->setSpacing(0);
+
   connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
   connect(ui->pDescription, SIGNAL(editingFinished()), this, SLOT(onDescriptionEdited()));
+  connect(ui->pDescription, SIGNAL(sizeChanged()), this, SLOT(updateSize()));
   connect(ui->pShowDetails, SIGNAL(toggled(bool)), this, SLOT(setExpanded(bool)));
 
   setUpContextMenu();
 
   setExpanded(true);
+  setAcceptDrops(true);
 }
 
 TaskWidget::~TaskWidget()
@@ -71,10 +82,23 @@ void TaskWidget::setUpContextMenu()
     delete pAction;
   }
 
+
+  // TODO: shortcuts don't work in general. why? focus problem? can't be,
+  // because the context is set to application...
+  // problem with hierarchy? maybe qt is stupid if widgets aren't present
+  // in a traditional parent-child hierarchy...
+  QAction* pPasteLinkAction = new QAction(tr("Paste link from clipboard"), this);
+  pPasteLinkAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
+  pPasteLinkAction->setShortcutContext(Qt::WidgetShortcut);
+  addAction(pPasteLinkAction);
+  m_pContextMenu->addAction(pPasteLinkAction);
+  connect(pPasteLinkAction, SIGNAL(triggered()), this, SLOT(onLinkPasted()));
+
   QAction* pDeleteAction = new QAction(tr("Delete"), this);
   pDeleteAction->setShortcuts(QList<QKeySequence>() << Qt::Key_Delete << Qt::Key_Backspace);
   pDeleteAction->setShortcutContext(Qt::WidgetShortcut);
   m_pContextMenu->addAction(pDeleteAction);
+  addAction(pDeleteAction);
   connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(onDeleteTriggered()));
 
   m_pContextMenu->addSeparator();
@@ -170,6 +194,19 @@ void TaskWidget::setBackgroundImageBlendFactor(double dFactor)
   update();
 }
 
+void TaskWidget::dragEnterEvent(QDragEnterEvent* pEvent)
+{
+  pEvent->setAccepted(pEvent->mimeData()->hasUrls());
+}
+
+void TaskWidget::dropEvent(QDropEvent* pEvent)
+{
+  for (const auto& url : pEvent->mimeData()->urls())
+  {
+    addLink(url);
+  }
+}
+
 bool TaskWidget::dropShadow() const
 {
   return m_bDropShadow;
@@ -242,7 +279,9 @@ void TaskWidget::addProperty(const QString& sName,
     if (nullptr != pGrid)
     {
       QLabel* pLabel = new QLabel(sName);
+      pLabel->setFocusPolicy(Qt::NoFocus);
       EditableLabel* pValue = new EditableLabel(this);
+      pValue->setFocusPolicy(Qt::NoFocus);
       pValue->setText(sValue);
       pValue->setProperty("name", sName);
       m_propertyLineEdits[sName] = pValue;
@@ -265,6 +304,42 @@ void TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
   {
     it->second->setText(sValue);
   }
+}
+
+void TaskWidget::addLink(const QUrl& link)
+{
+  QLayout* pLayout = ui->pLinks->layout();
+  if (nullptr != pLayout)
+  {
+    if (m_linkWidgets.end() == m_linkWidgets.find(link))
+    {
+      LinkWidget* pLinkWidget = new LinkWidget(link);
+      pLayout->addWidget(pLinkWidget);
+
+      emit linkAdded(m_taskId, link);
+
+      m_linkWidgets[link] = pLinkWidget;
+    }
+  }
+}
+
+void TaskWidget::removeLink(const QUrl& link)
+{
+  auto it = m_linkWidgets.find(link);
+  if (it != m_linkWidgets.end())
+  {
+    delete it->second;
+    m_linkWidgets.erase(it);
+  }
+
+  assert(false && "todo");
+  emit linkRemoved(m_taskId, link);
+}
+
+void TaskWidget::insertLink(const QUrl& link, int iPos)
+{
+  assert(false && "todo");
+  emit linkInserted(m_taskId, link, iPos);
 }
 
 void TaskWidget::onAddSubtaskTriggered()
@@ -524,8 +599,6 @@ void TaskWidget::resizeEvent(QResizeEvent* pEvent)
   m_pOverlay->move(0, 0);
   m_pOverlay->resize(size());
 
-  emit sizeChanged();
-
   m_cache = QPixmap();
 }
 
@@ -623,6 +696,34 @@ void TaskWidget::removeTask(TaskWidget* pTaskWidget)
 void TaskWidget::onDeleteTriggered()
 {
   emit taskDeleted(id());
+}
+
+void TaskWidget::onLinkPasted()
+{
+  QClipboard* pClipboard = QApplication::clipboard();
+
+  if (pClipboard->mimeData()->hasUrls())
+  {
+    for (const auto& url : pClipboard->mimeData()->urls())
+    {
+      addLink(url);
+    }
+  }
+  else if (pClipboard->mimeData()->hasText())
+  {
+    for (const auto& sLink: pClipboard->mimeData()->text().split("\n"))
+    {
+      QUrl url(sLink);
+
+      // checking a QUrl for validity is pointless since everything seems to be valid...
+      static const QRegExp c_rx(R"(^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$)");
+      if (url.isLocalFile() ||
+          0 == c_rx.indexIn(url.toString()))
+      {
+        addLink(sLink);
+      }
+    }
+  }
 }
 
 void TaskWidget::showEvent(QShowEvent* /*pEvent*/)

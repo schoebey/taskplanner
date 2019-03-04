@@ -1,11 +1,21 @@
 #ifndef LINKWIDGET_H
 #define LINKWIDGET_H
 
+#include <QWidget>
+#include <QUrl>
 
-class lInkwidget
+class LinkWidget : public QWidget
 {
+  Q_OBJECT
 public:
-  lInkwidget();
+  LinkWidget(const QUrl& link);
+  ~LinkWidget();
+
+private:
+  void paintEvent(QPaintEvent*);
+
+private:
+  QUrl m_link;
 };
 
 #endif // LINKWIDGET_H

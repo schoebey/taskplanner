@@ -280,7 +280,10 @@ in a hundred years
     auto list = sVal.split("|");
     for (const auto& el : list)
     {
-      vUrls.push_back(QUrl(el));
+      if (!el.isEmpty())
+      {
+        vUrls.push_back(QUrl(el));
+      }
     }
 
     bConversionStatus = true;

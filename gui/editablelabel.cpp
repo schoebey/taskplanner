@@ -63,8 +63,15 @@ QSize EditableLabel::sizeHint() const
   return boundingRect.size();
 }
 
-void EditableLabel::resizeEvent(QResizeEvent*)
+void EditableLabel::resizeEvent(QResizeEvent* pEvent)
 {
-  updateGeometry();
+  QLabel::resizeEvent(pEvent);
+//  updateGeometry();
+
+  // only emit this if size really has changed!
+//  if (pEvent->oldSize() != pEvent->size())
+//  {
+//    emit sizeChanged();
+//  }
 }
 

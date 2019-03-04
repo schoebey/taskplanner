@@ -51,6 +51,7 @@ TaskWidgetOverlay::TaskWidgetOverlay(TaskWidget *parent)
     m_pParent(parent)
 {
   setAttribute(Qt::WA_TransparentForMouseEvents);
+  setFocusPolicy(Qt::NoFocus);
 }
 
 HighlightingMethod TaskWidgetOverlay::highlight() const

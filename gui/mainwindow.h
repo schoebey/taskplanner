@@ -4,6 +4,7 @@
 #include "id_types.h"
 #include <QMainWindow>
 #include <QPointer>
+#include <QUrl>
 #include <map>
 
 namespace Ui {
@@ -46,6 +47,9 @@ private slots:
   void on_actionReport_triggered();
   void on_actionDisplayReport_triggered();
   void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
+  void onLinkAdded(task_id taskId, QUrl url);
+  void onLinkRemoved(task_id taskId, QUrl url);
+  void onLinkInserted(task_id taskId, QUrl url, int iPos);
   void onTaskRemoved(task_id parentTaskId, task_id childTaskId);
   void onTaskAdded(task_id parentTaskId, task_id childTaskId);  
   void onNewTaskAccepted();

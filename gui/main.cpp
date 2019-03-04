@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Task, "due date", QDateTime, true);
   REGISTER_PROPERTY(Task, "duration (days)", int, true);
   REGISTER_PROPERTY(Task, "category", QString, true);
-  REGISTER_PROPERTY(Task, "links", std::vector<QUrl>, true);
+  REGISTER_PROPERTY(Task, "links", std::vector<QUrl>, false);
   Properties<Task>::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
   Properties<Task>::registerConstraint("duration (days)", MIN(0));
 
