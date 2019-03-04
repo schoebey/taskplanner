@@ -205,6 +205,9 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   connect(pTaskWidget, SIGNAL(taskRemoved(task_id, task_id)), this, SLOT(onTaskRemoved(task_id, task_id)));
   connect(pTaskWidget, SIGNAL(taskDeleted(task_id)), this, SLOT(onTaskDeleted(task_id)));
   connect(pTaskWidget, SIGNAL(newSubTaskRequested(task_id)), this, SLOT(createNewSubTask(task_id)));
+  connect(pTaskWidget, SIGNAL(linkAdded(task_id, QUrl)), this, SLOT(onLinkAdded(task_id, QUrl)));
+  connect(pTaskWidget, SIGNAL(linkRemoved(task_id, QUrl)), this, SLOT(onLinkRemoved(task_id, QUrl)));
+  connect(pTaskWidget, SIGNAL(linkInserted(task_id, QUrl, int)), this, SLOT(onLinkInserted(task_id, QUrl, int)));
   connect(this, SIGNAL(timeTrackingStopped(task_id)), pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
 
@@ -221,6 +224,20 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   // konnte die Property ausgelesen werden, soll der expanded-State wiederhergestellt werden,
   // sonst soll defaultmässig expandiert sein.
   pTaskWidget->setExpanded(!bOk || bExpanded);
+
+
+  // TODO: hier die Links auslesen und via pTaskWidget->addLink() einzeln hinzufügen
+  // TODO: im Taskwidget: addLink, removeLink, insertLink(pos, link)
+  auto links = conversion::fromString<std::vector<QUrl>>(pTask->propertyValue("links"), bOk);
+  if (bOk)
+  {
+    for (const auto& link : links)
+    {
+      pTaskWidget->addLink(link);
+    }
+  }
+
+
   for (const QString& sName : Properties<Task>::registeredPropertyNames())
   {
     if (!Properties<Task>::visible(sName))  { continue; }
@@ -713,6 +730,74 @@ void MainWindow::onPropertyChanged(task_id taskId,
 
     emit documentModified();
   }
+}
+
+void MainWindow::onLinkAdded(task_id taskId, QUrl url)
+{
+  ITask* pTask = m_pManager->task(taskId);
+  if (nullptr != pTask)
+  {
+    bool bOk(false);
+    auto links = conversion::fromString<std::vector<QUrl>>(pTask->propertyValue("links"), bOk);
+    if (bOk)
+    {
+      auto it = std::find(links.begin(), links.end(), url);
+      if (it == links.end())
+      {
+        links.push_back(url);
+        pTask->setPropertyValue("links", conversion::toString(links));
+      }
+      else
+      {
+        // link already present - do nothing
+      }
+    }
+    else
+    {
+      assert(false);
+    }
+  }
+  else
+  {
+    assert(false);
+  }
+}
+
+void MainWindow::onLinkRemoved(task_id taskId, QUrl url)
+{
+  ITask* pTask = m_pManager->task(taskId);
+  if (nullptr != pTask)
+  {
+    bool bOk(false);
+    auto links = conversion::fromString<std::vector<QUrl>>(pTask->propertyValue("links"), bOk);
+    if (bOk)
+    {
+      auto it = std::find(links.begin(), links.end(), url);
+      if (it != links.end())
+      {
+        links.erase(it);
+        pTask->setPropertyValue("links", conversion::toString(links));
+      }
+      else
+      {
+        // link not present - do nothing
+        assert(false);
+      }
+    }
+    else
+    {
+      assert(false);
+    }
+  }
+  else
+  {
+    assert(false);
+  }
+}
+
+void MainWindow::onLinkInserted(task_id /*taskId*/, QUrl /*url*/, int /*iPos*/)
+{
+
 }
 
 void MainWindow::onTaskAdded(task_id parentTaskId, task_id childTaskId)

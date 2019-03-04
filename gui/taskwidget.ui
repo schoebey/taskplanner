@@ -49,6 +49,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -146,16 +149,9 @@
          <property name="bottomMargin">
           <number>0</number>
          </property>
-         <item row="1" column="0" colspan="2">
-          <widget class="QFrame" name="pSeparator">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
+         <property name="spacing">
+          <number>0</number>
+         </property>
          <item row="0" column="0" colspan="2">
           <widget class="EditableLabel" name="pDescription">
            <property name="sizePolicy">
@@ -181,6 +177,32 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QFrame" name="pSeparator">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="2">
+          <widget class="QFrame" name="pLinks">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -194,6 +216,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
      </property>
      <property name="text">
       <string/>

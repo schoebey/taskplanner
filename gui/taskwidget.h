@@ -5,6 +5,7 @@
 #include "highlightmethod.h"
 
 #include <QFrame>
+#include <QUrl>
 
 #include <map>
 #include <set>
@@ -17,6 +18,7 @@ class GroupWidget;
 class EditableLabel;
 class TaskWidgetOverlay;
 class QMenu;
+class LinkWidget;
 class TaskWidget : public QFrame
 {
   Q_OBJECT
@@ -41,6 +43,10 @@ public:
 
   void addProperty(const QString& sName, const QString& sValue);
   void setPropertyValue(const QString& sName, const QString& sValue);
+
+  void addLink(const QUrl& link);
+  void removeLink(const QUrl& link);
+  void insertLink(const QUrl& link, int iPos);
 
   void setHighlight(HighlightingMethod method);
   HighlightingMethod highlight() const;
@@ -75,6 +81,9 @@ signals:
   void taskAdded(task_id parentId, task_id childId);
   void taskRemoved(task_id parentId, task_id childId);
   void taskDeleted(task_id id);
+  void linkAdded(task_id id, QUrl url);
+  void linkRemoved(task_id id, QUrl url);
+  void linkInserted(task_id id, QUrl url, int iPos);
 
 private slots:
   void onTitleEdited();
@@ -86,6 +95,7 @@ private slots:
   void updateSize();
   void updateSize2();
   void onDeleteTriggered();
+  void onLinkPasted();
   void onAddSubtaskTriggered();
 
 private:
@@ -104,6 +114,8 @@ private:
   void leaveEvent(QEvent* pEvent) override;
   void contextMenuEvent(QContextMenuEvent* pEvent) override;
   void showEvent(QShowEvent* pEvent) override;
+  void dragEnterEvent(QDragEnterEvent* pEvent) override;
+  void dropEvent(QDropEvent* pEvent) override;
 
   Ui::TaskWidget *ui;
   QPixmap m_cache;
@@ -128,6 +140,7 @@ private:
   QMenu* m_pContextMenu = nullptr;
 
   std::set<TaskWidget*> m_subTasks;
+  std::map<QUrl, LinkWidget*> m_linkWidgets;
 
   static TaskWidget* m_pDraggingTaskWidget;
   static TaskWidget* m_pTaskWidgetUnderMouse;

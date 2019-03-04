@@ -23,6 +23,7 @@ public:
   void resizeEvent(QResizeEvent*) override;
 signals:
   void editingFinished();
+  void sizeChanged();
 
 private:
   int m_iSuggestedWidth = -1;

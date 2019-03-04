@@ -11,9 +11,13 @@ TaskWidget {
   qproperty-dropShadow: false;
 }
 
+TaskWidget #pLinks {
+  border: 1px solid #ff9900;
+}
+
 TaskWidget #pDescription {
   padding: 0 10 0 10;
-  border: 0px solid red;
+  border: 1px solid red;
   color: black;
 }
 
