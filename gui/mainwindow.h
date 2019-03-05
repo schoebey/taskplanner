@@ -62,7 +62,7 @@ private slots:
   void sortGroups();
   void onTaskDeleted(task_id id);
   void onDocumentModified();
-
+  void onPasteFromClipboard();
 signals:
   void timeTrackingStopped(task_id taskId);
   void documentModified();
