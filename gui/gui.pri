@@ -31,7 +31,8 @@ HEADERS += \
 FORMS += \
     gui/groupwidget.ui \
     gui/mainwindow.ui \
-    gui/taskwidget.ui
+    gui/taskwidget.ui \
+    $$PWD/linkwidget.ui
 
 RESOURCES += \
     $$PWD/resources/resource.qrc
