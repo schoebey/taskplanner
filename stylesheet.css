@@ -61,3 +61,30 @@ TaskWidget #pStartStop:checked {
   background-image: url(:/icons/timer_stop.png);
 }
 
+LinkWidget {
+  padding: 3px;
+  margin: 0px;
+}
+
+LinkWidget #pIcon {
+  border: 1px solid red;
+}
+
+LinkWidget[isFile=true] {
+  border: 1px solid blue;
+}
+
+LinkWidget[isFile=false] {
+  border: 1px solid blue;
+}
+LinkWidget[isFile=false] #pIcon {
+  background: url(:/icons/disk.png) center center no-repeat;
+}
+
+QMainWindow > LinkWidget {
+  background-color: rgba(255, 255, 255, 100);
+  border: 1px solid black;
+  border-radius: 3px;
+  padding: 13px;
+}
+

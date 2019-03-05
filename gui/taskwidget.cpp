@@ -31,10 +31,8 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
 {
   ui->setupUi(this);
 
-  FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks);
+  FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
-//  pFlowLayout->setMargin(0);
-  pFlowLayout->setSpacing(0);
 
   connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));

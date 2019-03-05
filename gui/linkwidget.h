@@ -26,7 +26,7 @@ private:
   void leaveEvent(QEvent* pEvent) override;
   void paintEvent(QPaintEvent*) override;
 
-private:
+protected:
   Ui::LinkWidget* ui;
   QUrl m_link;
   bool m_bConstrainLabelToSize = false;
