@@ -23,6 +23,7 @@
 #include <QPushButton>
 #include <QTimer>
 #include <QSignalMapper>
+#include <QClipboard>
 
 #include <array>
 
@@ -56,6 +57,13 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   bool bOk = connect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
   assert(bOk);
   Q_UNUSED(bOk)
+
+
+  QAction* pPasteFromClipboardAction = new QAction(tr("paste"), this);
+  pPasteFromClipboardAction->setShortcut(Qt::CTRL + Qt::Key_V);
+  pPasteFromClipboardAction->setShortcutContext(Qt::WindowShortcut);
+  connect(pPasteFromClipboardAction, SIGNAL(triggered()), this, SLOT(onPasteFromClipboard()));
+  addAction(pPasteFromClipboardAction);
 
   initUi();
 }
@@ -922,6 +930,70 @@ void MainWindow::sortGroups()
     if (nullptr != el.second)
     {
       sortGroup(el.second->id());
+    }
+  }
+}
+
+void MainWindow::onPasteFromClipboard()
+{
+  QClipboard* pClipboard = QApplication::clipboard();
+  if (nullptr != pClipboard)
+  {
+    QString sText = pClipboard->text();
+    auto elements = sText.split("\n");
+
+    // check if it's a bullet point list
+    QRegExp rx(R"(^(\s*)(\*|\-|\>)?(.*)$)");
+    bool bIsBulletPointList = true;
+    for (const auto& el : elements)
+    {
+      bIsBulletPointList &= (0 == rx.indexIn(el));
+    }
+
+    if (bIsBulletPointList)
+    {
+      // group?
+      IGroup* pGroup = nullptr;
+      for (const auto& gid : m_pManager->groupIds())
+      {
+        pGroup = m_pManager->group(gid);
+        if (nullptr != pGroup) break;
+      }
+      // iterate through all entries in the list
+      // indented entries should become sub-tasks
+      int iCurrentIndentationLevel = 0;
+      std::map<int, ITask*> potentialParentTasks;
+      for (const auto& el : elements)
+      {
+        if (0 == rx.indexIn(el))
+        {
+          ITask* pNewTask = m_pManager->addTask();
+          QString sIndent = rx.cap(1);
+          iCurrentIndentationLevel = sIndent.size();
+
+          // find potential parent by looking for a task with a lesser indent
+          ITask* pPotentialParentTask = nullptr;
+          for (const auto& task : potentialParentTasks)
+          {
+            if (task.first < iCurrentIndentationLevel)  { pPotentialParentTask = task.second; }
+          }
+
+          if (nullptr != pPotentialParentTask)
+          {
+            // Subtask!
+            pPotentialParentTask->addTask(pNewTask->id());
+          }
+
+          pGroup->addTask(pNewTask->id());
+
+          pNewTask->setName(rx.cap(3));
+
+          // remember latest task of current indent level as potential parent
+          potentialParentTasks[iCurrentIndentationLevel] = pNewTask;
+        }
+      }
+
+      initUi();
     }
   }
 }
