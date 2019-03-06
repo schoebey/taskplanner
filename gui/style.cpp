@@ -1,6 +1,7 @@
 #include "style.h"
 
 #include "editablelabel.h"
+#include "linkwidget.h"
 
 #include <QPainter>
 #include <QPixmap>
@@ -264,6 +265,75 @@ namespace
 Style::Style()
 {
   setBaseStyle(nullptr);
+}
+
+void Style::drawControl(ControlElement element,
+                        const QStyleOption* pOption,
+                        QPainter* pPainter,
+                        const QWidget* pWidget) const
+{
+  switch (element)
+  {
+  case CustomControlElements::CE_LinkWidget:
+  {
+    const QStyleOptionLinkWidget* pLinkOption = qstyleoption_cast<const QStyleOptionLinkWidget*>(pOption);
+    if (nullptr != pLinkOption)
+    {
+      if (pLinkOption->bDrawFrame)
+      {
+        static const double c_dBias = 0.5;
+        QRectF r0 = pLinkOption->iconRect;
+        r0.adjust(-pLinkOption->dPaddingX + c_dBias, -pLinkOption->dPaddingY + c_dBias,
+                  pLinkOption->dPaddingX - c_dBias, pLinkOption->dPaddingY - c_dBias);
+
+        QRectF r1 = pLinkOption->labelRect;
+        r1.adjust(-pLinkOption->dPaddingX + c_dBias, -pLinkOption->dPaddingY + c_dBias,
+                  pLinkOption->dPaddingX - c_dBias, pLinkOption->dPaddingY - c_dBias);
+
+        QPolygonF p;
+        p << r0.topLeft()
+          << r0.topRight()
+          << QPointF(r0.right(), r1.top())
+          << r1.topRight()
+          << r1.bottomRight()
+          << r1.bottomLeft()
+          << r1.topLeft()
+          << QPointF(r0.left(), r1.top())
+          << r0.topLeft()
+          << r0.topRight();
+
+        QPainterPath path;
+
+        bool bStart = true;
+        for (int i = 1; i < p.size(); ++i)
+        {
+          QVector2D v = QVector2D(p[i].x() - p[i-1].x(), p[i].y() - p[i-1].y());
+          v = pLinkOption->dBorderRadius * v.normalized();
+          if (bStart)
+          {
+            path.moveTo(p[1] - v.toPointF());
+            bStart = false;
+          }
+          else
+          {
+            path.quadTo(p[i-1], p[i-1] + v.toPointF());
+            path.lineTo(p[i] - v.toPointF());
+          }
+        }
+
+        pPainter->save();
+        pPainter->setRenderHint(QPainter::Antialiasing, true);
+        pPainter->setPen(pOption->palette.color(QPalette::Text));
+        pPainter->setBrush(pOption->palette.color(QPalette::AlternateBase));
+        pPainter->drawPath(path);
+        pPainter->restore();
+      }
+    }
+  } break;
+  default:
+    return QProxyStyle::drawControl(element, pOption, pPainter, pWidget);
+  }
+
 }
 
 void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,

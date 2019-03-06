@@ -6,10 +6,19 @@
 
 #include <cmath>
 
+
+QStyleOptionLinkWidget::QStyleOptionLinkWidget()
+  : QStyleOption(1, eLinkWidget)
+{
+}
+
+
+
 LinkWidget::LinkWidget(const QUrl& link)
   : ui(new Ui::LinkWidget),
     m_link(link)
 {
+  setAttribute(Qt::WA_StyledBackground, false);
   ui->setupUi(this);
   setConstrainLabelToSize(true);
 
@@ -79,8 +88,24 @@ bool LinkWidget::constrainLabelToSize() const
   return m_bConstrainLabelToSize;
 }
 
-void LinkWidget::showToolTip()
+void LinkWidget::setDrawFrame(bool bDraw)
 {
+  m_bDrawFrame = bDraw;
+}
+
+bool LinkWidget::drawFrame() const
+{
+  return m_bDrawFrame;
+}
+
+void LinkWidget::setBorderRadius(double dRadius)
+{
+  m_dBorderRadius = dRadius;
+}
+
+double LinkWidget::borderRadius() const
+{
+  return m_dBorderRadius;
 }
 
 void LinkWidget::enterEvent(QEvent* pEvent)
@@ -89,6 +114,7 @@ void LinkWidget::enterEvent(QEvent* pEvent)
   {
     m_pToolTip = new LinkWidget(m_link);
     m_pToolTip->setConstrainLabelToSize(false);
+    m_pToolTip->setDrawFrame(true);
     m_pToolTip->setParent(window());
     m_pToolTip->setAttribute(Qt::WA_TransparentForMouseEvents);
     m_pToolTip->setFocusPolicy(Qt::NoFocus);
@@ -102,7 +128,7 @@ void LinkWidget::enterEvent(QEvent* pEvent)
     QPointF ptTooltipTl = m_pToolTip->ui->pIcon->mapTo(m_pToolTip, m_pToolTip->ui->pIcon->rect().topLeft());
     QPointF ptTooltipCenter = ptTooltipTl + QPointF(m_pToolTip->ui->pIcon->rect().width() / 2.,
                                                     m_pToolTip->ui->pIcon->rect().height() / 2.);
-    QPointF offset = ptTooltipCenter;// - ptTooltipTl;
+    QPointF offset = ptTooltipCenter;
     m_pToolTip->move(ptCenter.x() - floor(offset.x()), ptCenter.y() - floor(offset.y()));
   }
 }
@@ -115,10 +141,24 @@ void LinkWidget::leaveEvent(QEvent* pEvent)
 
 void LinkWidget::paintEvent(QPaintEvent* /*pEvent*/)
 {
-//  QPainter painter(this);
-//  painter.setPen(Qt::green);
-//  painter.setBrush(Qt::red);
+  QStyleOptionLinkWidget opt;
+  opt.initFrom(this);
 
-//  QRect r(rect());
-//  painter.drawRect(r);
+  QRect r(rect());
+  QRect cr(childrenRect());
+  opt.dPaddingX = (r.width() - cr.width()) / 2.;
+  opt.dPaddingY = (r.height() - cr.height()) / 2.;
+  opt.dBorderRadius = m_dBorderRadius;
+
+  QRect iconLabelRect = ui->pIcon->rect();
+  opt.iconRect = ui->pIcon->pixmap()->rect();
+  int iOffsetX = (iconLabelRect.width() - opt.iconRect.width()) / 2;
+  int iOffsetY = (iconLabelRect.height() - opt.iconRect.height()) / 2;
+  opt.iconRect.moveTo(ui->pIcon->mapTo(this, QPoint(iOffsetX, iOffsetY)));
+  opt.labelRect = ui->pLabel->rect();
+  opt.labelRect.moveTo(ui->pLabel->mapTo(this, QPoint(0,0)));
+  opt.bDrawFrame = m_bDrawFrame;
+
+  QPainter painter(this);
+  style()->drawControl(static_cast<QStyle::ControlElement>(CE_LinkWidget), &opt, &painter, this);
 }
