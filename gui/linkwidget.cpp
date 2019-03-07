@@ -3,6 +3,7 @@
 
 #include <QPainter>
 #include <QFileIconProvider>
+#include <QDesktopServices>
 
 #include <cmath>
 
@@ -18,8 +19,9 @@ LinkWidget::LinkWidget(const QUrl& link)
   : ui(new Ui::LinkWidget),
     m_link(link)
 {
-  setAttribute(Qt::WA_StyledBackground, false);
   ui->setupUi(this);
+  setAttribute(Qt::WA_StyledBackground, false);
+  setFocusPolicy(Qt::ClickFocus);
   setConstrainLabelToSize(true);
 
   QString s(m_link.toLocalFile());
@@ -61,6 +63,12 @@ LinkWidget::LinkWidget(const QUrl& link)
   //setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
   resize(32, 32);
   setMinimumSize(32, 32);
+
+  QAction* pDeleteAction = new QAction(tr("Delete"), this);
+  pDeleteAction->setShortcuts(QList<QKeySequence>() << Qt::Key_Delete << Qt::Key_Backspace);
+  pDeleteAction->setShortcutContext(Qt::WidgetShortcut);
+  addAction(pDeleteAction);
+  connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(onDeleteTriggered()));
 }
 
 LinkWidget::~LinkWidget()
@@ -108,7 +116,7 @@ double LinkWidget::borderRadius() const
   return m_dBorderRadius;
 }
 
-void LinkWidget::enterEvent(QEvent* pEvent)
+void LinkWidget::showOverlay()
 {
   if (nullptr == m_pToolTip)
   {
@@ -133,10 +141,26 @@ void LinkWidget::enterEvent(QEvent* pEvent)
   }
 }
 
-void LinkWidget::leaveEvent(QEvent* pEvent)
+void LinkWidget::hideOverlay()
 {
   delete m_pToolTip;
   m_pToolTip = nullptr;
+}
+
+void LinkWidget::onDeleteTriggered()
+{
+  hideOverlay();
+  emit deleteTriggered(m_link);
+}
+
+void LinkWidget::enterEvent(QEvent* /*pEvent*/)
+{
+  showOverlay();
+}
+
+void LinkWidget::leaveEvent(QEvent* /*pEvent*/)
+{
+  hideOverlay();
 }
 
 void LinkWidget::paintEvent(QPaintEvent* /*pEvent*/)
@@ -161,4 +185,20 @@ void LinkWidget::paintEvent(QPaintEvent* /*pEvent*/)
 
   QPainter painter(this);
   style()->drawControl(static_cast<QStyle::ControlElement>(CE_LinkWidget), &opt, &painter, this);
+}
+
+void LinkWidget::mousePressEvent(QMouseEvent*)
+{
+
+}
+
+void LinkWidget::mouseReleaseEvent(QMouseEvent*)
+{
+
+}
+
+void LinkWidget::mouseDoubleClickEvent(QMouseEvent*)
+{
+  QDesktopServices::openUrl(m_link);
+  hideOverlay();
 }
