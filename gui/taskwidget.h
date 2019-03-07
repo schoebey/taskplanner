@@ -44,9 +44,6 @@ public:
   void addProperty(const QString& sName, const QString& sValue);
   void setPropertyValue(const QString& sName, const QString& sValue);
 
-  void addLink(const QUrl& link);
-  void removeLink(const QUrl& link);
-  void insertLink(const QUrl& link, int iPos);
 
   void setHighlight(HighlightingMethod method);
   HighlightingMethod highlight() const;
@@ -65,10 +62,15 @@ public:
   void setDropShadow(bool bOn);
 
   void edit();
+
 public slots:
   void setExpanded(bool bExpanded);
   void addTask(TaskWidget* pTaskWidget);
   void removeTask(TaskWidget* pTaskWidget);
+
+  void addLink(const QUrl& link);
+  void removeLink(const QUrl& link);
+  void insertLink(const QUrl& link, int iPos);
 
 signals:
   void renamed(task_id taskId, const QString& sNewName);

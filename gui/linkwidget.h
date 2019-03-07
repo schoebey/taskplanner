@@ -51,10 +51,23 @@ public:
   void setBorderRadius(double dRadius);
   double borderRadius() const;
 
+signals:
+  void deleteTriggered(QUrl);
+
 private:
   void enterEvent(QEvent* pEvent) override;
   void leaveEvent(QEvent* pEvent) override;
   void paintEvent(QPaintEvent*) override;
+  void mousePressEvent(QMouseEvent*) override;
+  void mouseReleaseEvent(QMouseEvent*) override;
+  void mouseDoubleClickEvent(QMouseEvent*) override;
+
+  void showOverlay();
+
+  void hideOverlay();
+
+private slots:
+  void onDeleteTriggered();
 
 protected:
   Ui::LinkWidget* ui;

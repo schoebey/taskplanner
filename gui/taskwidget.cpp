@@ -314,6 +314,8 @@ void TaskWidget::addLink(const QUrl& link)
       LinkWidget* pLinkWidget = new LinkWidget(link);
       pLayout->addWidget(pLinkWidget);
 
+      connect(pLinkWidget, SIGNAL(deleteTriggered(QUrl)), this, SLOT(removeLink(QUrl)));
+
       emit linkAdded(m_taskId, link);
 
       m_linkWidgets[link] = pLinkWidget;
@@ -330,7 +332,6 @@ void TaskWidget::removeLink(const QUrl& link)
     m_linkWidgets.erase(it);
   }
 
-  assert(false && "todo");
   emit linkRemoved(m_taskId, link);
 }
 
