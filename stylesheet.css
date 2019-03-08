@@ -3,30 +3,21 @@
 #inprogress { qproperty-backgroundImage: url(:/task_background_2.png); } 
 #done { qproperty-backgroundImage: url(:/task_background_3.png); }
 
-TaskWidget
-{
-  border: 1px solid rgba(50, 50, 50, 100);
+
+TaskWidget {
+  border: 1px solid rgba(50, 50, 50, 128);
   border-radius: 7px;
   margin: 4px;
-  qproperty-dropShadow: false; 
-}
-
-TaskWidget #pDescription {
-  padding: 0 10px 0 10px;
-  border: 1px solid red;
-}
-
-TaskWidget #pDynamicProperties {
-  border: 1px solid #00ff00;
+  qproperty-dropShadow: false;
 }
 
 TaskWidget #pLinks {
-  border: 1px solid #ff9900;
+  border: 0px solid #ff9900;
 }
 
 TaskWidget #pDescription {
   padding: 0 10 0 10;
-  border: 1px solid red;
+  border: 0px solid red;
   color: black;
 }
 
