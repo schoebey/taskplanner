@@ -658,22 +658,25 @@ void TaskWidget::setExpanded(bool bExpanded)
 
 void TaskWidget::addTask(TaskWidget* pTaskWidget)
 {
-  QLayout* pLayout = ui->pSubTasks->layout();
-  if (nullptr != pLayout)
+  if (m_subTasks.end() == m_subTasks.find(pTaskWidget))
   {
-    QGridLayout* pGrid = dynamic_cast<QGridLayout*>(pLayout);
-    if (nullptr != pGrid)
+    QLayout* pLayout = ui->pSubTasks->layout();
+    if (nullptr != pLayout)
     {
-      pGrid->addWidget(pTaskWidget, pGrid->rowCount(), 0);
-      pTaskWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-      connect(pTaskWidget, SIGNAL(sizeChanged()), this, SIGNAL(sizeChanged()), Qt::QueuedConnection);
-      pTaskWidget->setParentTask(this);
+      QGridLayout* pGrid = dynamic_cast<QGridLayout*>(pLayout);
+      if (nullptr != pGrid)
+      {
+        pGrid->addWidget(pTaskWidget, pGrid->rowCount(), 0);
+        pTaskWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        connect(pTaskWidget, SIGNAL(sizeChanged()), this, SIGNAL(sizeChanged()), Qt::QueuedConnection);
+        pTaskWidget->setParentTask(this);
 
-      emit taskAdded(id(), pTaskWidget->id());
+        emit taskAdded(id(), pTaskWidget->id());
 
-      emit sizeChanged();
+        emit sizeChanged();
 
-      m_subTasks.insert(pTaskWidget);
+        m_subTasks.insert(pTaskWidget);
+      }
     }
   }
 }

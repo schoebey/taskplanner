@@ -65,7 +65,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   connect(pPasteFromClipboardAction, SIGNAL(triggered()), this, SLOT(onPasteFromClipboard()));
   addAction(pPasteFromClipboardAction);
 
-  initUi();
+  initTaskUi();
 }
 
 MainWindow::~MainWindow()
@@ -74,11 +74,8 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
-void MainWindow::initUi()
+void MainWindow::initTaskUi()
 {
-  bool bOk = disconnect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
-  assert(bOk);
-
   for (const auto& el : m_taskWidgets)
   {
     delete el.second;
@@ -91,24 +88,38 @@ void MainWindow::initUi()
   }
   m_groupWidgets.clear();
 
+  updateTaskUi();
+}
 
-  size_t i = 0;
-  std::array<QImage, 3> images = {{QImage(":/task_background_1.png"),
-                                   QImage(":/task_background_2.png"),
-                                   QImage(":/task_background_3.png")}};
+
+void MainWindow::updateTaskUi()
+{
+  bool bOk = disconnect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
+  assert(bOk);
+
+
   for (const auto& groupId : m_pManager->groupIds())
   {
     IGroup* pGroup = m_pManager->group(groupId);
 
     if (nullptr != pGroup)
     {
-      GroupWidget* pGroupWidget = createGroupWidget(groupId);
-      pGroupWidget->setBackgroundImage(images[i++ % images.size()]);
-      pGroupWidget->setName(pGroup->name());
+      GroupWidget* pGroupWidget = nullptr;
+      auto itGroupWidget = m_groupWidgets.find(groupId);
+      if (m_groupWidgets.end() == itGroupWidget)
+      {
+        pGroupWidget = createGroupWidget(groupId);
+        pGroupWidget->setName(pGroup->name());
 
-      bool bOk(false);
-      bool bAutoSortingEnabled = conversion::fromString<bool>(pGroup->propertyValue("autoSorting"), bOk);
-      if (bOk)  { pGroupWidget->setAutoSortingEnabled(bAutoSortingEnabled); }
+        bool bOk(false);
+        bool bAutoSortingEnabled = conversion::fromString<bool>(pGroup->propertyValue("autoSorting"), bOk);
+        if (bOk)  { pGroupWidget->setAutoSortingEnabled(bAutoSortingEnabled); }
+      }
+      else
+      {
+        pGroupWidget = itGroupWidget->second;
+      }
+
 
       std::map<int, std::vector<ITask*>> tasksByPriority;
       for (const auto& taskId : pGroup->taskIds())
@@ -125,12 +136,17 @@ void MainWindow::initUi()
       {
         for (const auto& pTask : task.second)
         {
-          TaskWidget* pTaskWidget = createTaskWidget(pTask->id());
-
-          auto pParentTask = m_pManager->task(pTask->parentTask());
-          if (nullptr == pParentTask)
+          TaskWidget* pTaskWidget = nullptr;
+          auto itTaskWidget = m_taskWidgets.find(pTask->id());
+          if (m_taskWidgets.end() == itTaskWidget)
           {
-            pGroupWidget->insertTask(pTaskWidget);
+            pTaskWidget = createTaskWidget(pTask->id());
+
+            auto pParentTask = m_pManager->task(pTask->parentTask());
+            if (nullptr == pParentTask)
+            {
+              pGroupWidget->insertTask(pTaskWidget);
+            }
           }
         }
       }
@@ -524,7 +540,7 @@ bool MainWindow::loadFile(const QString& sFileName, QString* psErrorMessage)
 
         setWindowTitle(QString("%1[*] - %2").arg(m_sFileName).arg(QGuiApplication::applicationDisplayName()));
 
-        initUi();
+        initTaskUi();
 
         return true;
       }
@@ -993,7 +1009,7 @@ void MainWindow::onPasteFromClipboard()
         }
       }
 
-      initUi();
+      updateTaskUi();
     }
   }
 }
