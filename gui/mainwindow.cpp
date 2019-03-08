@@ -959,11 +959,11 @@ void MainWindow::onPasteFromClipboard()
     auto elements = sText.split("\n");
 
     // check if it's a bullet point list
-    QRegExp rx(R"(^(\s*)(\*|\-|\>)?(.*)$)");
+    QRegExp rx(R"(^(\s*)(\*|\-|\>)+(.*)$)");
     bool bIsBulletPointList = true;
     for (const auto& el : elements)
     {
-      bIsBulletPointList &= (0 == rx.indexIn(el));
+      bIsBulletPointList |= (0 == rx.indexIn(el));
     }
 
     if (bIsBulletPointList)
@@ -979,11 +979,13 @@ void MainWindow::onPasteFromClipboard()
       // indented entries should become sub-tasks
       int iCurrentIndentationLevel = 0;
       std::map<int, ITask*> potentialParentTasks;
+
+      ITask* pNewTask = nullptr;
       for (const auto& el : elements)
       {
         if (0 == rx.indexIn(el))
         {
-          ITask* pNewTask = m_pManager->addTask();
+          pNewTask = m_pManager->addTask();
           QString sIndent = rx.cap(1);
           iCurrentIndentationLevel = sIndent.size();
 
@@ -1006,6 +1008,16 @@ void MainWindow::onPasteFromClipboard()
 
           // remember latest task of current indent level as potential parent
           potentialParentTasks[iCurrentIndentationLevel] = pNewTask;
+        }
+        else
+        {
+          // not a bullet point, so it is considered a description to the previous task
+          if (nullptr != pNewTask)
+          {
+            QString sDesc = pNewTask->description();
+            sDesc += (sDesc.isEmpty() ? "" : "\n") + el.trimmed();
+            pNewTask->setDescription(sDesc);
+          }
         }
       }
 
