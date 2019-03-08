@@ -39,7 +39,8 @@ private slots:
   void changeTaskDescription(task_id id, const QString& sNewDescr);
   void moveTask(task_id id, group_id groupId, int iPos);
   void reloadStylesheet(const QString& sPath);
-  void initUi();
+  void initTaskUi();
+  void updateTaskUi();
   void startTimeTracking(task_id taskId);
   void stopTimeTracking(task_id taskId);
   void on_actionOpen_triggered();
