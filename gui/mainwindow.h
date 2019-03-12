@@ -64,9 +64,13 @@ private slots:
   void onTaskDeleted(task_id id);
   void onDocumentModified();
   void onPasteFromClipboard();
+
 signals:
   void timeTrackingStopped(task_id taskId);
   void documentModified();
+
+private:
+  void timerEvent(QTimerEvent* pEvent) override;
 
 private:
   Ui::MainWindow *ui;

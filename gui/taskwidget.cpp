@@ -341,6 +341,21 @@ void TaskWidget::insertLink(const QUrl& link, int iPos)
   emit linkInserted(m_taskId, link, iPos);
 }
 
+void TaskWidget::setAutoPriority(double dPriority)
+{
+//  if (!qFuzzyCompare(m_dAutoPriority, dPriority))
+  {
+    m_dAutoPriority = dPriority;
+
+    // TODO: tell the overlay widget that the prio has changed
+    // let it change its color/property based on the new prio
+    // have priority buckets for high/medium/low?
+    m_pOverlay->setProperty("autoPriority", static_cast<int>(dPriority));
+    m_pOverlay->style()->unpolish(m_pOverlay);
+    m_pOverlay->style()->polish(m_pOverlay);
+  }
+}
+
 void TaskWidget::onAddSubtaskTriggered()
 {
   emit newSubTaskRequested(id());

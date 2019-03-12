@@ -78,10 +78,62 @@ double Task::autoPriority() const
 
 
   // for now: use due date, added date and duration as a base for computing the priority
-  int iNofDaysInProgress = 0;
+  double dDueTimeWeight = 0;
+  int iNofDaysTaskShouldBeInProgress = 0;
   QDateTime dueDate = property<QDateTime>("due date");
   if (dueDate.isValid())
   {
+    qint64 iTimeToDue = std::max<qint64>(1, QDateTime::currentDateTime().secsTo(dueDate));
+
+    // TODO: come up with a formula that computes dDueTimeWeight accurately
+    // e.g. based on the actual time to due, not just discreet buckets.
+    // set prio category according to the time left
+    if (iTimeToDue < 600) // less than 10 mins
+    {
+      dDueTimeWeight = 10;
+    }
+    else if (iTimeToDue < 3600) // less than an hour
+    {
+      dDueTimeWeight = 9;
+    }
+    else if (iTimeToDue < 18000) // less than half a day
+    {
+      dDueTimeWeight = 8;
+    }
+    else if (iTimeToDue < 24 * 3600) // less than a day
+    {
+      dDueTimeWeight = 7;
+    }
+    else if (iTimeToDue < 2 * 24 * 3600) // less than two days
+    {
+      dDueTimeWeight = 6;
+    }
+    else if (iTimeToDue < 7 * 24 * 3600) // less than a week
+    {
+      dDueTimeWeight = 5;
+    }
+    else if (iTimeToDue < 14 * 3600) // less than two weeks
+    {
+      dDueTimeWeight = 4;
+    }
+    else if (iTimeToDue < 30 * 3600) // less than a month
+    {
+      dDueTimeWeight = 3;
+    }
+    else if (iTimeToDue < 60 * 3600) // less than two months
+    {
+      dDueTimeWeight = 2;
+    }
+    else if (iTimeToDue < 182 * 24 * 3600) // less than half a year
+    {
+      dDueTimeWeight = 1;
+    }
+    else // everything longer than half a year
+    {
+      dDueTimeWeight = 0;
+    }
+
+
     int iNofDays = property<int>("duration (days)");
     QDateTime startDate = dueDate.addDays(-iNofDays);
 
@@ -89,7 +141,9 @@ double Task::autoPriority() const
     if (0 >= iNofDaysToStart)
     {
       int iNofDaysToDue = QDateTime::currentDateTime().daysTo(dueDate);
-      iNofDaysInProgress = iNofDays - iNofDaysToDue;
+      iNofDaysTaskShouldBeInProgress = iNofDays - iNofDaysToDue;
+
+//      dDueTimeWeight += something;
     }
   }
 
@@ -104,8 +158,7 @@ double Task::autoPriority() const
 
   // TODO: incorporate factor (hi/med/lo)
   // TODO: replace with std::tie
-  return (dueDate.isValid() ? 1 : 0) +
-      iNofDaysInProgress +
+  return dDueTimeWeight +
       static_cast<double>(iNofDaysInSystem) / 100.;
 }
 
