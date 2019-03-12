@@ -85,53 +85,80 @@ double Task::autoPriority() const
   {
     qint64 iTimeToDue = std::max<qint64>(1, QDateTime::currentDateTime().secsTo(dueDate));
 
-    // TODO: come up with a formula that computes dDueTimeWeight accurately
-    // e.g. based on the actual time to due, not just discreet buckets.
-    // set prio category according to the time left
-    if (iTimeToDue < 600) // less than 10 mins
+    // piecewise linear interpolation based on the segment we're in
+    std::vector<qint64> viPivots = {18000,
+                                    24 * 3600,
+                                    2 * 24 * 3600,
+                                    7 * 24 * 3600,
+                                    14 * 24 * 3600,
+                                    30 * 24 * 3600,
+                                    2 * 30 * 24 * 3600,
+                                    6 * 30 * 24 * 3600,
+                                    3600,
+                                    600,
+                                    0};
+    std::sort(viPivots.begin(), viPivots.end(), std::greater<qint64>());
+    dDueTimeWeight = viPivots.size() - 1;
+    for (size_t idx = viPivots.size() - 2; idx >= 0; --idx)
     {
-      dDueTimeWeight = 10;
+      if (iTimeToDue < viPivots[idx])
+      {
+        double dFractionInSegment =
+            static_cast<double>(viPivots[idx] - iTimeToDue) /
+            (viPivots[idx] - viPivots[idx + 1]);
+
+        dDueTimeWeight = dFractionInSegment + idx;
+
+        break;
+      }
     }
-    else if (iTimeToDue < 3600) // less than an hour
-    {
-      dDueTimeWeight = 9;
-    }
-    else if (iTimeToDue < 18000) // less than half a day
-    {
-      dDueTimeWeight = 8;
-    }
-    else if (iTimeToDue < 24 * 3600) // less than a day
-    {
-      dDueTimeWeight = 7;
-    }
-    else if (iTimeToDue < 2 * 24 * 3600) // less than two days
-    {
-      dDueTimeWeight = 6;
-    }
-    else if (iTimeToDue < 7 * 24 * 3600) // less than a week
-    {
-      dDueTimeWeight = 5;
-    }
-    else if (iTimeToDue < 14 * 3600) // less than two weeks
-    {
-      dDueTimeWeight = 4;
-    }
-    else if (iTimeToDue < 30 * 3600) // less than a month
-    {
-      dDueTimeWeight = 3;
-    }
-    else if (iTimeToDue < 60 * 3600) // less than two months
-    {
-      dDueTimeWeight = 2;
-    }
-    else if (iTimeToDue < 182 * 24 * 3600) // less than half a year
-    {
-      dDueTimeWeight = 1;
-    }
-    else // everything longer than half a year
-    {
-      dDueTimeWeight = 0;
-    }
+
+//    // e.g. based on the actual time to due, not just discreet buckets.
+//    // set prio category according to the time left
+//    if (iTimeToDue < 600) // less than 10 mins
+//    {
+//      dDueTimeWeight = 10;
+//    }
+//    else if (iTimeToDue < 3600) // less than an hour
+//    {
+//      dDueTimeWeight = 9;
+//    }
+//    else if (iTimeToDue < 18000) // less than half a day
+//    {
+//      dDueTimeWeight = 8;
+//    }
+//    else if (iTimeToDue < 24 * 3600) // less than a day
+//    {
+//      dDueTimeWeight = 7;
+//    }
+//    else if (iTimeToDue < 2 * 24 * 3600) // less than two days
+//    {
+//      dDueTimeWeight = 6;
+//    }
+//    else if (iTimeToDue < 7 * 24 * 3600) // less than a week
+//    {
+//      dDueTimeWeight = 5;
+//    }
+//    else if (iTimeToDue < 14 * 3600) // less than two weeks
+//    {
+//      dDueTimeWeight = 4;
+//    }
+//    else if (iTimeToDue < 30 * 3600) // less than a month
+//    {
+//      dDueTimeWeight = 3;
+//    }
+//    else if (iTimeToDue < 60 * 3600) // less than two months
+//    {
+//      dDueTimeWeight = 2;
+//    }
+//    else if (iTimeToDue < 182 * 24 * 3600) // less than half a year
+//    {
+//      dDueTimeWeight = 1;
+//    }
+//    else // everything longer than half a year
+//    {
+//      dDueTimeWeight = 0;
+//    }
 
 
     int iNofDays = property<int>("duration (days)");
