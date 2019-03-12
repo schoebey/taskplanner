@@ -66,6 +66,8 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   addAction(pPasteFromClipboardAction);
 
   initTaskUi();
+
+  startTimer(3000);
 }
 
 MainWindow::~MainWindow()
@@ -1022,6 +1024,29 @@ void MainWindow::onPasteFromClipboard()
       }
 
       updateTaskUi();
+    }
+  }
+}
+
+void MainWindow::timerEvent(QTimerEvent* /*pEvent*/)
+{
+  // TODO: iterate through all available tasks,
+  // evaluate their autoPriority and notify
+  // the respective widgets
+  static int c_iTest = 0;
+  c_iTest = (c_iTest + 1) % 4;
+  for (const auto& taskId : m_pManager->taskIds())
+  {
+    auto pTask = m_pManager->task(taskId);
+    if (nullptr != pTask)
+    {
+      auto it = m_taskWidgets.find(taskId);
+      if (it != m_taskWidgets.end() &&
+          nullptr != it->second)
+      {
+        TaskWidget* pWidget = it->second;
+        pWidget->setAutoPriority(pTask->autoPriority());
+      }
     }
   }
 }

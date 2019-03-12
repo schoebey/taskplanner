@@ -3,10 +3,10 @@
 
 #include "highlightmethod.h"
 
-#include <QWidget>
+#include <QFrame>
 
 class TaskWidget;
-class TaskWidgetOverlay : public QWidget
+class TaskWidgetOverlay : public QFrame
 {
   Q_OBJECT
 public:
@@ -19,6 +19,9 @@ public:
   QColor highlightColor() const;
   void setHighlightColor(const QColor& color);
   void setHighlightColor(const QColor& color, int iMsecs);
+
+  Q_PROPERTY(QColor animatedHighlightColor READ highlightColor WRITE setAnimatedHighlightColors)
+  void setAnimatedHighlightColors(const QColor& color);
 
   Q_PROPERTY(QColor borderColor READ borderColor WRITE setBorderColor)
   QColor borderColor() const;

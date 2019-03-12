@@ -72,6 +72,8 @@ public slots:
   void removeLink(const QUrl& link);
   void insertLink(const QUrl& link, int iPos);
 
+  void setAutoPriority(double dPriority);
+
 signals:
   void renamed(task_id taskId, const QString& sNewName);
   void descriptionChanged(task_id taskId, const QString& sNewDescription);
@@ -129,6 +131,7 @@ private:
   QImage m_backgroundImage[2];
   double m_dBackgroundImageBlendFactor = 0;
   bool m_bDropShadow = true;
+  double m_dAutoPriority = 0;
 
   GroupWidget* m_pGroupWidget = nullptr;
   GroupWidget* m_pPreviousGroupWidget = nullptr;

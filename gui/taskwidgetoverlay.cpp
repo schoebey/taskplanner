@@ -47,7 +47,7 @@ namespace
 }
 
 TaskWidgetOverlay::TaskWidgetOverlay(TaskWidget *parent)
-  : QWidget(parent),
+  : QFrame(parent),
     m_pParent(parent)
 {
   setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -151,6 +151,11 @@ void TaskWidgetOverlay::setHighlightColor(const QColor& color, int iMsecs)
   pAnimation->setEndValue(color);
   pAnimation->setEasingCurve(QEasingCurve::OutQuad);
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void TaskWidgetOverlay::setAnimatedHighlightColors(const QColor& color)
+{
+  setHighlightColor(color, 2000);
 }
 
 QColor TaskWidgetOverlay::borderColor() const

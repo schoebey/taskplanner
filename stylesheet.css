@@ -61,6 +61,42 @@ TaskWidget #pStartStop:checked {
   background-image: url(:/icons/timer_stop.png);
 }
 
+TaskWidgetOverlay {
+  qproperty-animatedHighlightColor: white;
+  border: 1px solid white;
+}
+
+TaskWidgetOverlay[autoPriority="10"] {
+  qproperty-animatedHighlightColor: red;
+}
+TaskWidgetOverlay[autoPriority="9"] {
+  qproperty-animatedHighlightColor: green;
+}
+TaskWidgetOverlay[autoPriority="8"] {
+  qproperty-animatedHighlightColor: blue;
+}
+TaskWidgetOverlay[autoPriority="7"] {
+  qproperty-animatedHighlightColor: rgba(100, 0, 255, 255);
+}
+TaskWidgetOverlay[autoPriority="6"] {
+  qproperty-animatedHighlightColor: rgba(100, 0, 255, 255);
+}
+TaskWidgetOverlay[autoPriority="5"] {
+  qproperty-animatedHighlightColor: rgba(100, 0, 255, 255);
+}
+TaskWidgetOverlay[autoPriority="4"] {
+  qproperty-animatedHighlightColor: rgba(100, 0, 255, 255);
+}
+TaskWidgetOverlay[autoPriority="3"] {
+  qproperty-animatedHighlightColor: rgba(100, 0, 255, 255);
+}
+TaskWidgetOverlay[autoPriority="2"] {
+  qproperty-animatedHighlightColor: rgba(100, 0, 255, 255);
+}
+TaskWidgetOverlay[autoPriority="1"] {
+  qproperty-animatedHighlightColor: rgba(100, 0, 255, 255);
+}
+
 LinkWidget {
   padding: 3px;
   margin: 0px;
