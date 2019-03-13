@@ -47,6 +47,7 @@ public:
   bool hasPropertyValue(const QString& sName) const override;
   QString propertyValue(const QString& sName) const override;
   bool setPropertyValue(const QString& sName, const QString& sValue) override;
+  bool removeProperty(const QString& sName) override;
   template<typename T> T property(const QString& sName) const
   {
     return m_properties.get<T>(sName);

@@ -337,3 +337,8 @@ bool Task::setPropertyValue(const QString& sName, const QString& sValue)
 {
   return m_properties.set(sName, sValue);
 }
+
+bool Task::removeProperty(const QString& sName)
+{
+  return m_properties.remove(sName);
+}

@@ -113,3 +113,8 @@ bool Group::setPropertyValue(const QString& sName, const QString& sValue)
 {
   return m_properties.set(sName, sValue);
 }
+
+bool Group::removeProperty(const QString& sName)
+{
+  return m_properties.remove(sName);
+}

@@ -12,6 +12,7 @@ public:
   virtual bool hasPropertyValue(const QString& sName) const = 0;
   virtual QString propertyValue(const QString& sName) const = 0;
   virtual bool setPropertyValue(const QString& sName, const QString& sValue) = 0;
+  virtual bool removeProperty(const QString& sName) = 0;
 
 protected:
   IPropertyProvider() {}

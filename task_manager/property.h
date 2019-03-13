@@ -434,6 +434,20 @@ public:
     return QString();
   }
 
+  bool remove(const QString& sPropertyName)
+  {
+    auto it = std::find_if(allProperties.begin(), allProperties.end(),
+                           [sPropertyName](const tspProperty& p)
+    { return sPropertyName == p->descriptor()->name(); });
+    if (it != allProperties.end())
+    {
+      allProperties.erase(it);
+      return true;
+    }
+
+    return false;
+  }
+
   bool isValid(const QString& sPropertyName) const
   {
     auto it = std::find_if(allProperties.begin(), allProperties.end(),
