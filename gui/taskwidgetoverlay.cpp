@@ -153,9 +153,15 @@ void TaskWidgetOverlay::setHighlightColor(const QColor& color, int iMsecs)
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
-void TaskWidgetOverlay::setAnimatedHighlightColors(const QColor& color)
+QColor TaskWidgetOverlay::backgroundColor() const
 {
-  setHighlightColor(color, 2000);
+  return m_backgroundColor;
+}
+
+void TaskWidgetOverlay::setBackgroundColor(const QColor& color)
+{
+  m_backgroundColor = color;
+  update();
 }
 
 QColor TaskWidgetOverlay::borderColor() const
@@ -189,11 +195,15 @@ void TaskWidgetOverlay::paintEvent(QPaintEvent* /*pEvent*/)
   QColor borderColor(m_borderColor);
   QColor backgroundColor(m_highlightColor);
 
-  painter.setPen(QPen(borderColor, 3));
-  painter.setBrush(backgroundColor);
-
   static const int c_iBorderOffset = 5;
   QRectF rct(rect().adjusted(c_iBorderOffset, c_iBorderOffset, -c_iBorderOffset, -c_iBorderOffset));
+
+  painter.setPen(Qt::NoPen);
+  painter.setBrush(m_backgroundColor);
+  painter.drawRoundRect(rct, 5, 5);
+
+  painter.setPen(QPen(borderColor, 3));
+  painter.setBrush(backgroundColor);
   painter.drawRoundedRect(rct, 5, 5);
 }
 

@@ -399,7 +399,7 @@ void TaskWidget::setHighlight(HighlightingMethod method)
     static const int c_iDuration = 250;
     pAnimation->setDuration(c_iDuration);
     pAnimation->setStartValue(pos() - QPoint(20,0));
-    static const int c_dNofShakes = 5;
+    static const double c_dNofShakes = 5;
     for (int i = 0; i < c_dNofShakes; ++i)
     {
       pAnimation->setKeyValueAt(2 * i / c_dNofShakes, pos() - QPoint(20, 0));
