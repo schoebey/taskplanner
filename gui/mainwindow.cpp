@@ -227,6 +227,7 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
   connect(pTaskWidget, SIGNAL(timeTrackingStarted(task_id)), this, SLOT(startTimeTracking(task_id)));
   connect(pTaskWidget, SIGNAL(timeTrackingStopped(task_id)), this, SLOT(stopTimeTracking(task_id)));
   connect(pTaskWidget, SIGNAL(propertyChanged(task_id, QString, QString)), this, SLOT(onPropertyChanged(task_id, QString, QString)));
+  connect(pTaskWidget, SIGNAL(propertyRemoved(task_id, QString)), this, SLOT(onPropertyRemoved(task_id, QString)));
   connect(pTaskWidget, SIGNAL(taskAdded(task_id, task_id)), this, SLOT(onTaskAdded(task_id, task_id)));
   connect(pTaskWidget, SIGNAL(taskRemoved(task_id, task_id)), this, SLOT(onTaskRemoved(task_id, task_id)));
   connect(pTaskWidget, SIGNAL(taskDeleted(task_id)), this, SLOT(onTaskDeleted(task_id)));
@@ -755,6 +756,15 @@ void MainWindow::onPropertyChanged(task_id taskId,
     }
 
     emit documentModified();
+  }
+}
+
+void MainWindow::onPropertyRemoved(task_id taskId, const QString& sPropertyName)
+{
+  ITask* pTask = m_pManager->task(taskId);
+  if (nullptr != pTask)
+  {
+    pTask->setPropertyValue(sPropertyName, QString());
   }
 }
 

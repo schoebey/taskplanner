@@ -114,6 +114,22 @@ void TaskWidget::setUpContextMenu()
     }
   }
 
+  if (!m_propertyLineEdits.empty())
+  {
+    QMenu* pRemovePropertiesMenu = m_pContextMenu->addMenu(tr("Remove properties"));
+    for (const auto& sPropertyName : Properties<Task>::registeredPropertyNames())
+    {
+      if (m_propertyLineEdits.find(sPropertyName) != m_propertyLineEdits.end() &&
+          Properties<Task>::visible(sPropertyName))
+      {
+        QAction* pAction = new QAction(sPropertyName, this);
+        pAction->setProperty("name", sPropertyName);
+        connect(pAction, SIGNAL(triggered()), this, SLOT(onRemovePropertyTriggered()));
+        pRemovePropertiesMenu->addAction(pAction);
+      }
+    }
+  }
+
   m_pContextMenu->addSeparator();
 
 
@@ -267,6 +283,16 @@ void TaskWidget::onAddPropertyTriggered()
   }
 }
 
+void TaskWidget::onRemovePropertyTriggered()
+{
+  QObject* pSender = sender();
+  if (nullptr != pSender)
+  {
+    QString sName = pSender->property("name").toString();
+    removeProperty(sName);
+  }
+}
+
 void TaskWidget::addProperty(const QString& sName,
                              const QString& sValue)
 {
@@ -278,11 +304,14 @@ void TaskWidget::addProperty(const QString& sName,
     {
       QLabel* pLabel = new QLabel(sName);
       pLabel->setFocusPolicy(Qt::NoFocus);
+      m_propertyLineEdits[sName].pLabel = pLabel;
+
       EditableLabel* pValue = new EditableLabel(this);
       pValue->setFocusPolicy(Qt::NoFocus);
       pValue->setText(sValue);
       pValue->setProperty("name", sName);
-      m_propertyLineEdits[sName] = pValue;
+      m_propertyLineEdits[sName].pValue = pValue;
+
       connect(pValue, SIGNAL(editingFinished()), this, SLOT(onPropertyEdited()));
       int iRow = pGrid->rowCount();
       pGrid->addWidget(pLabel, iRow, 0);
@@ -295,12 +324,29 @@ void TaskWidget::addProperty(const QString& sName,
   setUpContextMenu();
 }
 
+void TaskWidget::removeProperty(const QString& sName)
+{
+  auto it = m_propertyLineEdits.find(sName);
+  if (it != m_propertyLineEdits.end())
+  {
+    delete it->second.pLabel;
+    delete it->second.pValue;
+    m_propertyLineEdits.erase(it);
+
+    emit propertyRemoved(m_taskId, sName);
+
+    emit sizeChanged();
+  }
+
+  setUpContextMenu();
+}
+
 void TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
 {
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {
-    it->second->setText(sValue);
+    it->second.pValue->setText(sValue);
   }
 }
 

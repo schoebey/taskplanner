@@ -19,6 +19,7 @@ class EditableLabel;
 class TaskWidgetOverlay;
 class QMenu;
 class LinkWidget;
+class QLabel;
 class TaskWidget : public QFrame
 {
   Q_OBJECT
@@ -43,6 +44,7 @@ public:
 
   void addProperty(const QString& sName, const QString& sValue);
   void setPropertyValue(const QString& sName, const QString& sValue);
+  void removeProperty(const QString& sName);
 
 
   void setHighlight(HighlightingMethod method);
@@ -80,6 +82,7 @@ signals:
   void timeTrackingStarted(task_id id);
   void timeTrackingStopped(task_id id);
   void propertyChanged(task_id id, const QString& sName, const QString& sValue);
+  void propertyRemoved(task_id id, const QString& sName);
   void sizeChanged();
   void newSubTaskRequested(task_id taskId);
   void taskAdded(task_id parentId, task_id childId);
@@ -96,6 +99,7 @@ private slots:
   void onTimeTrackingStopped(task_id id);
   void onPropertyEdited();
   void onAddPropertyTriggered();
+  void onRemovePropertyTriggered();
   void updateSize();
   void updateSize2();
   void onDeleteTriggered();
@@ -138,7 +142,12 @@ private:
 
   TaskWidgetOverlay* m_pOverlay;
 
-  std::map<QString, EditableLabel*> m_propertyLineEdits;
+  struct SPropertyWidgets
+  {
+    QLabel* pLabel = nullptr;
+    EditableLabel* pValue = nullptr;
+  };
+  std::map<QString, SPropertyWidgets> m_propertyLineEdits;
 
   TaskWidget* m_pParentTask = nullptr;
 
