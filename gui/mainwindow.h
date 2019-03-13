@@ -48,6 +48,7 @@ private slots:
   void on_actionReport_triggered();
   void on_actionDisplayReport_triggered();
   void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
+  void onPropertyRemoved(task_id taskId, const QString& sPropertyName);
   void onLinkAdded(task_id taskId, QUrl url);
   void onLinkRemoved(task_id taskId, QUrl url);
   void onLinkInserted(task_id taskId, QUrl url, int iPos);
