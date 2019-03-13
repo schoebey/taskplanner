@@ -20,8 +20,9 @@ public:
   void setHighlightColor(const QColor& color);
   void setHighlightColor(const QColor& color, int iMsecs);
 
-  Q_PROPERTY(QColor animatedHighlightColor READ highlightColor WRITE setAnimatedHighlightColors)
-  void setAnimatedHighlightColors(const QColor& color);
+  Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
+  QColor backgroundColor() const;
+  void setBackgroundColor(const QColor& color);
 
   Q_PROPERTY(QColor borderColor READ borderColor WRITE setBorderColor)
   QColor borderColor() const;
@@ -40,6 +41,7 @@ private:
   HighlightingMethod m_method = EHighlightMethod::eNoHighlight;
   QColor m_borderColor = QColor(0,0,0,0);
   QColor m_highlightColor = QColor(0,0,0,0);
+  QColor m_backgroundColor = QColor(0,0,0,0);
 };
 
 #endif // TASKWIDGETOVERLAY_H
