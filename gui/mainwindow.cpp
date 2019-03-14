@@ -180,6 +180,10 @@ void MainWindow::updateTaskUi()
   // reconnect to the modified signal so that we get all the modifications from now on
   bOk = connect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
   assert(bOk);
+
+
+  // update the auto priority in all widgets (old and new)
+  updateAutoPrioritiesInTaskWidgets();
 }
 
 void MainWindow::reloadStylesheet(const QString& sPath)
@@ -1038,7 +1042,7 @@ void MainWindow::onPasteFromClipboard()
   }
 }
 
-void MainWindow::timerEvent(QTimerEvent* /*pEvent*/)
+void MainWindow::updateAutoPrioritiesInTaskWidgets()
 {
   // TODO: iterate through all available tasks,
   // evaluate their autoPriority and notify
@@ -1059,4 +1063,9 @@ void MainWindow::timerEvent(QTimerEvent* /*pEvent*/)
       }
     }
   }
+}
+
+void MainWindow::timerEvent(QTimerEvent* /*pEvent*/)
+{
+  updateAutoPrioritiesInTaskWidgets();
 }
