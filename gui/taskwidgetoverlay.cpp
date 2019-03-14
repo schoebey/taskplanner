@@ -4,6 +4,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QPropertyAnimation>
+#include <QDebug>
 
 namespace
 {
@@ -153,15 +154,14 @@ void TaskWidgetOverlay::setHighlightColor(const QColor& color, int iMsecs)
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
-QColor TaskWidgetOverlay::backgroundColor() const
+QBrush TaskWidgetOverlay::background() const
 {
-  return m_backgroundColor;
+  return m_backgroundBrush;
 }
 
-void TaskWidgetOverlay::setBackgroundColor(const QColor& color)
+void TaskWidgetOverlay::setBackground(const QBrush& b)
 {
-  m_backgroundColor = color;
-  update();
+  m_backgroundBrush = b;
 }
 
 QColor TaskWidgetOverlay::borderColor() const
@@ -199,8 +199,8 @@ void TaskWidgetOverlay::paintEvent(QPaintEvent* /*pEvent*/)
   QRectF rct(rect().adjusted(c_iBorderOffset, c_iBorderOffset, -c_iBorderOffset, -c_iBorderOffset));
 
   painter.setPen(Qt::NoPen);
-  painter.setBrush(m_backgroundColor);
-  painter.drawRoundRect(rct, 5, 5);
+  painter.setBrush(m_backgroundBrush);
+  painter.drawRoundedRect(rct, 5, 5);
 
   painter.setPen(QPen(borderColor, 3));
   painter.setBrush(backgroundColor);

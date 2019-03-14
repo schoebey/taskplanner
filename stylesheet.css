@@ -132,6 +132,12 @@ TaskWidget {
   qproperty-dropShadow: false;
 }
 
+TaskWidget #pTitle {
+  padding-left: 4px;
+  font-size: 11pt;
+  color: rgba(255, 255, 255, 255);
+}
+
 TaskWidget #pLinks {
   border: 0px solid #ff9900;
 }
@@ -183,38 +189,38 @@ TaskWidget #pStartStop:checked {
 }
 
 TaskWidgetOverlay {
-  qproperty-backgroundColor: rgba(255, 255, 255, 0);
+  qproperty-background: rgba(255, 255, 255, 0);
 }
 
 TaskWidgetOverlay[autoPriority="10"] {
-  qproperty-backgroundColor: rgba(0, 0, 0, 100);
+  qproperty-background: rgba(0, 0, 0, 100);
 }
 TaskWidgetOverlay[autoPriority="9"] {
-  qproperty-backgroundColor: rgba(255, 0, 0, 100);
+  qproperty-background: rgba(255, 0, 0, 100);
 }
 TaskWidgetOverlay[autoPriority="8"] {
-  qproperty-backgroundColor: rgba(255, 50, 0, 100);
+  qproperty-background: rgba(255, 50, 0, 100);
 }
 TaskWidgetOverlay[autoPriority="7"] {
-  qproperty-backgroundColor: rgba(255, 100, 0, 100);
+  qproperty-background: rgba(255, 100, 0, 100);
 }
 TaskWidgetOverlay[autoPriority="6"] {
-  qproperty-backgroundColor: rgba(255, 150, 0, 100);
+  qproperty-background: rgba(255, 150, 0, 100);
 }
 TaskWidgetOverlay[autoPriority="5"] {
-  qproperty-backgroundColor: rgba(255, 200, 0, 100);
+  qproperty-background: rgba(255, 200, 0, 100);
 }
 TaskWidgetOverlay[autoPriority="4"] {
-  qproperty-backgroundColor: rgba(150, 200, 0, 100);
+  qproperty-background: rgba(150, 200, 0, 100);
 }
 TaskWidgetOverlay[autoPriority="3"] {
-  qproperty-backgroundColor: rgba(100, 255, 0, 100);
+  qproperty-background: rgba(100, 255, 0, 100);
 }
 TaskWidgetOverlay[autoPriority="2"] {
-  qproperty-backgroundColor: rgba(50, 255, 100, 100);
+  qproperty-background: rgba(50, 255, 100, 100);
 }
 TaskWidgetOverlay[autoPriority="1"] {
-  qproperty-backgroundColor: rgba(0, 255, 150, 100);
+  qproperty-background: rgba(0, 255, 150, 100);
 }
 
 LinkWidget {
