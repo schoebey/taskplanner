@@ -4,6 +4,7 @@
 #include "highlightmethod.h"
 
 #include <QFrame>
+#include <QVariant>
 
 class TaskWidget;
 class TaskWidgetOverlay : public QFrame
@@ -20,9 +21,9 @@ public:
   void setHighlightColor(const QColor& color);
   void setHighlightColor(const QColor& color, int iMsecs);
 
-  Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
-  QColor backgroundColor() const;
-  void setBackgroundColor(const QColor& color);
+  Q_PROPERTY(QBrush background READ background WRITE setBackground)
+  QBrush background() const;
+  void setBackground(const QBrush& b);
 
   Q_PROPERTY(QColor borderColor READ borderColor WRITE setBorderColor)
   QColor borderColor() const;
@@ -41,7 +42,7 @@ private:
   HighlightingMethod m_method = EHighlightMethod::eNoHighlight;
   QColor m_borderColor = QColor(0,0,0,0);
   QColor m_highlightColor = QColor(0,0,0,0);
-  QColor m_backgroundColor = QColor(0,0,0,0);
+  QBrush m_backgroundBrush;
 };
 
 #endif // TASKWIDGETOVERLAY_H
