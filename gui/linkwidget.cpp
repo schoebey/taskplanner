@@ -22,6 +22,7 @@ LinkWidget::LinkWidget(const QUrl& link)
   ui->setupUi(this);
   setAttribute(Qt::WA_StyledBackground, false);
   setFocusPolicy(Qt::ClickFocus);
+  setContextMenuPolicy(Qt::ActionsContextMenu);
   setConstrainLabelToSize(true);
 
   QString s(m_link.toLocalFile());
@@ -64,6 +65,9 @@ LinkWidget::LinkWidget(const QUrl& link)
   resize(32, 32);
   setMinimumSize(32, 32);
 
+  QAction* pOpenAction = new QAction(tr("Open link..."), this);
+  addAction(pOpenAction);
+  connect(pOpenAction, SIGNAL(triggered()), this, SLOT(openLink()));
   QAction* pDeleteAction = new QAction(tr("Delete"), this);
   pDeleteAction->setShortcuts(QList<QKeySequence>() << Qt::Key_Delete << Qt::Key_Backspace);
   pDeleteAction->setShortcutContext(Qt::WidgetShortcut);
@@ -198,6 +202,11 @@ void LinkWidget::mouseReleaseEvent(QMouseEvent*)
 }
 
 void LinkWidget::mouseDoubleClickEvent(QMouseEvent*)
+{
+  openLink();
+}
+
+void LinkWidget::openLink()
 {
   QDesktopServices::openUrl(m_link);
   hideOverlay();

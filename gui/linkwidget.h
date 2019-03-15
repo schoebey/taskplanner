@@ -68,6 +68,7 @@ private:
 
 private slots:
   void onDeleteTriggered();
+  void openLink();
 
 protected:
   Ui::LinkWidget* ui;
