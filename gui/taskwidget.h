@@ -63,6 +63,10 @@ public:
   bool dropShadow() const;
   void setDropShadow(bool bOn);
 
+  Q_PROPERTY(QBrush overlayBackground READ overlayBackground WRITE setOverlayBackground)
+  QBrush overlayBackground() const;
+  void setOverlayBackground(const QBrush& b);
+
   void edit();
 
 public slots:

@@ -287,6 +287,11 @@ TaskWidget* MainWindow::createTaskWidget(task_id id)
     }
   }
 
+  auto color = conversion::fromString<QColor>(pTask->propertyValue("color"), bOk);
+  if (bOk)
+  {
+    pTaskWidget->setOverlayBackground(color);
+  }
 
   for (const QString& sName : Properties<Task>::registeredPropertyNames())
   {
@@ -768,6 +773,16 @@ void MainWindow::onPropertyChanged(task_id taskId,
                                (bNewValueAccepted ? EHighlightMethod::eValueAccepted :
                                                    EHighlightMethod::eValueRejected));
       it->second->setPropertyValue(sPropertyName, pTask->propertyValue(sPropertyName));
+
+      if ("color" == sPropertyName)
+      {
+        bool bOk(false);
+        auto color = conversion::fromString<QColor>(pTask->propertyValue("color"), bOk);
+        if (bOk)
+        {
+          it->second->setOverlayBackground(color);
+        }
+      }
     }
 
     auto itTimer = m_autoSortTimers.find(pTask->group());
@@ -1063,11 +1078,6 @@ void MainWindow::onPasteFromClipboard()
 
 void MainWindow::updateAutoPrioritiesInTaskWidgets()
 {
-  // TODO: iterate through all available tasks,
-  // evaluate their autoPriority and notify
-  // the respective widgets
-  static int c_iTest = 0;
-  c_iTest = (c_iTest + 1) % 4;
   for (const auto& taskId : m_pManager->taskIds())
   {
     auto pTask = m_pManager->task(taskId);
