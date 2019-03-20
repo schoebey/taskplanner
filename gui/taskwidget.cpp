@@ -687,7 +687,6 @@ void TaskWidget::leaveEvent(QEvent* /*pEvent*/)
 
 void TaskWidget::contextMenuEvent(QContextMenuEvent* pEvent)
 {
-
   if (nullptr != m_pContextMenu)
   {
     pEvent->accept();
