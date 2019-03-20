@@ -212,7 +212,9 @@ void MainWindow::onDocumentModified()
   setWindowModified(true);
 
   // save modifications to a temp file
-  saveFile("~" + m_sFileName);
+  QFileInfo info(m_sFileName);
+  QString sPath = info.path() + "/~" + info.fileName();
+  saveFile(sPath);
 }
 
 GroupWidget* MainWindow::createGroupWidget(group_id id)

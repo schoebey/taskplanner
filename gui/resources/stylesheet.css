@@ -64,10 +64,6 @@ GroupWidget {
   border-radius: 7px;
 }
 
-#backlog { qproperty-backgroundImage: url(:/task_background_1.png); } 
-#inprogress { qproperty-backgroundImage: url(:/task_background_2.png); } 
-#done { qproperty-backgroundImage: url(:/task_background_3.png); }
-
 GroupWidget > #pTitle {
   color: #777;
 }
@@ -75,95 +71,6 @@ GroupWidget > #pTitle {
 GroupWidget > #pAddTask,
 OverlayWidget > #pClose {
   border-top-right-radius: 5px;
-}
-
-
-TaskWidget {
-  margin: 5px 5px 5px 5px;
-  padding: 0px;
-}
-
-TaskWidget #pShowDetails {
-  border: 1px solid rgba(255,255,255,50);
-  background-color: rgba(255,255,255,40);
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  padding: 5px;
-  min-height: 15px;
-  width: 20px;
-  color: rgba(255, 255, 255, 128);
-  background-image: url(:/icons/arrow_right.png);
-  background-repeat: no-repeat;
-  background-position: center center;
-}
-
-TaskWidget #pShowDetails:checked {
-  border-bottom-left-radius: 0px;
-  background-image: url(:/icons/arrow_down.png);
-}
-
-TaskWidget #pStartStop {
-  border: 1px solid rgba(255,255,255,50);
-  background-color: rgba(255,255,255,40);
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-  padding: 5px;
-  min-height: 15px;
-  width: 20px;
-  color: rgba(255, 255, 255, 128);
-  background-image: url(:/icons/timer_start.png);
-  background-repeat: no-repeat;
-  background-position: center center;
-}
-
-TaskWidget #pStartStop:checked {
-  background-image: url(:/icons/timer_stop.png);
-}
-
-TaskWidget[expanded=false] > #pStartStop {
-  border-bottom-right-radius: 5px;
-}
-
-TaskWidget[expanded=true] > #pStartStop {
-  border-bottom-right-radius: 0px;
-}
-
-#pProperties {
-  padding: 10px 0px 0px 0px;
-  border: 0px solid #00ff00;
-}
-
-#pProperties QLabel {
-  padding-left: 4px;
-  padding-top: 0px;
-  padding-right: 4px;
-  font-size: 12pt;
-  color: rgba(255, 255, 255, 200);
-}
-
-#pSeparator {
-  border-top: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
-                stop:0 rgba(0, 0, 0, 0),
-                stop:0.4 rgba(0, 0, 0, 80),
-                stop:0.6 rgba(0, 0, 0, 80),
-                stop:1 rgba(0, 0, 0, 0));
-  border-bottom: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
-                stop:0 rgba(255, 255, 255, 0),
-                stop:0.4 rgba(255, 255, 255, 80),
-                stop:0.6 rgba(255, 255, 255, 80),
-                stop:1 rgba(255, 255, 255, 0));
-  min-height: 0px;
-  margin: 5px 10px 5px 10px;
-}
-
-TaskWidget #pTitle {
-  padding-left: 4px;
-  font-size: 11pt;
-  color: rgba(255, 255, 255, 224);
-}
-
-#pSubTasks {
-  border: 0px solid red;
 }
 
 OverlayWidget {
@@ -211,3 +118,173 @@ OverlayWidget #report {
   border-bottom-left-radius: 5px;
 }
 
+
+
+#backlog { qproperty-backgroundImage: url(:/task_background_1.png); } 
+#inprogress { qproperty-backgroundImage: url(:/task_background_2.png); } 
+#done { qproperty-backgroundImage: url(:/task_background_3.png); }
+
+
+TaskWidget {
+  border: 1px solid rgba(50, 50, 50, 128);
+  border-radius: 7px;
+  margin: 4px;
+  qproperty-dropShadow: false;
+}
+
+TaskWidget #pTitle {
+  qproperty-drawOutline: true;
+  padding-left: 4px;
+  font-size: 10pt;
+  color: rgba(255, 255, 255, 255);
+}
+
+TaskWidget #pLinks {
+  border: 0px solid #ff9900;
+}
+
+TaskWidget #pDescription {
+  padding: 0 10 0 10;
+  border: 0px solid red;
+  color: black;
+}
+
+TaskWidget #pShowDetails {
+  border: 1px solid rgba(255,255,255,50);
+  background-color: rgba(255,255,255,40);
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  padding: 5px;
+  min-height: 15px;
+  width: 20px;
+  color: rgba(255, 255, 255, 128);
+  background-image: url(:/icons/arrow_right.png);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+TaskWidget #pShowDetails:checked {
+  border-bottom-left-radius: 0px;
+  background-image: url(:/icons/arrow_down.png);
+}
+
+TaskWidget #pStartStop {
+  border: 1px solid rgba(255,255,255,50);
+  background-color: rgba(255,255,255,40);
+  border-top-right-radius: 5px;
+  padding: 5px;
+  min-height: 15px;
+  width: 20px;
+  color: rgba(255, 255, 255, 128);
+  background-image: url(:/icons/timer_start.png);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+TaskWidget[expanded=false] #pStartStop {
+  border-bottom-right-radius: 5px; 
+}
+
+TaskWidget #pStartStop:checked {
+  background-image: url(:/icons/timer_stop.png);
+}
+
+TaskWidgetOverlay {
+  qproperty-background: rgba(255, 255, 255, 0);
+}
+
+TaskWidgetOverlay[autoPriority="10"] {
+  qproperty-background: rgba(0, 0, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="9"] {
+  qproperty-background: rgba(255, 0, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="8"] {
+  qproperty-background: rgba(255, 50, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="7"] {
+  qproperty-background: rgba(255, 100, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="6"] {
+  qproperty-background: rgba(255, 150, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="5"] {
+  qproperty-background: rgba(255, 200, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="4"] {
+  qproperty-background: rgba(150, 200, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="3"] {
+  qproperty-background: rgba(100, 255, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="2"] {
+  qproperty-background: rgba(50, 255, 100, 100);
+}
+TaskWidgetOverlay[autoPriority="1"] {
+  qproperty-background: rgba(0, 255, 150, 100);
+}
+
+LinkWidget {
+  padding: 3px;
+  margin: 0px;
+}
+
+LinkWidget #pIcon {
+}
+
+LinkWidget[isFile=true] {
+  border: 0px solid blue;
+}
+
+LinkWidget[isFile=false] {
+  border: 0px solid blue;
+}
+
+LinkWidget[isFile=false] #pIcon {
+  background: url(:/icons/disk.png) center center no-repeat;
+}
+
+
+QMainWindow > LinkWidget {
+  color: rgba(0,0,0,100);
+  alternate-background-color: rgba(255, 255, 255, 200);
+  qproperty-borderRadius: 6;
+  padding: 6px;
+}
+
+LinkWidget:focus {
+  border: 1px solid rgba(90, 100, 255, 255);
+  border-radius: 3px;
+}
+
+#pProperties {
+  padding: 10px 0px 0px 0px;
+  border: 0px solid #00ff00;
+}
+
+#pProperties > QLabel {
+  padding-left: 4px;
+  padding-top: 0px;
+  padding-right: 4px;
+  font-size: 10pt;
+  color: rgba(0, 0, 0, 200);
+}
+
+#pDynamicProperties {
+  padding: 0 0 6px 0;
+}
+
+#pSeparator {
+  border-top: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
+                stop:0 rgba(0, 0, 0, 0),
+                stop:0.4 rgba(0, 0, 0, 80),
+                stop:0.6 rgba(0, 0, 0, 80),
+                stop:1 rgba(0, 0, 0, 0));
+  border-bottom: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
+                stop:0 rgba(255, 255, 255, 0),
+                stop:0.4 rgba(255, 255, 255, 80),
+                stop:0.6 rgba(255, 255, 255, 80),
+                stop:1 rgba(255, 255, 255, 0));
+  min-height: 0px;
+  margin: 5px 10px 5px 10px;
+}

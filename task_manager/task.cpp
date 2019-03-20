@@ -99,7 +99,7 @@ double Task::autoPriority() const
                                     0};
     std::sort(viPivots.begin(), viPivots.end(), std::greater<qint64>());
     dDueTimeWeight = viPivots.size() - 1;
-    for (size_t idx = viPivots.size() - 2; idx >= 0; --idx)
+    for (size_t idx = viPivots.size() - 2;; --idx)
     {
       if (iTimeToDue < viPivots[idx])
       {
@@ -111,6 +111,8 @@ double Task::autoPriority() const
 
         break;
       }
+
+      if (0 == idx)  { break; }
     }
 
 //    // e.g. based on the actual time to due, not just discreet buckets.

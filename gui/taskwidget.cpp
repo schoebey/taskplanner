@@ -374,7 +374,7 @@ void TaskWidget::removeLink(const QUrl& link)
   auto it = m_linkWidgets.find(link);
   if (it != m_linkWidgets.end())
   {
-    delete it->second;
+    it->second->deleteLater();
     m_linkWidgets.erase(it);
   }
 
