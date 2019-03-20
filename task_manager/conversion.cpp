@@ -303,4 +303,16 @@ in a hundred years
     return list.join("|");
   }
 
+  template<>
+  QColor fromString<QColor>(const QString& sVal, bool& bConversionStatus)
+  {
+    QColor c(sVal);
+    bConversionStatus = c.isValid();
+    return c;
+  }
+
+  QString toString(const QColor& c)
+  {
+    return c.name(QColor::HexArgb);
+  }
 }
