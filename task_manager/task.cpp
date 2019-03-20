@@ -17,7 +17,7 @@ Task::~Task()
 
 int Task::version() const
 {
-  return 0;
+  return 1;
 }
 
 ESerializingError Task::serialize(ISerializer* pSerializer) const
