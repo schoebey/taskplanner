@@ -187,7 +187,18 @@ double Task::autoPriority() const
 
   // TODO: incorporate factor (hi/med/lo)
   // TODO: replace with std::tie
-  return dDueTimeWeight +
+  int iUserDefinedPriority = 0;
+  if (hasPropertyValue("priority"))
+  {
+    iUserDefinedPriority = property<int>("priority");
+
+    // if a user defined priority is set, scale down the due date related priority
+    // such that two tasks with the same user defined priority get weighed against
+    // each other according to their due date.
+    dDueTimeWeight /= 10;
+  }
+
+  return dDueTimeWeight + iUserDefinedPriority +
       static_cast<double>(iNofDaysInSystem) / 100.;
 }
 
