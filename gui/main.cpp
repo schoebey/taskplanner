@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Task, "duration (days)", int, true);
   REGISTER_PROPERTY(Task, "category", QString, true);
   REGISTER_PROPERTY(Task, "links", std::vector<QUrl>, false);
+  REGISTER_PROPERTY(Task, "sort_priority", int, false);
   REGISTER_PROPERTY(Task, "priority", double, true);
   REGISTER_PROPERTY(Task, "color", QColor, true);
   Properties<Task>::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
