@@ -73,6 +73,7 @@ signals:
 private:
   void timerEvent(QTimerEvent* pEvent) override;
   void updateAutoPrioritiesInTaskWidgets();
+  void saveTempFile();
 
 private:
   Ui::MainWindow *ui;

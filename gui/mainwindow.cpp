@@ -26,6 +26,7 @@
 #include <QClipboard>
 
 #include <array>
+#include <future>
 
 Q_DECLARE_METATYPE(QIODevice*)
 
@@ -207,15 +208,19 @@ void MainWindow::reloadStylesheet(const QString& sPath)
   }
 }
 
+void MainWindow::saveTempFile()
+{
+  QFileInfo info(m_sFileName);
+  QString sPath = info.path() + "/~" + info.fileName();
+  saveFile(sPath);
+}
+
 void MainWindow::onDocumentModified()
 {
   setWindowModified(true);
 
   // save modifications to a temp file
-  QFileInfo info(m_sFileName);
-  QString sPath = info.path() + "/~" + info.fileName();
-  saveFile(sPath);
-  std::async(saveFile, filename);
+  auto f = std::async(std::launch::async, &MainWindow::saveTempFile, this);
 }
 
 GroupWidget* MainWindow::createGroupWidget(group_id id)
