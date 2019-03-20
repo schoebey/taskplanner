@@ -637,11 +637,22 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
     }
 
     SPriority prio;
-    QString sPrioPropertyName = 0 == iVersion ? "priority" : "sort_priority";
-    if (readFromMap(values, sPrioPropertyName, prio))
+    if (0 == iVersion)
     {
-      t.setPriority(prio);
+      if (readFromMap(values, "priority", prio))
+      {
+        t.setPriority(prio);
+        t.removeProperty("priority");
+      }
     }
+    else
+    {
+      if (readFromMap(values, "sort_priority", prio))
+      {
+        t.setPriority(prio);
+      }
+    }
+
 
     task_id parentId;
     if (readFromMap(values, "parent", parentId))
@@ -663,7 +674,14 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
       QString sPropertyValue;
       if (readFromMap(values, name, sPropertyValue))
       {
-        t.setPropertyValue(name, sPropertyValue);
+        if (0 == iVersion && "priority" == name)
+        {
+          // skip "priority" property for tasks of version 0
+        }
+        else
+        {
+          t.setPropertyValue(name, sPropertyValue);
+        }
       }
     }
 
