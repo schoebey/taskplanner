@@ -233,6 +233,16 @@ void TaskWidget::setDropShadow(bool bOn)
   update();
 }
 
+QBrush TaskWidget::overlayBackground() const
+{
+  return m_pOverlay->background();
+}
+
+void TaskWidget::setOverlayBackground(const QBrush& b)
+{
+  m_pOverlay->setBackground(b);
+}
+
 void TaskWidget::edit()
 {
   ui->pTitle->edit();
@@ -389,7 +399,7 @@ void TaskWidget::insertLink(const QUrl& link, int iPos)
 
 void TaskWidget::setAutoPriority(double dPriority)
 {
-//  if (!qFuzzyCompare(m_dAutoPriority, dPriority))
+  if (!qFuzzyCompare(m_dAutoPriority, dPriority))
   {
     m_dAutoPriority = dPriority;
 
