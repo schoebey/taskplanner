@@ -112,7 +112,7 @@ double Task::autoPriority() const
         break;
       }
 
-      if (0 == idx)  { break; }
+      if (0 == idx) { break; }
     }
 
 //    // e.g. based on the actual time to due, not just discreet buckets.

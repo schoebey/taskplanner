@@ -33,8 +33,9 @@ namespace conversion
   }
 
   template<typename T>
-  typename std::enable_if<!std::is_convertible<QString, T>::value, T>::type
-  fromString(const QString& /*sVal*/, bool& bConversionStatus);
+  typename std::enable_if<!std::is_convertible<QString, T>::value &&
+                          !std::is_arithmetic<T>::value, T>::type
+  fromString(const QString& /*sVal*/, bool& /*bConversionStatus*/);
 
   template<typename T>
   typename std::enable_if<std::is_convertible<QString, T>::value, T>::type
@@ -42,6 +43,12 @@ namespace conversion
   {
     bConversionStatus = true;
     return T(sVal);
+  }
+  template<typename T>
+  typename std::enable_if<std::is_arithmetic<T>::value, T>::type
+  fromString(const QString& sVal, bool& bConversionStatus)
+  {
+    return T(sVal.toDouble(&bConversionStatus));
   }
 
   //-- QDateTime
