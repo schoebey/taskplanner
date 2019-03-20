@@ -215,6 +215,7 @@ void MainWindow::onDocumentModified()
   QFileInfo info(m_sFileName);
   QString sPath = info.path() + "/~" + info.fileName();
   saveFile(sPath);
+  std::async(saveFile, filename);
 }
 
 GroupWidget* MainWindow::createGroupWidget(group_id id)
