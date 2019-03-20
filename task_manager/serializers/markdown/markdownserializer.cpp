@@ -602,7 +602,7 @@ ESerializingError MarkdownSerializer::serialize(const Task& t)
   }
 
   writeToStream(*m_pStream, t.timeFragments(), "time_info");
-  writeToStream(*m_pStream, t.priority(), "priority");
+  writeToStream(*m_pStream, t.priority(), "sort_priority");
   writeToStream(*m_pStream, t.parentTask(), "parent");
   writeToStream(*m_pStream, t.taskIds(), "children");
 
@@ -622,7 +622,7 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
   }
 
 
-  if (0 == iVersion)
+  if (0 <= iVersion)
   {
     task_id id;
     if (readFromMap(values, "id", id))
@@ -637,7 +637,8 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
     }
 
     SPriority prio;
-    if (readFromMap(values, "priority", prio))
+    QString sPrioPropertyName = 0 == iVersion ? "priority" : "sort_priority";
+    if (readFromMap(values, sPrioPropertyName, prio))
     {
       t.setPriority(prio);
     }
