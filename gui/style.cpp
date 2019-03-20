@@ -20,10 +20,11 @@ void drawShadowedText(QPainter* pPainter, const QPointF& pt, const QString& sTex
 {
   if (nullptr == pPainter)  { return; }
 
+  pPainter->save();
   QFont f(pPainter->font());
   QFontMetrics m(f);
 
-  QString sKey = QString("%1_%2x%3_%4").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
+  QString sKey = QString("%1_%2x%3_%4_outline").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
 
   QPixmap* pPixmap = QPixmapCache::find(sKey);
   if (nullptr == pPixmap)
@@ -58,6 +59,7 @@ void drawShadowedText(QPainter* pPainter, const QPointF& pt, const QString& sTex
     }
   }
 
+  pPainter->restore();
 
   if (nullptr != pPixmap)
   {
@@ -70,10 +72,12 @@ void drawOutlinedText(QPainter* pPainter, const QPointF& pt, const QString& sTex
 {
   if (nullptr == pPainter)  { return; }
 
+  pPainter->save();
+
   QFont f(pPainter->font());
   QFontMetrics m(f);
 
-  QString sKey = QString("%1_%2x%3_%4").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
+  QString sKey = QString("%1_%2x%3_%4_shadow").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
 
   QPixmap* pPixmap = QPixmapCache::find(sKey);
   if (nullptr == pPixmap)
@@ -87,7 +91,7 @@ void drawOutlinedText(QPainter* pPainter, const QPointF& pt, const QString& sTex
       textPath.addText(0, img.height()-2, f, sText);
 
       QPainter p(&img);
-      p.setPen(QPen(shadowColor, 3));
+      p.setPen(QPen(shadowColor, 5));
       p.setBrush(shadowColor);
       p.setRenderHint(QPainter::Antialiasing, true);
       p.setRenderHint(QPainter::HighQualityAntialiasing, true);
@@ -103,6 +107,7 @@ void drawOutlinedText(QPainter* pPainter, const QPointF& pt, const QString& sTex
     }
   }
 
+  pPainter->restore();
 
   if (nullptr != pPixmap)
   {
@@ -388,12 +393,34 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
                          const QPalette& pal, bool /*enabled*/, const QString& text,
                          QPalette::ColorRole textRole) const
 {
-//  qt_format_text(drawOutlinedText, painter->font(), rect, flags,
-//                 nullptr, text, nullptr, painter,
-//                 pal.color(textRole), QColor(0,0,0,255));
+  QColor textColor = pal.color(textRole);
+  QColor shadowColor(0, 0, 0, 100);
+
+
+  EditableLabel* pLabel = dynamic_cast<EditableLabel*>(painter->device());
+  bool bDrawOutline = false;
+  if (nullptr != pLabel)
+  {
+    bDrawOutline = pLabel->drawOutline();
+    if (bDrawOutline)
+    {
+      QColor outlineColor(0, 0, 0, 25);
+      if (textColor.lightness() < 128)
+      {
+        outlineColor = QColor(255, 255, 255, 25);
+      }
+      shadowColor = outlineColor;
+      shadowColor.setAlpha(100);
+
+      qt_format_text(drawOutlinedText, painter->font(), rect, flags,
+                     nullptr, text, nullptr, painter,
+                     textColor, outlineColor);
+    }
+  }
+
   qt_format_text(drawShadowedText, painter->font(), rect, flags,
                  nullptr, text, nullptr, painter,
-                 pal.color(textRole), QColor(0,0,0,100));
+                 textColor, shadowColor);
 }
 
 QRect Style::itemTextRect(const QFontMetrics & metrics,

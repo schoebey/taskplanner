@@ -72,6 +72,16 @@ void EditableLabel::resizeEvent(QResizeEvent* pEvent)
 //  if (pEvent->oldSize() != pEvent->size())
 //  {
 //    emit sizeChanged();
-//  }
+  //  }
+}
+
+bool EditableLabel::drawOutline() const
+{
+  return m_bDrawOutline;
+}
+
+void EditableLabel::setDrawOutline(bool bDraw)
+{
+  m_bDrawOutline = bDraw;
 }
 
