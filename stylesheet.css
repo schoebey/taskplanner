@@ -133,6 +133,7 @@ TaskWidget {
 }
 
 TaskWidget #pTitle {
+  qproperty-drawOutline: true;
   padding-left: 4px;
   font-size: 11pt;
   color: rgba(255, 255, 255, 255);

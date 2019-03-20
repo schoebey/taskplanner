@@ -21,12 +21,18 @@ public:
   QSize sizeHint() const override;
 
   void resizeEvent(QResizeEvent*) override;
+
+  Q_PROPERTY(bool drawOutline READ drawOutline WRITE setDrawOutline)
+  bool drawOutline() const;
+  void setDrawOutline(bool bDraw);
+
 signals:
   void editingFinished();
   void sizeChanged();
 
 private:
   int m_iSuggestedWidth = -1;
+  bool m_bDrawOutline = false;
 };
 
 #endif // EDITABLELABEL_H
