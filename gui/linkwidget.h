@@ -4,6 +4,7 @@
 #include <QStyleOption>
 #include <QFrame>
 #include <QUrl>
+#include <QMenu>
 
 namespace Ui {
   class LinkWidget;
@@ -61,6 +62,7 @@ private:
   void mousePressEvent(QMouseEvent*) override;
   void mouseReleaseEvent(QMouseEvent*) override;
   void mouseDoubleClickEvent(QMouseEvent*) override;
+  void contextMenuEvent(QContextMenuEvent*) override;
 
   void showOverlay();
 
@@ -77,6 +79,7 @@ protected:
   bool m_bDrawFrame = false;
   double m_dBorderRadius = 0;
   LinkWidget* m_pToolTip = nullptr;
+  QMenu* m_pContextMenu = nullptr;
 };
 
 #endif // LINKWIDGET_H

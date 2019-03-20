@@ -2,6 +2,7 @@
 #include "ui_linkwidget.h"
 
 #include <QPainter>
+#include <QContextMenuEvent>
 #include <QFileIconProvider>
 #include <QDesktopServices>
 
@@ -22,7 +23,6 @@ LinkWidget::LinkWidget(const QUrl& link)
   ui->setupUi(this);
   setAttribute(Qt::WA_StyledBackground, false);
   setFocusPolicy(Qt::ClickFocus);
-  setContextMenuPolicy(Qt::ActionsContextMenu);
   setConstrainLabelToSize(true);
 
   QString s(m_link.toLocalFile());
@@ -65,14 +65,19 @@ LinkWidget::LinkWidget(const QUrl& link)
   resize(32, 32);
   setMinimumSize(32, 32);
 
+
+  m_pContextMenu = new QMenu();
   QAction* pOpenAction = new QAction(tr("Open link..."), this);
-  addAction(pOpenAction);
+  m_pContextMenu->addAction(pOpenAction);
   connect(pOpenAction, SIGNAL(triggered()), this, SLOT(openLink()));
   QAction* pDeleteAction = new QAction(tr("Delete"), this);
   pDeleteAction->setShortcuts(QList<QKeySequence>() << Qt::Key_Delete << Qt::Key_Backspace);
   pDeleteAction->setShortcutContext(Qt::WidgetShortcut);
-  addAction(pDeleteAction);
+  m_pContextMenu->addAction(pDeleteAction);
   connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(onDeleteTriggered()));
+
+
+  setContextMenuPolicy(Qt::DefaultContextMenu);
 }
 
 LinkWidget::~LinkWidget()
@@ -165,6 +170,20 @@ void LinkWidget::enterEvent(QEvent* /*pEvent*/)
 void LinkWidget::leaveEvent(QEvent* /*pEvent*/)
 {
   hideOverlay();
+}
+
+void LinkWidget::contextMenuEvent(QContextMenuEvent* pEvent)
+{
+  if (nullptr != m_pContextMenu)
+  {
+    hideOverlay();
+    pEvent->accept();
+    m_pContextMenu->exec(pEvent->globalPos());
+  }
+  else
+  {
+    pEvent->ignore();
+  }
 }
 
 void LinkWidget::paintEvent(QPaintEvent* /*pEvent*/)
