@@ -443,7 +443,7 @@ ESerializingError MarkdownSerializer::serialize(const SerializableManager& m)
 EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
 {
   StreamReader r(&m_pStream, c_sManagerHeader);
-  if (!r)  { return EDeserializingError::eInternalError; }
+  if (!r)  { return EDeserializingError::eWrongFormat; }
 
   std::map<QString, std::vector<QString>> values = valuesFromStream(*m_pStream);
   int iVersion = 0;

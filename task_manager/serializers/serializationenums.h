@@ -14,7 +14,8 @@ enum class EDeserializingError
   eOk,
   eWrongParameter,
   eResourceError,
-  eInternalError
+  eInternalError,
+  eWrongFormat
 };
 
 #endif // SERIALIZATIONENUMS_H

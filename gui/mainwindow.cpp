@@ -590,6 +590,9 @@ bool MainWindow::loadFile(const QString& sFileName, QString* psErrorMessage)
           case EDeserializingError::eWrongParameter:
             *psErrorMessage = tr("wrong parameter");
             break;
+          case EDeserializingError::eWrongFormat:
+            *psErrorMessage = tr("wrong format. Maybe not a %1 file?").arg(it->first);
+            break;
           case EDeserializingError::eOk:
           default:
             break;
