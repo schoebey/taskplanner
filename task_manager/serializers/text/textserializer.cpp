@@ -122,7 +122,7 @@ EDeserializingError TextSerializer::deserialize(SerializableManager& m)
   QString sHeader = m_stream.readLine();
   if (sHeader != c_sManagerHeader)
   {
-    return EDeserializingError::eInternalError;
+    return EDeserializingError::eWrongFormat;
   }
 
   int iVersion = 0;
