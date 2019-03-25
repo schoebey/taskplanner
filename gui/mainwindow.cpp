@@ -234,7 +234,13 @@ void MainWindow::onDocumentModified()
   setWindowModified(true);
 
   // save modifications to a temp file
-  auto f = std::async(std::launch::async, &MainWindow::saveTempFile, this);
+  auto fnSave = [&]()
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    saveTempFile();
+  };
+
+  std::thread{fnSave}.detach();
 }
 
 void MainWindow::createNewTask(group_id groupId)
