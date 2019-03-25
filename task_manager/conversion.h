@@ -51,6 +51,8 @@ namespace conversion
   {
     return T(sVal.toDouble(&bConversionStatus));
   }
+  template<> int
+  fromString<int>(const QString& sVal, bool& bConversionStatus);
 
   //-- QDateTime
   template<> QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
