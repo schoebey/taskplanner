@@ -24,6 +24,7 @@
 #include <QTimer>
 #include <QSignalMapper>
 #include <QClipboard>
+#include <QThread>
 
 #include <array>
 #include <future>
@@ -657,7 +658,7 @@ bool MainWindow::saveFile(const QString& sFileName, QString* psErrorMessage)
         *psErrorMessage = sErrorMessage;
       }
 
-      setWindowModified(false);
+      if (QThread::currentThread() == thread())  { setWindowModified(false); }
       return ESerializingError::eOk == err;
     }
   }
