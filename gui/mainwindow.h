@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QPointer>
 #include <QUrl>
+#include <QDateTime>
 #include <map>
 
 namespace Ui {
@@ -44,6 +45,7 @@ private slots:
   void startTimeTracking(task_id taskId);
   void stopTimeTracking(task_id taskId);
   void on_actionOpen_triggered();
+  void on_actionSave_triggered();
   void on_actionSaveAs_triggered();
   void on_actionReport_triggered();
   void on_actionDisplayReport_triggered();
@@ -78,6 +80,7 @@ private:
 private:
   Ui::MainWindow *ui;
   QString m_sFileName;
+  QDateTime m_lastSaveTime;
   std::map<group_id, QPointer<GroupWidget>> m_groupWidgets;
   std::map<task_id, QPointer<TaskWidget>> m_taskWidgets;
   Manager* m_pManager = nullptr;
