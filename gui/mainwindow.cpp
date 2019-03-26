@@ -205,7 +205,7 @@ void MainWindow::reloadStylesheet(const QString& sPath)
   QFile f(sPath);
   if (f.open(QIODevice::ReadOnly))
   {
-    setStyleSheet(QString::fromUtf8(f.readAll()));
+    qApp->setStyleSheet(QString::fromUtf8(f.readAll()));
   }
 }
 
@@ -658,7 +658,16 @@ bool MainWindow::saveFile(const QString& sFileName, QString* psErrorMessage)
         *psErrorMessage = sErrorMessage;
       }
 
-      if (QThread::currentThread() == thread())  { setWindowModified(false); }
+      // only if the saved document is the currently loaded one,
+      // reset the modified flag and update the saved date
+      if (QThread::currentThread() == thread() &&
+          sFileName == m_sFileName)
+      {
+        setWindowModified(false);
+        m_lastSaveTime = QDateTime::currentDateTime();
+      }
+
+
       return ESerializingError::eOk == err;
     }
   }
@@ -670,6 +679,34 @@ void MainWindow::on_actionOpen_triggered()
 {
   QString sFileName = QFileDialog::getOpenFileName(this, tr("Open task file..."));
 
+  if (isWindowModified())
+  {
+    auto msecs = m_lastSaveTime.msecsTo(QDateTime::currentDateTime());
+    auto secs = msecs / 1000;
+    auto mins = secs / 60;
+    auto hours = mins / 60;
+    QString sLastSave;
+    if (0 < hours)  { sLastSave = QString("%1 Stunde(n)").arg(hours);}
+    if (0 < mins)  { sLastSave = QString("%1 Minute(n)").arg(mins);}
+    if (0 < secs)  { sLastSave = QString("%1 Sekunde(n)").arg(secs);}
+    QString sLastSaveMessage;
+    if (m_lastSaveTime.isValid())
+    {
+      sLastSaveMessage = tr("The document has been saved %1 ago.").arg(sLastSave);
+    }
+    else
+    {
+      sLastSaveMessage = "The document hasn't been saved yet.";
+    }
+
+    auto button =
+        QMessageBox::question(this, tr("Speichern"),
+                              tr("Should the new document be opened?\n"
+                                 "There are unsaved modifications.\n\n"
+                                 "%1").arg(sLastSaveMessage));
+    if (QMessageBox::No == button) { return; }
+  }
+
   QString sErrorMessage;
   if (!loadFile(sFileName, &sErrorMessage))
   {
@@ -677,6 +714,14 @@ void MainWindow::on_actionOpen_triggered()
   }
 }
 
+void MainWindow::on_actionSave_triggered()
+{
+  QString sErrorMessage;
+  if (!saveFile(m_sFileName, &sErrorMessage))
+  {
+    QMessageBox::critical(this, tr("error writing file"), sErrorMessage);
+  }
+}
 
 void MainWindow::on_actionSaveAs_triggered()
 {
