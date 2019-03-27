@@ -12,7 +12,8 @@ SOURCES += \
     $$PWD/overlaywidget.cpp \
     $$PWD/taskcreationdialog.cpp \
     $$PWD/flowlayout.cpp \
-    $$PWD/linkwidget.cpp
+    $$PWD/linkwidget.cpp \
+    $$PWD/commands/propertychangecommand.cpp
 
 HEADERS += \
     gui/editablelabel.h \
@@ -26,7 +27,8 @@ HEADERS += \
     $$PWD/overlaywidget.h \
     $$PWD/taskcreationdialog.h \
     $$PWD/flowlayout.h \
-    $$PWD/linkwidget.h
+    $$PWD/linkwidget.h \
+    $$PWD/commands/propertychangecommand.h
 
 FORMS += \
     gui/groupwidget.ui \
