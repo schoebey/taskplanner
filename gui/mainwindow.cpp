@@ -407,7 +407,9 @@ void MainWindow::renameGroup(group_id id, const QString& sNewName)
   IGroup* pGroup = m_pManager->group(id);
   if (nullptr != pGroup)
   {
-    pGroup->setName(sNewName);
+    PropertyChangeCommand* pChangeCommand =
+        new PropertyChangeCommand(pGroup, groupWidget(id), "name", pGroup->name(), sNewName);
+    m_undoStack.push(pChangeCommand);
 
     emit documentModified();
   }
