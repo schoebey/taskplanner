@@ -17,11 +17,11 @@ PropertyChangeCommand::PropertyChangeCommand(ITask* pTask,
 void PropertyChangeCommand::undo()
 {
   m_pTask->setPropertyValue(m_sPropertyName, m_sOldValue);
-  m_pTaskWidget->setPropertyValue(m_sPropertyName, m_sOldValue);
+  m_pTaskWidget->setPropertyValue(m_sPropertyName, m_pTask->propertyValue(m_sPropertyName));
 }
 
 void PropertyChangeCommand::redo()
 {
   m_pTask->setPropertyValue(m_sPropertyName, m_sNewValue);
-  m_pTaskWidget->setPropertyValue(m_sPropertyName, m_sNewValue);
+  m_pTaskWidget->setPropertyValue(m_sPropertyName, m_pTask->propertyValue(m_sPropertyName));
 }
