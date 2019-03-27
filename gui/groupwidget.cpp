@@ -93,6 +93,40 @@ void GroupWidget::setName(const QString& sName)
   style()->polish(this);
 }
 
+bool GroupWidget::setPropertyValue(const QString& sName, const QString& sValue)
+{
+  if ("name" == sName)
+  {
+    setName(sValue);
+    return true;
+  }
+
+  return false;
+}
+
+bool GroupWidget::removeProperty(const QString& /*sName*/)
+{
+  // no dynamic properties
+  return false;
+}
+
+std::set<QString> GroupWidget::propertyNames() const
+{
+  return {"name"};
+}
+
+bool GroupWidget::hasPropertyValue(const QString& sName) const
+{
+  return 0 == sName.compare("name", Qt::CaseSensitive);
+}
+
+QString GroupWidget::propertyValue(const QString& sName) const
+{
+  if ("name" == sName)  { return ui->pTitle->text(); }
+
+  return QString();
+}
+
 void GroupWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
 {
   if (m_vpTaskWidgets.end() ==

@@ -334,7 +334,39 @@ void TaskWidget::addProperty(const QString& sName,
   setUpContextMenu();
 }
 
-void TaskWidget::removeProperty(const QString& sName)
+std::set<QString> TaskWidget::propertyNames() const
+{
+  std::set<QString> names = {"name", "description"};
+  for (const auto& el : m_propertyLineEdits)
+  {
+    names.insert(el.first);
+  }
+  return names;
+}
+
+bool TaskWidget::hasPropertyValue(const QString& sName) const
+{
+  auto it = m_propertyLineEdits.find(sName);
+  return it != m_propertyLineEdits.end();
+}
+
+QString TaskWidget::propertyValue(const QString& sName) const
+{
+  if ("name" == sName)  { return name(); }
+  else if ("description" == sName)  { return description(); }
+  else
+  {
+    auto it = m_propertyLineEdits.find(sName);
+    if (it != m_propertyLineEdits.end())
+    {
+      return it->second.pValue->text();
+    }
+  }
+
+  return QString();
+}
+
+bool TaskWidget::removeProperty(const QString& sName)
 {
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
@@ -346,18 +378,34 @@ void TaskWidget::removeProperty(const QString& sName)
     emit propertyRemoved(m_taskId, sName);
 
     emit sizeChanged();
+
+    setUpContextMenu();
+    return true;
   }
 
-  setUpContextMenu();
+  return false;
 }
 
-void TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
+bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
 {
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {
     it->second.pValue->setText(sValue);
+    return true;
   }
+  else if ("description" == sName)
+  {
+    setDescription(sValue);
+    return true;
+  }
+  else if ("name" == sName)
+  {
+    setName(sValue);
+    return true;
+  }
+
+  return false;
 }
 
 void TaskWidget::addLink(const QUrl& link)
