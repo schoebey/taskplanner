@@ -3,6 +3,7 @@
 
 #include "id_types.h"
 #include "highlightmethod.h"
+#include "propertyproviderinterface.h"
 
 #include <QFrame>
 #include <QUrl>
@@ -20,7 +21,7 @@ class TaskWidgetOverlay;
 class QMenu;
 class LinkWidget;
 class QLabel;
-class TaskWidget : public QFrame
+class TaskWidget : public QFrame, public IPropertyProvider
 {
   Q_OBJECT
 
@@ -43,8 +44,11 @@ public:
   static TaskWidget* TaskWidgetUnderMoue();
 
   void addProperty(const QString& sName, const QString& sValue);
-  void setPropertyValue(const QString& sName, const QString& sValue);
-  void removeProperty(const QString& sName);
+  bool setPropertyValue(const QString& sName, const QString& sValue) override;
+  bool removeProperty(const QString& sName) override;
+  std::set<QString> propertyNames() const override;
+  bool hasPropertyValue(const QString& sName) const override;
+  QString propertyValue(const QString& sName) const override;
 
 
   void setHighlight(HighlightingMethod method);

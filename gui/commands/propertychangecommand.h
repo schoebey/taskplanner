@@ -1,7 +1,7 @@
 #ifndef PROPERTYCHANGECOMMAND_H
 #define PROPERTYCHANGECOMMAND_H
 
-#include "taskinterface.h"
+#include "propertyproviderinterface.h"
 #include "taskwidget.h"
 
 #include <QUndoCommand>
@@ -9,8 +9,8 @@
 class PropertyChangeCommand : public QUndoCommand
 {
 public:
-    PropertyChangeCommand(ITask* pTask,
-                          TaskWidget* pTaskWidget,
+    PropertyChangeCommand(IPropertyProvider* pPropertyProvider,
+                          IPropertyProvider* pPropertyProviderWidget,
                           const QString& sPropertyName,
                           const QString& sOldValue,
                           const QString& sNewValue);
@@ -18,8 +18,8 @@ public:
     void redo() override;
 
 private:
-    ITask* m_pTask;
-    TaskWidget* m_pTaskWidget;
+    IPropertyProvider* m_pPropertyProvider;
+    IPropertyProvider* m_pPropertyProviderWidget;
     QString m_sPropertyName;
     QString m_sNewValue;
     QString m_sOldValue;

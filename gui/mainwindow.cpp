@@ -418,7 +418,11 @@ void MainWindow::renameTask(task_id id, const QString& sNewName)
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
-    pTask->setName(sNewName);
+    TaskWidget* pTaskWidget = taskWidget(id);
+
+    PropertyChangeCommand* pChangeCommand =
+        new PropertyChangeCommand(pTask, pTaskWidget, "name", pTask->name(), sNewName);
+    m_undoStack.push(pChangeCommand);
 
     emit documentModified();
   }

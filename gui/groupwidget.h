@@ -1,25 +1,33 @@
 #ifndef GROUPWIDGET_H
 #define GROUPWIDGET_H
 
-#include <QFrame>
 #include "id_types.h"
+#include "propertyproviderinterface.h"
+
+#include <QFrame>
 
 namespace Ui {
   class GroupWidget;
 }
 
 class TaskWidget;
-class GroupWidget : public QFrame
+class GroupWidget : public QFrame, public IPropertyProvider
 {
   Q_OBJECT
 
 public:
   explicit GroupWidget(group_id id, QWidget *parent = nullptr);
-  ~GroupWidget();
+  ~GroupWidget() override;
 
   group_id id() const;
 
   void setName(const QString& sName);
+
+  bool setPropertyValue(const QString& sName, const QString& sValue) override;
+  bool removeProperty(const QString& sName) override;
+  std::set<QString> propertyNames() const override;
+  bool hasPropertyValue(const QString& sName) const override;
+  QString propertyValue(const QString& sName) const override;
 
   void insertTask(TaskWidget* pTaskWidget, int iPos = -1);
   void removeTask(TaskWidget* pTaskWidget);
