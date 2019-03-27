@@ -109,6 +109,8 @@ int main(int argc, char *argv[])
   Properties<Task>::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
   Properties<Task>::registerConstraint("duration (days)", MIN(0));
 
+  REGISTER_PROPERTY(Group, "name", QString, false);
+  REGISTER_PROPERTY(Group, "description", QString, false);
   REGISTER_PROPERTY(Group, "autoSorting", bool, false);
 
 

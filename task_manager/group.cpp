@@ -32,22 +32,22 @@ EDeserializingError Group::deserialize(ISerializer* pSerializer)
 
 QString Group::name() const
 {
-  return m_sName;
+  return propertyValue("name");
 }
 
 void Group::setName(const QString& sName)
 {
-  m_sName = sName;
+  setPropertyValue("name", sName);
 }
 
 QString Group::description() const
 {
-  return m_sDescription;
+  return propertyValue("description");
 }
 
 void Group::setDescription(const QString& sDescription)
 {
-  m_sDescription = sDescription;
+  setPropertyValue("description", sDescription);
 }
 
 std::set<task_id> Group::taskIds() const

@@ -58,8 +58,6 @@ public:
   }
 private:
   Manager* m_pManager = nullptr;
-  QString m_sName;
-  QString m_sDescription;
   std::set<task_id> m_tasksIds;
   Properties<Group> m_properties;
 };
