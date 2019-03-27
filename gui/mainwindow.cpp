@@ -41,6 +41,9 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 {
   ui->setupUi(this);
 
+  ui->toolBar->addAction(m_undoStack.createUndoAction(this));
+  ui->toolBar->addAction(m_undoStack.createRedoAction(this));
+
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
   QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
@@ -426,7 +429,11 @@ void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
-    pTask->setDescription(sNewDescr);
+    TaskWidget* pTaskWidget = taskWidget(id);
+
+    PropertyChangeCommand* pChangeCommand =
+        new PropertyChangeCommand(pTask, pTaskWidget, "description", pTask->description(), sNewDescr);
+    m_undoStack.push(pChangeCommand);
 
     emit documentModified();
   }
