@@ -12,6 +12,8 @@
 #include "overlaywidget.h"
 #include "taskcreationdialog.h"
 
+#include "commands/propertychangecommand.h"
+
 
 #include <QFileSystemWatcher>
 #include <QDebug>
@@ -812,12 +814,20 @@ void MainWindow::onPropertyChanged(task_id taskId,
   ITask* pTask = m_pManager->task(taskId);
   if (nullptr != pTask)
   {
+    QString sOldValue = pTask->propertyValue(sPropertyName);
     bool bNewValueAccepted = pTask->setPropertyValue(sPropertyName, sValue);
 
 
     auto it = m_taskWidgets.find(taskId);
     if (it != m_taskWidgets.end())
     {
+      if (bNewValueAccepted)
+      {
+        PropertyChangeCommand* pChangeCommand =
+            new PropertyChangeCommand(pTask, it->second, sPropertyName, sOldValue, sValue);
+        m_undoStack.push(pChangeCommand);
+      }
+
       it->second->setHighlight(it->second->highlight() |
                                (bNewValueAccepted ? EHighlightMethod::eValueAccepted :
                                                    EHighlightMethod::eValueRejected));

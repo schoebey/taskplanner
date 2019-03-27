@@ -6,6 +6,7 @@
 #include <QPointer>
 #include <QUrl>
 #include <QDateTime>
+#include <QUndoStack>
 #include <map>
 
 namespace Ui {
@@ -87,6 +88,7 @@ private:
   TaskCreationDialog* m_pTaskCreationDialog = nullptr;
   std::map<group_id, QTimer*> m_autoSortTimers;
   QSignalMapper* m_pTimeoutGroupIdMapper;
+  QUndoStack m_undoStack;
 };
 
 #endif // MAINWINDOW_H
