@@ -13,6 +13,7 @@
 #include "taskcreationdialog.h"
 
 #include "commands/propertychangecommand.h"
+#include "commands/movetaskcommand.h"
 
 
 #include <QFileSystemWatcher>
@@ -253,7 +254,7 @@ GroupWidget* MainWindow::createGroupWidget(group_id id)
 
   connect(pGroupWidget, SIGNAL(renamed(group_id, QString)), this, SLOT(renameGroup(group_id, QString)));
   connect(pGroupWidget, SIGNAL(newTaskClicked(group_id)), this, SLOT(createNewTask(group_id)));
-  connect(pGroupWidget, SIGNAL(taskMovedTo(task_id, group_id, int)), this, SLOT(moveTask(task_id, group_id, int)));
+  connect(pGroupWidget, SIGNAL(taskMovedTo(task_id, group_id, int)), this, SLOT(onTaskMoved(task_id, group_id, int)));
   connect(pGroupWidget, SIGNAL(autoSortEnabled(group_id)), this, SLOT(setAutoSortEnabled(group_id)));
   connect(pGroupWidget, SIGNAL(autoSortDisabled(group_id)), this, SLOT(setAutoSortDisabled(group_id)));
 
@@ -445,87 +446,29 @@ void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
   }
 }
 
-void MainWindow::moveTask(task_id id, group_id groupId, int iPos)
+void MainWindow::onTaskMoved(task_id id, group_id groupId, int iPos)
 {
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
-    group_id oldGroupId = pTask->group();
+    TaskWidget* pTaskWidget = taskWidget(id);
+    int iOldPos = pTask->priority().priority(0);
+    IGroup* pOldGroup = m_pManager->group(pTask->group());
+    GroupWidget* pOldGroupWidget = groupWidget(pTask->group());
+    IGroup* pNewGroup = m_pManager->group(groupId);
+    GroupWidget* pNewGroupWidget = groupWidget(groupId);
 
-    pTask->setGroup(groupId);
-
-
-    // if the task has moved groups, fill the priority gaps in the old group
-    // by building a sequence, determining the jumps and correcting the priorities
-    // of following tasks.
-    if (oldGroupId != groupId)
+    // only 'move' the task if it really has been moved from one group to another
+    if (nullptr != pOldGroup && (pOldGroup != pNewGroup || iOldPos != iPos))
     {
-      IGroup* pOldGroup = m_pManager->group(oldGroupId);
-      if (nullptr != pOldGroup)
-      {
-        std::map<int, ITask*> tasksByPriority;
-        for (const auto& taskId : pOldGroup->taskIds())
-        {
-          ITask* pOtherTask = m_pManager->task(taskId);
-          if (nullptr != pOtherTask)
-          {
-            tasksByPriority[pOtherTask->priority().priority(0)] = pOtherTask;
-          }
-        }
+      MoveTaskCommand* pCommand = new MoveTaskCommand(pTask, pTaskWidget,
+                                                      pOldGroup, pOldGroupWidget,
+                                                      pNewGroup, pNewGroupWidget,
+                                                      iOldPos, iPos, m_pManager);
+      m_undoStack.push(pCommand);
 
-        // determine the gaps
-        int iPrevPrio = -1;
-        int iDelta = 0;
-        for (const auto& el : tasksByPriority)
-        {
-          SPriority prio = el.second->priority();
-          iDelta += el.first - iPrevPrio - 1;
-          iPrevPrio = prio.priority(0);
-          if (0 < iDelta)
-          {
-            prio.setPriority(0, iPrevPrio - iDelta);
-            el.second->setPriority(prio);
-          }
-        }
-      }
+      emit documentModified();
     }
-
-
-
-    SPriority prio = pTask->priority();
-
-    IGroup* pGroup = m_pManager->group(groupId);
-    if (nullptr != pGroup)
-    {
-      // increment the priority of every task that is below the moved task, by one.
-      for (const auto& taskId : pGroup->taskIds())
-      {
-        ITask* pOtherTask = m_pManager->task(taskId);
-        if (nullptr != pOtherTask)
-        {
-          // if the item's priority lies between the old and the new priority, increment it by one
-          SPriority otherPrio = pOtherTask->priority();
-          if (iPos <= otherPrio.priority(0)  &&
-              prio.priority(0) >= otherPrio.priority(0))
-          {
-            otherPrio.setPriority(0, otherPrio.priority(0) + 1);
-          }
-          else if (iPos >= otherPrio.priority(0)  &&
-              prio.priority(0) < otherPrio.priority(0))
-          {
-            otherPrio.setPriority(0, otherPrio.priority(0) - 1);
-          }
-
-          pOtherTask->setPriority(otherPrio);
-        }
-      }
-    }
-
-
-    prio.setPriority(0, iPos);
-    pTask->setPriority(prio);
-
-    emit documentModified();
   }
 }
 

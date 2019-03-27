@@ -32,6 +32,7 @@ private:
   std::map<task_id, tspTask> m_tasks;
   std::map<group_id, tspGroup> m_groups;
   Manager* m_pManager = nullptr;
+  void rebuildHierarchy();
 };
 
 #endif // SERIALIZABLEMANAGER_H
