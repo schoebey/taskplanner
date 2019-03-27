@@ -39,7 +39,7 @@ private slots:
   void renameGroup(group_id id, const QString& sNewName);
   void renameTask(task_id id, const QString& sNewName);
   void changeTaskDescription(task_id id, const QString& sNewDescr);
-  void moveTask(task_id id, group_id groupId, int iPos);
+  void onTaskMoved(task_id id, group_id groupId, int iPos);
   void reloadStylesheet(const QString& sPath);
   void initTaskUi();
   void updateTaskUi();

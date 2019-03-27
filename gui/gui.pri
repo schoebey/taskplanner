@@ -13,7 +13,8 @@ SOURCES += \
     $$PWD/taskcreationdialog.cpp \
     $$PWD/flowlayout.cpp \
     $$PWD/linkwidget.cpp \
-    $$PWD/commands/propertychangecommand.cpp
+    $$PWD/commands/propertychangecommand.cpp \
+    $$PWD/commands/movetaskcommand.cpp
 
 HEADERS += \
     gui/editablelabel.h \
@@ -28,7 +29,8 @@ HEADERS += \
     $$PWD/taskcreationdialog.h \
     $$PWD/flowlayout.h \
     $$PWD/linkwidget.h \
-    $$PWD/commands/propertychangecommand.h
+    $$PWD/commands/propertychangecommand.h \
+    $$PWD/commands/movetaskcommand.h
 
 FORMS += \
     gui/groupwidget.ui \

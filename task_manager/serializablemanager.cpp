@@ -158,6 +158,25 @@ ESerializingError SerializableManager::serialize(ISerializer* pSerializer) const
   return ESerializingError::eOk;
 }
 
+void SerializableManager::rebuildHierarchy()
+{
+  for (const auto& groupId : groupIds())
+  {
+    auto pGroup = group(groupId);
+    if (nullptr != pGroup)
+    {
+      for (const auto& taskId : pGroup->taskIds())
+      {
+        auto pTask = task(taskId);
+        if (nullptr != pTask)
+        {
+          pTask->setGroup(pGroup->id());
+        }
+      }
+    }
+  }
+}
+
 EDeserializingError SerializableManager::deserialize(ISerializer* pSerializer)
 {
   clear();
@@ -168,6 +187,9 @@ EDeserializingError SerializableManager::deserialize(ISerializer* pSerializer)
 
   err= pSerializer->deserialize(*this);
   if (EDeserializingError::eOk != err)  { return err; }
+
+  // add tasks to groups
+  rebuildHierarchy();
 
   err= pSerializer->deinitDeserialization();
   if (EDeserializingError::eOk != err)  { return err; }
