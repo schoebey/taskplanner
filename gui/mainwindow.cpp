@@ -80,6 +80,28 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
+TaskWidget* MainWindow::taskWidget(task_id id) const
+{
+  auto it = m_taskWidgets.find(id);
+  if (it != m_taskWidgets.end())
+  {
+    return it->second;
+  }
+
+  return nullptr;
+}
+
+GroupWidget* MainWindow::groupWidget(group_id id) const
+{
+  auto it = m_groupWidgets.find(id);
+  if (it != m_groupWidgets.end())
+  {
+    return it->second;
+  }
+
+  return nullptr;
+}
+
 void MainWindow::initTaskUi()
 {
   for (const auto& el : m_taskWidgets)
@@ -110,16 +132,11 @@ void MainWindow::updateTaskUi()
 
     if (nullptr != pGroup)
     {
-      GroupWidget* pGroupWidget = nullptr;
-      auto itGroupWidget = m_groupWidgets.find(groupId);
-      if (m_groupWidgets.end() == itGroupWidget)
+      GroupWidget* pGroupWidget = groupWidget(groupId);
+      if (nullptr == pGroupWidget)
       {
         pGroupWidget = createGroupWidget(groupId);
         pGroupWidget->setName(pGroup->name());
-      }
-      else
-      {
-        pGroupWidget = itGroupWidget->second;
       }
 
 
@@ -138,9 +155,8 @@ void MainWindow::updateTaskUi()
       {
         for (const auto& pTask : task.second)
         {
-          TaskWidget* pTaskWidget = nullptr;
-          auto itTaskWidget = m_taskWidgets.find(pTask->id());
-          if (m_taskWidgets.end() == itTaskWidget)
+          TaskWidget* pTaskWidget = taskWidget(pTask->id());
+          if (nullptr == pTaskWidget)
           {
             pTaskWidget = createTaskWidget(pTask->id());
 
@@ -177,15 +193,14 @@ void MainWindow::updateTaskUi()
     auto pTask = m_pManager->task(taskId);
     if (nullptr != pTask)
     {
-      auto it = m_taskWidgets.find(taskId);
-      if (it != m_taskWidgets.end() &&
-          nullptr != it->second)
+      TaskWidget* pTaskWidget = taskWidget(taskId);
+      if (nullptr != pTaskWidget)
       {
         auto parentIt = m_taskWidgets.find(pTask->parentTask());
         if (parentIt != m_taskWidgets.end() &&
             nullptr != parentIt->second)
         {
-          parentIt->second->addTask(it->second);
+          parentIt->second->addTask(pTaskWidget);
         }
       }
     }
@@ -317,8 +332,8 @@ void MainWindow::createNewTask(group_id groupId)
   IGroup* pGroup = m_pManager->group(groupId);
   if (nullptr != pGroup)
   {
-    auto it = m_groupWidgets.find(groupId);
-    if (it != m_groupWidgets.end())
+    GroupWidget* pGroupWidget = groupWidget(groupId);
+    if (nullptr != pGroupWidget)
     {
       delete m_pTaskCreationDialog;
       m_pTaskCreationDialog = new TaskCreationDialog(this);
@@ -334,15 +349,15 @@ void MainWindow::onNewTaskAccepted()
   group_id groupId = m_pTaskCreationDialog->property("groupId").value<group_id>();
 
   IGroup* pGroup = m_pManager->group(groupId);
-  auto it = m_groupWidgets.find(groupId);
+  GroupWidget* pGroupWidget = groupWidget(groupId);
   if (nullptr != pGroup &&
-      it != m_groupWidgets.end())
+      nullptr != pGroupWidget)
   {
     ITask* pTask = m_pManager->addTask();
     pTask->setName(m_pTaskCreationDialog->name());
     pTask->setDescription(m_pTaskCreationDialog->description());
     pGroup->addTask(pTask->id());
-    it->second->insertTask(createTaskWidget(pTask->id()));
+    pGroupWidget->insertTask(createTaskWidget(pTask->id()));
 
     emit documentModified();
   }
@@ -353,8 +368,8 @@ void MainWindow::createNewSubTask(task_id taskId)
   ITask* pTask = m_pManager->task(taskId);
   if (nullptr != pTask)
   {
-    auto it = m_taskWidgets.find(taskId);
-    if (it != m_taskWidgets.end())
+    TaskWidget* pTaskWidget = taskWidget(taskId);
+    if (nullptr != pTaskWidget)
     {
       delete m_pTaskCreationDialog;
       m_pTaskCreationDialog = new TaskCreationDialog(this);
@@ -370,15 +385,15 @@ void MainWindow::onNewSubTaskAccepted()
   task_id taskId = m_pTaskCreationDialog->property("taskId").value<group_id>();
 
   ITask* pParentTask = m_pManager->task(taskId);
-  auto it = m_taskWidgets.find(taskId);
+  TaskWidget* pParentTaskWidget = taskWidget(taskId);
   if (nullptr != pParentTask &&
-      it != m_taskWidgets.end())
+      nullptr != pParentTaskWidget)
   {
     ITask* pTask = m_pManager->addTask();
     pTask->setName(m_pTaskCreationDialog->name());
     pTask->setDescription(m_pTaskCreationDialog->description());
     pParentTask->addTask(pTask->id());
-    it->second->addTask(createTaskWidget(pTask->id()));
+    pParentTaskWidget->addTask(createTaskWidget(pTask->id()));
 
     emit documentModified();
   }
@@ -818,20 +833,20 @@ void MainWindow::onPropertyChanged(task_id taskId,
     bool bNewValueAccepted = pTask->setPropertyValue(sPropertyName, sValue);
 
 
-    auto it = m_taskWidgets.find(taskId);
-    if (it != m_taskWidgets.end())
+    TaskWidget* pTaskWidget = taskWidget(taskId);
+    if (nullptr != pTaskWidget)
     {
       if (bNewValueAccepted)
       {
         PropertyChangeCommand* pChangeCommand =
-            new PropertyChangeCommand(pTask, it->second, sPropertyName, sOldValue, sValue);
+            new PropertyChangeCommand(pTask, pTaskWidget, sPropertyName, sOldValue, sValue);
         m_undoStack.push(pChangeCommand);
       }
 
-      it->second->setHighlight(it->second->highlight() |
+      pTaskWidget->setHighlight(pTaskWidget->highlight() |
                                (bNewValueAccepted ? EHighlightMethod::eValueAccepted :
                                                    EHighlightMethod::eValueRejected));
-      it->second->setPropertyValue(sPropertyName, pTask->propertyValue(sPropertyName));
+      pTaskWidget->setPropertyValue(sPropertyName, pTask->propertyValue(sPropertyName));
 
       if ("color" == sPropertyName)
       {
@@ -839,7 +854,7 @@ void MainWindow::onPropertyChanged(task_id taskId,
         auto color = conversion::fromString<QColor>(pTask->propertyValue("color"), bOk);
         if (bOk)
         {
-          it->second->setOverlayBackground(color);
+          pTaskWidget->setOverlayBackground(color);
         }
       }
     }
@@ -959,11 +974,11 @@ void MainWindow::onTaskDeleted(task_id id)
 {
   if (m_pManager->removeTask(id))
   {
-    auto it = m_taskWidgets.find(id);
-    if (it != m_taskWidgets.end())
+    TaskWidget* pTaskWidget = taskWidget(id);
+    if (nullptr != pTaskWidget)
     {
-      delete it->second;
-      m_taskWidgets.erase(it);
+      delete pTaskWidget;
+      m_taskWidgets.erase(m_taskWidgets.find(id));
 
       emit documentModified();
     }
@@ -1031,8 +1046,8 @@ void MainWindow::sortGroup(group_id groupId)
   }
 
 
-  auto it = m_groupWidgets.find(groupId);
-  if (it != m_groupWidgets.end())
+  GroupWidget* pGroupWidget = groupWidget(groupId);
+  if (nullptr != pGroupWidget)
   {
     std::vector<task_id> vIds;
     for (const auto& el : sortedTaskIds)
@@ -1044,7 +1059,7 @@ void MainWindow::sortGroup(group_id groupId)
       }
       vIds.insert(vIds.begin(), vIdsOfSamePrio.begin(), vIdsOfSamePrio.end());
     }
-    it->second->reorderTasks(vIds);
+    pGroupWidget->reorderTasks(vIds);
   }
 }
 

@@ -74,6 +74,8 @@ signals:
   void documentModified();
 
 private:
+  TaskWidget* taskWidget(task_id id) const;
+  GroupWidget* groupWidget(group_id id) const;
   void timerEvent(QTimerEvent* pEvent) override;
   void updateAutoPrioritiesInTaskWidgets();
   void saveTempFile();
