@@ -4,6 +4,7 @@
 #include "manager.h"
 #include "taskwidget.h"
 #include "groupwidget.h"
+#include "widgetmanager.h"
 
 namespace
 {
@@ -96,34 +97,36 @@ namespace
   }
 }
 
-MoveTaskCommand::MoveTaskCommand(ITask* pTask,
-                                 TaskWidget* pTaskWidget,
-                                 IGroup* pOldGroup,
-                                 GroupWidget* pOldGroupWidget,
-                                 IGroup* pNewGroup,
-                                 GroupWidget* pNewGroupWidget,
+MoveTaskCommand::MoveTaskCommand(task_id taskId,
+                                 group_id oldGroupId,
+                                 group_id newGroupId,
                                  int iOldPosition,
                                  int iNewPosition,
-                                 Manager* pManager)
-  : m_pTask(pTask),
-    m_pTaskWidget(pTaskWidget),
-    m_pOldGroup(pOldGroup),
-    m_pOldGroupWidget(pOldGroupWidget),
-    m_pNewGroup(pNewGroup),
-    m_pNewGroupWidget(pNewGroupWidget),
+                                 Manager* pManager,
+                                 WidgetManager* pWidgetManager)
+  : m_taskId(taskId),
+    m_oldGroupId(oldGroupId),
+    m_newGroupId(newGroupId),
     m_iOldPosition(iOldPosition),
     m_iNewPosition(iNewPosition),
-    m_pManager(pManager)
+    m_pManager(pManager),
+    m_pWidgetManager(pWidgetManager)
 {
   setText(QString("move task"));
 }
 
 void MoveTaskCommand::undo()
 {
-  moveTask(m_pTask, m_pTaskWidget, m_pNewGroup, m_pNewGroupWidget, m_pOldGroup, m_pOldGroupWidget, m_iOldPosition, m_pManager);
+  moveTask(m_pManager->task(m_taskId), m_pWidgetManager->taskWidget(m_taskId),
+           m_pManager->group(m_newGroupId), m_pWidgetManager->groupWidget(m_newGroupId),
+           m_pManager->group(m_oldGroupId), m_pWidgetManager->groupWidget(m_oldGroupId),
+           m_iOldPosition, m_pManager);
 }
 
 void MoveTaskCommand::redo()
 {
-  moveTask(m_pTask, m_pTaskWidget, m_pOldGroup, m_pOldGroupWidget, m_pNewGroup, m_pNewGroupWidget, m_iNewPosition, m_pManager);
+  moveTask(m_pManager->task(m_taskId), m_pWidgetManager->taskWidget(m_taskId),
+           m_pManager->group(m_oldGroupId), m_pWidgetManager->groupWidget(m_oldGroupId),
+           m_pManager->group(m_newGroupId), m_pWidgetManager->groupWidget(m_newGroupId),
+           m_iNewPosition, m_pManager);
 }
