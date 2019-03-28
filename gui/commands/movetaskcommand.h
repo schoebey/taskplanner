@@ -17,6 +17,8 @@ public:
                     int iNewPosition,
                     Manager* pManager,
                     WidgetManager* pWidgetManager);
+    virtual ~MoveTaskCommand();
+
     void undo() override;
     void redo() override;
 
