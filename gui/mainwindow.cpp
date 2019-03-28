@@ -348,10 +348,11 @@ void MainWindow::onTaskMoved(task_id id, group_id groupId, int iPos)
     // only 'move' the task if it really has been moved from one group to another
     if (nullptr != pOldGroup && (pOldGroup != pNewGroup || iOldPos != iPos))
     {
-      MoveTaskCommand* pCommand = new MoveTaskCommand(pTask, pTaskWidget,
-                                                      pOldGroup, pOldGroupWidget,
-                                                      pNewGroup, pNewGroupWidget,
-                                                      iOldPos, iPos, m_pManager);
+      MoveTaskCommand* pCommand = new MoveTaskCommand(id,
+                                                      pTask->group(),
+                                                      groupId,
+                                                      iOldPos, iPos,
+                                                      m_pManager,m_pWidgetManager);
       m_undoStack.push(pCommand);
 
       emit documentModified();

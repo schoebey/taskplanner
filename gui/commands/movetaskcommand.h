@@ -1,36 +1,33 @@
 #ifndef MOVETASKCOMMAND_H
 #define MOVETASKCOMMAND_H
 
+#include "id_types.h"
 #include <QUndoCommand>
-
-class ITask;
-class IGroup;
+;
 class Manager;
-class TaskWidget;
-class GroupWidget;
+class WidgetManager;
 
 class MoveTaskCommand : public QUndoCommand
 {
 public:
-    MoveTaskCommand(ITask* pTask, TaskWidget* pTaskWidget,
-                    IGroup* pOldGroup, GroupWidget* pOldGroupWidget,
-                    IGroup* pNewGroup, GroupWidget* pNewGroupWidget,
+    MoveTaskCommand(task_id taskId,
+                    group_id oldGroupId,
+                    group_id newGroupId,
                     int iOldPosition,
                     int iNewPosition,
-                    Manager* pManager);
+                    Manager* pManager,
+                    WidgetManager* pWidgetManager);
     void undo() override;
     void redo() override;
 
 private:
-    ITask* m_pTask;
-    TaskWidget* m_pTaskWidget;
-    IGroup* m_pOldGroup;
-    GroupWidget* m_pOldGroupWidget;
-    IGroup* m_pNewGroup;
-    GroupWidget* m_pNewGroupWidget;
+    task_id m_taskId;
+    group_id m_oldGroupId;
+    group_id m_newGroupId;
     int m_iOldPosition;
     int m_iNewPosition;
     Manager* m_pManager;
+    WidgetManager* m_pWidgetManager;
 };
 
 #endif // MOVETASKCOMMAND_H
