@@ -13,7 +13,8 @@
 #include "overlaywidget.h"
 #include "taskcreationdialog.h"
 
-#include "commands/propertychangecommand.h"
+#include "commands/changetaskpropertycommand.h"
+#include "commands/changegrouppropertycommand.h"
 #include "commands/movetaskcommand.h"
 
 
@@ -295,8 +296,9 @@ void MainWindow::renameGroup(group_id id, const QString& sNewName)
   IGroup* pGroup = m_pManager->group(id);
   if (nullptr != pGroup)
   {
-    PropertyChangeCommand* pChangeCommand =
-        new PropertyChangeCommand(pGroup, m_pWidgetManager->groupWidget(id), "name", pGroup->name(), sNewName);
+    ChangeGroupPropertyCommand* pChangeCommand =
+        new ChangeGroupPropertyCommand(id, "name", pGroup->name(), sNewName,
+                                        m_pManager, m_pWidgetManager);
     m_undoStack.push(pChangeCommand);
 
     emit documentModified();
@@ -310,8 +312,8 @@ void MainWindow::renameTask(task_id id, const QString& sNewName)
   {
     TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
 
-    PropertyChangeCommand* pChangeCommand =
-        new PropertyChangeCommand(pTask, pTaskWidget, "name", pTask->name(), sNewName);
+    ChangeTaskPropertyCommand* pChangeCommand =
+        new ChangeTaskPropertyCommand(id, "name", pTask->name(), sNewName, m_pManager, m_pWidgetManager);
     m_undoStack.push(pChangeCommand);
 
     emit documentModified();
@@ -325,8 +327,8 @@ void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
   {
     TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
 
-    PropertyChangeCommand* pChangeCommand =
-        new PropertyChangeCommand(pTask, pTaskWidget, "description", pTask->description(), sNewDescr);
+    ChangeTaskPropertyCommand* pChangeCommand =
+        new ChangeTaskPropertyCommand(id, "description", pTask->description(), sNewDescr, m_pManager, m_pWidgetManager);
     m_undoStack.push(pChangeCommand);
 
     emit documentModified();
@@ -682,8 +684,8 @@ void MainWindow::onPropertyChanged(task_id taskId,
     {
       if (bNewValueAccepted)
       {
-        PropertyChangeCommand* pChangeCommand =
-            new PropertyChangeCommand(pTask, pTaskWidget, sPropertyName, sOldValue, sValue);
+        ChangeTaskPropertyCommand* pChangeCommand =
+            new ChangeTaskPropertyCommand(taskId, sPropertyName, sOldValue, sValue, m_pManager, m_pWidgetManager);
         m_undoStack.push(pChangeCommand);
       }
 

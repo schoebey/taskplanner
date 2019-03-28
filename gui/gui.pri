@@ -13,10 +13,11 @@ SOURCES += \
     $$PWD/taskcreationdialog.cpp \
     $$PWD/flowlayout.cpp \
     $$PWD/linkwidget.cpp \
-    $$PWD/commands/propertychangecommand.cpp \
     $$PWD/commands/movetaskcommand.cpp \
     $$PWD/commands/addtaskcommand.cpp \
-    $$PWD/widgetmanager.cpp
+    $$PWD/widgetmanager.cpp \
+    $$PWD/commands/changetaskpropertycommand.cpp \
+    $$PWD/commands/changegrouppropertycommand.cpp
 
 HEADERS += \
     gui/editablelabel.h \
@@ -31,10 +32,11 @@ HEADERS += \
     $$PWD/taskcreationdialog.h \
     $$PWD/flowlayout.h \
     $$PWD/linkwidget.h \
-    $$PWD/commands/propertychangecommand.h \
     $$PWD/commands/movetaskcommand.h \
     $$PWD/commands/addtaskcommand.h \
-    $$PWD/widgetmanager.h
+    $$PWD/widgetmanager.h \
+    $$PWD/commands/changetaskpropertycommand.h \
+    $$PWD/commands/changegrouppropertycommand.h
 
 FORMS += \
     gui/groupwidget.ui \
