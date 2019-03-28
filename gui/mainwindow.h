@@ -16,6 +16,7 @@ namespace Ui {
 class GroupWidget;
 class TaskWidget;
 class Manager;
+class WidgetManager;
 class TaskCreationDialog;
 class QSignalMapper;
 class MainWindow : public QMainWindow
@@ -27,9 +28,6 @@ public:
   ~MainWindow();
 
 
-  GroupWidget* createGroupWidget(group_id id);
-  TaskWidget* createTaskWidget(task_id id);
-
   bool loadFile(const QString& sFileName, QString* psErrorMessage = nullptr);
   
   bool saveFile(const QString& sFileName, QString* psErrorMessage = nullptr);
@@ -40,6 +38,17 @@ private slots:
   void renameTask(task_id id, const QString& sNewName);
   void changeTaskDescription(task_id id, const QString& sNewDescr);
   void onTaskMoved(task_id id, group_id groupId, int iPos);
+  void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
+  void onPropertyRemoved(task_id taskId, const QString& sPropertyName);
+  void onLinkAdded(task_id taskId, QUrl url);
+  void onLinkRemoved(task_id taskId, QUrl url);
+  void onLinkInserted(task_id taskId, QUrl url, int iPos);
+  void onTaskDeleted(task_id id);
+  void onTaskRemoved(task_id parentTaskId, task_id childTaskId);
+  void onTaskAdded(task_id parentTaskId, task_id childTaskId);
+  void onNewTaskAccepted();
+  void createNewSubTask(task_id taskId);
+  void onNewSubTaskAccepted();
   void reloadStylesheet(const QString& sPath);
   void initTaskUi();
   void updateTaskUi();
@@ -50,22 +59,11 @@ private slots:
   void on_actionSaveAs_triggered();
   void on_actionReport_triggered();
   void on_actionDisplayReport_triggered();
-  void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
-  void onPropertyRemoved(task_id taskId, const QString& sPropertyName);
-  void onLinkAdded(task_id taskId, QUrl url);
-  void onLinkRemoved(task_id taskId, QUrl url);
-  void onLinkInserted(task_id taskId, QUrl url, int iPos);
-  void onTaskRemoved(task_id parentTaskId, task_id childTaskId);
-  void onTaskAdded(task_id parentTaskId, task_id childTaskId);  
-  void onNewTaskAccepted();
-  void createNewSubTask(task_id taskId);
-  void onNewSubTaskAccepted();
   void setAutoSortEnabled(group_id);
   void setAutoSortDisabled(group_id);
   void onSortGroupTriggered(int iGroupId);
   void sortGroup(group_id groupId);
   void sortGroups();
-  void onTaskDeleted(task_id id);
   void onDocumentModified();
   void onPasteFromClipboard();
 
@@ -74,8 +72,6 @@ signals:
   void documentModified();
 
 private:
-  TaskWidget* taskWidget(task_id id) const;
-  GroupWidget* groupWidget(group_id id) const;
   void timerEvent(QTimerEvent* pEvent) override;
   void updateAutoPrioritiesInTaskWidgets();
   void saveTempFile();
@@ -84,9 +80,8 @@ private:
   Ui::MainWindow *ui;
   QString m_sFileName;
   QDateTime m_lastSaveTime;
-  std::map<group_id, QPointer<GroupWidget>> m_groupWidgets;
-  std::map<task_id, QPointer<TaskWidget>> m_taskWidgets;
   Manager* m_pManager = nullptr;
+  WidgetManager* m_pWidgetManager = nullptr;
   TaskCreationDialog* m_pTaskCreationDialog = nullptr;
   std::map<group_id, QTimer*> m_autoSortTimers;
   QSignalMapper* m_pTimeoutGroupIdMapper;
