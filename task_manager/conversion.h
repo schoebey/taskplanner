@@ -60,6 +60,7 @@ namespace conversion
 
   //-- bool
   template<> bool fromString<bool>(const QString& sVal, bool& bConversionStatus);
+  QString toString(bool bVal);
 
   //-- std::vector<QUrl>
   template<> std::vector<QUrl> fromString<std::vector<QUrl>>(const QString& sVal, bool& bConversionStatus);

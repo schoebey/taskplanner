@@ -16,6 +16,7 @@
 #include "commands/changetaskpropertycommand.h"
 #include "commands/changegrouppropertycommand.h"
 #include "commands/movetaskcommand.h"
+#include "commands/addtaskcommand.h"
 
 
 #include <QFileSystemWatcher>
@@ -245,11 +246,11 @@ void MainWindow::onNewTaskAccepted()
   if (nullptr != pGroup &&
       nullptr != pGroupWidget)
   {
-    ITask* pTask = m_pManager->addTask();
-    pTask->setName(m_pTaskCreationDialog->name());
-    pTask->setDescription(m_pTaskCreationDialog->description());
-    pGroup->addTask(pTask->id());
-    pGroupWidget->insertTask(m_pWidgetManager->createTaskWidget(pTask->id()));
+    AddTaskCommand* pCommand = new AddTaskCommand(groupId,
+                                                  m_pTaskCreationDialog->name(),
+                                                  m_pTaskCreationDialog->description(),
+                                                  m_pManager, m_pWidgetManager);
+    m_undoStack.push(pCommand);
 
     emit documentModified();
   }
@@ -310,8 +311,6 @@ void MainWindow::renameTask(task_id id, const QString& sNewName)
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
-    TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
-
     ChangeTaskPropertyCommand* pChangeCommand =
         new ChangeTaskPropertyCommand(id, "name", pTask->name(), sNewName, m_pManager, m_pWidgetManager);
     m_undoStack.push(pChangeCommand);
@@ -325,8 +324,6 @@ void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
-    TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
-
     ChangeTaskPropertyCommand* pChangeCommand =
         new ChangeTaskPropertyCommand(id, "description", pTask->description(), sNewDescr, m_pManager, m_pWidgetManager);
     m_undoStack.push(pChangeCommand);
@@ -340,15 +337,13 @@ void MainWindow::onTaskMoved(task_id id, group_id groupId, int iPos)
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
-    TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
     int iOldPos = pTask->priority().priority(0);
     IGroup* pOldGroup = m_pManager->group(pTask->group());
-    GroupWidget* pOldGroupWidget = m_pWidgetManager->groupWidget(pTask->group());
     IGroup* pNewGroup = m_pManager->group(groupId);
-    GroupWidget* pNewGroupWidget = m_pWidgetManager->groupWidget(groupId);
 
     // only 'move' the task if it really has been moved from one group to another
-    if (nullptr != pOldGroup && (pOldGroup != pNewGroup || iOldPos != iPos))
+    if (nullptr != pOldGroup && nullptr != pNewGroup &&
+        (pOldGroup != pNewGroup || iOldPos != iPos))
     {
       MoveTaskCommand* pCommand = new MoveTaskCommand(id,
                                                       pTask->group(),
@@ -676,6 +671,8 @@ void MainWindow::onPropertyChanged(task_id taskId,
   if (nullptr != pTask)
   {
     QString sOldValue = pTask->propertyValue(sPropertyName);
+    if (sOldValue == sValue)  { return; }
+
     bool bNewValueAccepted = pTask->setPropertyValue(sPropertyName, sValue);
 
 

@@ -165,6 +165,16 @@ void TaskWidget::setDescription(const QString& sDescription)
   emit sizeChanged();
 }
 
+GroupWidget*TaskWidget::previousGroupWidget() const
+{
+  return m_pPreviousGroupWidget;
+}
+
+GroupWidget*TaskWidget::groupWidget() const
+{
+  return m_pGroupWidget;
+}
+
 void TaskWidget::setGroupWidget(GroupWidget* pGroupWidget)
 {
   m_pGroupWidget = pGroupWidget;
@@ -403,6 +413,12 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
   {
     setName(sValue);
     return true;
+  }
+  else if ("expanded" == sName)
+  {
+    bool bOk(false);
+    bool bExpanded = conversion::fromString<bool>(sValue, bOk);
+    if (bOk)  { setExpanded(bExpanded); }
   }
 
   return false;

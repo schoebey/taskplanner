@@ -37,6 +37,8 @@ public:
   QString description() const;
   void setDescription(const QString& sDescription);
 
+  GroupWidget* previousGroupWidget() const;
+  GroupWidget* groupWidget() const;
   void setGroupWidget(GroupWidget* pGroupWidget);
 
   static TaskWidget* DraggingTaskWidget();

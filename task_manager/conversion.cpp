@@ -272,6 +272,11 @@ in a hundred years
     return bRv;
   }
 
+  QString toString(bool bVal)
+  {
+    return bVal ? "true" : "false";
+  }
+
   template<>
   std::vector<QUrl> fromString<std::vector<QUrl> >(const QString& sVal, bool& bConversionStatus)
   {
@@ -315,4 +320,6 @@ in a hundred years
   {
     return c.name(QColor::HexArgb);
   }
+
+
 }

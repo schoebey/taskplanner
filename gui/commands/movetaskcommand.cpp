@@ -17,6 +17,13 @@ namespace
                 int iNewPosition,
                 Manager* pManager)
   {
+    if (nullptr == pTask || nullptr == pTaskWidget ||
+        nullptr == pOldGroup || nullptr == pOldGroupWidget ||
+        nullptr == pNewGroup || nullptr == pNewGroupWidget)
+    {
+      return;
+    }
+
     pTask->setGroup(pNewGroup->id());
 
     // if the task has moved groups, fill the priority gaps in the old group
@@ -113,6 +120,11 @@ MoveTaskCommand::MoveTaskCommand(task_id taskId,
     m_pWidgetManager(pWidgetManager)
 {
   setText(QString("move task"));
+}
+
+MoveTaskCommand::~MoveTaskCommand()
+{
+
 }
 
 void MoveTaskCommand::undo()

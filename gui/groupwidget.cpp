@@ -135,6 +135,11 @@ void GroupWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
     // insert the new widget
     if (-1 == iPos) iPos = static_cast<int>(m_vpTaskWidgets.size());
 
+    auto previousGroupId = -1;
+    if (nullptr != pTaskWidget->previousGroupWidget())
+    {
+      previousGroupId = pTaskWidget->previousGroupWidget()->id();
+    }
     QPoint currentPos = pTaskWidget->mapToGlobal(QPoint(0,0));
     qDebug() << currentPos.x() << currentPos.y();
     pTaskWidget->setParent(ui->scrollAreaWidgetContents);
@@ -152,7 +157,10 @@ void GroupWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
 
     UpdatePositions();
 
-    emit taskMovedTo(pTaskWidget->id(), m_groupId, iPos);
+    if (previousGroupId != -1 && m_groupId != previousGroupId)
+    {
+      emit taskMovedTo(pTaskWidget->id(), m_groupId, iPos);
+    }
   }
 }
 
