@@ -3,6 +3,7 @@
 
 #include "groupwidget.h"
 #include "taskwidget.h"
+#include "widgetmanager.h"
 #include "manager.h"
 #include "groupinterface.h"
 #include "taskinterface.h"
@@ -38,9 +39,11 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
   m_pManager(pManager),
+  m_pWidgetManager(new WidgetManager(m_pManager, this)),
   m_pTimeoutGroupIdMapper(new QSignalMapper(this))
 {
   ui->setupUi(this);
+
 
   ui->toolBar->addAction(m_undoStack.createUndoAction(this));
   ui->toolBar->addAction(m_undoStack.createRedoAction(this));
@@ -84,41 +87,9 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
-TaskWidget* MainWindow::taskWidget(task_id id) const
-{
-  auto it = m_taskWidgets.find(id);
-  if (it != m_taskWidgets.end())
-  {
-    return it->second;
-  }
-
-  return nullptr;
-}
-
-GroupWidget* MainWindow::groupWidget(group_id id) const
-{
-  auto it = m_groupWidgets.find(id);
-  if (it != m_groupWidgets.end())
-  {
-    return it->second;
-  }
-
-  return nullptr;
-}
-
 void MainWindow::initTaskUi()
 {
-  for (const auto& el : m_taskWidgets)
-  {
-    delete el.second;
-  }
-  m_taskWidgets.clear();
-
-  for (const auto& el : m_groupWidgets)
-  {
-    delete el.second;
-  }
-  m_groupWidgets.clear();
+  m_pWidgetManager->clear();
 
   updateTaskUi();
 }
@@ -136,11 +107,13 @@ void MainWindow::updateTaskUi()
 
     if (nullptr != pGroup)
     {
-      GroupWidget* pGroupWidget = groupWidget(groupId);
+      GroupWidget* pGroupWidget = m_pWidgetManager->groupWidget(groupId);
       if (nullptr == pGroupWidget)
       {
-        pGroupWidget = createGroupWidget(groupId);
-        pGroupWidget->setName(pGroup->name());
+        pGroupWidget = m_pWidgetManager->createGroupWidget(groupId);
+
+        QHBoxLayout* pLayout = dynamic_cast<QHBoxLayout*>(ui->frame->layout());
+        pLayout->addWidget(pGroupWidget);
       }
 
 
@@ -159,10 +132,10 @@ void MainWindow::updateTaskUi()
       {
         for (const auto& pTask : task.second)
         {
-          TaskWidget* pTaskWidget = taskWidget(pTask->id());
+          TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(pTask->id());
           if (nullptr == pTaskWidget)
           {
-            pTaskWidget = createTaskWidget(pTask->id());
+            pTaskWidget = m_pWidgetManager->createTaskWidget(pTask->id());
 
             auto pParentTask = m_pManager->task(pTask->parentTask());
             if (nullptr == pParentTask)
@@ -175,12 +148,13 @@ void MainWindow::updateTaskUi()
 
 
       // afer all the tasks have been created, the group properties can be set
-      for (auto el : m_groupWidgets)
+      for (auto groupId : m_pManager->groupIds())
       {
-        pGroupWidget = el.second;
-        IGroup* pGroup = m_pManager->group(el.first);
+        pGroupWidget = m_pWidgetManager->groupWidget(groupId);
+        IGroup* pGroup = m_pManager->group(groupId);
 
-        if (nullptr != pGroup)
+        if (nullptr != pGroup &&
+            nullptr != pGroupWidget)
         {
           bool bOk(false);
           bool bAutoSortingEnabled = conversion::fromString<bool>(pGroup->propertyValue("autoSorting"), bOk);
@@ -197,14 +171,13 @@ void MainWindow::updateTaskUi()
     auto pTask = m_pManager->task(taskId);
     if (nullptr != pTask)
     {
-      TaskWidget* pTaskWidget = taskWidget(taskId);
+      TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
       if (nullptr != pTaskWidget)
       {
-        auto parentIt = m_taskWidgets.find(pTask->parentTask());
-        if (parentIt != m_taskWidgets.end() &&
-            nullptr != parentIt->second)
+        TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(pTask->parentTask());
+        if (nullptr != pParentTaskWidget)
         {
-          parentIt->second->addTask(pTaskWidget);
+          pParentTaskWidget->addTask(pTaskWidget);
         }
       }
     }
@@ -245,98 +218,12 @@ void MainWindow::onDocumentModified()
   auto f = std::async(std::launch::async, &MainWindow::saveTempFile, this);
 }
 
-GroupWidget* MainWindow::createGroupWidget(group_id id)
-{
-  QHBoxLayout* pLayout = dynamic_cast<QHBoxLayout*>(ui->frame->layout());
-
-  GroupWidget* pGroupWidget = new GroupWidget(id);
-  pLayout->addWidget(pGroupWidget);
-
-  connect(pGroupWidget, SIGNAL(renamed(group_id, QString)), this, SLOT(renameGroup(group_id, QString)));
-  connect(pGroupWidget, SIGNAL(newTaskClicked(group_id)), this, SLOT(createNewTask(group_id)));
-  connect(pGroupWidget, SIGNAL(taskMovedTo(task_id, group_id, int)), this, SLOT(onTaskMoved(task_id, group_id, int)));
-  connect(pGroupWidget, SIGNAL(autoSortEnabled(group_id)), this, SLOT(setAutoSortEnabled(group_id)));
-  connect(pGroupWidget, SIGNAL(autoSortDisabled(group_id)), this, SLOT(setAutoSortDisabled(group_id)));
-
-  m_groupWidgets[id] = pGroupWidget;
-
-  return pGroupWidget;
-}
-
-TaskWidget* MainWindow::createTaskWidget(task_id id)
-{
-  TaskWidget* pTaskWidget = new TaskWidget(id);
-
-  connect(pTaskWidget, SIGNAL(renamed(task_id, QString)), this, SLOT(renameTask(task_id, QString)));
-  connect(pTaskWidget, SIGNAL(descriptionChanged(task_id, QString)), this, SLOT(changeTaskDescription(task_id, QString)));
-  connect(pTaskWidget, SIGNAL(timeTrackingStarted(task_id)), this, SLOT(startTimeTracking(task_id)));
-  connect(pTaskWidget, SIGNAL(timeTrackingStopped(task_id)), this, SLOT(stopTimeTracking(task_id)));
-  connect(pTaskWidget, SIGNAL(propertyChanged(task_id, QString, QString)), this, SLOT(onPropertyChanged(task_id, QString, QString)));
-  connect(pTaskWidget, SIGNAL(propertyRemoved(task_id, QString)), this, SLOT(onPropertyRemoved(task_id, QString)));
-  connect(pTaskWidget, SIGNAL(taskAdded(task_id, task_id)), this, SLOT(onTaskAdded(task_id, task_id)));
-  connect(pTaskWidget, SIGNAL(taskRemoved(task_id, task_id)), this, SLOT(onTaskRemoved(task_id, task_id)));
-  connect(pTaskWidget, SIGNAL(taskDeleted(task_id)), this, SLOT(onTaskDeleted(task_id)));
-  connect(pTaskWidget, SIGNAL(newSubTaskRequested(task_id)), this, SLOT(createNewSubTask(task_id)));
-  connect(pTaskWidget, SIGNAL(linkAdded(task_id, QUrl)), this, SLOT(onLinkAdded(task_id, QUrl)));
-  connect(pTaskWidget, SIGNAL(linkRemoved(task_id, QUrl)), this, SLOT(onLinkRemoved(task_id, QUrl)));
-  connect(pTaskWidget, SIGNAL(linkInserted(task_id, QUrl, int)), this, SLOT(onLinkInserted(task_id, QUrl, int)));
-  connect(this, SIGNAL(timeTrackingStopped(task_id)), pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
-
-
-  auto pTask = m_pManager->task(id);
-  if (nullptr != pTask)
-  {
-    pTaskWidget->setName(pTask->name());
-    pTaskWidget->setDescription(pTask->description());
-  }
-
-  bool bOk = false;
-  bool bExpanded = conversion::fromString<bool>(pTask->propertyValue("expanded"), bOk);
-
-  // konnte die Property ausgelesen werden, soll der expanded-State wiederhergestellt werden,
-  // sonst soll defaultmässig expandiert sein.
-  pTaskWidget->setExpanded(!bOk || bExpanded);
-
-
-  // TODO: hier die Links auslesen und via pTaskWidget->addLink() einzeln hinzufügen
-  // TODO: im Taskwidget: addLink, removeLink, insertLink(pos, link)
-  auto links = conversion::fromString<std::vector<QUrl>>(pTask->propertyValue("links"), bOk);
-  if (bOk)
-  {
-    for (const auto& link : links)
-    {
-      pTaskWidget->addLink(link);
-    }
-  }
-
-  auto color = conversion::fromString<QColor>(pTask->propertyValue("color"), bOk);
-  if (bOk)
-  {
-    pTaskWidget->setOverlayBackground(color);
-  }
-
-  for (const QString& sName : Properties<Task>::registeredPropertyNames())
-  {
-    if (!Properties<Task>::visible(sName))  { continue; }
-
-    if (pTask->hasPropertyValue(sName))
-    {
-      QString sPropertyValue = pTask->propertyValue(sName);
-      pTaskWidget->addProperty(sName, sPropertyValue);
-    }
-  }
-
-  m_taskWidgets[id] = pTaskWidget;
-
-  return pTaskWidget;
-}
-
 void MainWindow::createNewTask(group_id groupId)
 {
   IGroup* pGroup = m_pManager->group(groupId);
   if (nullptr != pGroup)
   {
-    GroupWidget* pGroupWidget = groupWidget(groupId);
+    GroupWidget* pGroupWidget = m_pWidgetManager->groupWidget(groupId);
     if (nullptr != pGroupWidget)
     {
       delete m_pTaskCreationDialog;
@@ -353,7 +240,7 @@ void MainWindow::onNewTaskAccepted()
   group_id groupId = m_pTaskCreationDialog->property("groupId").value<group_id>();
 
   IGroup* pGroup = m_pManager->group(groupId);
-  GroupWidget* pGroupWidget = groupWidget(groupId);
+  GroupWidget* pGroupWidget = m_pWidgetManager->groupWidget(groupId);
   if (nullptr != pGroup &&
       nullptr != pGroupWidget)
   {
@@ -361,7 +248,7 @@ void MainWindow::onNewTaskAccepted()
     pTask->setName(m_pTaskCreationDialog->name());
     pTask->setDescription(m_pTaskCreationDialog->description());
     pGroup->addTask(pTask->id());
-    pGroupWidget->insertTask(createTaskWidget(pTask->id()));
+    pGroupWidget->insertTask(m_pWidgetManager->createTaskWidget(pTask->id()));
 
     emit documentModified();
   }
@@ -372,7 +259,7 @@ void MainWindow::createNewSubTask(task_id taskId)
   ITask* pTask = m_pManager->task(taskId);
   if (nullptr != pTask)
   {
-    TaskWidget* pTaskWidget = taskWidget(taskId);
+    TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
     if (nullptr != pTaskWidget)
     {
       delete m_pTaskCreationDialog;
@@ -389,7 +276,7 @@ void MainWindow::onNewSubTaskAccepted()
   task_id taskId = m_pTaskCreationDialog->property("taskId").value<group_id>();
 
   ITask* pParentTask = m_pManager->task(taskId);
-  TaskWidget* pParentTaskWidget = taskWidget(taskId);
+  TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(taskId);
   if (nullptr != pParentTask &&
       nullptr != pParentTaskWidget)
   {
@@ -397,7 +284,7 @@ void MainWindow::onNewSubTaskAccepted()
     pTask->setName(m_pTaskCreationDialog->name());
     pTask->setDescription(m_pTaskCreationDialog->description());
     pParentTask->addTask(pTask->id());
-    pParentTaskWidget->addTask(createTaskWidget(pTask->id()));
+    pParentTaskWidget->addTask(m_pWidgetManager->createTaskWidget(pTask->id()));
 
     emit documentModified();
   }
@@ -409,7 +296,7 @@ void MainWindow::renameGroup(group_id id, const QString& sNewName)
   if (nullptr != pGroup)
   {
     PropertyChangeCommand* pChangeCommand =
-        new PropertyChangeCommand(pGroup, groupWidget(id), "name", pGroup->name(), sNewName);
+        new PropertyChangeCommand(pGroup, m_pWidgetManager->groupWidget(id), "name", pGroup->name(), sNewName);
     m_undoStack.push(pChangeCommand);
 
     emit documentModified();
@@ -421,7 +308,7 @@ void MainWindow::renameTask(task_id id, const QString& sNewName)
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
-    TaskWidget* pTaskWidget = taskWidget(id);
+    TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
 
     PropertyChangeCommand* pChangeCommand =
         new PropertyChangeCommand(pTask, pTaskWidget, "name", pTask->name(), sNewName);
@@ -436,7 +323,7 @@ void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
-    TaskWidget* pTaskWidget = taskWidget(id);
+    TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
 
     PropertyChangeCommand* pChangeCommand =
         new PropertyChangeCommand(pTask, pTaskWidget, "description", pTask->description(), sNewDescr);
@@ -451,12 +338,12 @@ void MainWindow::onTaskMoved(task_id id, group_id groupId, int iPos)
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
-    TaskWidget* pTaskWidget = taskWidget(id);
+    TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
     int iOldPos = pTask->priority().priority(0);
     IGroup* pOldGroup = m_pManager->group(pTask->group());
-    GroupWidget* pOldGroupWidget = groupWidget(pTask->group());
+    GroupWidget* pOldGroupWidget = m_pWidgetManager->groupWidget(pTask->group());
     IGroup* pNewGroup = m_pManager->group(groupId);
-    GroupWidget* pNewGroupWidget = groupWidget(groupId);
+    GroupWidget* pNewGroupWidget = m_pWidgetManager->groupWidget(groupId);
 
     // only 'move' the task if it really has been moved from one group to another
     if (nullptr != pOldGroup && (pOldGroup != pNewGroup || iOldPos != iPos))
@@ -789,7 +676,7 @@ void MainWindow::onPropertyChanged(task_id taskId,
     bool bNewValueAccepted = pTask->setPropertyValue(sPropertyName, sValue);
 
 
-    TaskWidget* pTaskWidget = taskWidget(taskId);
+    TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
     if (nullptr != pTaskWidget)
     {
       if (bNewValueAccepted)
@@ -930,12 +817,8 @@ void MainWindow::onTaskDeleted(task_id id)
 {
   if (m_pManager->removeTask(id))
   {
-    TaskWidget* pTaskWidget = taskWidget(id);
-    if (nullptr != pTaskWidget)
+    if (m_pWidgetManager->deleteTaskWidget(id))
     {
-      delete pTaskWidget;
-      m_taskWidgets.erase(m_taskWidgets.find(id));
-
       emit documentModified();
     }
   }
@@ -1002,7 +885,7 @@ void MainWindow::sortGroup(group_id groupId)
   }
 
 
-  GroupWidget* pGroupWidget = groupWidget(groupId);
+  GroupWidget* pGroupWidget = m_pWidgetManager->groupWidget(groupId);
   if (nullptr != pGroupWidget)
   {
     std::vector<task_id> vIds;
@@ -1021,12 +904,9 @@ void MainWindow::sortGroup(group_id groupId)
 
 void MainWindow::sortGroups()
 {
-  for (const auto& el : m_groupWidgets)
+  for (auto groupId : m_pManager->groupIds())
   {
-    if (nullptr != el.second)
-    {
-      sortGroup(el.second->id());
-    }
+    sortGroup(groupId);
   }
 }
 
@@ -1113,11 +993,9 @@ void MainWindow::updateAutoPrioritiesInTaskWidgets()
     auto pTask = m_pManager->task(taskId);
     if (nullptr != pTask)
     {
-      auto it = m_taskWidgets.find(taskId);
-      if (it != m_taskWidgets.end() &&
-          nullptr != it->second)
+      TaskWidget* pWidget = m_pWidgetManager->taskWidget(pTask->id());
+      if (nullptr != pWidget)
       {
-        TaskWidget* pWidget = it->second;
         pWidget->setAutoPriority(pTask->autoPriority());
       }
     }

@@ -14,7 +14,9 @@ SOURCES += \
     $$PWD/flowlayout.cpp \
     $$PWD/linkwidget.cpp \
     $$PWD/commands/propertychangecommand.cpp \
-    $$PWD/commands/movetaskcommand.cpp
+    $$PWD/commands/movetaskcommand.cpp \
+    $$PWD/commands/addtaskcommand.cpp \
+    $$PWD/widgetmanager.cpp
 
 HEADERS += \
     gui/editablelabel.h \
@@ -30,7 +32,9 @@ HEADERS += \
     $$PWD/flowlayout.h \
     $$PWD/linkwidget.h \
     $$PWD/commands/propertychangecommand.h \
-    $$PWD/commands/movetaskcommand.h
+    $$PWD/commands/movetaskcommand.h \
+    $$PWD/commands/addtaskcommand.h \
+    $$PWD/widgetmanager.h
 
 FORMS += \
     gui/groupwidget.ui \
