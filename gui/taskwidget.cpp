@@ -401,7 +401,17 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {
-    it->second.pValue->setText(sValue);
+    if (sValue.isEmpty())
+    {
+      delete it->second.pLabel;
+      delete it->second.pValue;
+      m_propertyLineEdits.erase(it);
+      emit sizeChanged();
+    }
+    else
+    {
+      it->second.pValue->setText(sValue);
+    }
     return true;
   }
   else if ("description" == sName)
@@ -419,6 +429,17 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
     bool bOk(false);
     bool bExpanded = conversion::fromString<bool>(sValue, bOk);
     if (bOk)  { setExpanded(bExpanded); }
+  }
+  else
+  {
+    if (Properties<Task>::visible(sName))
+    {
+      if (!sValue.isEmpty())
+      {
+        addProperty(sName, sValue);
+      }
+      return true;
+    }
   }
 
   return false;
@@ -810,6 +831,8 @@ void TaskWidget::addTask(TaskWidget* pTaskWidget)
         emit sizeChanged();
 
         m_subTasks.insert(pTaskWidget);
+
+        pTaskWidget->show();
       }
     }
   }

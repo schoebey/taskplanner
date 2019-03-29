@@ -57,7 +57,6 @@ protected:
   void moveEvent(QMoveEvent* pEvent);
   bool eventFilter(QObject* pObj, QEvent* pEvent);
   void ShowGhost(TaskWidget* pTaskWidget, int iPos);
-  void UpdatePositions(int iSpace = -1, int iSpacePos = 0);
   TaskWidget* taskWidgetAt(QPoint pt);
   void setUpContextMenu();
 
@@ -66,6 +65,7 @@ protected slots:
   void onNewTaskClicked();
   void onTitleEdited();
   void onSortClicked(bool bChecked);
+  void UpdatePositions(int iSpace = -1, int iSpacePos = 0);
 
 private:
   Ui::GroupWidget *ui;
