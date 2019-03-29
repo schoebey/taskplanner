@@ -133,7 +133,10 @@ void GroupWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
       std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
   {
     // insert the new widget
-    if (-1 == iPos) iPos = static_cast<int>(m_vpTaskWidgets.size());
+    if (-1 == iPos || iPos >= m_vpTaskWidgets.size())
+    {
+      iPos = static_cast<int>(m_vpTaskWidgets.size());
+    }
 
     QPoint currentPos = pTaskWidget->mapToGlobal(QPoint(0,0));
     qDebug() << currentPos.x() << currentPos.y();
@@ -148,8 +151,9 @@ void GroupWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
 
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
 
+    pTaskWidget->show();
 
-    UpdatePositions();
+    QMetaObject::invokeMethod(this, "UpdatePositions", Qt::QueuedConnection);
   }
 }
 
@@ -181,7 +185,7 @@ void GroupWidget::removeTask(TaskWidget* pTaskWidget)
   {
     m_vpTaskWidgets.erase(it);
 
-    UpdatePositions();
+    QMetaObject::invokeMethod(this, "UpdatePositions", Qt::QueuedConnection);
 
     pTaskWidget->setGroupWidget(nullptr);
     pTaskWidget->show();
@@ -338,7 +342,7 @@ void GroupWidget::reorderTasks(const std::vector<task_id>& vIds)
   if (vpTaskWidgets != m_vpTaskWidgets)
   {
     m_vpTaskWidgets = vpTaskWidgets;
-    UpdatePositions();
+    QMetaObject::invokeMethod(this, "UpdatePositions", Qt::QueuedConnection);
   }
 }
 

@@ -18,6 +18,7 @@
 #include "commands/movetaskcommand.h"
 #include "commands/addtaskcommand.h"
 #include "commands/deletetaskcommand.h"
+#include "commands/addsubtaskcommand.h"
 
 
 #include <QFileSystemWatcher>
@@ -35,6 +36,7 @@
 
 #include <array>
 #include <future>
+
 
 Q_DECLARE_METATYPE(QIODevice*)
 
@@ -354,6 +356,14 @@ void MainWindow::onTaskMoved(task_id id, group_id groupId, int iPos)
       m_undoStack.push(pCommand);
 
       emit documentModified();
+    }
+    else
+    {
+      auto pGroupWidget = m_pWidgetManager->groupWidget(groupId);
+      if (nullptr != pGroupWidget)
+      {
+        pGroupWidget->insertTask(m_pWidgetManager->taskWidget(id), iPos);
+      }
     }
   }
 }
@@ -798,9 +808,12 @@ void MainWindow::onLinkInserted(task_id /*taskId*/, QUrl /*url*/, int /*iPos*/)
 void MainWindow::onTaskAdded(task_id parentTaskId, task_id childTaskId)
 {
   ITask* pTask = m_pManager->task(parentTaskId);
-  if (nullptr != pTask)
+  ITask* pChildTask = m_pManager->task(childTaskId);
+  if (nullptr != pTask && nullptr != pChildTask &&
+      pChildTask->parentTask() != parentTaskId)
   {
-    pTask->addTask(childTaskId);
+    QUndoCommand* pCommand = new AddSubTaskCommand(parentTaskId, childTaskId, m_pManager, m_pWidgetManager);
+    m_undoStack.push(pCommand);
 
     emit documentModified();
   }
