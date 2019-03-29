@@ -17,6 +17,7 @@
 #include "commands/changegrouppropertycommand.h"
 #include "commands/movetaskcommand.h"
 #include "commands/addtaskcommand.h"
+#include "commands/deletetaskcommand.h"
 
 
 #include <QFileSystemWatcher>
@@ -719,7 +720,10 @@ void MainWindow::onPropertyRemoved(task_id taskId, const QString& sPropertyName)
   ITask* pTask = m_pManager->task(taskId);
   if (nullptr != pTask)
   {
-    pTask->removeProperty(sPropertyName);
+    ChangeTaskPropertyCommand* pChangeCommand =
+        new ChangeTaskPropertyCommand(taskId, sPropertyName, pTask->propertyValue(sPropertyName),
+                                      QString(), m_pManager, m_pWidgetManager);
+    m_undoStack.push(pChangeCommand);
   }
 }
 
@@ -815,12 +819,14 @@ void MainWindow::onTaskRemoved(task_id parentTaskId, task_id childTaskId)
 
 void MainWindow::onTaskDeleted(task_id id)
 {
-  if (m_pManager->removeTask(id))
+  if (nullptr != m_pManager->task(id) &&
+      nullptr != m_pWidgetManager->taskWidget(id))
   {
-    if (m_pWidgetManager->deleteTaskWidget(id))
-    {
-      emit documentModified();
-    }
+    QUndoCommand* pCommand =
+        new DeleteTaskCommand(id, m_pManager, m_pWidgetManager);
+    m_undoStack.push(pCommand);
+
+    emit documentModified();
   }
 }
 

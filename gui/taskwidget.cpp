@@ -570,7 +570,7 @@ bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
         QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
         QPoint pt = pGroupWidgetUnderMouse->mapFromGlobal(pMouseEvent->globalPos());
         int iInsertionIndex = pGroupWidgetUnderMouse->indexFromPoint(pt);
-        pGroupWidgetUnderMouse->insertTask(this, iInsertionIndex);
+        pGroupWidgetUnderMouse->requestInsert(this, iInsertionIndex);
       }
       else if (nullptr != m_pPreviousGroupWidget)
       {

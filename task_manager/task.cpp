@@ -58,6 +58,7 @@ SPriority Task::priority() const
 void Task::setPriority(const SPriority& priority)
 {
   m_priority = priority;
+  setProperty<int>("sort_priority", m_priority.categories[0]);
 }
 
 double Task::autoPriority() const
