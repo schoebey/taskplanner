@@ -17,7 +17,8 @@ SOURCES += \
     $$PWD/commands/addtaskcommand.cpp \
     $$PWD/widgetmanager.cpp \
     $$PWD/commands/changetaskpropertycommand.cpp \
-    $$PWD/commands/changegrouppropertycommand.cpp
+    $$PWD/commands/changegrouppropertycommand.cpp \
+    $$PWD/commands/deletetaskcommand.cpp
 
 HEADERS += \
     gui/editablelabel.h \
@@ -36,7 +37,8 @@ HEADERS += \
     $$PWD/commands/addtaskcommand.h \
     $$PWD/widgetmanager.h \
     $$PWD/commands/changetaskpropertycommand.h \
-    $$PWD/commands/changegrouppropertycommand.h
+    $$PWD/commands/changegrouppropertycommand.h \
+    $$PWD/commands/deletetaskcommand.h
 
 FORMS += \
     gui/groupwidget.ui \

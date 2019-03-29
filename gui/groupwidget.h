@@ -29,6 +29,7 @@ public:
   bool hasPropertyValue(const QString& sName) const override;
   QString propertyValue(const QString& sName) const override;
 
+  void requestInsert(TaskWidget* pTaskWidget, int iPos = -1);
   void insertTask(TaskWidget* pTaskWidget, int iPos = -1);
   void removeTask(TaskWidget* pTaskWidget);
 
