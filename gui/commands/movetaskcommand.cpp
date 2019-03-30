@@ -14,6 +14,10 @@ namespace
                 GroupWidget* pOldGroupWidget,
                 IGroup* pNewGroup,
                 GroupWidget* pNewGroupWidget,
+                ITask* pOldParentTask,
+                TaskWidget* pOldParentTaskWidget,
+                ITask* pNewParentTask,
+                TaskWidget* pNewParentTaskWidget,
                 int iNewPosition,
                 Manager* pManager)
   {
@@ -92,12 +96,35 @@ namespace
     prio.setPriority(0, iNewPosition);
     pTask->setPriority(prio);
 
-
-    if (nullptr != pOldGroupWidget)
+    if (nullptr != pOldParentTask)
+    {
+      pOldParentTask->removeTask(pTask->id());
+      if (nullptr != pOldParentTaskWidget)
+      {
+        pOldParentTaskWidget->removeTask(pTaskWidget);
+      }
+    }
+    else if (nullptr != pOldGroupWidget)
     {
       pOldGroupWidget->removeTask(pTaskWidget);
     }
-    if (nullptr != pNewGroupWidget)
+
+    if (nullptr != pNewParentTask)
+    {
+      if (pNewParentTask->addTask(pTask->id()))
+      {
+        if (nullptr != pNewParentTaskWidget)
+        {
+          auto pCurrentGroupWidget = pTaskWidget->groupWidget();
+          if (nullptr != pCurrentGroupWidget)
+          {
+            pCurrentGroupWidget->removeTask(pTaskWidget);
+          }
+          pNewParentTaskWidget->addTask(pTaskWidget);
+        }
+      }
+    }
+    else if (nullptr != pNewGroupWidget)
     {
       pNewGroupWidget->insertTask(pTaskWidget, iNewPosition);
     }
@@ -107,6 +134,8 @@ namespace
 MoveTaskCommand::MoveTaskCommand(task_id taskId,
                                  group_id oldGroupId,
                                  group_id newGroupId,
+                                 task_id oldParentTaskId,
+                                 task_id newParentTaskId,
                                  int iOldPosition,
                                  int iNewPosition,
                                  Manager* pManager,
@@ -114,6 +143,8 @@ MoveTaskCommand::MoveTaskCommand(task_id taskId,
   : m_taskId(taskId),
     m_oldGroupId(oldGroupId),
     m_newGroupId(newGroupId),
+    m_oldParentTaskId(oldParentTaskId),
+    m_newParentTaskId(newParentTaskId),
     m_iOldPosition(iOldPosition),
     m_iNewPosition(iNewPosition),
     m_pManager(pManager),
@@ -132,6 +163,8 @@ void MoveTaskCommand::undo()
   moveTask(m_pManager->task(m_taskId), m_pWidgetManager->taskWidget(m_taskId),
            m_pManager->group(m_newGroupId), m_pWidgetManager->groupWidget(m_newGroupId),
            m_pManager->group(m_oldGroupId), m_pWidgetManager->groupWidget(m_oldGroupId),
+           m_pManager->task(m_newParentTaskId), m_pWidgetManager->taskWidget(m_newParentTaskId),
+           m_pManager->task(m_oldParentTaskId), m_pWidgetManager->taskWidget(m_oldParentTaskId),
            m_iOldPosition, m_pManager);
 }
 
@@ -140,5 +173,7 @@ void MoveTaskCommand::redo()
   moveTask(m_pManager->task(m_taskId), m_pWidgetManager->taskWidget(m_taskId),
            m_pManager->group(m_oldGroupId), m_pWidgetManager->groupWidget(m_oldGroupId),
            m_pManager->group(m_newGroupId), m_pWidgetManager->groupWidget(m_newGroupId),
+           m_pManager->task(m_oldParentTaskId), m_pWidgetManager->taskWidget(m_oldParentTaskId),
+           m_pManager->task(m_newParentTaskId), m_pWidgetManager->taskWidget(m_newParentTaskId),
            m_iNewPosition, m_pManager);
 }

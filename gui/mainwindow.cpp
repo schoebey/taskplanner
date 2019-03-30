@@ -351,6 +351,7 @@ void MainWindow::onTaskMoved(task_id id, group_id groupId, int iPos)
       MoveTaskCommand* pCommand = new MoveTaskCommand(id,
                                                       pTask->group(),
                                                       groupId,
+                                                      -1, -1,
                                                       iOldPos, iPos,
                                                       m_pManager,m_pWidgetManager);
       m_undoStack.push(pCommand);
@@ -807,12 +808,22 @@ void MainWindow::onLinkInserted(task_id /*taskId*/, QUrl /*url*/, int /*iPos*/)
 
 void MainWindow::onTaskAdded(task_id parentTaskId, task_id childTaskId)
 {
-  ITask* pTask = m_pManager->task(parentTaskId);
-  ITask* pChildTask = m_pManager->task(childTaskId);
-  if (nullptr != pTask && nullptr != pChildTask &&
-      pChildTask->parentTask() != parentTaskId)
+  ITask* pNewParentTask = m_pManager->task(parentTaskId);
+  ITask* pTask = m_pManager->task(childTaskId);
+  if (nullptr != pNewParentTask && nullptr != pTask &&
+      pTask->parentTask() != parentTaskId)
   {
-    QUndoCommand* pCommand = new AddSubTaskCommand(parentTaskId, childTaskId, m_pManager, m_pWidgetManager);
+    bool bOk = false;
+    int iPosition = pTask->propertyValue("sort_priority").toInt(&bOk);
+    if (!bOk)  { iPosition = -1; }
+    QUndoCommand* pCommand =
+        new MoveTaskCommand(childTaskId, pTask->group(), pNewParentTask->group(),
+                            pTask->parentTask(), parentTaskId,
+                            iPosition, iPosition,
+                            m_pManager, m_pWidgetManager);
+
+
+        //new AddSubTaskCommand(parentTaskId, childTaskId, m_pManager, m_pWidgetManager);
     m_undoStack.push(pCommand);
 
     emit documentModified();
