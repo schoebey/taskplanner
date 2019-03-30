@@ -171,6 +171,8 @@ void GroupWidget::requestInsert(TaskWidget* pTaskWidget, int iPos)
       previousGroupId = pTaskWidget->previousGroupWidget()->id();
     }
 
+//    TODO: tasks that are added as subtasks directly, have no group id set.
+//        -> maybe set group id transitively?
     if (previousGroupId != -1)
     {
       emit taskMovedTo(pTaskWidget->id(), m_groupId, iPos);
