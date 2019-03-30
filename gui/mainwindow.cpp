@@ -50,8 +50,12 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   ui->setupUi(this);
 
 
-  ui->toolBar->addAction(m_undoStack.createUndoAction(this));
-  ui->toolBar->addAction(m_undoStack.createRedoAction(this));
+  auto pUndoAction = m_undoStack.createUndoAction(this);
+  pUndoAction->setShortcut(Qt::CTRL + Qt::Key_Z);
+  ui->toolBar->addAction(pUndoAction);
+  auto pRedoAction = m_undoStack.createRedoAction(this);
+  pRedoAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Z);
+  ui->toolBar->addAction(pRedoAction);
 
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
