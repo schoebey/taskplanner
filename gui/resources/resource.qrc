@@ -10,10 +10,12 @@
     <qresource prefix="/icons">
         <file>disk.png</file>
         <file>folder.png</file>
-        <file>hourglass_go.png</file>
         <file>arrow_right.png</file>
         <file>arrow_down.png</file>
         <file>timer_start.png</file>
         <file>timer_stop.png</file>
+        <file>redo.png</file>
+        <file>undo.png</file>
+        <file>clock.png</file>
     </qresource>
 </RCC>

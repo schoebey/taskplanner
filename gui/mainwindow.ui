@@ -91,7 +91,7 @@
   <action name="actionReport">
    <property name="icon">
     <iconset resource="resources/resource.qrc">
-     <normaloff>:/icons/hourglass_go.png</normaloff>:/icons/hourglass_go.png</iconset>
+     <normaloff>:/icons/clock.png</normaloff>:/icons/clock.png</iconset>
    </property>
    <property name="text">
     <string>Report...</string>
@@ -100,7 +100,7 @@
   <action name="actionDisplayReport">
    <property name="icon">
     <iconset resource="resources/resource.qrc">
-     <normaloff>:/icons/hourglass_go.png</normaloff>:/icons/hourglass_go.png</iconset>
+     <normaloff>:/icons/clock.png</normaloff>:/icons/clock.png</iconset>
    </property>
    <property name="text">
     <string>DisplayReport</string>
