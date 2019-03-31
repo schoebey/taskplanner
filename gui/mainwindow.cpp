@@ -54,11 +54,13 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   auto pUndoAction = m_undoStack.createUndoAction(this);
   pUndoAction->setShortcut(Qt::CTRL + Qt::Key_Z);
   pUndoAction->setIcon(QIcon(":/icons/undo.png"));
-  ui->toolBar->addAction(pUndoAction);
+  ui->toolBar->insertAction(ui->actionReport, pUndoAction);
   auto pRedoAction = m_undoStack.createRedoAction(this);
   pRedoAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Z);
   pRedoAction->setIcon(QIcon(":/icons/redo.png"));
-  ui->toolBar->addAction(pRedoAction);
+  ui->toolBar->insertAction(ui->actionReport, pRedoAction);
+  ui->toolBar->insertSeparator(ui->actionReport);
+  ui->toolBar->insertAction(ui->actionReport, ui->actionDisplayReport);
 
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
