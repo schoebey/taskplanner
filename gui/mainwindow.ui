@@ -79,7 +79,7 @@
   <action name="actionSaveAs">
    <property name="icon">
     <iconset resource="resources/resource.qrc">
-     <normaloff>:/icons/disk.png</normaloff>:/icons/disk.png</iconset>
+     <normaloff>:/icons/save_as.png</normaloff>:/icons/save_as.png</iconset>
    </property>
    <property name="text">
     <string>Save As...</string>
@@ -100,7 +100,7 @@
   <action name="actionDisplayReport">
    <property name="icon">
     <iconset resource="resources/resource.qrc">
-     <normaloff>:/icons/clock.png</normaloff>:/icons/clock.png</iconset>
+     <normaloff>:/icons/clock_show.png</normaloff>:/icons/clock_show.png</iconset>
    </property>
    <property name="text">
     <string>DisplayReport</string>
@@ -109,7 +109,7 @@
   <action name="actionSave">
    <property name="icon">
     <iconset resource="resources/resource.qrc">
-     <normaloff>:/icons/disk.png</normaloff>:/icons/disk.png</iconset>
+     <normaloff>:/icons/save.png</normaloff>:/icons/save.png</iconset>
    </property>
    <property name="text">
     <string>Save</string>
