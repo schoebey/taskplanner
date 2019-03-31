@@ -227,7 +227,7 @@ void TaskWidget::dropEvent(QDropEvent* pEvent)
 {
   for (const auto& url : pEvent->mimeData()->urls())
   {
-    addLink(url);
+    emit linkAdded(m_taskId, url);
   }
 }
 
@@ -430,6 +430,36 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
     bool bExpanded = conversion::fromString<bool>(sValue, bOk);
     if (bOk)  { setExpanded(bExpanded); }
   }
+  else if ("links" == sName)
+  {
+    bool bOk(false);
+    auto links = conversion::fromString<std::vector<QUrl>>(sValue, bOk);
+    if (bOk)
+    {
+      // all links that are not yet present have to be added
+      for (const auto& link : links)
+      {
+        auto it = m_linkWidgets.find(link);
+        if (it == m_linkWidgets.end())
+        {
+          addLink(link);
+        }
+      }
+
+      // all links that are present but not represented in sValue have to be removed
+      std::set<QUrl> toRemove;
+      for (auto it = m_linkWidgets.begin(); it != m_linkWidgets.end(); ++it)
+      {
+        auto itProp = std::find(links.begin(), links.end(), it->first);
+        if (itProp == links.end())
+        {
+          toRemove.insert(it->first);
+        }
+      }
+
+      for (const auto& url : toRemove)  { removeLink(url); }
+    }
+  }
   else
   {
     if (Properties<Task>::visible(sName))
@@ -456,8 +486,6 @@ void TaskWidget::addLink(const QUrl& link)
       pLayout->addWidget(pLinkWidget);
 
       connect(pLinkWidget, SIGNAL(deleteTriggered(QUrl)), this, SLOT(removeLink(QUrl)));
-
-      emit linkAdded(m_taskId, link);
 
       m_linkWidgets[link] = pLinkWidget;
     }
@@ -865,7 +893,7 @@ void TaskWidget::onLinkPasted()
   {
     for (const auto& url : pClipboard->mimeData()->urls())
     {
-      addLink(url);
+      emit linkAdded(m_taskId, url);
     }
   }
   else if (pClipboard->mimeData()->hasText())
@@ -879,7 +907,7 @@ void TaskWidget::onLinkPasted()
       if (url.isLocalFile() ||
           0 == c_rx.indexIn(url.toString()))
       {
-        addLink(sLink);
+        emit linkAdded(m_taskId, sLink);
       }
     }
   }

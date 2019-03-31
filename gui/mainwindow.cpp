@@ -755,7 +755,10 @@ void MainWindow::onLinkAdded(task_id taskId, QUrl url)
       if (it == links.end())
       {
         links.push_back(url);
-        pTask->setPropertyValue("links", conversion::toString(links));
+        QUndoCommand* pCommand = new ChangeTaskPropertyCommand(taskId, "links",
+                                                               pTask->propertyValue("links"), conversion::toString(links),
+                                                               m_pManager, m_pWidgetManager);
+        m_undoStack.push(pCommand);
       }
       else
       {
@@ -786,12 +789,14 @@ void MainWindow::onLinkRemoved(task_id taskId, QUrl url)
       if (it != links.end())
       {
         links.erase(it);
-        pTask->setPropertyValue("links", conversion::toString(links));
+        QUndoCommand* pCommand = new ChangeTaskPropertyCommand(taskId, "links",
+                                                               pTask->propertyValue("links"), conversion::toString(links),
+                                                               m_pManager, m_pWidgetManager);
+        m_undoStack.push(pCommand);
       }
       else
       {
         // link not present - do nothing
-        assert(false);
       }
     }
     else
