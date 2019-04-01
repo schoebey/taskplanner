@@ -90,6 +90,11 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   connect(pPasteFromClipboardAction, SIGNAL(triggered()), this, SLOT(onPasteFromClipboard()));
   addAction(pPasteFromClipboardAction);
 
+  QAction* pReloadAction = new QAction(tr("reload current document"), this);
+  pReloadAction->setShortcut(Qt::CTRL + Qt::Key_R);
+  connect(pReloadAction, SIGNAL(triggered()), this, SLOT(onReloadDocument()));
+  addAction(pReloadAction);
+
   initTaskUi();
 
   startTimer(3000);
@@ -1049,4 +1054,9 @@ void MainWindow::updateAutoPrioritiesInTaskWidgets()
 void MainWindow::timerEvent(QTimerEvent* /*pEvent*/)
 {
   updateAutoPrioritiesInTaskWidgets();
+}
+
+void MainWindow::onReloadDocument()
+{
+  loadFile(m_sFileName);
 }

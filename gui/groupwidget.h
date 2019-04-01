@@ -10,6 +10,10 @@ namespace Ui {
   class GroupWidget;
 }
 
+namespace widgetAnimation {
+  void deleteWidgetAnimation(QWidget*);
+}
+
 class TaskWidget;
 class GroupWidget : public QFrame, public IPropertyProvider
 {

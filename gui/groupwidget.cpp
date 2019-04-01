@@ -44,6 +44,18 @@ namespace
   }
 }
 
+namespace widgetAnimation
+{
+  void deleteWidgetAnimation(QWidget* pWidget)
+  {
+    auto it = animations.find(pWidget);
+    if (it != animations.end())
+    {
+      animations.erase(it);
+    }
+  }
+}
+
 GroupWidget* GroupWidget::m_pMouseHoveringOver = nullptr;
 GroupWidget::GroupWidget(group_id id, QWidget *parent) :
   QFrame(parent),
@@ -431,3 +443,4 @@ void GroupWidget::onSortClicked(bool bChecked)
     emit autoSortDisabled(m_groupId);
   }
 }
+
