@@ -5,6 +5,26 @@
 #include "taskinterface.h"
 #include "taskwidget.h"
 
+namespace {
+  void setProperty(task_id taskId, const QString& sProperty, const QString& sValue,
+                   Manager* pManager, WidgetManager* pWidgetManager)
+  {
+    auto pTask = pManager->task(taskId);
+    auto pTaskWidget = pWidgetManager->taskWidget(taskId);
+
+    if (sValue.isEmpty())
+    {
+      if (nullptr != pTask) { pTask->removeProperty(sProperty); }
+      if (nullptr != pTaskWidget) { pTaskWidget->removeProperty(sProperty); }
+    }
+    else
+    {
+      if (nullptr != pTask) { pTask->setPropertyValue(sProperty, sValue); }
+      if (nullptr != pTaskWidget) { pTaskWidget->setPropertyValue(sProperty, sValue); }
+    }
+  }
+}
+
 ChangeTaskPropertyCommand::ChangeTaskPropertyCommand(task_id taskId,
                                              const QString& sPropertyName,
                                              const QString& sOldValue,
@@ -23,18 +43,10 @@ ChangeTaskPropertyCommand::ChangeTaskPropertyCommand(task_id taskId,
 
 void ChangeTaskPropertyCommand::undo()
 {
-  auto pTask = m_pManager->task(m_taskId);
-  if (nullptr != pTask) { pTask->setPropertyValue(m_sPropertyName, m_sOldValue); }
-
-  auto pTaskWidget = m_pWidgetManager->taskWidget(m_taskId);
-  if (nullptr != pTaskWidget) { pTaskWidget->setPropertyValue(m_sPropertyName, m_sOldValue); }
+  setProperty(m_taskId, m_sPropertyName, m_sOldValue, m_pManager, m_pWidgetManager);
 }
 
 void ChangeTaskPropertyCommand::redo()
 {
-  auto pTask = m_pManager->task(m_taskId);
-  if (nullptr != pTask) { pTask->setPropertyValue(m_sPropertyName, m_sNewValue); }
-
-  auto pTaskWidget = m_pWidgetManager->taskWidget(m_taskId);
-  if (nullptr != pTaskWidget) { pTaskWidget->setPropertyValue(m_sPropertyName, m_sNewValue); }
+  setProperty(m_taskId, m_sPropertyName, m_sNewValue, m_pManager, m_pWidgetManager);
 }

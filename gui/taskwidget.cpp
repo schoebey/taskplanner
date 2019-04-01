@@ -183,7 +183,7 @@ void TaskWidget::setGroupWidget(GroupWidget* pGroupWidget)
   {
     setBackgroundImage(m_pGroupWidget->backgroundImage());
     m_pPreviousGroupWidget = m_pGroupWidget;
-    m_pDraggingTaskWidget = nullptr; 
+    m_pDraggingTaskWidget = nullptr;
   }
 }
 
@@ -310,6 +310,8 @@ void TaskWidget::onRemovePropertyTriggered()
   {
     QString sName = pSender->property("name").toString();
     removeProperty(sName);
+
+    emit propertyRemoved(m_taskId, sName);
   }
 }
 
@@ -384,8 +386,6 @@ bool TaskWidget::removeProperty(const QString& sName)
     delete it->second.pLabel;
     delete it->second.pValue;
     m_propertyLineEdits.erase(it);
-
-    emit propertyRemoved(m_taskId, sName);
 
     emit sizeChanged();
 
