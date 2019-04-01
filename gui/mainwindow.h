@@ -65,7 +65,8 @@ private slots:
   void sortGroup(group_id groupId);
   void sortGroups();
   void onDocumentModified();
-  void onPasteFromClipboard();
+  void onPasteFromClipboard();  
+  void onReloadDocument();
 
 signals:
   void timeTrackingStopped(task_id taskId);

@@ -48,6 +48,8 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
 
 TaskWidget::~TaskWidget()
 {
+  widgetAnimation::deleteWidgetAnimation(this);
+
   if (m_pTaskWidgetUnderMouse == this)
   {
     m_pTaskWidgetUnderMouse = nullptr;
