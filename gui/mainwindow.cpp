@@ -851,7 +851,7 @@ void MainWindow::onPropertyRemoved(task_id taskId, const QString& sPropertyName)
   ITask* pTask = m_pManager->task(taskId);
   if (nullptr != pTask)
   {
-    pTask->setPropertyValue(sPropertyName, QString());
+    pTask->removeProperty(sPropertyName);
   }
 }
 
