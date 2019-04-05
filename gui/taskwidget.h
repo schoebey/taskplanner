@@ -154,6 +154,7 @@ private:
 
   struct SPropertyWidgets
   {
+    QFrame* pFrame = nullptr;
     QLabel* pLabel = nullptr;
     EditableLabel* pValue = nullptr;
   };

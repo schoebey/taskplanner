@@ -19,5 +19,6 @@
         <file>save_as.png</file>
         <file>save.png</file>
         <file>clock_show.png</file>
+        <file>link.png</file>
     </qresource>
 </RCC>

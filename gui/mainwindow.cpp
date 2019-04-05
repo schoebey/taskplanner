@@ -84,6 +84,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   Q_UNUSED(bOk)
 
 
+  // TODO: move shortcut to group widget and set the context to 'widget'
   QAction* pPasteFromClipboardAction = new QAction(tr("paste"), this);
   pPasteFromClipboardAction->setShortcut(Qt::CTRL + Qt::Key_V);
   pPasteFromClipboardAction->setShortcutContext(Qt::WindowShortcut);
