@@ -20,7 +20,7 @@ namespace {
     else
     {
       if (nullptr != pTask) { pTask->setPropertyValue(sProperty, sValue); }
-      if (nullptr != pTaskWidget) { pTaskWidget->setPropertyValue(sProperty, sValue); }
+      if (nullptr != pTaskWidget) { pTaskWidget->setPropertyValue(sProperty, pTask->propertyValue(sProperty)); }
     }
   }
 }
