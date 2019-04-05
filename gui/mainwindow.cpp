@@ -650,6 +650,7 @@ void MainWindow::on_actionDisplayReport_triggered()
 
     OverlayWidget* pOverlay = new OverlayWidget(this);
     QLabel* pLabel = new QLabel(s);
+    pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     pLabel->setObjectName("report");
     pLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     pOverlay->setAutoDeleteOnClose(true);
