@@ -326,20 +326,32 @@ void TaskWidget::addProperty(const QString& sName,
     QGridLayout* pGrid = dynamic_cast<QGridLayout*>(pLayout);
     if (nullptr != pGrid)
     {
+      QFrame* pFrame = new QFrame();
+      m_propertyLineEdits[sName].pFrame = pFrame;
+      pFrame->setObjectName("pPropertyFrame");
+      QHBoxLayout* pHboxLayout = new QHBoxLayout();
+      pHboxLayout->setSpacing(0);
+      pHboxLayout->setMargin(0);
+      pFrame->setLayout(pHboxLayout);
       QLabel* pLabel = new QLabel(sName);
       pLabel->setFocusPolicy(Qt::NoFocus);
+      pLabel->setObjectName(QString("%1_label").arg(sName));
       m_propertyLineEdits[sName].pLabel = pLabel;
 
       EditableLabel* pValue = new EditableLabel(this);
+      pValue->setObjectName(QString("%1_value").arg(sName));
       pValue->setFocusPolicy(Qt::NoFocus);
       pValue->setText(sValue);
       pValue->setProperty("name", sName);
+      pValue->setAlignment(Qt::AlignCenter);
       m_propertyLineEdits[sName].pValue = pValue;
 
       connect(pValue, SIGNAL(editingFinished()), this, SLOT(onPropertyEdited()));
       int iRow = pGrid->rowCount();
-      pGrid->addWidget(pLabel, iRow, 0);
-      pGrid->addWidget(pValue, iRow, 1);
+      pHboxLayout->addWidget(pLabel);
+      pHboxLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+      pHboxLayout->addWidget(pValue);
+      pGrid->addWidget(pFrame, iRow, 0);
 
       emit sizeChanged();
     }
@@ -387,13 +399,14 @@ bool TaskWidget::removeProperty(const QString& sName)
   {
     delete it->second.pLabel;
     delete it->second.pValue;
+    delete it->second.pFrame;
     m_propertyLineEdits.erase(it);
 
     emit sizeChanged();
-
-    setUpContextMenu();
     return true;
   }
+
+  setUpContextMenu();
 
   return false;
 }
@@ -407,8 +420,11 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
     {
       delete it->second.pLabel;
       delete it->second.pValue;
+      delete it->second.pFrame;
       m_propertyLineEdits.erase(it);
       emit sizeChanged();
+
+      setUpContextMenu();
     }
     else
     {

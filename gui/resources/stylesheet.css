@@ -135,7 +135,7 @@ TaskWidget {
 TaskWidget #pTitle {
   qproperty-drawOutline: true;
   padding-left: 4px;
-  font-size: 10pt;
+  font-size: 11pt;
   color: rgba(255, 255, 255, 255);
 }
 
@@ -241,7 +241,7 @@ LinkWidget[isFile=false] {
 }
 
 LinkWidget[isFile=false] #pIcon {
-  background: url(:/icons/disk.png) center center no-repeat;
+  background: url(:/icons/link.png) center center no-repeat;
 }
 
 
@@ -259,19 +259,16 @@ LinkWidget:focus {
 
 #pProperties {
   padding: 10px 0px 0px 0px;
-  border: 0px solid #00ff00;
 }
 
-#pProperties > QLabel {
-  padding-left: 4px;
-  padding-top: 0px;
-  padding-right: 4px;
-  font-size: 10pt;
-  color: rgba(0, 0, 0, 200);
-}
 
 #pDynamicProperties {
   padding: 0 0 6px 0;
+  border: 0px solid red;
+}
+
+#pDynamicProperties QLabel {
+  font-size: 11pt;
 }
 
 #pSeparator {
@@ -282,9 +279,38 @@ LinkWidget:focus {
                 stop:1 rgba(0, 0, 0, 0));
   border-bottom: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
                 stop:0 rgba(255, 255, 255, 0),
-                stop:0.4 rgba(255, 255, 255, 80),
+                stop:0.4 rgba(255, 255,  255, 80),
                 stop:0.6 rgba(255, 255, 255, 80),
                 stop:1 rgba(255, 255, 255, 0));
   min-height: 0px;
   margin: 5px 10px 5px 10px;
+}
+
+#pPropertyFrame {
+  border: 0px solid white;
+  min-height: 20px;
+  padding-left: 4px;
+  padding-top: 0px;
+  padding-right: 4px;
+}
+
+#pPropertyFrame QLabel {
+  font-size: 10pt;
+}
+ 
+#priority_label {
+  color: black;
+  border: 0px solid black; 
+}
+#priority_value {
+  color: white;
+  background:  rgba(0, 0, 0, 25);
+  border-top: 1px solid rgba(0,0,0,50);
+  border-left: 1px solid rgba(0,0,0,50);
+  border-bottom: 1px solid rgba(255, 255, 255, 50);
+  border-right: 1px solid rgba(255, 255, 255, 50);
+  border-radius: 9px;
+  min-height: 18px;
+  min-width: 18px;
+  margin-right: 5px;
 }
