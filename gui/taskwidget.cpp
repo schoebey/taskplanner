@@ -5,6 +5,7 @@
 #include "taskwidgetoverlay.h"
 #include "flowlayout.h"
 #include "linkwidget.h"
+#include "mousehandlingframe.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -326,7 +327,7 @@ void TaskWidget::addProperty(const QString& sName,
     QGridLayout* pGrid = dynamic_cast<QGridLayout*>(pLayout);
     if (nullptr != pGrid)
     {
-      QFrame* pFrame = new QFrame();
+      QFrame* pFrame = new MouseHandlingFrame();
       m_propertyLineEdits[sName].pFrame = pFrame;
       pFrame->setObjectName("pPropertyFrame");
       QHBoxLayout* pHboxLayout = new QHBoxLayout();
@@ -339,6 +340,7 @@ void TaskWidget::addProperty(const QString& sName,
       m_propertyLineEdits[sName].pLabel = pLabel;
 
       EditableLabel* pValue = new EditableLabel(this);
+      connect(pFrame, SIGNAL(mouseDoubleClicked(QPoint)), pValue, SLOT(edit()));
       pValue->setObjectName(QString("%1_value").arg(sName));
       pValue->setFocusPolicy(Qt::NoFocus);
       pValue->setText(sValue);

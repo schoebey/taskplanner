@@ -14,8 +14,6 @@ public:
 
   void mouseDoubleClickEvent(QMouseEvent* pMouseEvent) override;
 
-  void edit();
-
   void suggestWidth(int iWidth);
 
   QSize sizeHint() const override;
@@ -25,6 +23,9 @@ public:
   Q_PROPERTY(bool drawOutline READ drawOutline WRITE setDrawOutline)
   bool drawOutline() const;
   void setDrawOutline(bool bDraw);
+
+public slots:
+  void edit();
 
 signals:
   void editingFinished();
