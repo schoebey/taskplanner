@@ -10,7 +10,7 @@
 EditableLabel::EditableLabel(QWidget* pParent)
   : QLabel(pParent)
 {
-  m_fnToDisplay = [](const QString& s){ return QString("\"%1\"").arg(s); };
+  m_fnToDisplay = [](const QString& s){ return s; };
 }
 
 void EditableLabel::mouseDoubleClickEvent(QMouseEvent* pMouseEvent)
@@ -47,6 +47,11 @@ void EditableLabel::suggestWidth(int iWidth)
 
     updateGeometry();
   }
+}
+
+void EditableLabel::setDisplayFunction(const std::function<QString(const QString&)> fnDisplay)
+{
+  m_fnToDisplay = fnDisplay;
 }
 
 void EditableLabel::setEditText(const QString& sText)

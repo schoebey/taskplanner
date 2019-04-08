@@ -345,6 +345,15 @@ void TaskWidget::addProperty(const QString& sName,
       pValue->setFocusPolicy(Qt::NoFocus);
       pValue->setProperty("name", sName);
       pValue->setAlignment(Qt::AlignCenter);
+      if ("due date" == sName)
+      {
+        auto fnDisplay = [](const QString& s) -> QString
+        {
+          QDateTime dt = QDateTime::fromString(s, conversion::c_sDateTimeFormat);
+          return dt.toString("yyyy-MM-dd hh:mm");
+        };
+        pValue->setDisplayFunction(fnDisplay);
+      }
       m_propertyLineEdits[sName].pValue = pValue;
 
       connect(pValue, SIGNAL(editingFinished()), this, SLOT(onPropertyEdited()));
