@@ -149,22 +149,22 @@ task_id TaskWidget::id() const
 
 QString TaskWidget::name() const
 {
-  return ui->pTitle->text();
+  return ui->pTitle->editText();
 }
 
 void TaskWidget::setName(const QString& sName)
 {
-  ui->pTitle->setText(sName);
+  ui->pTitle->setEditText(sName);
 }
 
 QString TaskWidget::description() const
 {
-  return ui->pDescription->text();
+  return ui->pDescription->editText();
 }
 
 void TaskWidget::setDescription(const QString& sDescription)
 {
-  ui->pDescription->setText(sDescription);
+  ui->pDescription->setEditText(sDescription);
   emit sizeChanged();
 }
 
@@ -388,7 +388,7 @@ QString TaskWidget::propertyValue(const QString& sName) const
     auto it = m_propertyLineEdits.find(sName);
     if (it != m_propertyLineEdits.end())
     {
-      return it->second.pValue->text();
+      return it->second.pValue->editText();
     }
   }
 
@@ -431,7 +431,7 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
     }
     else
     {
-      it->second.pValue->setText(sValue);
+      it->second.pValue->setEditText(sValue);
     }
     return true;
   }
@@ -702,12 +702,12 @@ void TaskWidget::mouseMoveEvent(QMouseEvent* pMouseEvent)
 
 void TaskWidget::onTitleEdited()
 {
-  emit renamed(m_taskId, ui->pTitle->text());
+  emit renamed(m_taskId, ui->pTitle->editText());
 }
 
 void TaskWidget::onDescriptionEdited()
 {
-  emit descriptionChanged(m_taskId, ui->pDescription->text());
+  emit descriptionChanged(m_taskId, ui->pDescription->editText());
   emit sizeChanged();
 }
 
@@ -737,7 +737,7 @@ void TaskWidget::onPropertyEdited()
   if (nullptr != pSender)
   {
     QString sPropertyName = pSender->property("name").toString();
-    emit propertyChanged(m_taskId, sPropertyName, pSender->text());
+    emit propertyChanged(m_taskId, sPropertyName, pSender->editText());
   }
 }
 

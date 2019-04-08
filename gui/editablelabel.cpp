@@ -10,7 +10,7 @@
 EditableLabel::EditableLabel(QWidget* pParent)
   : QLabel(pParent)
 {
-
+  m_fnToDisplay = [](const QString& s){ return QString("\"%1\"").arg(s); };
 }
 
 void EditableLabel::mouseDoubleClickEvent(QMouseEvent* pMouseEvent)
@@ -23,15 +23,18 @@ void EditableLabel::mouseDoubleClickEvent(QMouseEvent* pMouseEvent)
 void EditableLabel::edit()
 {
   QLineEdit* pEdit = new QLineEdit(this);
-  pEdit->setText(text());
+  pEdit->setText(m_sEditText.isEmpty() ? text() : m_sEditText);
   pEdit->selectAll();
   pEdit->setFocus();
   pEdit->resize(size());
   pEdit->show();
-  connect(pEdit, SIGNAL(textChanged(QString)), this, SLOT(setText(QString)));
-  connect(pEdit, SIGNAL(textChanged(QString)), this, SLOT(setText(QString)));
-  connect(pEdit, SIGNAL(editingFinished()), this, SIGNAL(editingFinished()));
-  connect(pEdit, SIGNAL(editingFinished()), pEdit, SLOT(deleteLater()));
+  connect(pEdit, SIGNAL(textChanged(QString)), this, SLOT(setEditText(QString)), Qt::UniqueConnection);
+  connect(pEdit, SIGNAL(editingFinished()), this, SIGNAL(editingFinished()), Qt::UniqueConnection);
+  connect(pEdit, SIGNAL(editingFinished()), pEdit, SLOT(deleteLater()), Qt::UniqueConnection);
+
+  std::function<void(const QString&)> fn = std::bind(&EditableLabel::setText,
+                                                     this, std::bind(m_fnToDisplay, std::placeholders::_1));
+  connect(pEdit, &QLineEdit::textChanged, this, fn);
 }
 
 void EditableLabel::suggestWidth(int iWidth)
@@ -44,6 +47,18 @@ void EditableLabel::suggestWidth(int iWidth)
 
     updateGeometry();
   }
+}
+
+void EditableLabel::setEditText(const QString& sText)
+{
+  m_sEditText = sText;
+
+  setText(m_fnToDisplay(sText));
+}
+
+QString EditableLabel::editText() const
+{
+  return m_sEditText;
 }
 
 QSize EditableLabel::sizeHint() const
