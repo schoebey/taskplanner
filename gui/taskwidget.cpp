@@ -343,7 +343,6 @@ void TaskWidget::addProperty(const QString& sName,
       connect(pFrame, SIGNAL(mouseDoubleClicked(QPoint)), pValue, SLOT(edit()));
       pValue->setObjectName(QString("%1_value").arg(sName));
       pValue->setFocusPolicy(Qt::NoFocus);
-      pValue->setText(sValue);
       pValue->setProperty("name", sName);
       pValue->setAlignment(Qt::AlignCenter);
       m_propertyLineEdits[sName].pValue = pValue;
@@ -354,6 +353,8 @@ void TaskWidget::addProperty(const QString& sName,
       pHboxLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
       pHboxLayout->addWidget(pValue);
       pGrid->addWidget(pFrame, iRow, 0);
+
+      setPropertyValue(sName, sValue);
 
       emit sizeChanged();
     }
