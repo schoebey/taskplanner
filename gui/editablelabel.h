@@ -27,6 +27,9 @@ public:
 public slots:
   void edit();
 
+  void setEditText(const QString& sText);
+  QString editText() const;
+
 signals:
   void editingFinished();
   void sizeChanged();
@@ -34,6 +37,8 @@ signals:
 private:
   int m_iSuggestedWidth = -1;
   bool m_bDrawOutline = false;
+  QString m_sEditText;
+  std::function<QString(const QString&)> m_fnToDisplay;
 };
 
 #endif // EDITABLELABEL_H
