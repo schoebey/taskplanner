@@ -12,6 +12,8 @@
 
 namespace conversion
 {
+  static const QString c_sDateTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
+
   int stringToInt(const QString& sNumber, bool* pbStatus = nullptr, int iStartValue = 0);
 
   template<typename T>

@@ -24,6 +24,8 @@ public:
   bool drawOutline() const;
   void setDrawOutline(bool bDraw);
 
+  void setDisplayFunction(const std::function<QString(const QString&)> fnDisplay);
+
 public slots:
   void edit();
 

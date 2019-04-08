@@ -95,7 +95,6 @@ namespace conversion
     return stringToInt(sVal, &bConversionStatus);
   }
 
-  static const QString c_sDateTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
   static const std::set<QString> c_sDateTimeFormats = {c_sDateTimeFormat,
                                                        "yyyy-MM-dd hh:mm:ss",
                                                        "yyyy-MM-dd hh:mm",
