@@ -11,18 +11,40 @@
 
 namespace conversion
 {
+  static const std::vector<QString> one_variants = {"one", "a", "an"};
+  static const std::vector<QString> ones = {"-", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+                                            "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
+                                            "eighteen", "nineteen"};
+  static const std::vector<QString> tens = {"-", "-", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"};
+  static const QString hundred = "hundred";
+  static const std::vector<QString> powers = {"-", "thousand", "million", "billion", "trillion"};
+  static const QString sAnd = "and";
+
+  QString intToString(int iValue, int iDepth)
+  {
+    QString sTail;
+    if (2 == iDepth)  { sTail = hundred; }
+    else if (3 <= iDepth)  { sTail = powers[iDepth - 2]; }
+
+    int iTens = iValue % 100;
+    if (iTens < 20)
+    {
+      int iNextVal = iValue / 100;
+      return (0 < iNextVal ? intToString(iNextVal, iDepth + 2) : QString()) + ones[iTens] + sTail;
+    }
+    else
+    {
+      int iOnes = iValue % 10;
+      int iNextVal = iValue / 10;
+      return (0 < iNextVal ? intToString(iNextVal, iDepth + 1) : QString()) + ones[iOnes] + sTail;
+    }
+  }
+
   int stringToInt(const QString& sNumber, bool* pbStatus, int iStartValue)
   {
     QString sNumberCopy(sNumber.simplified());
     sNumberCopy.remove(" ");
-    static const std::vector<QString> one_variants = {"one", "a", "an"};
-    static const std::vector<QString> ones = {"-", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
-                                              "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
-                                              "eighteen", "nineteen"};
-    static const std::vector<QString> tens = {"-", "-", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"};
-    static const QString hundred = "hundred";
-    static const std::vector<QString> powers = {"-", "thousand", "million", "billion", "trillion"};
-    static const QString sAnd = "and";
+
 
     int iResult = 0;
     if (sNumberCopy.startsWith(sAnd))
