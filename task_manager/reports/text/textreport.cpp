@@ -6,6 +6,7 @@
 #include <QString>
 #include <QVariant>
 #include <QFile>
+#include <QStringList>
 
 namespace
 {
@@ -14,6 +15,18 @@ namespace
   static const QString c_sPara_FileName = "fileName";
   static const QString c_sPara_Device = "device";
   static const QString c_sTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
+
+  QStringList fullName(const ITask* pTask, const Manager* pManager)
+  {
+    if (nullptr != pTask)
+    {
+      auto list = fullName(pManager->task(pTask->parentTask()), pManager);
+      list.append(pTask->name());
+      return list;
+    }
+
+    return QStringList();
+  }
 }
 
 Q_DECLARE_METATYPE(QIODevice*)
@@ -91,7 +104,9 @@ EReportError TextReport::create_impl(const Manager& manager) const
             QDateTime start = std::max<QDateTime>(startOfDay, tf.startTime);
             QDateTime stop = std::min<QDateTime>(endOfDay, tf.stopTime);
 
-            timings[start] = std::make_pair(stop, pTask->name());
+            QString sName = fullName(pTask, &manager).join(" -> ");
+
+            timings[start] = std::make_pair(stop, sName);
           }
         }
       }
