@@ -287,7 +287,7 @@ LinkWidget:focus {
 }
 
 #pPropertyFrame {
-  border: 1px solid white;
+  border: 0px solid white;
   min-height: 20px;
   padding-left: 4px;
   padding-top: 0px;

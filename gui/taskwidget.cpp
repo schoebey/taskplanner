@@ -113,8 +113,8 @@ namespace
     {
       // due tomorrow
       int iHour = dt.time().hour();
-      sText = QString("tomorrow %1 at %1")
-          .arg(0 < iHour ? (12 > iHour ? "morning" : (12 < iHour ? "afternoon" : "")) : "")
+      sText = QString("tomorrow %1 at %2")
+          .arg(0 < iHour ? (12 > iHour ? "morning" : (12 < iHour ? (16 < iHour ? "evening" : "afternoon") : "")) : "")
           .arg(toString(dt.time()));
     }
 
@@ -470,7 +470,10 @@ void TaskWidget::addProperty(const QString& sName,
       pGrid->addWidget(pFrame, iRow, 0);
       pFrame->setVisible(true);
 
-      setPropertyValue(sName, sValue);
+      if (!sValue.isEmpty())
+      {
+        setPropertyValue(sName, sValue);
+      }
 
       emit sizeChanged();
     }
@@ -516,9 +519,9 @@ bool TaskWidget::removeProperty(const QString& sName)
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {
-    delete it->second.pLabel;
-    delete it->second.pValue;
-    delete it->second.pFrame;
+    it->second.pLabel->deleteLater();
+    it->second.pValue->deleteLater();
+    it->second.pFrame->deleteLater();
     m_propertyLineEdits.erase(it);
 
     emit sizeChanged();
@@ -537,9 +540,9 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
   {
     if (sValue.isEmpty())
     {
-      delete it->second.pLabel;
-      delete it->second.pValue;
-      delete it->second.pFrame;
+      it->second.pLabel->deleteLater();
+      it->second.pValue->deleteLater();
+      it->second.pFrame->deleteLater();
       m_propertyLineEdits.erase(it);
       emit sizeChanged();
 

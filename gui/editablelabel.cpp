@@ -8,8 +8,10 @@
 
 
 EditableLabel::EditableLabel(QWidget* pParent)
-  : QLabel(pParent)
+  : QLabel(pParent),
+    m_pLineEdit(new QLineEdit(this))
 {
+  m_pLineEdit->hide();
   m_fnToDisplay = [](const QString& s){ return s; };
 }
 
@@ -22,19 +24,21 @@ void EditableLabel::mouseDoubleClickEvent(QMouseEvent* pMouseEvent)
 
 void EditableLabel::edit()
 {
-  QLineEdit* pEdit = new QLineEdit(this);
-  pEdit->setText(m_sEditText.isEmpty() ? text() : m_sEditText);
-  pEdit->selectAll();
-  pEdit->setFocus();
-  pEdit->resize(size());
-  pEdit->show();
-  connect(pEdit, SIGNAL(textChanged(QString)), this, SLOT(setEditText(QString)), Qt::UniqueConnection);
-  connect(pEdit, SIGNAL(editingFinished()), this, SIGNAL(editingFinished()), Qt::UniqueConnection);
-  connect(pEdit, SIGNAL(editingFinished()), pEdit, SLOT(deleteLater()), Qt::UniqueConnection);
+  m_iMinWidth = sizeHint().width();
+  setMinimumWidth(150);
+
+  m_pLineEdit->setText(m_sEditText.isEmpty() ? text() : m_sEditText);
+  m_pLineEdit->selectAll();
+  m_pLineEdit->setFocus();
+  m_pLineEdit->resize(size());
+  m_pLineEdit->show();
+  connect(m_pLineEdit, SIGNAL(textChanged(QString)), this, SLOT(setEditText(QString)), Qt::UniqueConnection);
+  connect(m_pLineEdit, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()), Qt::UniqueConnection);
+  connect(m_pLineEdit, SIGNAL(editingFinished()), m_pLineEdit, SLOT(hide()), Qt::UniqueConnection);
 
   std::function<void(const QString&)> fn = std::bind(&EditableLabel::setText,
                                                      this, std::bind(m_fnToDisplay, std::placeholders::_1));
-  connect(pEdit, &QLineEdit::textChanged, this, fn);
+  connect(m_pLineEdit, &QLineEdit::textChanged, this, fn);
 }
 
 void EditableLabel::suggestWidth(int iWidth)
@@ -103,5 +107,11 @@ bool EditableLabel::drawOutline() const
 void EditableLabel::setDrawOutline(bool bDraw)
 {
   m_bDrawOutline = bDraw;
+}
+
+void EditableLabel::onEditingFinished()
+{
+  setMinimumWidth(m_iMinWidth);
+  emit editingFinished();
 }
 

@@ -5,7 +5,7 @@
 
 
 
-
+class QLineEdit;
 class EditableLabel : public QLabel
 {
   Q_OBJECT
@@ -36,11 +36,16 @@ signals:
   void editingFinished();
   void sizeChanged();
 
+private slots:
+  void onEditingFinished();
+
 private:
+  QLineEdit* m_pLineEdit = nullptr;
   int m_iSuggestedWidth = -1;
   bool m_bDrawOutline = false;
   QString m_sEditText;
   std::function<QString(const QString&)> m_fnToDisplay;
+  int m_iMinWidth;
 };
 
 #endif // EDITABLELABEL_H
