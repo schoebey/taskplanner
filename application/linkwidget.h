@@ -33,6 +33,8 @@ public:
   double dBorderRadius = 0;
 };
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class LinkWidget : public QFrame
 {
   Q_OBJECT
@@ -71,6 +73,7 @@ private:
 private slots:
   void onDeleteTriggered();
   void openLink();
+  void fileDownloaded();
 
 protected:
   Ui::LinkWidget* ui;
@@ -80,6 +83,7 @@ protected:
   double m_dBorderRadius = 0;
   LinkWidget* m_pToolTip = nullptr;
   QMenu* m_pContextMenu = nullptr;
+  std::shared_ptr<QNetworkAccessManager> m_spNetworkAccessManager;
 };
 
 #endif // LINKWIDGET_H
