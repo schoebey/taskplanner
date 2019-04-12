@@ -1,5 +1,5 @@
 CONFIG += c++11
-QT += core gui
+QT += core gui network
 TEMPLATE = subdirs
 
 equals(QT_MAJOR_VERSION, 5) {

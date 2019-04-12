@@ -5,9 +5,10 @@
 #include <QContextMenuEvent>
 #include <QFileIconProvider>
 #include <QDesktopServices>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
 #include <cmath>
-
 
 QStyleOptionLinkWidget::QStyleOptionLinkWidget()
   : QStyleOption(1, eLinkWidget)
@@ -57,6 +58,24 @@ LinkWidget::LinkWidget(const QUrl& link)
     pm.fill(Qt::transparent);
     ui->pIcon->setPixmap(pm);
     ui->pLabel->setText(m_link.toString());
+
+
+    // try to grab the favicon of the website
+    m_spNetworkAccessManager = std::make_shared<QNetworkAccessManager>(this);
+
+    QSslConfiguration sslConfiguration(QSslConfiguration::defaultConfiguration());
+    sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
+    sslConfiguration.setProtocol(QSsl::AnyProtocol);
+
+    QNetworkRequest request;
+    request.setSslConfiguration(sslConfiguration);
+
+    QString sFaviconPath = link.scheme() + "://" + link.host() + "/favicon.ico";
+    request.setUrl(QUrl(sFaviconPath));
+
+    QNetworkReply *reply = m_spNetworkAccessManager->get(request);
+    connect(reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    connect(reply, SIGNAL(finished()), this, SLOT(fileDownloaded()));
   }
 
 
@@ -229,4 +248,30 @@ void LinkWidget::openLink()
 {
   QDesktopServices::openUrl(m_link);
   hideOverlay();
+}
+
+void LinkWidget::fileDownloaded()
+{
+  QFile f("test.png");
+  f.open(QIODevice::WriteOnly);
+  f.write(m_iconFromWeb.constData(), m_iconFromWeb.size());
+  f.close();
+
+  QImage img;
+  if (img.loadFromData(m_iconFromWeb) && !img.isNull())
+  {
+    ui->pIcon->setPixmap(QPixmap::fromImage(img));
+  }
+}
+
+
+void LinkWidget::onReadyRead()
+{
+  QNetworkReply* pReply = dynamic_cast<QNetworkReply*>(sender());
+  if (nullptr != pReply)
+  {
+    QByteArray bytes(pReply->readAll());
+    m_iconFromWeb.append(bytes);
+
+  }
 }
