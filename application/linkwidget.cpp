@@ -5,9 +5,186 @@
 #include <QContextMenuEvent>
 #include <QFileIconProvider>
 #include <QDesktopServices>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QDir>
+#include <QImage>
 
 #include <cmath>
 
+namespace
+{
+static const int c_iIconSize = 16;
+
+QString toString(const QUrl& url)
+{
+    return url.toString();
+}
+
+QString sanitize(const QString& s)
+{
+    QString sSanitized(s);
+    sSanitized.replace("/", "_").replace(":","_").replace(";","_").replace("?","_").replace(".", "_");
+    return sSanitized;
+}
+
+class ImgCache
+{
+public:
+    ImgCache()
+    {
+        readFromTemp();
+    }
+    ~ImgCache()
+    {
+        writeToTemp();
+    }
+
+    template<typename T>
+    QImage* get(const T& t)
+    {
+        return get(toString(t));
+    }
+
+    QImage* get(const QString& sKey)
+    {
+        QString sSanitized = sanitize(sKey);
+        auto it = imageCache.find(sSanitized);
+        if (it != imageCache.end())
+        {
+            return &it->second;
+        }
+        return nullptr;
+    }
+
+    template<typename T>
+    void add(const T& t, const QImage& img)
+    {
+        add(toString(t), img);
+    }
+
+    void add(const QString& sKey, const QImage& img)
+    {
+        QString sSanitized = sanitize(sKey);
+        imageCache[sSanitized] = img;
+        writeToTemp(sSanitized, img);
+    }
+private:
+    bool writeToTemp(const QString& sKey, const QImage& img)
+    {
+        QString sLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        QDir dir(sLocation);
+
+        if (!dir.cd("url_icons"))
+        {
+            return false;
+        }
+
+        return img.save(dir.filePath(sKey), "PNG");
+    }
+    void writeToTemp()
+    {
+        for (const auto &[sKey, img] : imageCache)
+        {
+            writeToTemp(sKey, img);
+        }
+    }
+
+    void readFromTemp()
+    {
+        QString sLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
+
+        QDir dir(sLocation);
+        if (!dir.exists())
+        {
+            dir.mkpath(sLocation);
+            dir.setPath(sLocation);
+        }
+        dir.mkdir("url_icons");
+        dir.cd("url_icons");
+
+        auto fileInfos = dir.entryInfoList();
+        for (const auto& fileInfo : fileInfos)
+        {
+            if (fileInfo.isFile())
+            {
+                QImage img;
+                img.load(fileInfo.absoluteFilePath(), "PNG");
+                if (!img.isNull())
+                {
+                    QString sSanitized = sanitize(fileInfo.fileName());
+                    imageCache[sSanitized] = img;
+                }
+            }
+        }
+    }
+
+    std::map<QString, QImage> imageCache;
+};
+
+ImgCache& Cache()
+{
+    static ImgCache cache;
+    return cache;
+}
+
+
+QString extractHrefFromTag(const QString& sTag)
+{
+    QString sPattern = R"url(<link.*href="?([^ "]*)"?)url";
+    QRegularExpression rx(sPattern);
+    auto match = rx.match(sTag);
+    if (match.hasMatch())
+    {
+        QString sCapture = match.captured(1);
+        return sCapture;
+    }
+
+    return {};
+}
+
+QString extractTagFromDocument(const QByteArray& baDoc)
+{
+    QRegularExpression rxTag("<link[^>]*>", QRegularExpression::MultilineOption);
+
+
+    // todo: parse header to find correct encoding
+    QString sDoc = QString::fromUtf8(baDoc);
+
+    QStringList links;
+    int iOffset = 0;
+    auto it = rxTag.globalMatch(sDoc);
+    while (it.hasNext())
+    {
+        auto match = it.next();
+        iOffset = match.capturedStart() + match.capturedLength();
+        links.push_back(match.captured());
+    }
+
+
+    QStringList relationships = {"icon", "shortcut icon", "alternative icon"};
+
+    QString sPattern = R"url(<link.*?(?=rel)rel\s*=\s*"%1"[^>]*>)url";
+
+    for (const QString& sRel : relationships)
+    {
+        QRegularExpression rx((sPattern.arg(sRel)));
+        for (const auto& sLink : links)
+        {
+            auto match = rx.match(sLink);
+            if (match.hasMatch())
+            {
+                QString sCapture = match.captured(0);
+                return sCapture;
+            }
+        }
+    }
+
+    return {};
+}
+}
+//"<link href=/assets/img/favicons/favicon.ico rel="shortcut icon">"
 
 QStyleOptionLinkWidget::QStyleOptionLinkWidget()
   : QStyleOption(1, eLinkWidget)
@@ -57,6 +234,32 @@ LinkWidget::LinkWidget(const QUrl& link)
     pm.fill(Qt::transparent);
     ui->pIcon->setPixmap(pm);
     ui->pLabel->setText(m_link.toString());
+
+
+    // try to grab the favicon of the website
+    m_spNetworkAccessManager = std::make_shared<QNetworkAccessManager>(this);
+
+    QSslConfiguration sslConfiguration(QSslConfiguration::defaultConfiguration());
+    sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
+    sslConfiguration.setProtocol(QSsl::AnyProtocol);
+
+
+    // TODO: query local cache before issuing network request
+    auto* pImg = Cache().get(m_link);
+    if (nullptr == pImg)
+    {
+        QNetworkRequest request;
+        request.setSslConfiguration(sslConfiguration);
+
+        request.setUrl(m_link);
+    
+        QNetworkReply *reply = m_spNetworkAccessManager->get(request);
+        connect(reply, SIGNAL(finished()), this, SLOT(fileDownloaded()));
+    }
+    else
+    {
+        ui->pIcon->setPixmap(QPixmap::fromImage(*pImg).scaled(c_iIconSize, c_iIconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
   }
 
 
@@ -198,7 +401,7 @@ void LinkWidget::paintEvent(QPaintEvent* /*pEvent*/)
   opt.dBorderRadius = m_dBorderRadius;
 
   QRect iconLabelRect = ui->pIcon->rect();
-  opt.iconRect = ui->pIcon->pixmap()->rect();
+  opt.iconRect = ui->pIcon->rect();
   int iOffsetX = (iconLabelRect.width() - opt.iconRect.width()) / 2;
   int iOffsetY = (iconLabelRect.height() - opt.iconRect.height()) / 2;
   opt.iconRect.moveTo(ui->pIcon->mapTo(this, QPoint(iOffsetX, iOffsetY)));
@@ -230,3 +433,43 @@ void LinkWidget::openLink()
   QDesktopServices::openUrl(m_link);
   hideOverlay();
 }
+
+void LinkWidget::fileDownloaded()
+{
+  QNetworkReply* pReply = dynamic_cast<QNetworkReply*>(sender());
+  if (nullptr != pReply)
+  {
+    QByteArray ba = pReply->readAll();
+
+    QImage img;
+    if (img.loadFromData(ba) && !img.isNull())
+    {
+        Cache().add(m_link, img);
+        ui->pIcon->setPixmap(QPixmap::fromImage(img).scaled(c_iIconSize, c_iIconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+    else
+    {
+        // ba contains the site source.
+        // scan it for favicon links like "shortcut icon"
+      QString sTag = extractTagFromDocument(ba);
+      QString sIconUrl = extractHrefFromTag(sTag);
+      if (!sIconUrl.isEmpty())
+      {
+        QUrl url(sIconUrl);
+        if (url.isRelative())
+        {
+            QString sHost = m_link.scheme() + "://" + m_link.host();
+            QString sUrl = sHost + sIconUrl;
+            url = sUrl;
+        }
+        // TODO: query local cache before issuing network request
+        QNetworkRequest request;
+        request.setUrl(url);
+        QNetworkReply *reply = m_spNetworkAccessManager->get(request);
+        connect(reply, SIGNAL(finished()), this, SLOT(fileDownloaded()));
+      }
+    }
+  }
+}
+
+
