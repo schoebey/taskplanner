@@ -14,9 +14,16 @@ namespace conversion
 {
   static const QString c_sDateTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
 
-  QString intToString(int iValue, int iDepth = 0);
+  namespace fancy
+  {
+    QString toString(const QTime& t);
 
-  int stringToInt(const QString& sNumber, bool* pbStatus = nullptr, int iStartValue = 0);
+    QString dateToString(const QString& sDate);
+
+    QString toString(int iValue, int iDepth = 0);
+
+    int toInt(const QString& sNumber, bool* pbStatus, int iStartValue = 0);
+  }
 
   template<typename T>
   typename std::enable_if<!std::is_convertible<T, QString>::value &&

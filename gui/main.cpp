@@ -55,7 +55,8 @@ int main(int argc, char *argv[])
 //    QString s3 = relativeToNow.cap(3);
 //  }
 
-  QString sTest = conversion::intToString(4711);
+  QString sTest = conversion::fancy::toString(4711);
+  QString sTest2 = conversion::fancy::toString(4711002);
 
 //  bool bIsInt = false;
 //  int iTest = conversion::stringToInt("ninehundredfiftytwo", &bIsInt);

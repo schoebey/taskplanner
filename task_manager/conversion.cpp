@@ -20,101 +20,227 @@ namespace conversion
   static const std::vector<QString> powers = {"-", "thousand", "million", "billion", "trillion"};
   static const QString sAnd = "and";
 
-  QString intToString(int iValue, int iDepth)
+  namespace fancy
   {
-    QString sTail;
-    if (2 == iDepth)  { sTail = hundred; }
-    else if (3 <= iDepth)  { sTail = powers[iDepth - 2]; }
-
-    int iTens = iValue % 100;
-    if (iTens < 20)
+    QString toString(const QTime& t)
     {
-      int iNextVal = iValue / 100;
-      return (0 < iNextVal ? intToString(iNextVal, iDepth + 2) : QString()) + ones[iTens] + sTail;
+      if (t.hour() == 12)
+      {
+        return "noon";
+      }
+      else if (t.hour() == 0)
+      {
+        return "midnight";
+      }
+      else
+      {
+        return t.toString("hh:mm");
+      }
     }
-    else
+
+    QString dateToString(const QString& sDate)
     {
-      int iOnes = iValue % 10;
-      int iNextVal = iValue / 10;
-      return (0 < iNextVal ? intToString(iNextVal, iDepth + 1) : QString()) + ones[iOnes] + sTail;
+      QDateTime dt = QDateTime::fromString(sDate, conversion::c_sDateTimeFormat);
+
+      QString sText;
+
+      // determine the delta to the current date time
+      QDateTime now = QDateTime::currentDateTime();
+
+      // due today
+      qint64 iMsecsTo = now.msecsTo(dt);
+      qint64 iHoursTo = iMsecsTo / 3600000;
+      qint64 iMinsTo = iMsecsTo / 60000 - iHoursTo * 3600000;
+      qint64 iDaysTo = now.daysTo(dt);
+      qint64 iWeeksTo = iDaysTo / 7;
+      qint64 iMonthsTo = iWeeksTo / 4;
+      qint64 iYearsTo = iDaysTo / 365;
+      std::vector<qint64> viCounters = {iYearsTo, iMonthsTo, iWeeksTo, iDaysTo, iHoursTo, iMinsTo};
+
+      enum class Type
+      {
+        eYears = 0,
+        eMonths,
+        eWeeks,
+        eDays,
+        eHours,
+        eMinutes
+      };
+
+      auto multiplicity = [](const QString& sSingular, const QString& sPlural, qint64 iCounter)
+      {
+        return iCounter > 1 ? sPlural : sSingular;
+      };
+      auto multiplicityOf = [&](const QString& sSingular, const QString& sPlural, qint64 iCounter)
+      {
+        return QString("%1 %2").arg(toString(iCounter)).arg(multiplicity(sSingular, sPlural, iCounter));
+      };
+      auto in = [&](const QString& sSingular, const QString& sPlural, qint64 iCounter)
+      {
+        return QString("in %1").arg(multiplicityOf(sSingular, sPlural, iCounter));
+      };
+
+      typedef std::function<QString(qint64)> tFnToString;
+      std::map<Type, tFnToString> mapping;
+      mapping[Type::eYears]   = [&](qint64 i){ return in("year", "years", i); };
+      mapping[Type::eMonths]  = [&](qint64 i){ return in("month", "months", i); };
+      mapping[Type::eWeeks]   = [&](qint64 i){ return in("week", "weeks", i); };
+      mapping[Type::eDays]    = [&](qint64 i){ return in("day", "days", i); };
+      mapping[Type::eHours]   = [&](qint64 i){ return in("hour", "hours", i); };
+      mapping[Type::eMinutes] = [&](qint64 i){ return in("minute", "minutes", i); };
+
+      qint64* piCounter = &viCounters[0];
+      for (const auto& el : mapping)
+      {
+        if (0 < *piCounter)
+        {
+          sText = el.second(*piCounter);
+          break;
+        }
+        else
+        {
+          ++piCounter;
+        }
+      }
+
+
+      if (0 == iDaysTo && 4 <= iHoursTo)
+      {
+        sText = QString("at %1").arg(dt.time().toString("hh:mm"));
+      }
+      else if (0 > iDaysTo)
+      {
+        // in the past
+        sText = "in the past";
+      }
+      else if (1 == iDaysTo)
+      {
+        // due tomorrow
+        int iHour = dt.time().hour();
+        sText = QString("tomorrow %1 at %2")
+            .arg(0 < iHour ? (12 > iHour ? "morning" : (12 < iHour ? (16 < iHour ? "evening" : "afternoon") : "")) : "")
+            .arg(toString(dt.time()));
+      }
+
+
+      if (sText.isEmpty())
+      {
+        return dt.toString("yyyy-MM-dd hh:mm");
+      }
+      else
+      {
+        return sText;
+      }
+    }
+
+    QString toString(int iValue, int iDepth)
+    {
+      // decode pairs of three
+      int iCurrentPack = iValue % 1000;
+      int iRest = iValue / 1000;
+
+      int iOnes = iCurrentPack % 10;
+      int iTens = (iCurrentPack / 10) % 10;
+      if (1 == iTens)
+      {
+        iOnes = iCurrentPack % 100;
+        iTens = 0;
+      }
+      int iHundreds = (iCurrentPack / 100) % 10;
+
+      QString sValue;
+      if (iHundreds > 0)  { sValue += ones[iHundreds] + hundred; }
+      if (iTens > 0)  { sValue += tens[iTens]; }
+      if (iOnes > 0)  { sValue += ((sValue.isEmpty() && iRest == 0) ? "" : "and") + ones[iOnes]; }
+
+      if (0 < iDepth)
+      {
+        sValue += powers[iDepth];
+      }
+
+      if (iRest != 0)
+      {
+        sValue = toString(iRest, iDepth + 1) + sValue;
+      }
+
+      return sValue;
+    }
+
+    int toInt(const QString& sNumber, bool* pbStatus, int iStartValue)
+    {
+      QString sNumberCopy(sNumber.simplified());
+      sNumberCopy.remove(" ");
+
+
+      int iResult = 0;
+      if (sNumberCopy.startsWith(sAnd))
+      {
+        sNumberCopy.remove(0, sAnd.size());
+      }
+
+      for (const auto& one : one_variants)
+      {
+        if (sNumberCopy.startsWith(one))
+        {
+          iResult += 1;
+          sNumberCopy.remove(0, one.size());
+        }
+      }
+
+      for (int i = 0; i < tens.size(); ++i)
+      {
+        if (sNumberCopy.startsWith(tens[i]))
+        {
+          iResult += i * 10;
+          sNumberCopy.remove(0, tens[i].size());
+        }
+      }
+
+      for (int i = 0; i < ones.size(); ++i)
+      {
+        if (sNumberCopy.startsWith(ones[i]))
+        {
+          iResult += i;
+          sNumberCopy.remove(0, ones[i].size());
+        }
+      }
+
+      if (sNumberCopy.startsWith(hundred))
+      {
+        iResult *= 100;
+        sNumberCopy.remove(0, hundred.size());
+      }
+
+      for (int i = 0; i < powers.size(); ++i)
+      {
+        if (sNumberCopy.startsWith(powers[i]))
+        {
+          iResult *= std::pow(1000, i);
+          sNumberCopy.remove(0, powers[i].size());
+        }
+      }
+
+      iResult += iStartValue;
+      if (iStartValue != iResult)
+      {
+        return toInt(sNumberCopy, pbStatus, iResult);
+      }
+
+      if (nullptr != pbStatus)
+      {
+        *pbStatus = sNumberCopy.isEmpty();
+      }
+
+      return iResult;
     }
   }
-
-  int stringToInt(const QString& sNumber, bool* pbStatus, int iStartValue)
-  {
-    QString sNumberCopy(sNumber.simplified());
-    sNumberCopy.remove(" ");
-
-
-    int iResult = 0;
-    if (sNumberCopy.startsWith(sAnd))
-    {
-      sNumberCopy.remove(0, sAnd.size());
-    }
-
-    for (const auto& one : one_variants)
-    {
-      if (sNumberCopy.startsWith(one))
-      {
-        iResult += 1;
-        sNumberCopy.remove(0, one.size());
-      }
-    }
-
-    for (int i = 0; i < tens.size(); ++i)
-    {
-      if (sNumberCopy.startsWith(tens[i]))
-      {
-        iResult += i * 10;
-        sNumberCopy.remove(0, tens[i].size());
-      }
-    }
-
-    for (int i = 0; i < ones.size(); ++i)
-    {
-      if (sNumberCopy.startsWith(ones[i]))
-      {
-        iResult += i;
-        sNumberCopy.remove(0, ones[i].size());
-      }
-    }
-
-    if (sNumberCopy.startsWith(hundred))
-    {
-      iResult *= 100;
-      sNumberCopy.remove(0, hundred.size());
-    }
-
-    for (int i = 0; i < powers.size(); ++i)
-    {
-      if (sNumberCopy.startsWith(powers[i]))
-      {
-        iResult *= std::pow(1000, i);
-        sNumberCopy.remove(0, powers[i].size());
-      }
-    }
-
-    iResult += iStartValue;
-    if (iStartValue != iResult)
-    {
-      return stringToInt(sNumberCopy, pbStatus, iResult);
-    }
-
-    if (nullptr != pbStatus)
-    {
-      *pbStatus = sNumberCopy.isEmpty();
-    }
-
-    return iResult;
-  }
-
 
   template<> int fromString<int>(const QString& sVal, bool& bConversionStatus)
   {
     bConversionStatus = false;
     int iVal = sVal.toInt(&bConversionStatus);
     if (bConversionStatus)  { return iVal; }
-    return stringToInt(sVal, &bConversionStatus);
+    return fancy::toInt(sVal, &bConversionStatus);
   }
 
   static const std::set<QString> c_sDateTimeFormats = {c_sDateTimeFormat,
