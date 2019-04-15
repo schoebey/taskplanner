@@ -22,112 +22,7 @@
 
 namespace
 {
-  QString toString(const QTime& t)
-  {
-    if (t.hour() == 12)
-    {
-      return "noon";
-    }
-    else if (t.hour() == 0)
-    {
-      return "midnight";
-    }
-    else
-    {
-      return t.toString("hh:mm");
-    }
-  }
 
-  QString toDisplay(const QString& s)
-  {
-    QDateTime dt = QDateTime::fromString(s, conversion::c_sDateTimeFormat);
-
-    QString sText;
-
-    // determine the delta to the current date time
-    QDateTime now = QDateTime::currentDateTime();
-
-    // due today
-    qint64 iMsecsTo = now.msecsTo(dt);
-    qint64 iHoursTo = iMsecsTo / 3600000;
-    qint64 iMinsTo = iMsecsTo / 60000 - iHoursTo * 3600000;
-    qint64 iDaysTo = now.daysTo(dt);
-    qint64 iWeeksTo = iDaysTo / 7;
-    qint64 iMonthsTo = iWeeksTo / 4;
-    qint64 iYearsTo = iDaysTo / 365;
-    std::vector<qint64> viCounters = {iYearsTo, iMonthsTo, iWeeksTo, iDaysTo, iHoursTo, iMinsTo};
-
-    enum class Type
-    {
-      eYears = 0,
-      eMonths,
-      eWeeks,
-      eDays,
-      eHours,
-      eMinutes
-    };
-
-    auto blah = [](const QString& sSingular, const QString& sPlural, int iCounter)
-    {
-      return iCounter > 1 ? sPlural : sSingular;
-    };
-    auto blah2 = [&](const QString& sSingular, const QString& sPlural, int iCounter)
-    {
-      return /*toString(iCounter) +*/ blah(sSingular, sPlural, iCounter);
-    };
-
-    typedef std::function<QString(qint64)> tFnToString;
-    std::map<Type, tFnToString> mapping;
-    mapping[Type::eYears]   = [](qint64 i){ return QString("in %1 years").arg(i); };
-    mapping[Type::eMonths]  = [](qint64 i){ return QString("in %1 months").arg(i); };
-    mapping[Type::eWeeks]   = [](qint64 i){ return QString("in %1 weeks").arg(i); };
-    mapping[Type::eDays]    = [](qint64 i){ return QString("in %1 days").arg(i); };
-    mapping[Type::eHours]   = [](qint64 i){ return QString("in %1 hours").arg(i); };
-    mapping[Type::eMinutes] = [](qint64 i){ return QString("in %1 minutes").arg(i); };
-
-    qint64* piCounter = &viCounters[0];
-    for (const auto& el : mapping)
-    {
-      if (0 < *piCounter)
-      {
-        sText = el.second(*piCounter);
-        break;
-      }
-      else
-      {
-        ++piCounter;
-      }
-    }
-
-
-    if (0 == iDaysTo && 4 <= iHoursTo)
-    {
-      sText = QString("at %1").arg(dt.time().toString("hh:mm"));
-    }
-    else if (0 > iDaysTo)
-    {
-      // in the past
-      sText = "in the past";
-    }
-    else if (1 == iDaysTo)
-    {
-      // due tomorrow
-      int iHour = dt.time().hour();
-      sText = QString("tomorrow %1 at %2")
-          .arg(0 < iHour ? (12 > iHour ? "morning" : (12 < iHour ? (16 < iHour ? "evening" : "afternoon") : "")) : "")
-          .arg(toString(dt.time()));
-    }
-
-
-    if (sText.isEmpty())
-    {
-      return dt.toString("yyyy-MM-dd hh:mm");
-    }
-    else
-    {
-      return sText;
-    }
-  }
 }
 
 
@@ -457,7 +352,7 @@ void TaskWidget::addProperty(const QString& sName,
       pValue->setAlignment(Qt::AlignCenter);
       if ("due date" == sName)
       {
-        pValue->setDisplayFunction(toDisplay);
+        pValue->setDisplayFunction(conversion::fancy::dateToString);
       }
       m_propertyLineEdits[sName].pValue = pValue;
 
