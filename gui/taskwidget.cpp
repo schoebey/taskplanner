@@ -15,6 +15,7 @@
 #include <QMenu>
 #include <QMimeData>
 #include <QClipboard>
+#include <QPointer>
 
 #include <QPropertyAnimation>
 #include <cassert>
@@ -353,6 +354,26 @@ void TaskWidget::addProperty(const QString& sName,
       if ("due date" == sName)
       {
         pValue->setDisplayFunction(conversion::fancy::dateToString);
+        QTimer* pTimer = new QTimer(pValue);
+        connect(pTimer, &QTimer::timeout, [pValue, pTimer]()
+        {
+          bool bStatus(false);
+          QDateTime dt = conversion::fromString<QDateTime>(pValue->editText(), bStatus);
+          if (bStatus)
+          {
+            pValue->updateDisplay();
+
+            // restart the timer with a closer timeout as the due date approaches
+            qint64 iSecsTo = QDateTime::currentDateTime().msecsTo(dt) / 1000;
+            if (0 < iSecsTo)
+            {
+              pTimer->start(static_cast<int>(iSecsTo / 4 * 1000));
+            }
+          }
+        });
+        m_updateTimers[pValue] = pTimer;
+        pTimer->setSingleShot(true);
+        pTimer->start(1000);
       }
       m_propertyLineEdits[sName].pValue = pValue;
 
@@ -447,6 +468,15 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
     {
       it->second.pValue->setEditText(sValue);
     }
+
+
+    // restart the update timer so that its timeout can adapt to the new value
+    auto itTimer = m_updateTimers.find(it->second.pValue);
+    if (itTimer != m_updateTimers.end())
+    {
+      itTimer->second->start(1000);
+    }
+
     return true;
   }
   else if ("description" == sName)

@@ -32,6 +32,8 @@ public slots:
   void setEditText(const QString& sText);
   QString editText() const;
 
+  void updateDisplay();
+
 signals:
   void editingFinished();
   void sizeChanged();

@@ -159,6 +159,7 @@ private:
     EditableLabel* pValue = nullptr;
   };
   std::map<QString, SPropertyWidgets> m_propertyLineEdits;
+  std::map<EditableLabel*, QPointer<QTimer>> m_updateTimers;
 
   TaskWidget* m_pParentTask = nullptr;
 
