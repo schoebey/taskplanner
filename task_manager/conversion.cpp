@@ -75,7 +75,7 @@ namespace conversion
       };
       auto multiplicityOf = [&](const QString& sSingular, const QString& sPlural, qint64 iCounter)
       {
-        return QString("%1 %2").arg(toString(iCounter)).arg(multiplicity(sSingular, sPlural, iCounter));
+        return QString("%1 %2").arg((iCounter <= 10) ? toString(iCounter) : QString::number(iCounter)).arg(multiplicity(sSingular, sPlural, iCounter));
       };
       auto in = [&](const QString& sSingular, const QString& sPlural, qint64 iCounter)
       {
@@ -153,8 +153,9 @@ namespace conversion
 
       QString sValue;
       if (iHundreds > 0)  { sValue += ones[iHundreds] + hundred; }
+      if ((iTens > 0 || iOnes > 0) && !sValue.isEmpty())  { sValue += "and"; }
       if (iTens > 0)  { sValue += tens[iTens]; }
-      if (iOnes > 0)  { sValue += ((sValue.isEmpty() && iRest == 0) ? "" : "and") + ones[iOnes]; }
+      if (iOnes > 0)  { sValue += ones[iOnes]; }
 
       if (0 < iDepth)
       {
