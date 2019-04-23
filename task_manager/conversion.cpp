@@ -49,13 +49,14 @@ namespace conversion
 
       // due today
       qint64 iMsecsTo = now.msecsTo(dt);
+      qint64 iSecsTo = iMsecsTo / 1000;
       qint64 iHoursTo = iMsecsTo / 3600000;
       qint64 iMinsTo = iMsecsTo / 60000 - iHoursTo * 3600000;
       qint64 iDaysTo = now.daysTo(dt);
       qint64 iWeeksTo = iDaysTo / 7;
       qint64 iMonthsTo = iWeeksTo / 4;
       qint64 iYearsTo = iDaysTo / 365;
-      std::vector<qint64> viCounters = {iYearsTo, iMonthsTo, iWeeksTo, iDaysTo, iHoursTo, iMinsTo};
+      std::vector<qint64> viCounters = {iYearsTo, iMonthsTo, iWeeksTo, iDaysTo, iHoursTo, iMinsTo, iSecsTo};
 
       enum class Type
       {
@@ -64,7 +65,8 @@ namespace conversion
         eWeeks,
         eDays,
         eHours,
-        eMinutes
+        eMinutes,
+        eSeconds
       };
 
       auto multiplicity = [](const QString& sSingular, const QString& sPlural, qint64 iCounter)
@@ -88,6 +90,7 @@ namespace conversion
       mapping[Type::eDays]    = [&](qint64 i){ return in("day", "days", i); };
       mapping[Type::eHours]   = [&](qint64 i){ return in("hour", "hours", i); };
       mapping[Type::eMinutes] = [&](qint64 i){ return in("minute", "minutes", i); };
+      mapping[Type::eSeconds] = [&](qint64 i){ return in("second", "seconds", i); };
 
       qint64* piCounter = &viCounters[0];
       for (const auto& el : mapping)

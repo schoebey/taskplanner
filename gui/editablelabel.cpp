@@ -70,6 +70,14 @@ QString EditableLabel::editText() const
   return m_sEditText;
 }
 
+void EditableLabel::updateDisplay()
+{
+  if (m_fnToDisplay)
+  {
+    setText(m_fnToDisplay(m_sEditText));
+  }
+}
+
 QSize EditableLabel::sizeHint() const
 {
   QFontMetrics fm(font());
