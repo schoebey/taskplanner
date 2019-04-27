@@ -367,7 +367,21 @@ void TaskWidget::addProperty(const QString& sName,
             qint64 iSecsTo = QDateTime::currentDateTime().msecsTo(dt) / 1000;
             if (0 < iSecsTo)
             {
-              int iTimeoutMs = std::max<int>(1000, static_cast<int>(iSecsTo / 4 * 1000));
+              int iTimeoutMs = std::max<int>(1000, static_cast<int>(iSecsTo * 1000));
+
+              if (iTimeoutMs <= 10000)
+              {
+                iTimeoutMs = 1000;
+              }
+              else if (iTimeoutMs <= 30000)
+              {
+                iTimeoutMs = 5000;
+              }
+              else if (iTimeoutMs <= 60000)
+              {
+                iTimeoutMs = 15000;
+              }
+
               pTimer->start(iTimeoutMs);
             }
           }
