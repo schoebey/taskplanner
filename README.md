@@ -8,7 +8,7 @@ The tasks are yours. No account, no login, no cloud, no internet.
 
 ## Features
 
-<img align="left" src="screenshots/screenshot2.png">
+<img width="200" align="right" src="screenshots/screenshot2.png">
 
  * Kanban-style board that lets you move tasks between user-definable lanes
  * Create tasks with short descriptive text
@@ -22,6 +22,8 @@ The tasks are yours. No account, no login, no cloud, no internet.
  * [planned] plugin-based support for saving/loading different file formats
  * [planned] plugin-based support for generating reports
  * everything is kept 100% offline. noCloud™-technology
+
+
 
 ## Requirements
 
