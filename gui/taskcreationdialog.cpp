@@ -8,6 +8,7 @@
 TaskCreationDialog::TaskCreationDialog(QWidget *parent)
   : OverlayWidget(parent)
 {
+  setTitle(tr("new task"));
 }
 
 void TaskCreationDialog::show()

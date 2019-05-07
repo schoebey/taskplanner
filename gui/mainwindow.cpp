@@ -12,6 +12,7 @@
 #include "property.h"
 #include "overlaywidget.h"
 #include "taskcreationdialog.h"
+#include "aboutdialog.h"
 
 #include "commands/changetaskpropertycommand.h"
 #include "commands/changegrouppropertycommand.h"
@@ -61,6 +62,11 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   ui->toolBar->insertAction(ui->actionReport, pRedoAction);
   ui->toolBar->insertSeparator(ui->actionReport);
   ui->toolBar->insertAction(ui->actionReport, ui->actionDisplayReport);
+
+  QWidget* pSpacer = new QWidget();
+  pSpacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+  ui->toolBar->insertWidget(ui->actionAbout, pSpacer);
+
 
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
@@ -655,6 +661,7 @@ void MainWindow::on_actionDisplayReport_triggered()
     pLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     pOverlay->setAutoDeleteOnClose(true);
     pOverlay->addWidget(pLabel);
+    pOverlay->setTitle(tr("Report"));
     pLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     pOverlay->appear();
   }
@@ -695,6 +702,13 @@ void MainWindow::on_actionReport_triggered()
       }
     }
   }
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+  AboutDialog* pAboutDialog = new AboutDialog(this);
+  pAboutDialog->setAutoDeleteOnClose(true);
+  pAboutDialog->appear();
 }
 
 void MainWindow::onPropertyChanged(task_id taskId,

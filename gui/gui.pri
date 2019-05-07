@@ -20,7 +20,8 @@ SOURCES += \
     $$PWD/commands/changegrouppropertycommand.cpp \
     $$PWD/commands/deletetaskcommand.cpp \
     $$PWD/commands/addsubtaskcommand.cpp \
-    $$PWD/mousehandlingframe.cpp
+    $$PWD/mousehandlingframe.cpp \
+    $$PWD/aboutdialog.cpp
 
 HEADERS += \
     gui/editablelabel.h \
@@ -42,13 +43,15 @@ HEADERS += \
     $$PWD/commands/changegrouppropertycommand.h \
     $$PWD/commands/deletetaskcommand.h \
     $$PWD/commands/addsubtaskcommand.h \
-    $$PWD/mousehandlingframe.h
+    $$PWD/mousehandlingframe.h \
+    $$PWD/aboutdialog.h
 
 FORMS += \
     gui/groupwidget.ui \
     gui/mainwindow.ui \
     gui/taskwidget.ui \
-    $$PWD/linkwidget.ui
+    $$PWD/linkwidget.ui \
+    $$PWD/aboutdialog.ui
 
 RESOURCES += \
     $$PWD/resources/resource.qrc

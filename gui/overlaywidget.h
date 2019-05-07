@@ -5,6 +5,7 @@
 
 class QGridLayout;
 class QPushButton;
+class QLabel;
 class OverlayWidget : public QFrame
 {
   Q_OBJECT
@@ -17,6 +18,7 @@ public:
 
   void keyPressEvent(QKeyEvent* pEvent) override;
 
+  void setTitle(const QString& sText);
 signals:
 
 public slots:
@@ -32,6 +34,7 @@ private:
   QWidget* m_pParent = nullptr;
   QGridLayout* m_pLayout = nullptr;
   QPushButton* m_pCloseButton = nullptr;
+  QLabel* m_pTitle = nullptr;
 };
 
 #endif // OVERLAYWIDGET_H

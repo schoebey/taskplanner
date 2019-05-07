@@ -9,6 +9,11 @@ win32 {
     NULL_DEVICE = /dev/null
 }
 
+#get the timestamp of the most recent commit
+BASE_GIT_TIMESTAMP_COMMAND = git log -n 1 --format=%cd --date=unix
+
+GIT_TIMESTAMP = $$system($$BASE_GIT_TIMESTAMP_COMMAND 2> $$NULL_DEVICE)
+
 # Need to call git with manually specified paths to repository
 BASE_GIT_COMMAND = git --git-dir $$PWD/.git --work-tree $$PWD
 
@@ -41,7 +46,8 @@ win32 { # On windows version can only be numerical so remove commit hash
 
 # Adding C preprocessor #DEFINE so we can use it in C++ code
 # also here we want full version on every system so using GIT_VERSION
-DEFINES += GIT_VERSION=\\\"$$GIT_VERSION\\\"
+DEFINES += GIT_VERSION=\\\"$$GIT_VERSION\\\" \
+           GIT_TIMESTAMP=\\\"$$GIT_TIMESTAMP\\\"
 
 # By default Qt only uses major and minor version for Info.plist on Mac.
 # This will rewrite Info.plist with full version
