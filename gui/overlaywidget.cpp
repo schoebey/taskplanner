@@ -8,17 +8,17 @@
 #include <QPaintEvent>
 
 OverlayWidget::OverlayWidget(QWidget *parent)
-  : QFrame(parent->window()),
+  : QFrame(nullptr != parent ? parent->window() : nullptr),
     m_pParent(parent),
     m_pLayout(new QGridLayout(this)),
     m_pCloseButton(new QPushButton("X", this))
 {
   setFocusPolicy(Qt::StrongFocus);
-  m_pParent->installEventFilter(this);
+  if (nullptr != m_pParent) { m_pParent->installEventFilter(this); }
   connect(m_pCloseButton, SIGNAL(clicked()), this, SLOT(disappear()));
-  QLabel* pTitle = new QLabel("title");
-  pTitle->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-  m_pLayout->addWidget(pTitle, 0, 0);
+  m_pTitle = new QLabel("title");
+  m_pTitle->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+  m_pLayout->addWidget(m_pTitle, 0, 0);
   m_pCloseButton->setObjectName("pClose");
   m_pCloseButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
   m_pLayout->addWidget(m_pCloseButton, 0, 1);
@@ -33,6 +33,11 @@ void OverlayWidget::setAutoDeleteOnClose(bool bAutoDelete)
 void OverlayWidget::addWidget(QWidget* pWidget, Qt::Alignment alignment)
 {
   m_pLayout->addWidget(pWidget, m_pLayout->rowCount(), 0, 1, 2, alignment);
+}
+
+void OverlayWidget::setTitle(const QString& sText)
+{
+  m_pTitle->setText(sText);
 }
 
 void OverlayWidget::appear()
@@ -66,7 +71,7 @@ void OverlayWidget::resizeEvent(QResizeEvent* pEvent)
 {
   QFrame::resizeEvent(pEvent);
 
-  resize(m_pParent->size());
+  if (nullptr != m_pParent)  { resize(m_pParent->size()); }
 }
 
 bool OverlayWidget::eventFilter(QObject* pObject, QEvent* pEvent)

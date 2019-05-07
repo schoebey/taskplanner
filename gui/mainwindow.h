@@ -66,7 +66,8 @@ private slots:
   void sortGroups();
   void onDocumentModified();
   void onPasteFromClipboard();  
-  void onReloadDocument();
+  void onReloadDocument();  
+  void on_actionAbout_triggered();
 
 signals:
   void timeTrackingStopped(task_id taskId);

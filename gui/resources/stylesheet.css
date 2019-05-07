@@ -9,6 +9,39 @@ MainWindow #frame {
   padding: -12px;
 }
 
+.AboutDialog #pContents {
+  min-width: 350px;
+  min-height: 200px;
+  padding: 10px;
+  border: 1px solid red;
+  border-radius: 5px;
+  background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgb(50, 90, 70),
+                stop:1 rgb(30, 40, 40));
+}
+
+.AboutDialog QWidget {
+  border: 0px solid red;
+}
+
+.AboutDialog #pAppIcon {
+  border: 1px solid white;
+  border-radius: 5px;
+  min-width: 64px;
+  min-height: 64px;
+  margin-right: 10px;
+}
+
+.AboutDialog #pAppName {
+  font-size: 22pt;
+  font-weight: 700;
+}
+
+.AboutDialog #pCopyright {
+  margin-top: 8px;
+}
+
+
 EditableLabel {
   border: 0px solid red;
 }
@@ -77,7 +110,7 @@ OverlayWidget {
   border: 0px;
   border-radius: 10px;
   background: rgba(50, 50, 50, 240);
-  margin: 62 12 12 12;
+  margin: 12 12 12 12;
   padding: 12px;
 }
 

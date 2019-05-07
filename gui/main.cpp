@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   QApplication app(argc, argv);
 
   QString version(GIT_VERSION);
-  QGuiApplication::setApplicationDisplayName(QString("TaskMänätscher (%1)").arg(version));
+  QGuiApplication::setApplicationDisplayName(QString("task_planner (%1)").arg(version));
 
   app.setStyle(new Style());
 
