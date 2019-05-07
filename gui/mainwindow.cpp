@@ -39,6 +39,17 @@
 #include <future>
 
 
+namespace
+{
+  QString tempFileNameFromFileName(const QString& sFileName)
+  {
+    QFileInfo info(sFileName);
+    QString sPath = info.path() + "/~" + info.fileName();
+    return sPath;
+  }
+}
+
+
 Q_DECLARE_METATYPE(QIODevice*)
 
 MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
@@ -231,8 +242,7 @@ void MainWindow::reloadStylesheet(const QString& sPath)
 
 void MainWindow::saveTempFile()
 {
-  QFileInfo info(m_sFileName);
-  QString sPath = info.path() + "/~" + info.fileName();
+  QString sPath = tempFileNameFromFileName(m_sFileName);
   saveFile(sPath);
 }
 
@@ -575,6 +585,7 @@ bool MainWindow::saveFile(const QString& sFileName, QString* psErrorMessage)
 void MainWindow::on_actionOpen_triggered()
 {
   QString sFileName = QFileDialog::getOpenFileName(this, tr("Open task file..."));
+  if (sFileName.isEmpty())  { return; }
 
   if (isWindowModified())
   {
@@ -597,12 +608,37 @@ void MainWindow::on_actionOpen_triggered()
     }
 
     auto button =
-        QMessageBox::question(this, tr("Speichern"),
+        QMessageBox::question(this, tr("Save modifications?"),
                               tr("Should the new document be opened?\n"
                                  "There are unsaved modifications.\n\n"
                                  "%1").arg(sLastSaveMessage));
     if (QMessageBox::No == button) { return; }
   }
+
+
+  // check the filesystem for a temp file of the same name with newer timestamp
+  QFileInfo info(sFileName);
+  QFileInfo tempInfo(tempFileNameFromFileName(sFileName));
+  if (info.exists() && tempInfo.exists() &&
+      tempInfo.lastModified() > info.lastModified())
+  {
+    QMessageBox mb(QMessageBox::Question, tr("Load temporary file?"),
+                   tr("There's a temporary file of the selected file "
+                      "that is newer than the file itself.\n\n"
+                      "Should the temporary file be loaded instead?"),
+                   QMessageBox::Yes | QMessageBox::No);
+    mb.setDetailedText(tr("%1 saved on %2,\n"
+                          "%3 saved on %4\n\n")
+                       .arg(info.fileName()).arg(info.lastModified().toString("yyyy-MM-dd hh:mm:ss"))
+                       .arg(tempInfo.fileName()).arg(tempInfo.lastModified().toString("yyyy-MM-dd hh:mm:ss")));
+
+
+    if (QMessageBox::Yes == mb.exec())
+    {
+      sFileName = tempInfo.filePath();
+    }
+  }
+
 
   QString sErrorMessage;
   if (!loadFile(sFileName, &sErrorMessage))
