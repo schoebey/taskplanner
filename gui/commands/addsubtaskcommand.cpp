@@ -43,6 +43,7 @@ void AddSubTaskCommand::redo()
 {
   ITask* pParentTask = m_pManager->task(m_parentTaskId);
   TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(m_parentTaskId);
+  GroupWidget* pParentGroupWidget = m_pWidgetManager->groupWidget(pParentTask->group());
   if (nullptr != pParentTask &&
       nullptr != pParentTaskWidget)
   {
@@ -55,8 +56,10 @@ void AddSubTaskCommand::redo()
       assert(bAccepted);
     }
 
+    pTask->setGroup(pParentTask->group());
     pParentTask->addTask(pTask->id());
     auto pTaskWidget = m_pWidgetManager->createTaskWidget(pTask->id());
+    pTaskWidget->setGroupWidget(pParentGroupWidget);
 
     int iPos = -1;
     auto it = m_properties.find("sort_priority");
