@@ -315,18 +315,17 @@ void MainWindow::createNewSubTask(task_id taskId)
 
 void MainWindow::onNewSubTaskAccepted()
 {
-  task_id taskId = m_pTaskCreationDialog->property("taskId").value<group_id>();
+  task_id parentTaskId = m_pTaskCreationDialog->property("taskId").value<group_id>();
 
-  ITask* pParentTask = m_pManager->task(taskId);
-  TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(taskId);
-  if (nullptr != pParentTask &&
-      nullptr != pParentTaskWidget)
+  ITask* pParentTask = m_pManager->task(parentTaskId);
+  if (nullptr != pParentTask)
   {
-    ITask* pTask = m_pManager->addTask();
-    pTask->setName(m_pTaskCreationDialog->name());
-    pTask->setDescription(m_pTaskCreationDialog->description());
-    pParentTask->addTask(pTask->id());
-    pParentTaskWidget->addTask(m_pWidgetManager->createTaskWidget(pTask->id()));
+
+    AddSubTaskCommand* pCommand = new AddSubTaskCommand(parentTaskId,
+                                                        m_pTaskCreationDialog->name(),
+                                                        m_pTaskCreationDialog->description(),
+                                                        m_pManager, m_pWidgetManager);
+    m_undoStack.push(pCommand);
 
     emit documentModified();
   }
@@ -900,7 +899,6 @@ void MainWindow::onTaskAdded(task_id parentTaskId, task_id childTaskId)
                             m_pManager, m_pWidgetManager);
 
 
-        //new AddSubTaskCommand(parentTaskId, childTaskId, m_pManager, m_pWidgetManager);
     m_undoStack.push(pCommand);
 
     emit documentModified();

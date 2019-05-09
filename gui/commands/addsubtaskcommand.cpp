@@ -1,81 +1,72 @@
 #include "addsubtaskcommand.h"
-
-#include "taskinterface.h"
 #include "manager.h"
-
-#include "taskwidget.h"
-#include "groupwidget.h"
 #include "widgetmanager.h"
+#include "taskinterface.h"
+#include "taskwidget.h"
+
+#include <cassert>
 
 AddSubTaskCommand::AddSubTaskCommand(task_id parentTaskId,
-                                     task_id childTaskId,
-                                     Manager* pManager,
-                                     WidgetManager* pWidgetManager)
-  : m_parentTaskId(parentTaskId),
-    m_prevParentTaskId(-1),
-    m_iPrevPos(-1),
-    m_childTaskId(childTaskId),
+                               const QString& sName,
+                               const QString& sDescription,
+                               Manager* pManager,
+                               WidgetManager* pWidgetManager)
+  : m_taskId(-1),
+    m_parentTaskId(parentTaskId),
     m_pManager(pManager),
     m_pWidgetManager(pWidgetManager)
 {
-  setText(QString("Add sub task"));
+  setText(QString("add subtask \"%1\"").arg(sName));
+
+  m_properties["name"] = sName;
+  m_properties["description"] = sDescription;
 }
 
 void AddSubTaskCommand::undo()
 {
-  ITask* pTask = m_pManager->task(m_parentTaskId);
+  ITask* pTask = m_pManager->task(m_taskId);
   if (nullptr != pTask)
   {
-    if (pTask->removeTask(m_childTaskId))
+    for (const auto& sName : pTask->propertyNames())
     {
-      auto pTaskWidget = m_pWidgetManager->taskWidget(m_parentTaskId);
-      auto pChildTaskWidget = m_pWidgetManager->taskWidget(m_childTaskId);
-      if (nullptr != pTaskWidget)
-      {
-        pTaskWidget->removeTask(pChildTaskWidget);
-
-        pTaskWidget = m_pWidgetManager->taskWidget(m_prevParentTaskId);
-        if (nullptr != pTaskWidget)
-        {
-          pTaskWidget->addTask(pChildTaskWidget);
-        }
-        else
-        {
-          auto pGroupWidget = m_pWidgetManager->groupWidget(pTask->group());
-          if (nullptr != pGroupWidget)
-          {
-            pGroupWidget->insertTask(pChildTaskWidget, m_iPrevPos);
-          }
-        }
-      }
+      m_properties[sName] = pTask->propertyValue(sName);
     }
   }
+
+  TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(m_parentTaskId);
+  pParentTaskWidget->removeTask(m_pWidgetManager->taskWidget(m_taskId));
+  m_pWidgetManager->deleteTaskWidget(m_taskId);
+  m_pManager->removeTask(m_taskId);
 }
 
 void AddSubTaskCommand::redo()
 {
-  ITask* pTask = m_pManager->task(m_parentTaskId);
-  ITask* pChildTask = m_pManager->task(m_childTaskId);
-  if (nullptr != pTask && nullptr != pChildTask)
+  ITask* pParentTask = m_pManager->task(m_parentTaskId);
+  TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(m_parentTaskId);
+  if (nullptr != pParentTask &&
+      nullptr != pParentTaskWidget)
   {
-    bool bOk(false);
-    m_iPrevPos = pChildTask->propertyValue("sort_priority").toInt(&bOk);
-    if (!bOk)  { m_iPrevPos = -1; }
+    ITask* pTask = m_pManager->addTask(m_taskId);
+    m_taskId = pTask->id();
 
-    m_prevParentTaskId = pTask->parentTask();
-    if (pTask->addTask(m_childTaskId))
+    for (const auto& el : m_properties)
     {
-      auto pTaskWidget = m_pWidgetManager->taskWidget(m_parentTaskId);
-      auto pChildTaskWidget = m_pWidgetManager->taskWidget(m_childTaskId);
-      if (nullptr != pTaskWidget)
-      {
-        auto pCurrentGroupWidget = pChildTaskWidget->groupWidget();
-        if (nullptr != pCurrentGroupWidget)
-        {
-          pCurrentGroupWidget->removeTask(pChildTaskWidget);
-        }
-        pTaskWidget->addTask(pChildTaskWidget);
-      }
+      bool bAccepted = pTask->setPropertyValue(el.first, el.second);
+      assert(bAccepted);
     }
+
+    pParentTask->addTask(pTask->id());
+    auto pTaskWidget = m_pWidgetManager->createTaskWidget(pTask->id());
+
+    int iPos = -1;
+    auto it = m_properties.find("sort_priority");
+    if (it != m_properties.end())
+    {
+      bool bOk(false);
+      iPos = it->second.toInt(&bOk);
+      if (!bOk) { iPos = -1; }
+    }
+    pParentTaskWidget->addTask(pTaskWidget/*, iPos*/);
+    pTaskWidget->show();
   }
 }
