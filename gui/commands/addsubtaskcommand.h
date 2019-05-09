@@ -13,7 +13,8 @@ class AddSubTaskCommand : public QUndoCommand
 {
 public:
   AddSubTaskCommand(task_id parentTaskId,
-                    task_id childTaskId,
+                    const QString& sName,
+                    const QString& sDescription,
                     Manager* pManager,
                     WidgetManager* pWidgetManager);
 
@@ -22,10 +23,9 @@ public:
   void redo() override;
 
 private:
+  task_id m_taskId;
   task_id m_parentTaskId;
-  task_id m_prevParentTaskId;
-  int m_iPrevPos;
-  task_id m_childTaskId;
+  std::map<QString, QString> m_properties;
   Manager* m_pManager;
   WidgetManager* m_pWidgetManager;
 };
