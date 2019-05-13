@@ -1,10 +1,17 @@
-INCLUDEPATH += $$PWD
+CONFIG += c++11
+QT += core gui
+
+equals(QT_MAJOR_VERSION, 5) {
+  QT += widgets
+}
+
+include(../git_version.pri)
 
 SOURCES += \
-    gui/editablelabel.cpp \
-    gui/groupwidget.cpp \
-    gui/mainwindow.cpp \
-    gui/taskwidget.cpp \
+    $$PWD/editablelabel.cpp \
+    $$PWD/groupwidget.cpp \
+    $$PWD/mainwindow.cpp \
+    $$PWD/taskwidget.cpp \
     $$PWD/main.cpp \
     $$PWD/style.cpp \
     $$PWD/highlightanimation.cpp \
@@ -24,10 +31,10 @@ SOURCES += \
     $$PWD/aboutdialog.cpp
 
 HEADERS += \
-    gui/editablelabel.h \
-    gui/groupwidget.h \
-    gui/mainwindow.h \
-    gui/taskwidget.h \
+    $$PWD/editablelabel.h \
+    $$PWD/groupwidget.h \
+    $$PWD/mainwindow.h \
+    $$PWD/taskwidget.h \
     $$PWD/style.h \
     $$PWD/highlightanimation.h \
     $$PWD/taskwidgetoverlay.h \
@@ -47,11 +54,22 @@ HEADERS += \
     $$PWD/aboutdialog.h
 
 FORMS += \
-    gui/groupwidget.ui \
-    gui/mainwindow.ui \
-    gui/taskwidget.ui \
+    $$PWD/groupwidget.ui \
+    $$PWD/mainwindow.ui \
+    $$PWD/taskwidget.ui \
     $$PWD/linkwidget.ui \
     $$PWD/aboutdialog.ui
 
 RESOURCES += \
     $$PWD/resources/resource.qrc
+
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../task_manager/release/ -ltask_manager
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../task_manager/debug/ -ltask_manager
+else:unix: LIBS += -L$$OUT_PWD/../task_manager/ -ltask_manager
+
+INCLUDEPATH += $$PWD \
+               $$PWD/../task_manager \
+               $$PWD/../task_manager/serializers \
+               $$PWD/../task_manager/reports \
+DEPENDPATH += $$PWD/../task_manager
