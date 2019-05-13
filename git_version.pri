@@ -1,6 +1,6 @@
 # from https://www.everythingfrontend.com/posts/app-version-from-git-tag-in-qt-qml.html
 # If there is no version tag in git this one will be used
-VERSION = 0.1.1
+VERSION = 0.2.0
 
 # Need to discard STDERR so get path to NULL device
 win32 {
@@ -52,6 +52,6 @@ DEFINES += GIT_VERSION=\\\"$$GIT_VERSION\\\" \
 # By default Qt only uses major and minor version for Info.plist on Mac.
 # This will rewrite Info.plist with full version
 macx {
-    #INFO_PLIST_PATH = $$shell_quote($${OUT_PWD}/$${TARGET}.app/Contents/Info.plist)
-    #QMAKE_POST_LINK += /usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $${VERSION}\" $${INFO_PLIST_PATH}
+#    INFO_PLIST_PATH = $$shell_quote($${OUT_PWD}/$${TARGET}.app/Contents/Info.plist)
+#    QMAKE_POST_LINK += /usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $${VERSION}\" $${INFO_PLIST_PATH}
 }

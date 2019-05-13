@@ -77,6 +77,7 @@ private:
   void timerEvent(QTimerEvent* pEvent) override;
   void updateAutoPrioritiesInTaskWidgets();
   void saveTempFile();
+  void loadPlugins();
 
 private:
   Ui::MainWindow *ui;

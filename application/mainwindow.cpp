@@ -96,6 +96,8 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
     reloadStylesheet(":/stylesheet.css");
   }
 
+  loadPlugins();
+
   bool bOk = connect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
   assert(bOk);
   Q_UNUSED(bOk)
@@ -228,6 +230,12 @@ void MainWindow::updateTaskUi()
 
   // update the auto priority in all widgets (old and new)
   updateAutoPrioritiesInTaskWidgets();
+}
+
+void MainWindow::loadPlugins()
+{
+  // TODO: load serializer plugins
+  // TODO: load report plugins
 }
 
 void MainWindow::reloadStylesheet(const QString& sPath)
