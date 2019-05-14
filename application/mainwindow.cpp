@@ -34,9 +34,12 @@
 #include <QSignalMapper>
 #include <QClipboard>
 #include <QThread>
+#include <QPluginLoader>
+#include <plugininterface.h>
 
 #include <array>
 #include <future>
+#include <memory>
 
 
 namespace
@@ -234,8 +237,34 @@ void MainWindow::updateTaskUi()
 
 void MainWindow::loadPlugins()
 {
-  // TODO: load serializer plugins
-  // TODO: load report plugins
+  QString sSearchPath = QCoreApplication::applicationDirPath();
+  static const std::vector<QString> c_vsPluginFolders = { "/plugins/serializers", "/plugins/reports" };
+
+  for (const auto& sPath : c_vsPluginFolders)
+  {
+    QDir d(sSearchPath + sPath);
+
+    // since providing a filter breaks entryInfoList
+    // (returned list is empty as soon as a filter is set. Qt-Bug in 5.6?)
+    // we have to filter out symlinks manually...
+    for (const auto& el : d.entryInfoList())
+    {
+      if (el.isSymLink())  { continue; }
+
+      QPluginLoader loader(el.filePath());
+
+      QObject* pPlugin = loader.instance();
+      if (nullptr != pPlugin)
+      {
+        IPlugin* p = dynamic_cast<IPlugin*>(pPlugin);
+        if (nullptr != p)
+        {
+          p->initialize();
+          m_vspPlugins.push_back(std::shared_ptr<QObject>(pPlugin));
+        }
+      }
+    }
+  }
 }
 
 void MainWindow::reloadStylesheet(const QString& sPath)

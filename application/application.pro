@@ -1,5 +1,6 @@
 CONFIG += c++11
 QT += core gui
+TARGET = ../taskplanner
 
 equals(QT_MAJOR_VERSION, 5) {
   QT += widgets

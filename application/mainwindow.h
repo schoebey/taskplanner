@@ -89,6 +89,7 @@ private:
   std::map<group_id, QTimer*> m_autoSortTimers;
   QSignalMapper* m_pTimeoutGroupIdMapper;
   QUndoStack m_undoStack;
+  std::vector<std::shared_ptr<QObject>> m_vspPlugins;
 };
 
 #endif // MAINWINDOW_H
