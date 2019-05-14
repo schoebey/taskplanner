@@ -21,6 +21,7 @@
         <file>clock_show.png</file>
         <file>link.png</file>
         <file>about.png</file>
+        <file>qt.svg</file>
         <file>Built_with_Qt_RGB_logo_white.png</file>
     </qresource>
 </RCC>

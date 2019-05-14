@@ -1,6 +1,7 @@
 CONFIG += c++11
 QT += core gui
 TEMPLATE = lib
+TARGET = $$PWD/../../../taskplanner.app/Contents/MacOS/plugins/serializers/markdown
 
 equals(QT_MAJOR_VERSION, 5) {
   QT += widgets
