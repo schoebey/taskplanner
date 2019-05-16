@@ -706,6 +706,7 @@ void MainWindow::on_actionSaveAs_triggered()
   QString sFileName = QFileDialog::getSaveFileName(this, tr("Save task file as..."),
                                                    QString(), sFilter,
                                                    &sSelectedFilter);
+  if (sFileName.isEmpty())  { return; }
 
   QString sErrorMessage;
   if (!saveFile(sFileName, &sErrorMessage))
