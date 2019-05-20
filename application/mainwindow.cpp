@@ -85,7 +85,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
   QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
-  pWatcher->addPath("gui/resources/stylesheet.css");
+  pWatcher->addPath("application/resources/stylesheet.css");
   connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
 
   if (QFileInfo("stylesheet.css").exists())

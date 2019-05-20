@@ -13,7 +13,7 @@ MainWindow #frame {
   min-width: 350px;
   min-height: 200px;
   padding: 10px;
-  border: 1px solid red;
+  border: 0px solid red;
   border-radius: 5px;
   background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                 stop:0 rgb(50, 90, 70),
@@ -25,11 +25,13 @@ MainWindow #frame {
 }
 
 .AboutDialog #pAppIcon {
-  border: 1px solid white;
+  border: 1px solid rgba(255,255,255,150);
   border-radius: 5px;
   min-width: 64px;
   min-height: 64px;
   margin-right: 10px;
+  background: url(:/icons/appicon_64.png);
+  background-color: rgba(255,255,255,50);
 }
 
 .AboutDialog #pAppName {
