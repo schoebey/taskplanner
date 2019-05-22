@@ -1,10 +1,11 @@
 #ifndef SERIALIZABLEMANAGER_H
 #define SERIALIZABLEMANAGER_H
 
+#include "libtaskmanager.h"
 #include "manager.h"
 #include "serializableinterface.h"
 
-class SerializableManager : public ISerializable
+class LIBTASKMANAGER SerializableManager : public ISerializable
 {
 public:
   SerializableManager(Manager* pManager);

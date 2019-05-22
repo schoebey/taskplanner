@@ -1,6 +1,7 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
+#include "libtaskmanager.h"
 #include "id_types.h"
 #include "serializableinterface.h"
 
@@ -18,7 +19,7 @@ typedef std::shared_ptr<Group> tspGroup;
 
 
 class SerializableManager;
-class Manager
+class LIBTASKMANAGER Manager
 {
 public:
   Manager();

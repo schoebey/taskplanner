@@ -2,7 +2,7 @@
 #define EDITABLELABEL_H
 
 #include <QLabel>
-
+#include <functional>
 
 
 class QLineEdit;
