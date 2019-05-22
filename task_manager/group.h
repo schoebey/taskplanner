@@ -1,6 +1,8 @@
 #ifndef GROUP_H
 #define GROUP_H
 
+#include "libtaskmanager.h"
+
 #include "groupinterface.h"
 #include "id_types.h"
 #include "serializableinterface.h"
@@ -16,7 +18,7 @@ class Manager;
 class Task;
 typedef std::shared_ptr<Task> tspTask;
 
-class Group: public IGroup, public ISerializable
+class LIBTASKMANAGER Group: public IGroup, public ISerializable
 {
 public:
   using id_generator<group_id>::setId;

@@ -1,6 +1,7 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include "libtaskmanager.h"
 #include "taskinterface.h"
 #include "timefragment.h"
 #include "priority.h"
@@ -24,7 +25,7 @@ class Group;
 typedef std::shared_ptr<Group> tspGroup;
 typedef std::weak_ptr<Group> twpGroup;
 
-class Task : public ITask, public ISerializable
+class LIBTASKMANAGER Task : public ITask, public ISerializable
 {
 public:
   using id_generator<task_id>::setId;

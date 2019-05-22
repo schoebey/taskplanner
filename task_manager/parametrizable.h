@@ -1,9 +1,10 @@
 #ifndef PARAMETRIZABLE_H
 #define PARAMETRIZABLE_H
 
+#include "libtaskmanager.h"
 #include "parametrizableinterface.h"
 
-class Parametrizable : public IParametrizable
+class LIBTASKMANAGER Parametrizable : public IParametrizable
 {
 public:
   Parametrizable();

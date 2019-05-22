@@ -1,6 +1,8 @@
 #ifndef CONSTRAINTFACTORY_H
 #define CONSTRAINTFACTORY_H
 
+#include "libtaskmanager.h"
+
 #include <QString>
 
 #include <functional>
@@ -11,7 +13,7 @@ template<typename T> class ConstraintTpl;
 template<typename T> using tspConstraintTpl = std::shared_ptr<ConstraintTpl<T>>;
 template<typename T> using tFnCreator = std::function<tspConstraintTpl<T>(QString)>;
 
-class ConstraintFactory
+class LIBTASKMANAGER ConstraintFactory
 {
 public:
   template<typename T> static tspConstraintTpl<T> create(const QString& sName,

@@ -1,12 +1,15 @@
 CONFIG += c++11
 QT += core gui
 TEMPLATE = lib
+CONFIG += dll
 
 equals(QT_MAJOR_VERSION, 5) {
   QT += widgets
 }
 
 include(../git_version.pri)
+
+DEFINES += BUILD_LIB
 
 INCLUDEPATH *= \
     serializers
@@ -40,7 +43,8 @@ HEADERS += \
     reports/reportenums.h \
     reports/reportfactory.h \
     reports/reportinterface.h \
-    reports/reportregister.h
+    reports/reportregister.h \
+    libtaskmanager.h
 
 SOURCES += \
     constraint.cpp \

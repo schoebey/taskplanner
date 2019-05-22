@@ -1,6 +1,8 @@
 #ifndef CONVERSION_H
 #define CONVERSION_H
 
+#include "libtaskmanager.h"
+
 #include <type_traits>
 
 #include <vector>
@@ -16,13 +18,13 @@ namespace conversion
 
   namespace fancy
   {
-    QString toString(const QTime& t);
+    QString LIBTASKMANAGER toString(const QTime& t);
 
-    QString dateToString(const QString& sDate);
+    QString LIBTASKMANAGER dateToString(const QString& sDate);
 
-    QString toString(int iValue, int iDepth = 0);
+    QString LIBTASKMANAGER toString(int iValue, int iDepth = 0);
 
-    int toInt(const QString& sNumber, bool* pbStatus, int iStartValue = 0);
+    int LIBTASKMANAGER toInt(const QString& sNumber, bool* pbStatus, int iStartValue = 0);
   }
 
   template<typename T>
@@ -66,19 +68,23 @@ namespace conversion
   fromString<int>(const QString& sVal, bool& bConversionStatus);
 
   //-- QDateTime
-  template<> QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
+  template<> LIBTASKMANAGER
+  QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
   QString toString(const QDateTime& dt);
 
   //-- bool
-  template<> bool fromString<bool>(const QString& sVal, bool& bConversionStatus);
+  template<> LIBTASKMANAGER
+  bool fromString<bool>(const QString& sVal, bool& bConversionStatus);
   QString toString(bool bVal);
 
   //-- std::vector<QUrl>
-  template<> std::vector<QUrl> fromString<std::vector<QUrl>>(const QString& sVal, bool& bConversionStatus);
+  template<> LIBTASKMANAGER
+  std::vector<QUrl> fromString<std::vector<QUrl>>(const QString& sVal, bool& bConversionStatus);
   QString toString(const std::vector<QUrl>& vUrls);
 
   //-- QColor
-  template<> QColor fromString<QColor>(const QString& sVal, bool& bConversionStatus);
+  template<> LIBTASKMANAGER
+  QColor fromString<QColor>(const QString& sVal, bool& bConversionStatus);
   QString toString(const QColor& c);
 }
 
