@@ -1,9 +1,10 @@
 #ifndef REPORT_H
 #define REPORT_H
 
+#include "libtaskmanager.h"
 #include "reportinterface.h"
 
-class Report : public IReport
+class LIBTASKMANAGER Report : public IReport
 {
 public:
   Report();

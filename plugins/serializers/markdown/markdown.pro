@@ -24,7 +24,7 @@ SOURCES += \
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../task_manager/release/ -ltask_manager
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../task_manager/debug/ -ltask_manager
-else:unix: LIBS += -L$$OUT_PWD/../../../task_manager/ -ltask_manager
+else:unix: LIBS += -L$$PWD/../../../../task_manager/ -ltask_manager
 
 INCLUDEPATH += $$PWD/../../../task_manager \
                $$PWD/../../../task_manager/serializers
