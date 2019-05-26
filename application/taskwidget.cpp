@@ -6,6 +6,7 @@
 #include "flowlayout.h"
 #include "linkwidget.h"
 #include "mousehandlingframe.h"
+#include "task.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>

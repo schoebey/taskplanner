@@ -22,9 +22,9 @@ SOURCES += \
     markdownserializerplugin.cpp
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../task_manager/release/ -ltask_manager
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../task_manager/debug/ -ltask_manager
-else:unix: LIBS += -L$$PWD/../../../../task_manager/ -ltask_manager
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../ -ltask_manager
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../ -ltask_manager
+else:unix: LIBS += -L$$PWD/../../../../ -ltask_manager
 
 INCLUDEPATH += $$PWD/../../../task_manager \
                $$PWD/../../../task_manager/serializers

@@ -1,10 +1,12 @@
-#include "WidgetManager.h"
+#include "widgetmanager.h"
 #include "taskwidget.h"
 #include "groupwidget.h"
 #include "manager.h"
 #include "taskinterface.h"
 #include "groupinterface.h"
 #include "conversion.h"
+#include "task.h"
+#include "group.h"
 
 #include <QHBoxLayout>
 #include <property.h>
