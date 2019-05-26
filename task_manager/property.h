@@ -254,17 +254,17 @@ public:
     };
     factory()[sName] = creatorFct;
 
-    descriptors<T>().insert(spDescriptor);
     return allDescriptors().insert(spDescriptor).second;
   }
 
   template<typename T> static bool registerConstraint(const QString& sName,
                                                       const tspConstraintTpl<T>& spConstraint)
   {
-    tspDescriptorTpl<T> spDescriptor = findDescriptor(sName, descriptors<T>());
-    if (nullptr != spDescriptor)
+    tspDescriptor spDescriptor = findDescriptor(sName, allDescriptors());
+    tspDescriptorTpl<T> spTypedDescriptor = std::static_pointer_cast<PropertyDescriptorTpl<T>>(spDescriptor);
+    if (nullptr != spTypedDescriptor)
     {
-      spDescriptor->setConstraint(spConstraint);
+      spTypedDescriptor->setConstraint(spConstraint);
       return true;
     }
     else
@@ -293,12 +293,6 @@ public:
     return names;
   }
 
-  template<typename T> static std::set<tspDescriptorTpl<T>>& descriptors()
-  {
-    static std::set<tspDescriptorTpl<T>> descriptors;
-    return descriptors;
-  }
-
   template<typename T>
   static T findDescriptor(const QString& sName,
                           const std::set<T>& container)
@@ -314,12 +308,6 @@ public:
     if (it != container.end())  { return *it; }
 
     return nullptr;
-  }
-
-  template<typename T> static std::set<tspPropertyTpl<T>>& properties(const Properties* pOwner)
-  {
-    static std::map<const Properties*, std::set<tspPropertyTpl<T>>> properties;
-    return properties[pOwner];
   }
 
   template<typename T>
@@ -357,19 +345,19 @@ public:
 
   template<typename T> bool set(const QString& sPropertyName, const T& value)
   {
-    tspPropertyTpl<T> spProperty = findProperty(sPropertyName, properties<T>(this));
-
-    if (nullptr == spProperty)
+    tspProperty spProperty = findProperty(sPropertyName, allProperties);
+    tspPropertyTpl<T> spTypedProperty = std::static_pointer_cast<PropertyTpl<T>>(spProperty);
+    if (nullptr == spTypedProperty)
     {
       auto itCreator = factory().find(sPropertyName);
       if (itCreator != factory().end())
       {
-        tspDescriptorTpl<T> spDescriptor = findDescriptor(sPropertyName, descriptors<T>());
-        if (nullptr != spDescriptor && spDescriptor->accepts(value))
+        tspDescriptor spDescriptor = findDescriptor(sPropertyName, allDescriptors());
+        tspDescriptorTpl<T> spTypedDescriptor = std::static_pointer_cast<PropertyDescriptorTpl<T>>(spDescriptor);
+        if (nullptr != spTypedDescriptor && spTypedDescriptor->accepts(value))
         {
           tspPropertyTpl<T> spProp =
-              std::make_shared<PropertyTpl<T>>(spDescriptor, value);
-          properties<T>(this).insert(spProp);
+              std::make_shared<PropertyTpl<T>>(spTypedDescriptor, value);
           return allProperties.insert(spProp).second;
         }
       }
@@ -378,7 +366,7 @@ public:
     }
     else
     {
-      return spProperty->set(value);
+      return spTypedProperty->set(value);
     }
   }
 
@@ -458,15 +446,25 @@ public:
   }
 
 private:
+  // TODO: remove properties<T>() and descriptors<T>(), replace them with non-templatized properties/descriptors() calls and dynamic cast
+//  template<typename T> static std::set<tspPropertyTpl<T>>& properties(const Properties* pOwner)
+//  {
+//    static std::map<const Properties*, std::set<tspPropertyTpl<T>>> properties;
+//    return properties[pOwner];
+//  }
+
   static std::set<tspDescriptor>& allDescriptors()
   {
     static std::set<tspDescriptor> descriptors;
+    qDebug() << "address of descriptors:" << &descriptors;
     return descriptors;
   }
 
-  static std::map<QString, std::function<tspProperty(void)>>& factory()
+  typedef std::map<QString, std::function<tspProperty(void)>> blah;
+  static blah& factory()
   {
-    static std::map<QString, std::function<tspProperty(void)>> f;
+    static blah f;
+    qDebug() << "address of f:" << &f;
     return f;
   }
 
