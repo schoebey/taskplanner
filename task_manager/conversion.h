@@ -64,28 +64,25 @@ namespace conversion
   {
     return T(sVal.toDouble(&bConversionStatus));
   }
-  template<> int
-  fromString<int>(const QString& sVal, bool& bConversionStatus);
+
+  //-- int
+  template<> int LIBTASKMANAGER fromString<int>(const QString& sVal, bool& bConversionStatus);
 
   //-- QDateTime
-  template<> LIBTASKMANAGER
-  QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
-  QString toString(const QDateTime& dt);
+  template<> QDateTime LIBTASKMANAGER fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
+  QString LIBTASKMANAGER toString(const QDateTime& dt);
 
   //-- bool
-  template<> LIBTASKMANAGER
-  bool fromString<bool>(const QString& sVal, bool& bConversionStatus);
-  QString toString(bool bVal);
+  template<> bool LIBTASKMANAGER fromString<bool>(const QString& sVal, bool& bConversionStatus);
+  QString LIBTASKMANAGER toString(bool bVal);
 
   //-- std::vector<QUrl>
-  template<> LIBTASKMANAGER
-  std::vector<QUrl> fromString<std::vector<QUrl>>(const QString& sVal, bool& bConversionStatus);
-  QString toString(const std::vector<QUrl>& vUrls);
+  template<> std::vector<QUrl> LIBTASKMANAGER fromString<std::vector<QUrl>>(const QString& sVal, bool& bConversionStatus);
+  QString LIBTASKMANAGER toString(const std::vector<QUrl>& vUrls);
 
   //-- QColor
-  template<> LIBTASKMANAGER
-  QColor fromString<QColor>(const QString& sVal, bool& bConversionStatus);
-  QString toString(const QColor& c);
+  template<> QColor LIBTASKMANAGER fromString<QColor>(const QString& sVal, bool& bConversionStatus);
+  QString LIBTASKMANAGER toString(const QColor& c);
 }
 
 #endif // CONVERSION_H

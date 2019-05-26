@@ -2,6 +2,8 @@ CONFIG += c++11
 QT += core gui
 TEMPLATE = lib
 CONFIG += dll
+CONFIG += skip_target_version_ext
+DESTDIR = $$PWD/../
 
 equals(QT_MAJOR_VERSION, 5) {
   QT += widgets
@@ -17,7 +19,6 @@ INCLUDEPATH *= \
 HEADERS += \
     constraint.h \
     constraintfactory.h \
-    container_utils.h \
     conversion.h \
     group.h \
     groupinterface.h \
