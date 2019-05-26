@@ -77,7 +77,7 @@ private:
   void timerEvent(QTimerEvent* pEvent) override;
   void updateAutoPrioritiesInTaskWidgets();
   void saveTempFile();
-  void loadPlugins();
+  void loadPlugins(const QString &sInitialSearchPath = QString());
 
 private:
   Ui::MainWindow *ui;

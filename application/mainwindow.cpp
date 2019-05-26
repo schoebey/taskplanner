@@ -99,7 +99,14 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
     reloadStylesheet(":/stylesheet.css");
   }
 
-  loadPlugins();
+
+
+  static const std::vector<QString> c_vsPluginFolders = { QCoreApplication::applicationDirPath() + "/plugins/serializers",
+                                                          QCoreApplication::applicationDirPath() + "/plugins/reports" };
+  for (const auto& sPath : c_vsPluginFolders)
+  {
+    loadPlugins(sPath);
+  }
 
   bool bOk = connect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
   assert(bOk);
@@ -235,22 +242,28 @@ void MainWindow::updateTaskUi()
   updateAutoPrioritiesInTaskWidgets();
 }
 
-void MainWindow::loadPlugins()
+void MainWindow::loadPlugins(const QString& sInitialSearchPath)
 {
-  QString sSearchPath = QCoreApplication::applicationDirPath();
-  static const std::vector<QString> c_vsPluginFolders = { "/plugins/serializers", "/plugins/reports" };
+  QString sSearchPath = sInitialSearchPath;
 
-  for (const auto& sPath : c_vsPluginFolders)
+  QDir d(sSearchPath);
+
+  // since providing a filter breaks entryInfoList
+  // (returned list is empty as soon as a filter is set. Qt-Bug in 5.6?)
+  // we have to filter out symlinks manually...
+  for (const auto& el : d.entryInfoList())
   {
-    QDir d(sSearchPath + sPath);
-
-    // since providing a filter breaks entryInfoList
-    // (returned list is empty as soon as a filter is set. Qt-Bug in 5.6?)
-    // we have to filter out symlinks manually...
-    for (const auto& el : d.entryInfoList())
+    if (el.isSymLink())  { continue; }
+    else if (el.isDir())
     {
-      if (el.isSymLink())  { continue; }
-
+      QDir subfolder(el.filePath());
+      if (subfolder.dirName() != "." &&
+          subfolder.dirName() != "..")
+      {
+        loadPlugins(el.filePath());
+      }
+    }
+    else {
       QPluginLoader loader(el.filePath());
 
       QObject* pPlugin = loader.instance();

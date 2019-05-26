@@ -1,6 +1,8 @@
 #ifndef FACTORY_H
 #define FACTORY_H
 
+#include "libtaskmanager.h"
+
 #include <QString>
 
 #include <map>
@@ -12,8 +14,20 @@ template<typename T> using tFnCreateObject = std::function<T*(void)>;
 
 namespace detail
 {
+   class LIBTASKMANAGER FactoryPrivateBase
+   {
+   public:
+     FactoryPrivateBase();
+     virtual ~FactoryPrivateBase();
+   };
+   typedef std::shared_ptr<FactoryPrivateBase> tspPrivBase;
+
+   tspPrivBase LIBTASKMANAGER p_base(size_t objectHashCode, size_t metaInfoHashCode);
+
+   void LIBTASKMANAGER reg_base(const detail::tspPrivBase& spPriv, size_t objectHashCode, size_t metaInfoHashCode);
+
     template<typename Object, typename ObjectMetaInformation>
-    class FactoryPrivate
+    class FactoryPrivate : public FactoryPrivateBase
     {
         struct SInternalInfo
         {
@@ -33,6 +47,8 @@ namespace detail
         using tspObject = std::shared_ptr<Object>;
 
         FactoryPrivate() {}
+
+        ~FactoryPrivate() override {}
 
       bool registerCreator(tFnCreateObject<Object> fnCreate,
                                                      const QString& sName,
@@ -86,9 +102,9 @@ public:
   Factory();
 
   static std::map<QString, ObjectMetaInformation> classes()
-{
-  return p()->classes();
-}
+  {
+    return p()->classes();
+  }
 
   static tspObject create(const QString& sName)
     {
@@ -98,8 +114,16 @@ public:
 protected:
   static detail::FactoryPrivate<Object, ObjectMetaInformation>* p()
   {
-    static detail::FactoryPrivate<Object, ObjectMetaInformation> priv;
-    return &priv;
+    detail::tspPrivBase spPriv = detail::p_base(typeid(Object).hash_code(), typeid(ObjectMetaInformation).hash_code());
+    if (nullptr == spPriv)
+    {
+      spPriv = std::make_shared<detail::FactoryPrivate<Object, ObjectMetaInformation>>();
+      detail::reg_base(spPriv, typeid(Object).hash_code(), typeid(ObjectMetaInformation).hash_code());
+    }
+
+    detail::FactoryPrivateBase* pBase = spPriv.get();
+
+    return dynamic_cast<detail::FactoryPrivate<Object, ObjectMetaInformation>*>(pBase);
   }
 };
 

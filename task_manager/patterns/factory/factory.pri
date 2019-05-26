@@ -3,3 +3,6 @@ HEADERS += \
     $$PWD/register.h \
     $$PWD/registrar.h
 
+SOURCES += \
+    $$PWD/factory.cpp
+

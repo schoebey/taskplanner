@@ -10,6 +10,7 @@ equals(QT_MAJOR_VERSION, 5) {
 }
 
 include(../git_version.pri)
+include(patterns/patterns.pri)
 
 DEFINES += BUILD_LIB
 

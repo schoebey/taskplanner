@@ -5,6 +5,7 @@
 #include "conversion.h"
 #include "serializableinterface.h"
 #include "serializerinterface.h"
+#include "libtaskmanager.h"
 
 #include <QString>
 #include <QDateTime>
@@ -230,6 +231,15 @@ template<typename T> using tspPropertyTpl = std::shared_ptr<PropertyTpl<T>>;
 
 
 
+namespace factory
+{
+  typedef std::map<QString, std::function<tspProperty(void)>> tProperties;
+  typedef std::set<tspDescriptor> tDescriptors;
+
+  LIBTASKMANAGER tProperties& propertiesFactory(size_t scopeHashCode, size_t typeHashCode = 0);
+  LIBTASKMANAGER tDescriptors& descriptorsFactory(size_t scopeHashCode, size_t typeHashCode = 0);
+}
+
 #define REGISTER_PROPERTY(scope, name, type, visible) Properties<scope>::registerProperty<type>(name, #type, visible);
 
 template<typename SCOPE>
@@ -446,25 +456,16 @@ public:
   }
 
 private:
-  // TODO: remove properties<T>() and descriptors<T>(), replace them with non-templatized properties/descriptors() calls and dynamic cast
-//  template<typename T> static std::set<tspPropertyTpl<T>>& properties(const Properties* pOwner)
-//  {
-//    static std::map<const Properties*, std::set<tspPropertyTpl<T>>> properties;
-//    return properties[pOwner];
-//  }
-
   static std::set<tspDescriptor>& allDescriptors()
   {
-    static std::set<tspDescriptor> descriptors;
-    qDebug() << "address of descriptors:" << &descriptors;
-    return descriptors;
+    auto& d = factory::descriptorsFactory(typeid(SCOPE).hash_code());
+    return d;
   }
 
-  typedef std::map<QString, std::function<tspProperty(void)>> blah;
-  static blah& factory()
+  static factory::tProperties& factory()
   {
-    static blah f;
-    qDebug() << "address of f:" << &f;
+    auto& f = factory::propertiesFactory(typeid(SCOPE).hash_code());
+
     return f;
   }
 
