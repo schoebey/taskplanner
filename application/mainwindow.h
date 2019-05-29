@@ -67,8 +67,9 @@ private slots:
   void onDocumentModified();
   void onPasteFromClipboard();  
   void onReloadDocument();  
-  void on_actionAbout_triggered();
-
+  void on_actionAbout_triggered();  
+  void onWokeUpFromHibernation(const QDateTime& sleepTime,
+                               const QDateTime& wakeUpTime);
 signals:
   void timeTrackingStopped(task_id taskId);
   void documentModified();
