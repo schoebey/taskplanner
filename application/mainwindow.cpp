@@ -1178,9 +1178,17 @@ void MainWindow::onReloadDocument()
 void MainWindow::onWokeUpFromHibernation(const QDateTime& sleepTime,
                                          const QDateTime& wakeUpTime)
 {
-  /* TODO:
-   * get the currentlly tracked task
-   * set its stop track time to sleepTime
-   * (start tracking it again)
-  */
+  // find all tasks that are currently being tracked
+  // create a work interrupt of the duration of the hibernation
+  for (const auto& taskId : m_pManager->taskIds())
+  {
+    ITask* pTask = m_pManager->task(taskId);
+    if (nullptr != pTask &&
+        pTask->isTrackingTime())
+    {
+      pTask->stopWork(sleepTime);
+
+      pTask->startWork(wakeUpTime);
+    }
+  }
 }
