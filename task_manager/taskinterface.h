@@ -31,8 +31,9 @@ public:
   virtual bool addTask(task_id id) = 0;
   virtual bool removeTask(task_id id) = 0;
 
-  virtual void startWork() = 0;
-  virtual void stopWork() = 0;
+  virtual void startWork(const QDateTime& when = QDateTime::currentDateTime()) = 0;
+  virtual void stopWork(const QDateTime& when = QDateTime::currentDateTime()) = 0;
+  virtual bool isTrackingTime() const = 0;
   virtual std::vector<STimeFragment> timeFragments() const = 0;
 
   virtual group_id group() const = 0;

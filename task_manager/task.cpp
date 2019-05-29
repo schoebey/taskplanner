@@ -269,21 +269,28 @@ bool Task::removeTask(task_id id)
   return false;
 }
 
-void Task::startWork()
+void Task::startWork(const QDateTime& when)
 {
   STimeFragment fragment;
-  fragment.startTime = QDateTime::currentDateTime();
+  fragment.startTime = when;
   m_vTimingInfo.push_back(fragment);
 }
 
-void Task::stopWork()
+void Task::stopWork(const QDateTime& when)
 {
   if (m_vTimingInfo.empty())  { return; }
 
   if (!m_vTimingInfo.back().stopTime.isValid())
   {
-    m_vTimingInfo.back().stopTime = QDateTime::currentDateTime();
+    m_vTimingInfo.back().stopTime = when;
   }
+}
+
+bool Task::isTrackingTime() const
+{
+  if (m_vTimingInfo.empty())  { return false; }
+
+  return !m_vTimingInfo.back().stopTime.isValid();
 }
 
 std::vector<STimeFragment> Task::timeFragments() const

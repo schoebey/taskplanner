@@ -59,8 +59,9 @@ public:
   bool addTaskId(task_id id);
   bool removeTask(task_id id) override;
 
-  void startWork() override;
-  void stopWork() override;
+  void startWork(const QDateTime& when) override;
+  void stopWork(const QDateTime& when) override;
+  bool isTrackingTime() const override;
   std::vector<STimeFragment> timeFragments() const override;
   void setTimeFragments(const std::vector<STimeFragment>& vFragments);
 
