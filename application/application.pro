@@ -30,7 +30,8 @@ SOURCES += \
     $$PWD/commands/deletetaskcommand.cpp \
     $$PWD/commands/addsubtaskcommand.cpp \
     $$PWD/mousehandlingframe.cpp \
-    $$PWD/aboutdialog.cpp
+    $$PWD/aboutdialog.cpp \
+    hibernationdetector.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -53,7 +54,8 @@ HEADERS += \
     $$PWD/commands/deletetaskcommand.h \
     $$PWD/commands/addsubtaskcommand.h \
     $$PWD/mousehandlingframe.h \
-    $$PWD/aboutdialog.h
+    $$PWD/aboutdialog.h \
+    hibernationdetector.h
 
 FORMS += \
     $$PWD/groupwidget.ui \

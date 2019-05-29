@@ -13,6 +13,7 @@
 #include "overlaywidget.h"
 #include "taskcreationdialog.h"
 #include "aboutdialog.h"
+#include "hibernationdetector.h"
 
 #include "commands/changetaskpropertycommand.h"
 #include "commands/changegrouppropertycommand.h"
@@ -110,7 +111,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
   bool bOk = connect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
   assert(bOk);
-  Q_UNUSED(bOk)
 
 
   // TODO: move shortcut to group widget and set the context to 'widget'
@@ -128,6 +128,12 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   initTaskUi();
 
   startTimer(3000);
+
+  auto pDetector = new HibernationDetector(this);
+  bOk = connect(pDetector, SIGNAL(wokeUpFromHibernation(QDateTime, QDateTime)),
+                this, SLOT(onWokeUpFromHibernation(QDateTime, QDateTime)));
+  assert(bOk);
+  Q_UNUSED(bOk)
 }
 
 MainWindow::~MainWindow()
@@ -1166,4 +1172,15 @@ void MainWindow::timerEvent(QTimerEvent* /*pEvent*/)
 void MainWindow::onReloadDocument()
 {
   loadFile(m_sFileName);
+}
+
+
+void MainWindow::onWokeUpFromHibernation(const QDateTime& sleepTime,
+                                         const QDateTime& wakeUpTime)
+{
+  /* TODO:
+   * get the currentlly tracked task
+   * set its stop track time to sleepTime
+   * (start tracking it again)
+  */
 }
