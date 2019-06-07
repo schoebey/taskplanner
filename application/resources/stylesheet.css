@@ -341,3 +341,12 @@ LinkWidget:focus {
   min-width: 18px;
   margin-right: 5px;
 }
+
+ToolBarInfoDisplay {
+  background-color: red;
+}
+
+ToolBarInfoDisplay QLabel {
+  color: white;
+  font-size: 20pt;
+}

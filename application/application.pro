@@ -31,7 +31,8 @@ SOURCES += \
     $$PWD/commands/addsubtaskcommand.cpp \
     $$PWD/mousehandlingframe.cpp \
     $$PWD/aboutdialog.cpp \
-    hibernationdetector.cpp
+    hibernationdetector.cpp \
+    toolbarinfodisplay.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -55,7 +56,8 @@ HEADERS += \
     $$PWD/commands/addsubtaskcommand.h \
     $$PWD/mousehandlingframe.h \
     $$PWD/aboutdialog.h \
-    hibernationdetector.h
+    hibernationdetector.h \
+    toolbarinfodisplay.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
