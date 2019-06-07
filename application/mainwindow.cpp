@@ -14,6 +14,7 @@
 #include "taskcreationdialog.h"
 #include "aboutdialog.h"
 #include "hibernationdetector.h"
+#include "toolbarinfodisplay.h"
 
 #include "commands/changetaskpropertycommand.h"
 #include "commands/changegrouppropertycommand.h"
@@ -81,6 +82,9 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QWidget* pSpacer = new QWidget();
   pSpacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
   ui->toolBar->insertWidget(ui->actionAbout, pSpacer);
+
+  QWidget* pInfoDisplay = new ToolBarInfoDisplay(this);
+  ui->toolBar->insertWidget(ui->actionAbout, pInfoDisplay);
 
 
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
