@@ -9,6 +9,11 @@ Manager::Manager()
   m_spPrivate = std::make_shared<SerializableManager>(this);
 }
 
+Manager::~Manager()
+{
+
+}
+
 ESerializingError Manager::serializeTo(ISerializer* pSerializer) const
 {
   return m_spPrivate->serialize(pSerializer);

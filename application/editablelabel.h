@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <functional>
 
+#include <functional>
 
 class QLineEdit;
 class EditableLabel : public QLabel

@@ -64,6 +64,8 @@ namespace conversion
   {
     return T(sVal.toDouble(&bConversionStatus));
   }
+  template<> int LIBTASKMANAGER
+  fromString<int>(const QString& sVal, bool& bConversionStatus);
 
   //-- int
   template<> int LIBTASKMANAGER fromString<int>(const QString& sVal, bool& bConversionStatus);
@@ -77,7 +79,7 @@ namespace conversion
   QString LIBTASKMANAGER toString(bool bVal);
 
   //-- std::vector<QUrl>
-  template<> std::vector<QUrl> LIBTASKMANAGER fromString<std::vector<QUrl>>(const QString& sVal, bool& bConversionStatus);
+  template<> LIBTASKMANAGER std::vector<QUrl> fromString<std::vector<QUrl>>(const QString& sVal, bool& bConversionStatus);
   QString LIBTASKMANAGER toString(const std::vector<QUrl>& vUrls);
 
   //-- QColor
