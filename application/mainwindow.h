@@ -79,6 +79,7 @@ private:
   void updateAutoPrioritiesInTaskWidgets();
   void saveTempFile();
   void loadPlugins(const QString &sInitialSearchPath = QString());
+  void restoreDefaultLayout();
 
 private:
   Ui::MainWindow *ui;

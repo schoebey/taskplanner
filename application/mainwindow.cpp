@@ -503,6 +503,23 @@ void MainWindow::stopTimeTracking(task_id taskId)
   }
 }
 
+void MainWindow::restoreDefaultLayout()
+{
+  if (0 == m_pManager->groupIds().size())
+  {
+    IGroup* pGroup = m_pManager->addGroup();
+    pGroup->setName("backlog");
+
+    pGroup = m_pManager->addGroup();
+    pGroup->setName("in progress");
+
+    pGroup = m_pManager->addGroup();
+    pGroup->setName("done");
+
+    initTaskUi();
+  }
+}
+
 bool MainWindow::loadFile(const QString& sFileName, QString* psErrorMessage)
 {
   if (!sFileName.isEmpty())
@@ -565,6 +582,8 @@ bool MainWindow::loadFile(const QString& sFileName, QString* psErrorMessage)
             break;
           }
         }
+
+        restoreDefaultLayout();
       }
     }
   }

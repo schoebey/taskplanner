@@ -147,17 +147,7 @@ int main(int argc, char *argv[])
 
   Manager manager;
 
-  if (0 == manager.groupIds().size())
-  {
-    IGroup* pGroup = manager.addGroup();
-    pGroup->setName("backlog");
 
-    pGroup = manager.addGroup();
-    pGroup->setName("in progress");
-
-    pGroup = manager.addGroup();
-    pGroup->setName("done");
-  }
 
   MainWindow window(&manager);
   window.show();
