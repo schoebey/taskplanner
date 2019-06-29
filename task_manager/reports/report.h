@@ -3,6 +3,7 @@
 
 #include "libtaskmanager.h"
 #include "reportinterface.h"
+#include "libtaskmanager.h"
 
 class LIBTASKMANAGER Report : public IReport
 {

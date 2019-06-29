@@ -15,3 +15,8 @@ SUBDIRS += \
     task_manager \
     plugins \
     application/application.pro
+
+task_manager.path = $$PWD/task_manager
+plugins.path = $$PWD/plugins
+application.path = $$PWD/application
+INSTALLS += task_manager

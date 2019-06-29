@@ -1,4 +1,4 @@
-CONFIG += c++11
+CONFIG += c++11 skip_target_version_ext
 QT += core gui
 TEMPLATE = lib
 CONFIG += dll
@@ -9,10 +9,17 @@ equals(QT_MAJOR_VERSION, 5) {
   QT += widgets
 }
 
+win32 {
+  DESTDIR = $$PWD/../bin/
+}
+else:macx {
+  DESTDIR = ../taskplanner.app/Contents/MacOS/
+}
+
 include(../git_version.pri)
 include(patterns/patterns.pri)
 
-DEFINES += BUILD_LIB
+DEFINES += BUILD_TASKMANAGER_LIB
 
 INCLUDEPATH *= \
     serializers
@@ -25,6 +32,7 @@ HEADERS += \
     groupinterface.h \
     id_generator.h \
     id_types.h \
+    libtaskmanager.h \
     manager.h \
     parameter.h \
     parametrizable.h \

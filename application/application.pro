@@ -1,7 +1,12 @@
 CONFIG += c++11
 QT += core gui
 TARGET = taskplanner
-DESTDIR = $$PWD/../
+win32 {
+  DESTDIR = $$PWD/../bin
+}
+else:macx {
+  DESTDIR = ../
+}
 
 equals(QT_MAJOR_VERSION, 5) {
   QT += widgets
@@ -69,9 +74,7 @@ FORMS += \
 RESOURCES += \
     $$PWD/resources/resource.qrc
 
-
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../ -ltask_manager
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../ -ltask_manager
+win32: LIBS += -L$$PWD/../bin/ -ltask_manager
 else:unix: LIBS += -L$$PWD/../ -ltask_manager
 
 INCLUDEPATH += $$PWD \

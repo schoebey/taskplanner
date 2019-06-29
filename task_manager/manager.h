@@ -4,6 +4,7 @@
 #include "libtaskmanager.h"
 #include "id_types.h"
 #include "serializableinterface.h"
+#include "libtaskmanager.h"
 
 #include <memory>
 #include <set>
@@ -23,6 +24,8 @@ class LIBTASKMANAGER Manager
 {
 public:
   Manager();
+
+  ~Manager();
 
   ESerializingError serializeTo(ISerializer* pSerializer) const;
 
