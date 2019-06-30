@@ -34,13 +34,13 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
-  <widget class="QToolBar" name="toolBar">
+  <widget class="QToolBar" name="pMainToolBar">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>main</string>
    </property>
    <property name="movable">
     <bool>false</bool>
@@ -65,6 +65,20 @@
    <addaction name="actionReport"/>
    <addaction name="separator"/>
    <addaction name="actionAbout"/>
+  </widget>
+  <widget class="QToolBar" name="pInfoToolBar">
+   <property name="windowTitle">
+    <string>info</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
   </widget>
   <action name="actionOpen">
    <property name="icon">

@@ -68,25 +68,24 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   ui->setupUi(this);
 
 
-  ui->toolBar->addSeparator();
   auto pUndoAction = m_undoStack.createUndoAction(this);
   pUndoAction->setShortcut(Qt::CTRL + Qt::Key_Z);
   pUndoAction->setIcon(QIcon(":/icons/undo.png"));
-  ui->toolBar->insertAction(ui->actionReport, pUndoAction);
+  ui->pMainToolBar->insertAction(ui->actionReport, pUndoAction);
   auto pRedoAction = m_undoStack.createRedoAction(this);
   pRedoAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Z);
   pRedoAction->setIcon(QIcon(":/icons/redo.png"));
-  ui->toolBar->insertAction(ui->actionReport, pRedoAction);
-  ui->toolBar->insertSeparator(ui->actionReport);
-  ui->toolBar->insertAction(ui->actionReport, ui->actionDisplayReport);
+  ui->pMainToolBar->insertAction(ui->actionReport, pRedoAction);
+  ui->pMainToolBar->insertSeparator(ui->actionReport);
+  ui->pMainToolBar->insertAction(ui->actionReport, ui->actionDisplayReport);
 
-  QWidget* pSpacer = new QWidget();
-  pSpacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-  ui->toolBar->insertWidget(ui->actionAbout, pSpacer);
 
   QWidget* pInfoDisplay = new ToolBarInfoDisplay(this);
-  ui->toolBar->insertWidget(ui->actionAbout, pInfoDisplay);
+  auto pInfoDisplayAction = ui->pInfoToolBar->addWidget(pInfoDisplay);
 
+  QWidget* pSpacer = new QWidget();
+  pSpacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+  ui->pInfoToolBar->insertWidget(pInfoDisplayAction, pSpacer);
 
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
