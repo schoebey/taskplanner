@@ -8,7 +8,6 @@
 ToolBarInfoDisplay::ToolBarInfoDisplay(QWidget *parent)
   : QFrame(parent)
 {
-  setMinimumSize(20, 20);
   QGridLayout* pLayout = new QGridLayout(this);
   setLayout(pLayout);
 
