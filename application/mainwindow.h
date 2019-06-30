@@ -29,8 +29,12 @@ public:
 
 
   bool loadFile(const QString& sFileName, QString* psErrorMessage = nullptr);
+
+  bool loadMostRecentFile();
   
   bool saveFile(const QString& sFileName, QString* psErrorMessage = nullptr);
+
+  void restoreDefaultLayout();
   
 private slots:
   void createNewTask(group_id groupId);
@@ -76,10 +80,12 @@ signals:
 
 private:
   void timerEvent(QTimerEvent* pEvent) override;
+  void closeEvent(QCloseEvent *) override;
   void updateAutoPrioritiesInTaskWidgets();
   void saveTempFile();
   void loadPlugins(const QString &sInitialSearchPath = QString());
-  void restoreDefaultLayout();
+  void saveSettings();
+  void loadSettings();
 
 private:
   Ui::MainWindow *ui;
