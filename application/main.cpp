@@ -164,10 +164,11 @@ int main(int argc, char *argv[])
     }
   }
 
-  // load default file? get last loaded file from config?
-  if (!bLoadedFileFromArgs)
+  // load last used file
+  if (!bLoadedFileFromArgs &&!
+      window.loadMostRecentFile())
   {
-    window.loadFile("default.md");
+    window.restoreDefaultLayout();
   }
 
 

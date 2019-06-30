@@ -39,6 +39,7 @@
 #include <QPluginLoader>
 #include <plugininterface.h>
 
+#include <QSettings>
 #include <array>
 #include <future>
 #include <memory>
@@ -138,12 +139,49 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
                 this, SLOT(onWokeUpFromHibernation(QDateTime, QDateTime)));
   assert(bOk);
   Q_UNUSED(bOk)
+
+
+  loadSettings();
 }
 
 MainWindow::~MainWindow()
 {
-  saveFile(m_sFileName);
   delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent* /*event*/)
+{
+  saveFile(m_sFileName);
+  saveSettings();
+}
+
+void MainWindow::saveSettings()
+{
+  // write window state, currently loaded file etc. to a settings file
+  QSettings settings("settings.ini", QSettings::IniFormat);
+
+  settings.beginGroup("window");
+  settings.setValue("state", saveState());
+  settings.setValue("geometry", saveGeometry());
+  settings.endGroup();
+
+  settings.beginGroup("files");
+  settings.setValue("mostRecentFile", m_sFileName);
+  settings.endGroup();
+}
+
+void MainWindow::loadSettings()
+{
+  QSettings settings("settings.ini", QSettings::IniFormat);
+
+  settings.beginGroup("window");
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("state").toByteArray());
+  settings.endGroup();
+
+  settings.beginGroup("files");
+  m_sFileName = settings.value("mostRecentFile").toString();
+  settings.endGroup();
 }
 
 void MainWindow::initTaskUi()
@@ -582,13 +620,16 @@ bool MainWindow::loadFile(const QString& sFileName, QString* psErrorMessage)
             break;
           }
         }
-
-        restoreDefaultLayout();
       }
     }
   }
 
   return false;
+}
+
+bool MainWindow::loadMostRecentFile()
+{
+  return loadFile(m_sFileName);
 }
 
 
