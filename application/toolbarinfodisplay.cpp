@@ -20,7 +20,7 @@ ToolBarInfoDisplay::ToolBarInfoDisplay(QWidget *parent)
 
 void ToolBarInfoDisplay::UpdateInfo()
 {
-  m_pLabel->setText(QString("KW %1").arg(QDate::currentDate().weekNumber()));
+  m_pLabel->setText(tr("CW %1").arg(QDate::currentDate().weekNumber()));
 }
 
 void ToolBarInfoDisplay::timerEvent(QTimerEvent* /*pEvent*/)
