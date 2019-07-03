@@ -72,10 +72,14 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   pUndoAction->setShortcut(Qt::CTRL + Qt::Key_Z);
   pUndoAction->setIcon(QIcon(":/icons/undo.png"));
   ui->pMainToolBar->insertAction(ui->actionReport, pUndoAction);
+  ui->menuEdit->addAction(pUndoAction);
+
   auto pRedoAction = m_undoStack.createRedoAction(this);
   pRedoAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Z);
   pRedoAction->setIcon(QIcon(":/icons/redo.png"));
   ui->pMainToolBar->insertAction(ui->actionReport, pRedoAction);
+  ui->menuEdit->addAction(pRedoAction);
+
   ui->pMainToolBar->insertSeparator(ui->actionReport);
   ui->pMainToolBar->insertAction(ui->actionReport, ui->actionDisplayReport);
 
