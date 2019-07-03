@@ -43,7 +43,7 @@ void OverlayWidget::setTitle(const QString& sText)
 void OverlayWidget::appear()
 {
   QPropertyAnimation* pAnimation = new QPropertyAnimation(this, "pos");
-  pAnimation->setStartValue(QPoint(0, window()->height()));
+  pAnimation->setStartValue(QPoint(0, -window()->height()));
   pAnimation->setEndValue(QPoint(0,0));
   pAnimation->setDuration(200);
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
@@ -56,7 +56,7 @@ void OverlayWidget::disappear()
 {
   QPropertyAnimation* pAnimation = new QPropertyAnimation(this, "pos");
   pAnimation->setStartValue(pos());
-  pAnimation->setEndValue(QPoint(0,window()->height()));
+  pAnimation->setEndValue(QPoint(0, -window()->height()));
   pAnimation->setDuration(200);
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
   pAnimation->setEasingCurve(QEasingCurve::InCubic);
