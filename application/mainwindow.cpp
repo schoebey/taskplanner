@@ -65,6 +65,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   m_pWidgetManager(new WidgetManager(m_pManager, this)),
   m_pTimeoutGroupIdMapper(new QSignalMapper(this))
 {
+  setWindowFlag(Qt::FramelessWindowHint);
   ui->setupUi(this);
 
 
@@ -157,6 +158,8 @@ void MainWindow::closeEvent(QCloseEvent* /*event*/)
   saveFile(m_sFileName);
   saveSettings();
 }
+
+
 
 void MainWindow::saveSettings()
 {
