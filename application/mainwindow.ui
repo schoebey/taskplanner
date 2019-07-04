@@ -28,7 +28,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
+  <widget class="WindowTitleMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -118,6 +118,7 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="resources/resource.qrc">
@@ -193,6 +194,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>WindowTitleMenuBar</class>
+   <extends>QMenuBar</extends>
+   <header>windowtitlemenubar.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources/resource.qrc"/>
  </resources>

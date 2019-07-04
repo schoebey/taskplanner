@@ -37,7 +37,8 @@ SOURCES += \
     $$PWD/mousehandlingframe.cpp \
     $$PWD/aboutdialog.cpp \
     hibernationdetector.cpp \
-    toolbarinfodisplay.cpp
+    toolbarinfodisplay.cpp \
+    windowtitlemenubar.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -62,7 +63,8 @@ HEADERS += \
     $$PWD/mousehandlingframe.h \
     $$PWD/aboutdialog.h \
     hibernationdetector.h \
-    toolbarinfodisplay.h
+    toolbarinfodisplay.h \
+    windowtitlemenubar.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
