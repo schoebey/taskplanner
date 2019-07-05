@@ -29,6 +29,14 @@ private:
   void resizeEvent(QResizeEvent *pEvent) override;
   bool eventFilter(QObject *pObject, QEvent *pEvent) override;
 
+  /*!
+   * \brief corrects the coordinates based on window size and magnetic distance to stick to the nearest screen border
+   * \param targetPos targeted position of the window
+   * \param iMagneticDistance distance at which the window gets 'attracted' to the border
+   * \return corrected coordinate to move the window to in order to 'stick' it to the border
+   */
+  QPoint stickToScreenBorders(const QPoint& targetPos, int iMagneticDistance);
+
 
   bool m_bDraggingWindow = false;
   QPoint m_mouseDownPoint;

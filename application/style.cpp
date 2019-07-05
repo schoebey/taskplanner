@@ -2,6 +2,7 @@
 
 #include "editablelabel.h"
 #include "linkwidget.h"
+#include "styleExtension.h"
 
 #include <QPainter>
 #include <QPixmap>
@@ -387,6 +388,19 @@ void Style::drawControl(ControlElement element,
     return QProxyStyle::drawControl(element, pOption, pPainter, pWidget);
   }
 
+}
+
+int Style::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const
+{
+  switch (metric)
+  {
+  case customPixelMetrics::PM_FloatingBorderSize:
+    return 0;
+  case customPixelMetrics::PM_ResizerActiveArea:
+    return 5;
+  default:
+    return QProxyStyle::pixelMetric(metric, option, widget);
+  }
 }
 
 void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
