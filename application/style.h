@@ -15,6 +15,8 @@ public:
   QRect itemTextRect(const QFontMetrics& metrics, const QRect& rectangle,
                      int alignment, bool enabled, const QString& text) const override;
   void drawControl(ControlElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override;
+
+  int pixelMetric(PixelMetric metric, const QStyleOption *option = Q_NULLPTR, const QWidget *widget = Q_NULLPTR) const override;
 };
 
 #endif // STYLE_H

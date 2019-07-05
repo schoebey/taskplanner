@@ -1,8 +1,11 @@
 #include "windowtitlemenubar.h"
+#include "widgetresizer.h"
 
 #include <QMouseEvent>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QApplication>
+#include <QDesktopWidget>
 
 WindowTitleMenuBar::WindowTitleMenuBar(QWidget *pParent)
   : QMenuBar(pParent)
@@ -28,6 +31,15 @@ WindowTitleMenuBar::WindowTitleMenuBar(QWidget *pParent)
   QMetaObject::invokeMethod(this, "updateWidgets", Qt::QueuedConnection);
 
   window()->installEventFilter(this);
+
+  new WidgetResizer(window(), WidgetResizer::eTopLeft);
+  new WidgetResizer(window(), WidgetResizer::eTop);
+  new WidgetResizer(window(), WidgetResizer::eTopRight);
+  new WidgetResizer(window(), WidgetResizer::eLeft);
+  new WidgetResizer(window(), WidgetResizer::eRight);
+  new WidgetResizer(window(), WidgetResizer::eBottomLeft);
+  new WidgetResizer(window(), WidgetResizer::eBottom);
+  new WidgetResizer(window(), WidgetResizer::eBottomRight);
 }
 
 void WindowTitleMenuBar::addWidget(QWidget *pWidget)
@@ -89,6 +101,47 @@ void WindowTitleMenuBar::mousePressEvent(QMouseEvent* pEvent)
   }
 }
 
+QPoint WindowTitleMenuBar::stickToScreenBorders(const QPoint& targetPos, int iMagneticDistance)
+{
+  auto pDesktop = QApplication::desktop();
+  auto screenGeo = pDesktop->availableGeometry(pDesktop->screenNumber(this));
+
+  // check if window is near desktop border and magnetically stick to it
+  bool bTearOffX = abs((targetPos - m_mouseDownPoint).x()) > 2 * iMagneticDistance;
+  bool bTearOffY = abs((targetPos - m_mouseDownPoint).y()) > 2 * iMagneticDistance;
+  int iLeft = window()->x();
+  int iRight = iLeft + window()->width();
+  int iTop = window()->y();
+  int iBottom = iTop + window()->height();
+
+  QPoint position = mapToGlobal(targetPos) - m_mouseDownPoint;
+  if (!bTearOffX )
+  {
+    if (iLeft < screenGeo.left() + iMagneticDistance && iLeft >= screenGeo.left())
+    {
+      position.setX(screenGeo.left());
+    }
+    else if (iRight > screenGeo.right() - iMagneticDistance && iRight <= screenGeo.right() + 1)
+    {
+      position.setX(screenGeo.right() - window()->width() + 1);
+    }
+  }
+
+  if (!bTearOffY)
+  {
+    if (iTop < screenGeo.top() + iMagneticDistance && iTop >= screenGeo.top())
+    {
+      position.setY(screenGeo.top());
+    }
+    else if (iBottom > screenGeo.bottom() - iMagneticDistance && iBottom <= screenGeo.bottom() + 1)
+    {
+      position.setY(screenGeo.bottom() - window()->height() + 1);
+    }
+  }
+
+  return position;
+}
+
 void WindowTitleMenuBar::mouseMoveEvent(QMouseEvent* pEvent)
 {
   QMenuBar::mouseMoveEvent(pEvent);
@@ -102,7 +155,10 @@ void WindowTitleMenuBar::mouseMoveEvent(QMouseEvent* pEvent)
       // TODO: recalc mousedown point so it feels more 'natural'
     }
 
-    window()->move(pEvent->globalPos() - m_mouseDownPoint);
+
+    QPoint position = stickToScreenBorders(pEvent->pos(), 50);
+
+    window()->move(position);
   }
 }
 

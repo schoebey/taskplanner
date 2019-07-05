@@ -38,6 +38,7 @@ SOURCES += \
     $$PWD/aboutdialog.cpp \
     hibernationdetector.cpp \
     toolbarinfodisplay.cpp \
+    widgetresizer.cpp \
     windowtitlemenubar.cpp
 
 HEADERS += \
@@ -64,6 +65,7 @@ HEADERS += \
     $$PWD/aboutdialog.h \
     hibernationdetector.h \
     toolbarinfodisplay.h \
+    widgetresizer.h \
     windowtitlemenubar.h
 
 FORMS += \
