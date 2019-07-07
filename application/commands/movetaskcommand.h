@@ -3,7 +3,7 @@
 
 #include "id_types.h"
 #include <QUndoCommand>
-;
+
 class Manager;
 class WidgetManager;
 

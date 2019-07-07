@@ -4,20 +4,22 @@
 #include "manager.h"
 #include "taskwidget.h"
 #include "groupwidget.h"
+#include "tasklistwidget.h"
 #include "widgetmanager.h"
+#include "itaskcontainerwidget.h"
 
 namespace
 {
   void moveTask(ITask* pTask,
                 TaskWidget* pTaskWidget,
                 IGroup* pOldGroup,
-                GroupWidget* pOldGroupWidget,
+                ITaskContainerWidget* pOldGroupWidget,
                 IGroup* pNewGroup,
-                GroupWidget* pNewGroupWidget,
+                ITaskContainerWidget* pNewGroupWidget,
                 ITask* pOldParentTask,
-                TaskWidget* pOldParentTaskWidget,
+                ITaskContainerWidget* pOldParentTaskWidget,
                 ITask* pNewParentTask,
-                TaskWidget* pNewParentTaskWidget,
+                ITaskContainerWidget* pNewParentTaskWidget,
                 int iNewPosition,
                 Manager* pManager)
   {
@@ -115,12 +117,12 @@ namespace
       {
         if (nullptr != pNewParentTaskWidget)
         {
-          auto pCurrentGroupWidget = pTaskWidget->groupWidget();
-          if (nullptr != pCurrentGroupWidget)
+          auto pCurrentTaskListWidget = pTaskWidget->taskListWidget();
+          if (nullptr != pCurrentTaskListWidget)
           {
-            pCurrentGroupWidget->removeTask(pTaskWidget);
+            pCurrentTaskListWidget->removeTask(pTaskWidget);
           }
-          pNewParentTaskWidget->addTask(pTaskWidget);
+          pNewParentTaskWidget->insertTask(pTaskWidget);
         }
       }
     }

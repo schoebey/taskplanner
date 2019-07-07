@@ -37,6 +37,7 @@ SOURCES += \
     $$PWD/mousehandlingframe.cpp \
     $$PWD/aboutdialog.cpp \
     hibernationdetector.cpp \
+    tasklistwidget.cpp \
     toolbarinfodisplay.cpp \
     widgetresizer.cpp \
     windowtitlemenubar.cpp
@@ -64,6 +65,8 @@ HEADERS += \
     $$PWD/mousehandlingframe.h \
     $$PWD/aboutdialog.h \
     hibernationdetector.h \
+    itaskcontainerwidget.h \
+    tasklistwidget.h \
     toolbarinfodisplay.h \
     widgetresizer.h \
     windowtitlemenubar.h

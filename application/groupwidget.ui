@@ -35,13 +35,13 @@
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents">
+     <widget class="TaskListWidget" name="pTaskListWidget">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>244</width>
-        <height>281</height>
+        <width>250</width>
+        <height>288</height>
        </rect>
       </property>
      </widget>
@@ -83,6 +83,12 @@
    <class>EditableLabel</class>
    <extends>QLabel</extends>
    <header>editablelabel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TaskListWidget</class>
+   <extends>QWidget</extends>
+   <header>tasklistwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
