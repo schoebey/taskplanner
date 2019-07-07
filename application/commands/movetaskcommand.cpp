@@ -74,7 +74,7 @@ namespace
       for (const auto& taskId : pNewGroup->taskIds())
       {
         ITask* pOtherTask = pManager->task(taskId);
-        if (nullptr != pOtherTask)
+        if (nullptr != pOtherTask && pOtherTask->parentTask() == pTask->parentTask())
         {
           // if the item's priority lies between the old and the new priority, increment it by one
           SPriority otherPrio = pOtherTask->priority();

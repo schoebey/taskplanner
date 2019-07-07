@@ -174,6 +174,16 @@ namespace
     return s;
   }
 
+  template<> QString convertFrom(const task_id& id)
+  {
+    return QString::number(int(id));
+  }
+
+  template<> QString convertFrom(const group_id& id)
+  {
+    return QString::number(int(id));
+  }
+
   template<typename T>
   QString convertFrom(const T& container)
   {
@@ -194,6 +204,16 @@ namespace
     bool bOk(false);
     int iRes = s.toInt(&bOk);
     return bOk ? iRes : 0;
+  }
+
+  template<> task_id convertTo<task_id>(const QString& s)
+  {
+    return convertTo<int>(s);
+  }
+
+  template<> group_id convertTo<group_id>(const QString& s)
+  {
+    return convertTo<int>(s);
   }
 
   template<> QString convertTo<QString>(const QString& s)
@@ -515,7 +535,7 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
     while (readFromMap(values, c_sTaskHeader, sPayload, index++))
     {
       Task* pTask = m.addTask();
-      group_id oldId = pTask->id();
+      task_id oldId = pTask->id();
 
       StreamReader t(&m_pStream, c_sTaskHeader, sPayload);
       EDeserializingError err = pTask->deserialize(this);
@@ -601,7 +621,6 @@ ESerializingError MarkdownSerializer::serialize(const Task& t)
   }
 
   writeToStream(*m_pStream, t.timeFragments(), "time_info");
-  writeToStream(*m_pStream, t.priority(), "sort_priority");
   writeToStream(*m_pStream, t.parentTask(), "parent");
   writeToStream(*m_pStream, t.taskIds(), "children");
 

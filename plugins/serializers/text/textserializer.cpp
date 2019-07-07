@@ -152,7 +152,7 @@ EDeserializingError TextSerializer::deserialize(SerializableManager& m)
     for (int iTask = 0; iTask < iNofTasks; ++iTask)
     {
       Task* pTask = m.addTask();
-      group_id oldId = pTask->id();
+      task_id oldId = pTask->id();
       EDeserializingError err = pTask->deserialize(this);
       m.changeTaskId(oldId, pTask->id());
       if (EDeserializingError::eOk != err)  { return err; }
@@ -186,7 +186,7 @@ ESerializingError TextSerializer::serialize(const Task& t)
 {
   m_stream << c_sTaskHeader << endl;
   m_stream << t.version() << endl;
-  m_stream << t.id() << endl;
+  m_stream << int(t.id()) << endl;
   m_stream << t.name() << endl;
   m_stream << t.description() << endl;
 
@@ -199,12 +199,12 @@ ESerializingError TextSerializer::serialize(const Task& t)
 
 //  m_stream << t.priority();
 
-  m_stream << t.parentTask() << endl;
+  m_stream << int(t.parentTask()) << endl;
 
   m_stream << t.taskIds().size() << endl;
   for (const auto& id : t.taskIds())
   {
-    m_stream << id << endl;
+    m_stream << int(id) << endl;
   }
 
   // TODO: serialize generic properties
@@ -227,11 +227,12 @@ EDeserializingError TextSerializer::deserialize(Task& t)
 
   if (0 == iVersion)
   {
-    task_id id;
-    m_stream >> id;
+    int iId;
+    m_stream >> iId;
+
     m_stream.readLine();
 
-    t.setId(id);
+    t.setId(iId);
 
     QString sName = m_stream.readLine();
     t.setName(sName);
@@ -256,11 +257,11 @@ EDeserializingError TextSerializer::deserialize(Task& t)
     }
     t.setTimeFragments(vTimeFragments);
 
-    task_id parentId;
-    m_stream >> parentId;
+    int iParentId;
+    m_stream >> iParentId;
     m_stream.readLine();
 
-    t.setParentTaskId(parentId);
+    t.setParentTaskId(iParentId);
 
     int iNofSubTasks = 0;
     m_stream >> iNofSubTasks;
@@ -268,11 +269,11 @@ EDeserializingError TextSerializer::deserialize(Task& t)
 
     for (int i = 0; i < iNofSubTasks; ++i)
     {
-      task_id id;
-      m_stream >> id;
+      int iId;
+      m_stream >> iId;
       m_stream.readLine();
 
-      t.addTaskId(id);
+      t.addTaskId(iId);
     }
 
     // TODO: deserialize generic properties
@@ -287,14 +288,14 @@ ESerializingError TextSerializer::serialize(const Group& g)
 {
   m_stream << c_sGroupHeader << endl;
   m_stream << g.version() << endl;
-  m_stream << g.id() << endl;
+  m_stream << int(g.id()) << endl;
   m_stream << g.name() << endl;
   m_stream << g.description() << endl;
 
   m_stream << g.taskIds().size() << endl;
   for (const auto& id : g.taskIds())
   {
-    m_stream << id << endl;
+    m_stream << int(id) << endl;
   }
 
   return ESerializingError::eOk;
@@ -315,11 +316,11 @@ EDeserializingError TextSerializer::deserialize(Group& g)
 
   if (0 == iVersion)
   {
-    task_id id;
-    m_stream >> id;
+    int iId;
+    m_stream >> iId;
     m_stream.readLine();
 
-    g.setId(id);
+    g.setId(iId);
 
     QString sName = m_stream.readLine();
     g.setName(sName);
@@ -333,11 +334,11 @@ EDeserializingError TextSerializer::deserialize(Group& g)
 
     for (int i = 0; i < iNofSubTasks; ++i)
     {
-      task_id id;
-      m_stream >> id;
+      int iId;
+      m_stream >> iId;
       m_stream.readLine();
 
-      g.addTaskId(id);
+      g.addTaskId(iId);
     }
 
     return EDeserializingError::eOk;

@@ -48,6 +48,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(ui->pDescription, SIGNAL(editingFinished()), this, SLOT(onDescriptionEdited()));
   connect(ui->pDescription, SIGNAL(sizeChanged()), this, SLOT(updateSize()));
   connect(ui->pShowDetails, SIGNAL(toggled(bool)), this, SLOT(setExpanded(bool)));
+  connect(ui->pTaskListWidget, &TaskListWidget::taskInserted, this, &TaskWidget::onTaskInserted);
 
   setUpContextMenu();
 
@@ -212,10 +213,7 @@ void TaskWidget::setBackgroundImage(const QImage& image)
   pAnimation->setEasingCurve(QEasingCurve::Linear);
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 
-  for (auto pSubTask : m_subTasks)
-  {
-    pSubTask->setBackgroundImage(image);
-  }
+  ui->pTaskListWidget->setBackgroundImage(image);
 }
 
 double TaskWidget::backgroundImageBlendFactor() const
@@ -612,6 +610,14 @@ void TaskWidget::onAddSubtaskTriggered()
   emit newSubTaskRequested(id());
 }
 
+void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int iPos)
+{
+  if (nullptr != pTaskWidget)
+  {
+    emit taskMovedTo(pTaskWidget->id(), m_taskId, iPos);
+  }
+}
+
 HighlightingMethod TaskWidget::highlight() const
 {
   return m_pOverlay->highlight();
@@ -690,18 +696,17 @@ bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
       m_bMouseDown = false;
       TaskListWidget* pTaskListWidgetUnderMouse = TaskListWidget::TaskListWidgetUnderMouse();
       TaskWidget* pTaskWidgetUnderMouse = TaskWidgetUnderMoue();
-      if (nullptr != pTaskWidgetUnderMouse)
-      {
-        // insert dragging task as sub-task...
-        pTaskWidgetUnderMouse->insertTask(this);
-        m_pDraggingTaskWidget = nullptr;
-      }
-      else if (nullptr != pTaskListWidgetUnderMouse)
+      if (nullptr != pTaskListWidgetUnderMouse)
       {
         QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
         QPoint pt = pTaskListWidgetUnderMouse->mapFromGlobal(pMouseEvent->globalPos());
         int iInsertionIndex = pTaskListWidgetUnderMouse->indexFromPoint(pt);
         pTaskListWidgetUnderMouse->requestInsert(this, iInsertionIndex);
+      }
+      else if (nullptr != pTaskWidgetUnderMouse)
+      {
+        // append dragging task as sub-task...
+        pTaskWidgetUnderMouse->requestInsert(this);
       }
       else if (nullptr != m_pPreviousTaskListWidget)
       {
@@ -923,54 +928,19 @@ void TaskWidget::setExpanded(bool bExpanded)
 
 void TaskWidget::requestInsert(TaskWidget *pTaskWidget, int iPos)
 {
-
+  ui->pTaskListWidget->requestInsert(pTaskWidget, iPos);
 }
 
 bool TaskWidget::insertTask(TaskWidget *pTaskWidget, int iPos)
 {
-  if (m_subTasks.end() == m_subTasks.find(pTaskWidget))
-  {
-    QLayout* pLayout = ui->pSubTasks->layout();
-    if (nullptr != pLayout)
-    {
-      QGridLayout* pGrid = dynamic_cast<QGridLayout*>(pLayout);
-      if (nullptr != pGrid)
-      {
-        pGrid->addWidget(pTaskWidget, pGrid->rowCount(), 0);
-        pTaskWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        connect(pTaskWidget, SIGNAL(sizeChanged()), this, SIGNAL(sizeChanged()), Qt::QueuedConnection);
-        pTaskWidget->setParentTask(this);
-
-        emit taskAdded(id(), pTaskWidget->id());
-
-        emit sizeChanged();
-
-        m_subTasks.insert(pTaskWidget);
-
-        pTaskWidget->show();
-
-        return true;
-      }
-    }
-  }
-
-  return false;
+  return ui->pTaskListWidget->insertTask(pTaskWidget, iPos);
 }
 
-void TaskWidget::removeTask(TaskWidget* pTaskWidget)
+void TaskWidget::removeTask(TaskWidget *pTaskWidget)
 {
-  disconnect(pTaskWidget, SIGNAL(sizeChanged()), this, SIGNAL(sizeChanged()));
-  pTaskWidget->setParentTask(nullptr);
-
-  emit taskRemoved(id(), pTaskWidget->id());
-
-  ui->pSubTasks->layout()->removeWidget(pTaskWidget);
-
+  ui->pTaskListWidget->removeTask(pTaskWidget);
   emit sizeChanged();
-
-  m_subTasks.erase(pTaskWidget);
 }
-
 
 void TaskWidget::onDeleteTriggered()
 {
@@ -1008,4 +978,18 @@ void TaskWidget::onLinkPasted()
 void TaskWidget::showEvent(QShowEvent* /*pEvent*/)
 {
   emit sizeChanged();
+}
+
+bool TaskWidget::onMouseMoved(const QPoint& pt)
+{
+  bool bRv = ui->pTaskListWidget->onMouseMoved(ui->pTaskListWidget->mapFrom(this, pt));
+
+  static const int c_iBorderSize = 20;
+  if (!bRv && rect().adjusted(0, c_iBorderSize, 0, -c_iBorderSize).contains(pt))
+  {
+    TaskWidget::SetTaskWidgetUnderMouse(this);
+    return true;
+  }
+
+  return bRv;
 }

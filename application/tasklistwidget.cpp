@@ -273,17 +273,20 @@ int TaskListWidget::indexFromPoint(QPoint pt)
   return static_cast<int>(m_vpTaskWidgets.size());
 }
 
-bool TaskListWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
+bool TaskListWidget::onMouseMoved(const QPoint& pt)
 {
-  if (QEvent::MouseMove == pEvent->type())
+  if (rect().contains(pt))
   {
-    QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
-    QPoint pt = mapFromGlobal(pMouseEvent->globalPos());
-    if (rect().contains(pt))
+    TaskWidget* pTaskWidget = taskWidgetAt(pt);
+
+    if (nullptr != pTaskWidget)
     {
-      pt = mapFromGlobal(pMouseEvent->globalPos());
-      TaskWidget* pTaskWidget = taskWidgetAt(pt);
-      TaskWidget::SetTaskWidgetUnderMouse(pTaskWidget);
+      m_pMouseHoveringOver = nullptr;
+      if (pTaskWidget->onMouseMoved(pTaskWidget->mapFrom(this, pt)))
+      {
+        ShowGhost(nullptr, -1);
+        return true;
+      }
 
       if (nullptr != TaskWidget::DraggingTaskWidget())
       {
@@ -301,18 +304,24 @@ bool TaskListWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
           ShowGhost(TaskWidget::DraggingTaskWidget(), iPos);
         }
       }
-
-      m_pMouseHoveringOver = this;
     }
     else
     {
-      if (m_pMouseHoveringOver == this)
-      {
-        m_pMouseHoveringOver = nullptr;
-        TaskWidget::SetTaskWidgetUnderMouse(nullptr);
-      }
-      ShowGhost(nullptr, -1);
+      TaskWidget::SetTaskWidgetUnderMouse(nullptr);
     }
+
+    m_pMouseHoveringOver = this;
+
+    return true;
+  }
+  else
+  {
+    if (m_pMouseHoveringOver == this)
+    {
+      m_pMouseHoveringOver = nullptr;
+      TaskWidget::SetTaskWidgetUnderMouse(nullptr);
+    }
+    ShowGhost(nullptr, -1);
   }
 
   return false;

@@ -33,6 +33,7 @@ public:
 
   int indexFromPoint(QPoint pt);
 
+  bool onMouseMoved(const QPoint &pt);
 signals:
   void taskInserted(TaskWidget* pTaskWidget, int iPos);
   void taskRemoved(TaskWidget* pTaskWidget);
@@ -43,7 +44,6 @@ private:
 
   void resizeEvent(QResizeEvent* pEvent) override;
   void moveEvent(QMoveEvent* pEvent) override;
-  bool eventFilter(QObject* pObj, QEvent* pEvent) override;
 
 private slots:
   void updatePositions(int iSpace = -1, int iSpacePos = 0);
