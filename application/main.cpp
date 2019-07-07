@@ -97,6 +97,8 @@ int main(int argc, char *argv[])
 
 //  tspConstraintTpl spResult = ONE_OF('a', 'b', 'c') OR (EVEN_NUMBER BUT MIN(0) AND MAX(100));
 
+  task_id test(0);
+  test++;
 
   // test code for properties
   REGISTER_PROPERTY(Task, "name", QString, false);

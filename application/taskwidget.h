@@ -76,6 +76,7 @@ public:
 
   void edit();
 
+  bool onMouseMoved(const QPoint &pt);
 public slots:
   void setExpanded(bool bExpanded);
 
@@ -98,7 +99,7 @@ signals:
   void propertyRemoved(task_id id, const QString& sName);
   void sizeChanged();
   void newSubTaskRequested(task_id taskId);
-  void taskAdded(task_id parentId, task_id childId);
+  void taskMovedTo(task_id taskId, task_id newParentTaskId, int iPos);
   void taskRemoved(task_id parentId, task_id childId);
   void taskDeleted(task_id id);
   void linkAdded(task_id id, QUrl url);
@@ -118,6 +119,7 @@ private slots:
   void onDeleteTriggered();
   void onLinkPasted();
   void onAddSubtaskTriggered();
+  void onTaskInserted(TaskWidget* pTaskWidget, int iPos = -1);
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;
@@ -168,7 +170,6 @@ private:
 
   QMenu* m_pContextMenu = nullptr;
 
-  std::set<TaskWidget*> m_subTasks;
   std::map<QUrl, LinkWidget*> m_linkWidgets;
 
   static TaskWidget* m_pDraggingTaskWidget;

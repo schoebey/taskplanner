@@ -42,6 +42,7 @@ private slots:
   void renameTask(task_id id, const QString& sNewName);
   void changeTaskDescription(task_id id, const QString& sNewDescr);
   void onTaskMoved(task_id id, group_id groupId, int iPos);
+  void onTaskMoved(task_id id, task_id newParentTaskId, int iPos);
   void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
   void onPropertyRemoved(task_id taskId, const QString& sPropertyName);
   void onLinkAdded(task_id taskId, QUrl url);
@@ -81,6 +82,7 @@ signals:
 private:
   void timerEvent(QTimerEvent* pEvent) override;
   void closeEvent(QCloseEvent *) override;
+  bool eventFilter(QObject *, QEvent *pEvent) override;
   void updateAutoPrioritiesInTaskWidgets();
   void saveTempFile();
   void loadPlugins(const QString &sInitialSearchPath = QString());

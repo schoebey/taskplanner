@@ -39,6 +39,7 @@
 #include <QPluginLoader>
 #include <plugininterface.h>
 
+#include <QMouseEvent>
 #include <QSettings>
 #include <array>
 #include <future>
@@ -68,6 +69,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   setWindowFlag(Qt::FramelessWindowHint);
   ui->setupUi(this);
 
+  qApp->installEventFilter(this);
 
   auto pUndoAction = m_undoStack.createUndoAction(this);
   pUndoAction->setShortcut(Qt::CTRL + Qt::Key_Z);
@@ -374,7 +376,7 @@ void MainWindow::createNewTask(group_id groupId)
     {
       delete m_pTaskCreationDialog;
       m_pTaskCreationDialog = new TaskCreationDialog(this);
-      m_pTaskCreationDialog->setProperty("groupId", groupId);
+      m_pTaskCreationDialog->setProperty("groupId", int(groupId));
       connect(m_pTaskCreationDialog, SIGNAL(accepted()), this, SLOT(onNewTaskAccepted()));
       m_pTaskCreationDialog->show();
     }
@@ -383,7 +385,7 @@ void MainWindow::createNewTask(group_id groupId)
 
 void MainWindow::onNewTaskAccepted()
 {
-  group_id groupId = m_pTaskCreationDialog->property("groupId").value<group_id>();
+  group_id groupId = m_pTaskCreationDialog->property("groupId").toInt();
 
   IGroup* pGroup = m_pManager->group(groupId);
   GroupWidget* pGroupWidget = m_pWidgetManager->groupWidget(groupId);
@@ -410,7 +412,7 @@ void MainWindow::createNewSubTask(task_id taskId)
     {
       delete m_pTaskCreationDialog;
       m_pTaskCreationDialog = new TaskCreationDialog(this);
-      m_pTaskCreationDialog->setProperty("taskId", taskId);
+      m_pTaskCreationDialog->setProperty("taskId", int(taskId));
       connect(m_pTaskCreationDialog, SIGNAL(accepted()), this, SLOT(onNewSubTaskAccepted()));
       m_pTaskCreationDialog->show();
     }
@@ -419,7 +421,7 @@ void MainWindow::createNewSubTask(task_id taskId)
 
 void MainWindow::onNewSubTaskAccepted()
 {
-  task_id parentTaskId = m_pTaskCreationDialog->property("taskId").value<group_id>();
+  task_id parentTaskId = m_pTaskCreationDialog->property("taskId").toInt();
 
   ITask* pParentTask = m_pManager->task(parentTaskId);
   if (nullptr != pParentTask)
@@ -475,41 +477,6 @@ void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
   }
 }
 
-//void MainWindow::onTaskMoved(task_id id, task_id newParentTaskId, int iPos)
-//{
-//  ITask* pTask = m_pManager->task(id);
-//  if (nullptr != pTask)
-//  {
-//    int iOldPos = pTask->priority().priority(0);
-//    ITask* pOldTask = m_pManager->task(pTask->parentTask());
-//    ITask* pNewTask = m_pManager->task(newParentTaskId);
-
-//    // only 'move' the task if it really has been moved from one group to another
-//    if (nullptr != pOldTask && nullptr != pNewTask &&
-//        (pOldTask != pNewTask || iOldPos != iPos))
-//    {
-//      MoveTaskCommand* pCommand = new MoveTaskCommand(id,
-//                                                      pOldTask->group(),
-//                                                      pNewTask->group(),
-//                                                      pOldTask->id(),
-//                                                      newParentTaskId,
-//                                                      iOldPos, iPos,
-//                                                      m_pManager,m_pWidgetManager);
-//      m_undoStack.push(pCommand);
-
-//      emit documentModified();
-//    }
-//    else
-//    {
-//      auto pTaskWidget = m_pWidgetManager->taskWidget(newParentTaskId);
-//      if (nullptr != pTaskWidget)
-//      {
-//        pTaskWidget->insertTask(m_pWidgetManager->taskWidget(id), iPos);
-//      }
-//    }
-//  }
-//}
-
 void MainWindow::onTaskMoved(task_id id, group_id newParentGroupId, int iPos)
 {
   ITask* pTask = m_pManager->task(id);
@@ -539,6 +506,41 @@ void MainWindow::onTaskMoved(task_id id, group_id newParentGroupId, int iPos)
       if (nullptr != pGroupWidget)
       {
         pGroupWidget->insertTask(m_pWidgetManager->taskWidget(id), iPos);
+      }
+    }
+  }
+}
+
+void MainWindow::onTaskMoved(task_id id, task_id newParentTaskId, int iPos)
+{
+  ITask* pTask = m_pManager->task(id);
+  if (nullptr != pTask)
+  {
+    int iOldPos = pTask->priority().priority(0);
+    ITask* pOldParentTask = m_pManager->task(pTask->parentTask());
+    ITask* pNewParentTask = m_pManager->task(newParentTaskId);
+
+    // only 'move' the task if it really has been moved from one group to another
+    if (nullptr != pOldParentTask && nullptr != pNewParentTask &&
+        (pOldParentTask != pNewParentTask || iOldPos != iPos))
+    {
+      MoveTaskCommand* pCommand = new MoveTaskCommand(id,
+                                                      pOldParentTask->group(),
+                                                      pNewParentTask->group(),
+                                                      pOldParentTask->id(),
+                                                      pNewParentTask->id(),
+                                                      iOldPos, iPos,
+                                                      m_pManager,m_pWidgetManager);
+      m_undoStack.push(pCommand);
+
+      emit documentModified();
+    }
+    else
+    {
+      auto pTaskWidget = m_pWidgetManager->taskWidget(newParentTaskId);
+      if (nullptr != pTaskWidget)
+      {
+        pTaskWidget->insertTask(m_pWidgetManager->taskWidget(id), iPos);
       }
     }
   }
@@ -1097,7 +1099,7 @@ void MainWindow::setAutoSortEnabled(group_id groupId)
       m_autoSortTimers.end())
   {
     m_autoSortTimers[groupId] = new QTimer(this);
-    m_pTimeoutGroupIdMapper->setMapping(m_autoSortTimers[groupId], groupId);
+    m_pTimeoutGroupIdMapper->setMapping(m_autoSortTimers[groupId], int(groupId));
     connect(m_autoSortTimers[groupId], SIGNAL(timeout()), m_pTimeoutGroupIdMapper, SLOT(map()));
   }
 
@@ -1296,4 +1298,30 @@ void MainWindow::onWokeUpFromHibernation(const QDateTime& sleepTime,
       pTask->startWork(wakeUpTime);
     }
   }
+}
+
+bool MainWindow::eventFilter(QObject* /*pWatched*/, QEvent* pEvent)
+{
+  if (pEvent->type() == QEvent::MouseMove)
+  {
+    QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
+    if (nullptr != pMouseEvent)
+    {
+      QPoint ptGlobal = pMouseEvent->globalPos();
+      for (const auto& groupId : m_pManager->groupIds())
+      {
+        auto pGroup = m_pWidgetManager->groupWidget(groupId);
+        if (nullptr != pGroup)
+        {
+          QPoint pt = pGroup->mapFromGlobal(ptGlobal);
+          if (pGroup->rect().contains(pt))
+          {
+            pGroup->onMouseMoved(pt);
+          }
+        }
+      }
+    }
+  }
+
+  return false;
 }

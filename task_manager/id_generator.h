@@ -7,7 +7,8 @@ template<class T> class id_generator
   {
     if (-1 == id)
     {
-      return c_nextId++;
+      c_nextId++;
+      return c_nextId;
     }
     else if (id > c_nextId)
     {
@@ -32,7 +33,7 @@ protected:
     m_id = id;
     if (c_nextId <= id)
     {
-      c_nextId = id + 1;
+      c_nextId = ++id;
     }
   }
 

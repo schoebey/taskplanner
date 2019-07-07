@@ -157,3 +157,8 @@ void GroupWidget::onSortClicked(bool bChecked)
   }
 }
 
+bool GroupWidget::onMouseMoved(const QPoint& pt)
+{
+  return ui->pTaskListWidget->onMouseMoved(ui->pTaskListWidget->mapFrom(this, pt));
+}
+

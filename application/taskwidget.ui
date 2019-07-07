@@ -91,43 +91,6 @@
       <property name="spacing">
        <number>0</number>
       </property>
-      <item row="2" column="0" colspan="2">
-       <widget class="QFrame" name="pSubTasks">
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_4">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetNoConstraint</enum>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <item row="0" column="0">
-          <widget class="QFrame" name="pSeparator_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
       <item row="1" column="0" colspan="2">
        <widget class="QFrame" name="pDynamicProperties">
         <property name="frameShadow">
@@ -206,6 +169,40 @@
         </layout>
        </widget>
       </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="TaskListWidget" name="pTaskListWidget" native="true">
+        <layout class="QGridLayout" name="gridLayout_4">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetNoConstraint</enum>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QFrame" name="pSeparator_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -238,6 +235,12 @@
    <class>EditableLabel</class>
    <extends>QLabel</extends>
    <header>editablelabel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TaskListWidget</class>
+   <extends>QWidget</extends>
+   <header>tasklistwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

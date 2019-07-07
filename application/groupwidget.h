@@ -49,6 +49,8 @@ public:
   bool insertTask(TaskWidget* pTaskWidget, int iPos = -1) override;
   void removeTask(TaskWidget* pTaskWidget) override;
 
+  bool onMouseMoved(const QPoint &pt);
+
 signals:
   void taskMovedTo(task_id taskId, group_id groupId, int iPos);
   void renamed(group_id groupId, const QString& sNewName);
@@ -70,7 +72,6 @@ protected slots:
 private:
   Ui::GroupWidget *ui;
   group_id m_groupId;
-  std::vector<TaskWidget*> m_vpTaskWidgets;
   QImage m_backgroundImage;
 };
 

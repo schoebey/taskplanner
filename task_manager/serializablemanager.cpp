@@ -108,7 +108,7 @@ Group* SerializableManager::group(group_id id) const
 
 std::set<group_id> SerializableManager::groupIds() const
 {
-  std::set<task_id> groupIds;
+  std::set<group_id> groupIds;
   for (const auto& el : m_groups)
   {
     groupIds.insert(el.second->id());
