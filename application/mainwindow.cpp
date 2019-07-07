@@ -280,7 +280,7 @@ void MainWindow::updateTaskUi()
         TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(pTask->parentTask());
         if (nullptr != pParentTaskWidget)
         {
-          pParentTaskWidget->addTask(pTaskWidget);
+          pParentTaskWidget->insertTask(pTaskWidget);
         }
       }
     }
@@ -475,14 +475,49 @@ void MainWindow::changeTaskDescription(task_id id, const QString& sNewDescr)
   }
 }
 
-void MainWindow::onTaskMoved(task_id id, group_id groupId, int iPos)
+//void MainWindow::onTaskMoved(task_id id, task_id newParentTaskId, int iPos)
+//{
+//  ITask* pTask = m_pManager->task(id);
+//  if (nullptr != pTask)
+//  {
+//    int iOldPos = pTask->priority().priority(0);
+//    ITask* pOldTask = m_pManager->task(pTask->parentTask());
+//    ITask* pNewTask = m_pManager->task(newParentTaskId);
+
+//    // only 'move' the task if it really has been moved from one group to another
+//    if (nullptr != pOldTask && nullptr != pNewTask &&
+//        (pOldTask != pNewTask || iOldPos != iPos))
+//    {
+//      MoveTaskCommand* pCommand = new MoveTaskCommand(id,
+//                                                      pOldTask->group(),
+//                                                      pNewTask->group(),
+//                                                      pOldTask->id(),
+//                                                      newParentTaskId,
+//                                                      iOldPos, iPos,
+//                                                      m_pManager,m_pWidgetManager);
+//      m_undoStack.push(pCommand);
+
+//      emit documentModified();
+//    }
+//    else
+//    {
+//      auto pTaskWidget = m_pWidgetManager->taskWidget(newParentTaskId);
+//      if (nullptr != pTaskWidget)
+//      {
+//        pTaskWidget->insertTask(m_pWidgetManager->taskWidget(id), iPos);
+//      }
+//    }
+//  }
+//}
+
+void MainWindow::onTaskMoved(task_id id, group_id newParentGroupId, int iPos)
 {
   ITask* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
     int iOldPos = pTask->priority().priority(0);
     IGroup* pOldGroup = m_pManager->group(pTask->group());
-    IGroup* pNewGroup = m_pManager->group(groupId);
+    IGroup* pNewGroup = m_pManager->group(newParentGroupId);
 
     // only 'move' the task if it really has been moved from one group to another
     if (nullptr != pOldGroup && nullptr != pNewGroup &&
@@ -490,7 +525,7 @@ void MainWindow::onTaskMoved(task_id id, group_id groupId, int iPos)
     {
       MoveTaskCommand* pCommand = new MoveTaskCommand(id,
                                                       pTask->group(),
-                                                      groupId,
+                                                      newParentGroupId,
                                                       -1, -1,
                                                       iOldPos, iPos,
                                                       m_pManager,m_pWidgetManager);
@@ -500,7 +535,7 @@ void MainWindow::onTaskMoved(task_id id, group_id groupId, int iPos)
     }
     else
     {
-      auto pGroupWidget = m_pWidgetManager->groupWidget(groupId);
+      auto pGroupWidget = m_pWidgetManager->groupWidget(newParentGroupId);
       if (nullptr != pGroupWidget)
       {
         pGroupWidget->insertTask(m_pWidgetManager->taskWidget(id), iPos);

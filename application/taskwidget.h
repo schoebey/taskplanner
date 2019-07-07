@@ -4,6 +4,7 @@
 #include "id_types.h"
 #include "highlightmethod.h"
 #include "propertyproviderinterface.h"
+#include "itaskcontainerwidget.h"
 
 #include <QFrame>
 #include <QUrl>
@@ -15,13 +16,13 @@ namespace Ui {
   class TaskWidget;
 }
 
-class GroupWidget;
+class TaskListWidget;
 class EditableLabel;
 class TaskWidgetOverlay;
 class QMenu;
 class LinkWidget;
 class QLabel;
-class TaskWidget : public QFrame, public IPropertyProvider
+class TaskWidget : public QFrame, public IPropertyProvider, public ITaskContainerWidget
 {
   Q_OBJECT
 
@@ -37,9 +38,9 @@ public:
   QString description() const;
   void setDescription(const QString& sDescription);
 
-  GroupWidget* previousGroupWidget() const;
-  GroupWidget* groupWidget() const;
-  void setGroupWidget(GroupWidget* pGroupWidget);
+  TaskListWidget* previousTaskListWidget() const;
+  TaskListWidget* taskListWidget() const;
+  void setTaskListWidget(TaskListWidget* pTaskListWidget);
 
   static TaskWidget* DraggingTaskWidget();
   static void SetTaskWidgetUnderMouse(TaskWidget* pTaskWidget);
@@ -77,8 +78,10 @@ public:
 
 public slots:
   void setExpanded(bool bExpanded);
-  void addTask(TaskWidget* pTaskWidget);
-  void removeTask(TaskWidget* pTaskWidget);
+
+  void requestInsert(TaskWidget* pTaskWidget, int iPos = -1) override;
+  bool insertTask(TaskWidget* pTaskWidget, int iPos = -1) override;
+  void removeTask(TaskWidget* pTaskWidget) override;
 
   void addLink(const QUrl& link);
   void removeLink(const QUrl& link);
@@ -147,8 +150,8 @@ private:
   bool m_bDropShadow = true;
   double m_dAutoPriority = 0;
 
-  GroupWidget* m_pGroupWidget = nullptr;
-  GroupWidget* m_pPreviousGroupWidget = nullptr;
+  TaskListWidget* m_pTaskListWidget = nullptr;
+  TaskListWidget* m_pPreviousTaskListWidget = nullptr;
 
   TaskWidgetOverlay* m_pOverlay;
 

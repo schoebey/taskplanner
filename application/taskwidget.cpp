@@ -7,6 +7,7 @@
 #include "linkwidget.h"
 #include "mousehandlingframe.h"
 #include "task.h"
+#include "tasklistwidget.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -68,9 +69,9 @@ TaskWidget::~TaskWidget()
     m_pDraggingTaskWidget = nullptr;
   }
 
-  if (nullptr != m_pGroupWidget)
+  if (nullptr != m_pTaskListWidget)
   {
-    m_pGroupWidget->removeTask(this);
+    m_pTaskListWidget->removeTask(this);
   }
 
   delete ui;
@@ -175,24 +176,24 @@ void TaskWidget::setDescription(const QString& sDescription)
   emit sizeChanged();
 }
 
-GroupWidget*TaskWidget::previousGroupWidget() const
+TaskListWidget* TaskWidget::previousTaskListWidget() const
 {
-  return m_pPreviousGroupWidget;
+  return m_pPreviousTaskListWidget;
 }
 
-GroupWidget*TaskWidget::groupWidget() const
+TaskListWidget* TaskWidget::taskListWidget() const
 {
-  return m_pGroupWidget;
+  return m_pTaskListWidget;
 }
 
-void TaskWidget::setGroupWidget(GroupWidget* pGroupWidget)
+void TaskWidget::setTaskListWidget(TaskListWidget* pTaskListWidget)
 {
-  m_pGroupWidget = pGroupWidget;
+  m_pTaskListWidget = pTaskListWidget;
 
-  if (nullptr != m_pGroupWidget)
+  if (nullptr != m_pTaskListWidget)
   {
-    setBackgroundImage(m_pGroupWidget->backgroundImage());
-    m_pPreviousGroupWidget = m_pGroupWidget;
+    setBackgroundImage(m_pTaskListWidget->backgroundImage());
+    m_pPreviousTaskListWidget = m_pTaskListWidget;
     m_pDraggingTaskWidget = nullptr;
   }
 }
@@ -628,7 +629,7 @@ void TaskWidget::setParentTask(TaskWidget* pParentTask)
     }
     if (nullptr != m_pParentTask)
     {
-      m_pParentTask->addTask(this);
+      m_pParentTask->insertTask(this);
     }
   }
 }
@@ -687,24 +688,24 @@ bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
     else if (QEvent::MouseButtonRelease == pEvent->type())
     {
       m_bMouseDown = false;
-      GroupWidget* pGroupWidgetUnderMouse = GroupWidget::GroupWidgetUnderMouse();
+      TaskListWidget* pTaskListWidgetUnderMouse = TaskListWidget::TaskListWidgetUnderMouse();
       TaskWidget* pTaskWidgetUnderMouse = TaskWidgetUnderMoue();
       if (nullptr != pTaskWidgetUnderMouse)
       {
         // insert dragging task as sub-task...
-        pTaskWidgetUnderMouse->addTask(this);
+        pTaskWidgetUnderMouse->insertTask(this);
         m_pDraggingTaskWidget = nullptr;
       }
-      else if (nullptr != pGroupWidgetUnderMouse)
+      else if (nullptr != pTaskListWidgetUnderMouse)
       {
         QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
-        QPoint pt = pGroupWidgetUnderMouse->mapFromGlobal(pMouseEvent->globalPos());
-        int iInsertionIndex = pGroupWidgetUnderMouse->indexFromPoint(pt);
-        pGroupWidgetUnderMouse->requestInsert(this, iInsertionIndex);
+        QPoint pt = pTaskListWidgetUnderMouse->mapFromGlobal(pMouseEvent->globalPos());
+        int iInsertionIndex = pTaskListWidgetUnderMouse->indexFromPoint(pt);
+        pTaskListWidgetUnderMouse->requestInsert(this, iInsertionIndex);
       }
-      else if (nullptr != m_pPreviousGroupWidget)
+      else if (nullptr != m_pPreviousTaskListWidget)
       {
-        m_pPreviousGroupWidget->insertTask(this);
+        m_pPreviousTaskListWidget->insertTask(this);
       }
       else
       {
@@ -740,9 +741,9 @@ void TaskWidget::mouseMoveEvent(QMouseEvent* pMouseEvent)
     {
       m_pDraggingTaskWidget = this;
 
-      if (nullptr != m_pGroupWidget)
+      if (nullptr != m_pTaskListWidget)
       {
-        m_pGroupWidget->removeTask(this);
+        m_pTaskListWidget->removeTask(this);
       }
 
       if (nullptr != m_pParentTask)
@@ -920,7 +921,12 @@ void TaskWidget::setExpanded(bool bExpanded)
   }
 }
 
-void TaskWidget::addTask(TaskWidget* pTaskWidget)
+void TaskWidget::requestInsert(TaskWidget *pTaskWidget, int iPos)
+{
+
+}
+
+bool TaskWidget::insertTask(TaskWidget *pTaskWidget, int iPos)
 {
   if (m_subTasks.end() == m_subTasks.find(pTaskWidget))
   {
@@ -942,9 +948,13 @@ void TaskWidget::addTask(TaskWidget* pTaskWidget)
         m_subTasks.insert(pTaskWidget);
 
         pTaskWidget->show();
+
+        return true;
       }
     }
   }
+
+  return false;
 }
 
 void TaskWidget::removeTask(TaskWidget* pTaskWidget)
@@ -960,6 +970,7 @@ void TaskWidget::removeTask(TaskWidget* pTaskWidget)
 
   m_subTasks.erase(pTaskWidget);
 }
+
 
 void TaskWidget::onDeleteTriggered()
 {

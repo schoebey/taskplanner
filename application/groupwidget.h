@@ -3,6 +3,7 @@
 
 #include "id_types.h"
 #include "propertyproviderinterface.h"
+#include "itaskcontainerwidget.h"
 
 #include <QFrame>
 
@@ -15,7 +16,7 @@ namespace widgetAnimation {
 }
 
 class TaskWidget;
-class GroupWidget : public QFrame, public IPropertyProvider
+class GroupWidget : public QFrame, public IPropertyProvider, public ITaskContainerWidget
 {
   Q_OBJECT
 
@@ -33,11 +34,6 @@ public:
   bool hasPropertyValue(const QString& sName) const override;
   QString propertyValue(const QString& sName) const override;
 
-  void requestInsert(TaskWidget* pTaskWidget, int iPos = -1);
-  void insertTask(TaskWidget* pTaskWidget, int iPos = -1);
-  void removeTask(TaskWidget* pTaskWidget);
-
-  static GroupWidget* GroupWidgetUnderMouse();
 
   int indexFromPoint(QPoint pt);
 
@@ -49,6 +45,10 @@ public:
 
   void setAutoSortingEnabled(bool bEnabled);
 
+  void requestInsert(TaskWidget* pTaskWidget, int iPos = -1) override;
+  bool insertTask(TaskWidget* pTaskWidget, int iPos = -1) override;
+  void removeTask(TaskWidget* pTaskWidget) override;
+
 signals:
   void taskMovedTo(task_id taskId, group_id groupId, int iPos);
   void renamed(group_id groupId, const QString& sNewName);
@@ -57,27 +57,21 @@ signals:
   void autoSortDisabled(group_id);
 
 protected:
-  void resizeEvent(QResizeEvent* pEvent);
-  void moveEvent(QMoveEvent* pEvent);
-  bool eventFilter(QObject* pObj, QEvent* pEvent);
   void ShowGhost(TaskWidget* pTaskWidget, int iPos);
   TaskWidget* taskWidgetAt(QPoint pt);
   void setUpContextMenu();
 
 protected slots:
-  void repositionChildren();
+  void onTaskInserted(TaskWidget* pTaskWidget, int iPos = -1);
   void onNewTaskClicked();
   void onTitleEdited();
   void onSortClicked(bool bChecked);
-  void UpdatePositions(int iSpace = -1, int iSpacePos = 0);
 
 private:
   Ui::GroupWidget *ui;
   group_id m_groupId;
   std::vector<TaskWidget*> m_vpTaskWidgets;
   QImage m_backgroundImage;
-
-  static GroupWidget* m_pMouseHoveringOver;
 };
 
 #endif // GROUPWIDGET_H

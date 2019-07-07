@@ -396,3 +396,7 @@ ToolBarInfoDisplay QLabel {
   color: white;
   font-size: 20pt;
 }
+
+TaskListWidget {
+	background-color: red;
+}
