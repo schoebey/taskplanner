@@ -8,8 +8,53 @@
 #include "widgetmanager.h"
 #include "itaskcontainerwidget.h"
 
+#include <QDebug>
+
 namespace
 {
+  template<typename T> void fillSortPriorityGapsOfChildren(T* pT, task_id parentTaskId, Manager* pManager)
+  {
+    std::map<int, ITask*> tasksByPriority;
+    for (const auto& taskId : pT->taskIds())
+    {
+      ITask* pOtherTask = pManager->task(taskId);
+      if (nullptr != pOtherTask && parentTaskId == pOtherTask->parentTask())
+      {
+        tasksByPriority[pOtherTask->priority().priority(0)] = pOtherTask;
+      }
+    }
+
+    int iPrevPriority = 0;
+    for (auto& el : tasksByPriority)
+    {
+      int iDelta = el.first - iPrevPriority - 1;
+      if (iDelta > 0)
+      {
+        auto prio = el.second->priority();
+        prio.setPriority(0, prio.priority(0) - iDelta);
+        el.second->setPriority(prio);
+      }
+      iPrevPriority = el.second->priority().priority(0);
+    }
+  }
+
+  template<typename T> void correctSortPriorityOfChildren(T* pT, task_id parentTaskId, int iStartPosition, int iEndPosition, int iDelta, Manager* pManager)
+  {
+    for (const auto& taskId : pT->taskIds())
+    {
+      ITask* pOtherTask = pManager->task(taskId);
+      if (nullptr != pOtherTask && parentTaskId == pOtherTask->parentTask())
+      {
+        auto prio = pOtherTask->priority();
+        if (prio.priority(0) >= iStartPosition && prio.priority(0) < iEndPosition)
+        {
+          prio.setPriority(0, prio.priority(0) + iDelta);
+          pOtherTask->setPriority(prio);
+        }
+      }
+    }
+  }
+
   void moveTask(ITask* pTask,
                 TaskWidget* pTaskWidget,
                 IGroup* pOldGroup,
@@ -23,108 +68,112 @@ namespace
                 int iNewPosition,
                 Manager* pManager)
   {
-    if (nullptr == pTask || nullptr == pTaskWidget ||
-        nullptr == pOldGroup || nullptr == pOldGroupWidget ||
-        nullptr == pNewGroup || nullptr == pNewGroupWidget)
+    if (nullptr == pTask || nullptr == pTaskWidget)
     {
       return;
     }
 
-    pTask->setGroup(pNewGroup->id());
 
-    // if the task has moved groups, fill the priority gaps in the old group
-    // by building a sequence, determining the jumps and correcting the priorities
-    // of following tasks.
-    if (pOldGroup != pNewGroup)
+    int iCurrentPosition = pTask->priority().priority(0);
+
+
+
+    /* item could be moved
+     *  * from a group
+     *    * to a new position within the same group
+     *    * to a new group
+     *    * to a new task
+     *  * from a task
+     *    * to a new position within the same task
+     *    * to a new group
+     *    * to a new task
+     */
+    if (nullptr != pOldParentTask)
     {
-      if (nullptr != pOldGroup)
+      if (pOldParentTask == pNewParentTask)
       {
-        std::map<int, ITask*> tasksByPriority;
-        for (const auto& taskId : pOldGroup->taskIds())
+        // order within the task has changed
+        int iDelta = iNewPosition - iCurrentPosition;
+        if (iDelta < 0)
         {
-          ITask* pOtherTask = pManager->task(taskId);
-          if (nullptr != pOtherTask)
-          {
-            tasksByPriority[pOtherTask->priority().priority(0)] = pOtherTask;
-          }
+          correctSortPriorityOfChildren<ITask>(pOldParentTask, pOldParentTask->id(), iNewPosition, iCurrentPosition, 1, pManager);
         }
-
-        // determine the gaps
-        int iPrevPrio = -1;
-        int iDelta = 0;
-        for (const auto& el : tasksByPriority)
+        else if (iDelta > 0)
         {
-          SPriority prio = el.second->priority();
-          iDelta += el.first - iPrevPrio - 1;
-          iPrevPrio = prio.priority(0);
-          if (0 < iDelta)
-          {
-            prio.setPriority(0, iPrevPrio - iDelta);
-            el.second->setPriority(prio);
-          }
+          correctSortPriorityOfChildren<ITask>(pOldParentTask, pOldParentTask->id(), iCurrentPosition, iNewPosition, -1, pManager);
         }
+      }
+      else if (nullptr != pNewParentTask)
+      {
+        // task has been moved to a new parent task
+        pTask->setGroup(pNewParentTask->group());
+        pTask->setParentTask(pNewParentTask->id());
+        fillSortPriorityGapsOfChildren<ITask>(pOldParentTask, pOldParentTask->id(), pManager);
+        correctSortPriorityOfChildren<ITask>(pNewParentTask, pNewParentTask->id(), iNewPosition, std::numeric_limits<int>::max(), 1, pManager);
+      }
+      else if (nullptr != pNewGroup)
+      {
+        // task has been removed from a parent task and moved to a group
+        pTask->setGroup(pNewGroup->id());
+        pTask->setParentTask(-1);
+        fillSortPriorityGapsOfChildren<ITask>(pOldParentTask, pOldParentTask->id(), pManager);
+        correctSortPriorityOfChildren<IGroup>(pNewGroup, -1, iNewPosition, std::numeric_limits<int>::max(), 1, pManager);
+      }
+    }
+    else if (nullptr != pOldGroup)
+    {
+      if (nullptr != pNewParentTask)
+      {
+        // task has been moved from a group to a parent task
+        pTask->setGroup(pNewParentTask->group());
+        pTask->setParentTask(pNewParentTask->id());
+        fillSortPriorityGapsOfChildren<IGroup>(pOldGroup, -1, pManager);
+        correctSortPriorityOfChildren<ITask>(pNewParentTask, pNewParentTask->id(), iNewPosition, std::numeric_limits<int>::max(), 1, pManager);
+      }
+      else if (pOldGroup == pNewGroup)
+      {
+        // order within the group has changed
+        int iDelta = iNewPosition - iCurrentPosition;
+        if (iDelta < 0)
+        {
+          correctSortPriorityOfChildren<IGroup>(pOldGroup, -1, iNewPosition, iCurrentPosition, 1, pManager);
+        }
+        else if (iDelta > 0)
+        {
+          correctSortPriorityOfChildren<IGroup>(pOldGroup, -1, iCurrentPosition, iNewPosition, -1, pManager);
+        }
+      }
+      else if (nullptr != pNewGroup)
+      {
+        // task has been moved to a new group
+        pTask->setGroup(pNewGroup->id());
+        pTask->setParentTask(-1);
+        fillSortPriorityGapsOfChildren<IGroup>(pOldGroup, -1, pManager);
+        correctSortPriorityOfChildren<IGroup>(pNewGroup, -1, iNewPosition, std::numeric_limits<int>::max(), 1, pManager);
       }
     }
 
-    SPriority prio = pTask->priority();
 
-    if (nullptr != pNewGroup)
-    {
-      // increment the priority of every task that is below the moved task, by one.
-      for (const auto& taskId : pNewGroup->taskIds())
-      {
-        ITask* pOtherTask = pManager->task(taskId);
-        if (nullptr != pOtherTask && pOtherTask->parentTask() == pTask->parentTask())
-        {
-          // if the item's priority lies between the old and the new priority, increment it by one
-          SPriority otherPrio = pOtherTask->priority();
-          if (iNewPosition <= otherPrio.priority(0)  &&
-              prio.priority(0) >= otherPrio.priority(0))
-          {
-            otherPrio.setPriority(0, otherPrio.priority(0) + 1);
-          }
-          else if (iNewPosition >= otherPrio.priority(0)  &&
-                   prio.priority(0) < otherPrio.priority(0))
-          {
-            otherPrio.setPriority(0, otherPrio.priority(0) - 1);
-          }
-
-          pOtherTask->setPriority(otherPrio);
-        }
-      }
-    }
-
-
+    auto prio = pTask->priority();
     prio.setPriority(0, iNewPosition);
     pTask->setPriority(prio);
 
-    if (nullptr != pOldParentTask)
+
+    // update the widgets
+    if (nullptr != pOldParentTaskWidget)
     {
-      pOldParentTask->removeTask(pTask->id());
-      if (nullptr != pOldParentTaskWidget)
-      {
-        pOldParentTaskWidget->removeTask(pTaskWidget);
-      }
+      pOldParentTaskWidget->removeTask(pTaskWidget);
     }
-    else if (nullptr != pOldGroupWidget)
+
+    if (nullptr != pOldGroupWidget)
     {
       pOldGroupWidget->removeTask(pTaskWidget);
     }
 
-    if (nullptr != pNewParentTask)
+
+    if (nullptr != pNewParentTaskWidget)
     {
-      if (pNewParentTask->addTask(pTask->id()))
-      {
-        if (nullptr != pNewParentTaskWidget)
-        {
-          auto pCurrentTaskListWidget = pTaskWidget->taskListWidget();
-          if (nullptr != pCurrentTaskListWidget)
-          {
-            pCurrentTaskListWidget->removeTask(pTaskWidget);
-          }
-          pNewParentTaskWidget->insertTask(pTaskWidget);
-        }
-      }
+      pNewParentTaskWidget->insertTask(pTaskWidget, iNewPosition);
     }
     else if (nullptr != pNewGroupWidget)
     {
@@ -168,6 +217,7 @@ void MoveTaskCommand::undo()
            m_pManager->task(m_newParentTaskId), m_pWidgetManager->taskWidget(m_newParentTaskId),
            m_pManager->task(m_oldParentTaskId), m_pWidgetManager->taskWidget(m_oldParentTaskId),
            m_iOldPosition, m_pManager);
+  qDebug() << QString("reverting task %1 from position %2 back to position %3").arg(int(m_taskId)).arg(m_iNewPosition).arg(m_iOldPosition);
 }
 
 void MoveTaskCommand::redo()
@@ -178,4 +228,5 @@ void MoveTaskCommand::redo()
            m_pManager->task(m_oldParentTaskId), m_pWidgetManager->taskWidget(m_oldParentTaskId),
            m_pManager->task(m_newParentTaskId), m_pWidgetManager->taskWidget(m_newParentTaskId),
            m_iNewPosition, m_pManager);
+  qDebug() << QString("moving task %1 from position %2 to position %3").arg(int(m_taskId)).arg(m_iOldPosition).arg(m_iNewPosition);
 }

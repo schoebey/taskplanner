@@ -49,6 +49,8 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(ui->pDescription, SIGNAL(sizeChanged()), this, SLOT(updateSize()));
   connect(ui->pShowDetails, SIGNAL(toggled(bool)), this, SLOT(setExpanded(bool)));
   connect(ui->pTaskListWidget, &TaskListWidget::taskInserted, this, &TaskWidget::onTaskInserted);
+  connect(ui->pTaskListWidget, &TaskListWidget::taskRemoved, this, &TaskWidget::onTaskRemoved);
+  connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::sizeChanged);
 
   setUpContextMenu();
 
@@ -68,11 +70,6 @@ TaskWidget::~TaskWidget()
   if (m_pDraggingTaskWidget == this)
   {
     m_pDraggingTaskWidget = nullptr;
-  }
-
-  if (nullptr != m_pTaskListWidget)
-  {
-    m_pTaskListWidget->removeTask(this);
   }
 
   delete ui;
@@ -189,13 +186,21 @@ TaskListWidget* TaskWidget::taskListWidget() const
 
 void TaskWidget::setTaskListWidget(TaskListWidget* pTaskListWidget)
 {
-  m_pTaskListWidget = pTaskListWidget;
-
-  if (nullptr != m_pTaskListWidget)
+  if (m_pTaskListWidget != pTaskListWidget)
   {
-    setBackgroundImage(m_pTaskListWidget->backgroundImage());
-    m_pPreviousTaskListWidget = m_pTaskListWidget;
-    m_pDraggingTaskWidget = nullptr;
+    if (nullptr != m_pTaskListWidget)
+    {
+      m_pTaskListWidget->removeTask(this);
+    }
+
+    m_pTaskListWidget = pTaskListWidget;
+
+    if (nullptr != m_pTaskListWidget)
+    {
+      setBackgroundImage(m_pTaskListWidget->backgroundImage());
+      m_pPreviousTaskListWidget = m_pTaskListWidget;
+      m_pDraggingTaskWidget = nullptr;
+    }
   }
 }
 
@@ -615,7 +620,14 @@ void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int iPos)
   if (nullptr != pTaskWidget)
   {
     emit taskMovedTo(pTaskWidget->id(), m_taskId, iPos);
+
+    emit sizeChanged();
   }
+}
+
+void TaskWidget::onTaskRemoved(TaskWidget */*pTaskWidget*/)
+{
+  emit sizeChanged();
 }
 
 HighlightingMethod TaskWidget::highlight() const
@@ -623,26 +635,26 @@ HighlightingMethod TaskWidget::highlight() const
   return m_pOverlay->highlight();
 }
 
-void TaskWidget::setParentTask(TaskWidget* pParentTask)
+void TaskWidget::setParentContainerWidget(ITaskContainerWidget* pContainer)
 {
-  if (pParentTask != m_pParentTask)
+  if (pContainer != m_pContainer)
   {
-    TaskWidget* pFormerParent = m_pParentTask;
-    m_pParentTask = pParentTask;
-    if (nullptr != pFormerParent)
+    auto pFormerContainer = m_pContainer;
+    m_pContainer = pContainer;
+    if (nullptr != pFormerContainer)
     {
-      pFormerParent->removeTask(this);
+      pFormerContainer->removeTask(this);
     }
-    if (nullptr != m_pParentTask)
+    if (nullptr != m_pContainer)
     {
-      m_pParentTask->insertTask(this);
+      m_pContainer->insertTask(this);
     }
   }
 }
 
-TaskWidget*TaskWidget::parentTask() const
+ITaskContainerWidget* TaskWidget::parentContainerWidget() const
 {
-  return m_pParentTask;
+  return m_pContainer;
 }
 
 
@@ -746,14 +758,9 @@ void TaskWidget::mouseMoveEvent(QMouseEvent* pMouseEvent)
     {
       m_pDraggingTaskWidget = this;
 
-      if (nullptr != m_pTaskListWidget)
+      if (nullptr != m_pContainer)
       {
-        m_pTaskListWidget->removeTask(this);
-      }
-
-      if (nullptr != m_pParentTask)
-      {
-        m_pParentTask->removeTask(this);
+        m_pContainer->removeTask(this);
       }
 
       qApp->installEventFilter(this);
@@ -823,7 +830,7 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
     QRectF rct(rect());
     rct.adjust(c_dBorderOffset, c_dBorderOffset, -c_dBorderOffset, -c_dBorderOffset);
 
-    if (nullptr != m_pParentTask)
+    if (nullptr != m_pContainer)
     {
       painter.setBrush(QColor(255, 255, 255, 30));
     }
@@ -933,11 +940,17 @@ void TaskWidget::requestInsert(TaskWidget *pTaskWidget, int iPos)
 
 bool TaskWidget::insertTask(TaskWidget *pTaskWidget, int iPos)
 {
-  return ui->pTaskListWidget->insertTask(pTaskWidget, iPos);
+  if (ui->pTaskListWidget->insertTask(pTaskWidget, iPos))
+  {
+    pTaskWidget->setParentContainerWidget(this);
+    return true;
+  }
+  return false;
 }
 
 void TaskWidget::removeTask(TaskWidget *pTaskWidget)
 {
+  pTaskWidget->setParentContainerWidget(nullptr);
   ui->pTaskListWidget->removeTask(pTaskWidget);
   emit sizeChanged();
 }
