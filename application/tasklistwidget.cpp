@@ -101,7 +101,7 @@ bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
     pTaskWidget->move(mapFromGlobal(currentPos));
     pTaskWidget->show();
 
-    connect(pTaskWidget, SIGNAL(sizeChanged()), this, SLOT(repositionChildren()), Qt::QueuedConnection);
+    connect(pTaskWidget, &TaskWidget::sizeChanged, this, &TaskListWidget::updateTaskPositions, Qt::QueuedConnection);
 
 
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
@@ -128,7 +128,7 @@ void TaskListWidget::removeTask(TaskWidget* pTaskWidget)
     pTaskWidget->setTaskListWidget(nullptr);
     pTaskWidget->show();
 
-    disconnect(pTaskWidget, SIGNAL(sizeChanged()), this, SLOT(repositionChildren()));
+    disconnect(pTaskWidget, &TaskWidget::sizeChanged, this, &TaskListWidget::updateTaskPositions);
   }
 }
 
@@ -201,11 +201,18 @@ TaskWidget *TaskListWidget::taskWidgetAt(QPoint pt)
 void TaskListWidget::resizeEvent(QResizeEvent */*pEvent*/)
 {
   updatePositions();
+
+  emit sizeChanged();
 }
 
 void TaskListWidget::moveEvent(QMoveEvent */*pEvent*/)
 {
   updatePositions();
+}
+
+void TaskListWidget::updateTaskPositions()
+{
+  updatePositions(-1, 0);
 }
 
 void TaskListWidget::updatePositions(int iSpace, int iSpacePos)

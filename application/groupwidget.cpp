@@ -127,12 +127,18 @@ void GroupWidget::requestInsert(TaskWidget *pTaskWidget, int iPos)
 
 bool GroupWidget::insertTask(TaskWidget *pTaskWidget, int iPos)
 {
-  return ui->pTaskListWidget->insertTask(pTaskWidget, iPos);
+  if (ui->pTaskListWidget->insertTask(pTaskWidget, iPos))
+  {
+    pTaskWidget->setParentContainerWidget(this);
+    return true;
+  }
+  return false;
 }
 
 void GroupWidget::removeTask(TaskWidget *pTaskWidget)
 {
   ui->pTaskListWidget->removeTask(pTaskWidget);
+  pTaskWidget->setParentContainerWidget(nullptr);
 }
 
 void GroupWidget::onNewTaskClicked()

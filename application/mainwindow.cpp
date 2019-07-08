@@ -488,12 +488,12 @@ void MainWindow::onTaskMoved(task_id id, group_id newParentGroupId, int iPos)
 
     // only 'move' the task if it really has been moved from one group to another
     if (nullptr != pOldGroup && nullptr != pNewGroup &&
-        (pOldGroup != pNewGroup || iOldPos != iPos))
+        (pOldGroup != pNewGroup || iOldPos != iPos || -1 != pTask->parentTask()))
     {
       MoveTaskCommand* pCommand = new MoveTaskCommand(id,
                                                       pTask->group(),
                                                       newParentGroupId,
-                                                      -1, -1,
+                                                      pTask->parentTask(), -1,
                                                       iOldPos, iPos,
                                                       m_pManager,m_pWidgetManager);
       m_undoStack.push(pCommand);
@@ -520,15 +520,15 @@ void MainWindow::onTaskMoved(task_id id, task_id newParentTaskId, int iPos)
     ITask* pOldParentTask = m_pManager->task(pTask->parentTask());
     ITask* pNewParentTask = m_pManager->task(newParentTaskId);
 
-    // only 'move' the task if it really has been moved from one group to another
-    if (nullptr != pOldParentTask && nullptr != pNewParentTask &&
-        (pOldParentTask != pNewParentTask || iOldPos != iPos))
+
+    if (pOldParentTask != pNewParentTask || iOldPos != iPos)
     {
+//      TODO: test moving tasks to subtasks or between subtasks or reordering of subtasks
       MoveTaskCommand* pCommand = new MoveTaskCommand(id,
-                                                      pOldParentTask->group(),
-                                                      pNewParentTask->group(),
-                                                      pOldParentTask->id(),
-                                                      pNewParentTask->id(),
+                                                      pTask->group(),
+                                                      nullptr != pNewParentTask ? pNewParentTask->group() : -1,
+                                                      pTask->parentTask(),
+                                                      nullptr != pNewParentTask ? pNewParentTask->id() : -1,
                                                       iOldPos, iPos,
                                                       m_pManager,m_pWidgetManager);
       m_undoStack.push(pCommand);

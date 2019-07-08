@@ -57,8 +57,8 @@ public:
   void setHighlight(HighlightingMethod method);
   HighlightingMethod highlight() const;
 
-  void setParentTask(TaskWidget* pParentTask);
-  TaskWidget* parentTask() const;
+  void setParentContainerWidget(ITaskContainerWidget *pParentTask);
+  ITaskContainerWidget *parentContainerWidget() const;
 
   void setBackgroundImage(const QImage& image);
 
@@ -120,6 +120,7 @@ private slots:
   void onLinkPasted();
   void onAddSubtaskTriggered();
   void onTaskInserted(TaskWidget* pTaskWidget, int iPos = -1);
+  void onTaskRemoved(TaskWidget *pTaskWidget);
 
 private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;
@@ -166,7 +167,7 @@ private:
   std::map<QString, SPropertyWidgets> m_propertyLineEdits;
   std::map<EditableLabel*, QPointer<QTimer>> m_updateTimers;
 
-  TaskWidget* m_pParentTask = nullptr;
+  ITaskContainerWidget* m_pContainer = nullptr;
 
   QMenu* m_pContextMenu = nullptr;
 
