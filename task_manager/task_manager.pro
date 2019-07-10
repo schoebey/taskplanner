@@ -2,8 +2,6 @@ CONFIG += c++11 skip_target_version_ext
 QT += core gui
 TEMPLATE = lib
 CONFIG += dll
-CONFIG += skip_target_version_ext
-DESTDIR = $$PWD/../
 
 equals(QT_MAJOR_VERSION, 5) {
   QT += widgets
