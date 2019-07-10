@@ -286,6 +286,14 @@ bool TaskListWidget::onMouseMoved(const QPoint& pt)
   {
     TaskWidget* pTaskWidget = taskWidgetAt(pt);
 
+    if (nullptr != TaskWidget::DraggingTaskWidget())
+    {
+      if (this != m_pMouseHoveringOver)
+      {
+        TaskWidget::DraggingTaskWidget()->setBackgroundImage(backgroundImage());
+      }
+    }
+
     if (nullptr != pTaskWidget)
     {
       m_pMouseHoveringOver = nullptr;
@@ -297,11 +305,6 @@ bool TaskListWidget::onMouseMoved(const QPoint& pt)
 
       if (nullptr != TaskWidget::DraggingTaskWidget())
       {
-        if (this != m_pMouseHoveringOver)
-        {
-          TaskWidget::DraggingTaskWidget()->setBackgroundImage(backgroundImage());
-        }
-
         // if dragging the widget into the drop zone
         // of the task (for sub tasks), the ghost should
         // not change position.

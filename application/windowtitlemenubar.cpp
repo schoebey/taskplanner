@@ -53,6 +53,12 @@ bool WindowTitleMenuBar::eventFilter(QObject* pObject, QEvent* pEvent)
   {
     switch (pEvent->type())
     {
+    case QEvent::WindowTitleChange:
+      updateWidgets();
+      break;
+    case QEvent::ModifiedChange:
+      updateWidgets();
+      break;
     case QEvent::WindowStateChange:
       updateWidgets();
     default:
@@ -176,6 +182,11 @@ void WindowTitleMenuBar::mouseReleaseEvent(QMouseEvent* pEvent)
 
 void WindowTitleMenuBar::updateWidgets()
 {
+  QString sTitle = window()->windowTitle();
+  sTitle.replace("[*]", window()->isWindowModified() ? "*" :  "");
+  m_pTitle->setText(sTitle);
+
+  m_pTitle->resize(m_pTitle->sizeHint());
   m_pTitle->move(rect().center().x() - m_pTitle->width() / 2, 0);
 
   m_pRightButtonBox->move(width() - m_pRightButtonBox->width(), 0);

@@ -638,6 +638,8 @@ bool MainWindow::loadFile(const QString& sFileName, QString* psErrorMessage)
 
         initTaskUi();
 
+        setWindowModified(false);
+
         return true;
       }
       else

@@ -1,6 +1,5 @@
 #include "taskwidget.h"
 #include "ui_taskwidget.h"
-#include "groupwidget.h"
 #include "property.h"
 #include "taskwidgetoverlay.h"
 #include "flowlayout.h"
@@ -23,9 +22,9 @@
 #include <cassert>
 #include <cmath>
 
-namespace
-{
 
+namespace widgetAnimation {
+  void deleteWidgetAnimation(QWidget*);
 }
 
 
@@ -218,7 +217,7 @@ void TaskWidget::setBackgroundImage(const QImage& image)
   pAnimation->setEasingCurve(QEasingCurve::Linear);
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 
-  ui->pTaskListWidget->setBackgroundImage(image);
+  //ui->pTaskListWidget->setBackgroundImage(image);
 }
 
 double TaskWidget::backgroundImageBlendFactor() const
@@ -830,11 +829,11 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
     QRectF rct(rect());
     rct.adjust(c_dBorderOffset, c_dBorderOffset, -c_dBorderOffset, -c_dBorderOffset);
 
-    if (nullptr != m_pContainer)
-    {
-      painter.setBrush(QColor(255, 255, 255, 30));
-    }
-    else
+//    if (nullptr == taskListWidget()->)
+//    {
+//      painter.setBrush(QColor(255, 255, 255, 30));
+//    }
+//    else
     {
       if (m_bDropShadow)
       {
