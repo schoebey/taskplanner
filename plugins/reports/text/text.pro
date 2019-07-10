@@ -24,7 +24,7 @@ SOURCES += \
 
 
 win32: LIBS += -L$$PWD/../../../bin/ -ltask_manager
-else:unix: LIBS += -L$$PWD/../../../task_manager/ -ltask_manager
+else:unix: LIBS += -L$$PWD/../../../taskplanner.app/Contents/MacOS/ -ltask_manager
 
 INCLUDEPATH += $$PWD/../../../task_manager \
                $$PWD/../../../task_manager/serializers \

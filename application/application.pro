@@ -82,7 +82,7 @@ RESOURCES += \
     $$PWD/resources/resource.qrc
 
 win32: LIBS += -L$$PWD/../bin/ -ltask_manager
-else:unix: LIBS += -L$$PWD/../ -ltask_manager
+else:unix: LIBS += -L$$PWD/../taskplanner.app/Contents/MacOS/ -ltask_manager
 
 INCLUDEPATH += $$PWD \
                $$PWD/../task_manager \
