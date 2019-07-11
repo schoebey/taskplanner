@@ -66,7 +66,10 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   m_pWidgetManager(new WidgetManager(m_pManager, this)),
   m_pTimeoutGroupIdMapper(new QSignalMapper(this))
 {
-  setWindowFlag(Qt::FramelessWindowHint);
+  // todo: remove on mac
+  setWindowFlags(Qt::FramelessWindowHint);
+
+
   ui->setupUi(this);
 
   qApp->installEventFilter(this);
