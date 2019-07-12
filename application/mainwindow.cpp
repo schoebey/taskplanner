@@ -66,9 +66,9 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   m_pWidgetManager(new WidgetManager(m_pManager, this)),
   m_pTimeoutGroupIdMapper(new QSignalMapper(this))
 {
-  // todo: remove on mac
+#ifndef Q_OS_MAC
   setWindowFlags(Qt::FramelessWindowHint);
-
+#endif
 
   ui->setupUi(this);
 
