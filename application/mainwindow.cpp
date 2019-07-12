@@ -149,6 +149,11 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   assert(bOk);
   Q_UNUSED(bOk)
 
+  m_pEnableHibernationDetection = new QAction(tr("hibernation detection"), this);
+  m_pEnableHibernationDetection->setCheckable(true);
+  connect(m_pEnableHibernationDetection, &QAction::toggled, pDetector, &HibernationDetector::setEnabled);
+  ui->menuTools->addAction(m_pEnableHibernationDetection);
+
 
   loadSettings();
 }
@@ -179,6 +184,10 @@ void MainWindow::saveSettings()
   settings.beginGroup("files");
   settings.setValue("mostRecentFile", m_sFileName);
   settings.endGroup();
+
+  settings.beginGroup("options");
+  settings.setValue("hibernationDetection", m_pEnableHibernationDetection->isChecked());
+  settings.endGroup();
 }
 
 void MainWindow::loadSettings()
@@ -192,6 +201,10 @@ void MainWindow::loadSettings()
 
   settings.beginGroup("files");
   m_sFileName = settings.value("mostRecentFile").toString();
+  settings.endGroup();
+
+  settings.beginGroup("options");
+  m_pEnableHibernationDetection->setChecked(settings.value("hibernationDetection", true).toBool());
   settings.endGroup();
 }
 

@@ -100,6 +100,7 @@ private:
   QSignalMapper* m_pTimeoutGroupIdMapper;
   QUndoStack m_undoStack;
   std::vector<std::shared_ptr<QObject>> m_vspPlugins;
+  QAction* m_pEnableHibernationDetection;
 };
 
 #endif // MAINWINDOW_H
