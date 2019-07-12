@@ -10,6 +10,7 @@
 WindowTitleMenuBar::WindowTitleMenuBar(QWidget *pParent)
   : QMenuBar(pParent)
 {
+#ifndef Q_OS_MAC
   m_pTitle = new QLabel("hello world", this);
   m_pRightButtonBox = new QFrame(this);
   QHBoxLayout* pLayout = new QHBoxLayout(m_pRightButtonBox);
@@ -40,8 +41,10 @@ WindowTitleMenuBar::WindowTitleMenuBar(QWidget *pParent)
   new WidgetResizer(window(), WidgetResizer::eBottomLeft);
   new WidgetResizer(window(), WidgetResizer::eBottom);
   new WidgetResizer(window(), WidgetResizer::eBottomRight);
+#endif
 }
 
+#ifndef Q_OS_MAC
 void WindowTitleMenuBar::addWidget(QWidget *pWidget)
 {
   m_pRightButtonBox->layout()->addWidget(pWidget);
@@ -198,3 +201,4 @@ void WindowTitleMenuBar::resizeEvent(QResizeEvent* /*pEvent*/)
 {
   updateWidgets();
 }
+#endif

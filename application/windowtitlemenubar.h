@@ -11,6 +11,7 @@ class WindowTitleMenuBar : public QMenuBar
 public:
   explicit WindowTitleMenuBar(QWidget* pParent = nullptr);
 
+#ifndef Q_OS_MAC
   void addWidget(QWidget* pWidget);
 
 private slots:
@@ -43,6 +44,7 @@ private:
   QLabel* m_pTitle = nullptr;
   QFrame* m_pRightButtonBox = nullptr;
   QPushButton* m_pMaximizeButton = nullptr;
+#endif
 };
 
 #endif // TITLEBARMENU_H
