@@ -8,6 +8,7 @@
 #include <QDateTime>
 #include <QUndoStack>
 #include <map>
+#include <memory>
 
 namespace Ui {
   class MainWindow;
@@ -31,11 +32,11 @@ public:
   bool loadFile(const QString& sFileName, QString* psErrorMessage = nullptr);
 
   bool loadMostRecentFile();
-  
+
   bool saveFile(const QString& sFileName, QString* psErrorMessage = nullptr);
 
   void restoreDefaultLayout();
-  
+
 private slots:
   void createNewTask(group_id groupId);
   void renameGroup(group_id id, const QString& sNewName);
@@ -70,9 +71,9 @@ private slots:
   void sortGroup(group_id groupId);
   void sortGroups();
   void onDocumentModified();
-  void onPasteFromClipboard();  
-  void onReloadDocument();  
-  void on_actionAbout_triggered();  
+  void onPasteFromClipboard();
+  void onReloadDocument();
+  void on_actionAbout_triggered();
   void onWokeUpFromHibernation(const QDateTime& sleepTime,
                                const QDateTime& wakeUpTime);
 signals:
