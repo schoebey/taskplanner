@@ -7,11 +7,11 @@ equals(QT_MAJOR_VERSION, 5) {
   QT += widgets
 }
 
-win32 {
-  DESTDIR = $$PWD/../bin/
-}
-else:macx {
+macx {
   DESTDIR = ../taskplanner.app/Contents/MacOS/
+}
+else {
+  DESTDIR = ../bin/
 }
 
 include(../git_version.pri)
