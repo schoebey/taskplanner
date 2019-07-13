@@ -3,11 +3,11 @@ QT += core gui
 TEMPLATE = lib
 TARGET = text
 
-win32 {
-  DESTDIR = $$PWD/../../../bin/plugins/reports/
+macx {
+  DESTDIR = ../../../taskplanner.app/Contents/MacOS/plugins/reports
 }
-else:macx {
-  DESTDIR = $$PWD/../../../taskplanner.app/Contents/MacOS/plugins/reports
+else {
+  DESTDIR = ../../../bin/plugins/reports/
 }
 
 equals(QT_MAJOR_VERSION, 5) {
@@ -23,8 +23,10 @@ SOURCES += \
     textreportplugin.cpp
 
 
-win32: LIBS += -L$$PWD/../../../bin/ -ltask_manager
-else:unix: LIBS += -L$$PWD/../../../taskplanner.app/Contents/MacOS/ -ltask_manager
+macx: LIBS += -L$$OUT_PWD/../../../taskplanner.app/Contents/MacOS/
+else: LIBS += -L$$OUT_PWD/../../../bin/
+
+LIBS *= -ltask_manager
 
 INCLUDEPATH += $$PWD/../../../task_manager \
                $$PWD/../../../task_manager/serializers \

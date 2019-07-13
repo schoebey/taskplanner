@@ -1,11 +1,12 @@
 CONFIG += c++11
 QT += core gui
 TARGET = taskplanner
-win32 {
-  DESTDIR = $$PWD/../bin
-}
-else:macx {
+
+macx {
   DESTDIR = ../
+}
+else {
+  DESTDIR = ../bin
 }
 
 equals(QT_MAJOR_VERSION, 5) {
@@ -81,8 +82,10 @@ FORMS += \
 RESOURCES += \
     $$PWD/resources/resource.qrc
 
-win32: LIBS += -L$$PWD/../bin/ -ltask_manager
-else:unix: LIBS += -L$$PWD/../taskplanner.app/Contents/MacOS/ -ltask_manager
+macx: LIBS += -L$$OUT_PWD/../taskplanner.app/Contents/MacOS/
+else: LIBS += -L$$OUT_PWD/../bin/
+
+LIBS *= -ltask_manager
 
 INCLUDEPATH += $$PWD \
                $$PWD/../task_manager \

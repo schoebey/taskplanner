@@ -3,11 +3,11 @@ QT += core gui
 TEMPLATE = lib
 TARGET = markdown
 
-win32 {
-  DESTDIR = $$PWD/../../../bin/plugins/serializers/
+macx {
+  DESTDIR = ../../../taskplanner.app/Contents/MacOS/plugins/serializers
 }
-else:macx {
-  DESTDIR = $$PWD/../../../taskplanner.app/Contents/MacOS/plugins/serializers
+else {
+  DESTDIR = ../../../bin/plugins/serializers/
 }
 
 equals(QT_MAJOR_VERSION, 5) {
@@ -23,8 +23,10 @@ SOURCES += \
     markdownserializerplugin.cpp
 
 
-win32: LIBS += -L$$PWD/../../../bin/ -ltask_manager
-else:unix: LIBS += -L$$PWD/../../../taskplanner.app/Contents/MacOS/ -ltask_manager
+macx: LIBS += -L$$OUT_PWD/../../../taskplanner.app/Contents/MacOS/
+else: LIBS += -L$$OUT_PWD/../../../bin/
+
+LIBS *= -ltask_manager
 
 INCLUDEPATH += $$PWD/../../../task_manager \
                $$PWD/../../../task_manager/serializers
