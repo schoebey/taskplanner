@@ -87,6 +87,10 @@ else: LIBS += -L$$OUT_PWD/../bin/
 
 LIBS *= -ltask_manager
 
+unix {
+    !macx: QMAKE_LFLAGS +=  -Wl,-rpath=\'\$$ORIGIN/\'
+}
+
 INCLUDEPATH += $$PWD \
                $$PWD/../task_manager \
                $$PWD/../task_manager/serializers \
