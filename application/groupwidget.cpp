@@ -2,9 +2,11 @@
 #include "ui_groupwidget.h"
 #include "taskwidget.h"
 
+#include <QAction>
 #include <QLayout>
 #include <QResizeEvent>
 #include <QPropertyAnimation>
+#include <QStyle>
 #include <QDebug>
 
 

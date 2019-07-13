@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <functional>
+#include <memory>
 
 
 template<typename T> using tFnCreateObject = std::function<T*(void)>;
