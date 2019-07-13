@@ -18,5 +18,7 @@ SUBDIRS += \
 
 task_manager.path = $$PWD/task_manager
 plugins.path = $$PWD/plugins
+plugins.depends = task_manager
 application.path = $$PWD/application
+application.depends = task_manager
 INSTALLS += task_manager
