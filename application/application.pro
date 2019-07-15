@@ -45,7 +45,8 @@ SOURCES += \
     tasklistwidget.cpp \
     toolbarinfodisplay.cpp \
     widgetresizer.cpp \
-    windowtitlemenubar.cpp
+    windowtitlemenubar.cpp \
+    decoratedlabel.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -73,7 +74,8 @@ HEADERS += \
     tasklistwidget.h \
     toolbarinfodisplay.h \
     widgetresizer.h \
-    windowtitlemenubar.h
+    windowtitlemenubar.h \
+    decoratedlabel.h
 
 FORMS += \
     $$PWD/groupwidget.ui \

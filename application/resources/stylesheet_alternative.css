@@ -210,13 +210,6 @@ OverlayWidget #report {
 }
 
 
-
-#backlog { qproperty-backgroundImage: url(:/task_background_1.png); } 
-#inprogress { qproperty-backgroundImage: url(); } 
-#testing { qproperty-backgroundImage: url(testing.png); } 
-#done { qproperty-backgroundImage: url(:/task_background_3.png); }
-
-
 TaskWidget {
   border: 0px solid rgba(50, 50, 50, 128);
   border-radius: 7px;
@@ -226,10 +219,19 @@ TaskWidget {
   background-color: #F7F4F2;
 }
 
+TaskWidget QLabel {
+  font-size: 8px;
+  color: #8C8987;
+}
+
+TaskWidget TaskWidget {
+  border: 1px solid #ddd;
+}
+
 TaskWidget #pTitle {
   qproperty-drawOutline: false;
   padding-left: 4px;
-  color: #8C8987;
+  font-size: 10px;
 }
 
 TaskWidget #pLinks {
@@ -238,9 +240,6 @@ TaskWidget #pLinks {
 
 TaskWidget #pDescription {
   padding: 0 10 0 10;
-  border: 0px solid red;
-  font-size: 7pt;
-  color: #8C8987;
 }
 
 TaskWidget #pShowDetails {
@@ -384,11 +383,6 @@ LinkWidget:focus {
   padding-right: 4px;
 }
 
- 
-#priority_label {
-  color: black;
-  border: 0px solid black; 
-}
 #priority_value {
   color: white;
   background:  rgba(0, 0, 0, 25);
