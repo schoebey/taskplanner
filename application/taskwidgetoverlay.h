@@ -11,7 +11,7 @@ class TaskWidgetOverlay : public QFrame
 {
   Q_OBJECT
 public:
-  explicit TaskWidgetOverlay(TaskWidget *parent = nullptr);
+  explicit TaskWidgetOverlay(QWidget* pParent = nullptr);
 
   void setHighlight(HighlightingMethod method);
   HighlightingMethod highlight() const;
@@ -38,7 +38,6 @@ private:
   void paintEvent(QPaintEvent* pEvent) override;
 
 private:
-  TaskWidget* m_pParent;
   HighlightingMethod m_method = EHighlightMethod::eNoHighlight;
   QColor m_borderColor = QColor(0,0,0,0);
   QColor m_highlightColor = QColor(0,0,0,0);

@@ -7,6 +7,7 @@
 #include "mousehandlingframe.h"
 #include "task.h"
 #include "tasklistwidget.h"
+#include "decoratedlabel.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -34,10 +35,10 @@ TaskWidget* TaskWidget::m_pTaskWidgetUnderMouse = nullptr;
 TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   QFrame(parent),
   ui(new Ui::TaskWidget),
-  m_taskId(id),
-  m_pOverlay(new TaskWidgetOverlay(this))
+  m_taskId(id)
 {
   ui->setupUi(this);
+  m_pOverlay = new TaskWidgetOverlay(ui->pFrame);
 
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
@@ -344,7 +345,7 @@ void TaskWidget::addProperty(const QString& sName,
       pHboxLayout->setSpacing(0);
       pHboxLayout->setMargin(0);
       pFrame->setLayout(pHboxLayout);
-      QLabel* pLabel = new QLabel(sName);
+      QLabel* pLabel = new DecoratedLabel(sName);
       pLabel->setFocusPolicy(Qt::NoFocus);
       pLabel->setObjectName(QString("%1_label").arg(sName));
       m_propertyLineEdits[sName].pLabel = pLabel;

@@ -463,8 +463,8 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
   tfnDrawText fnDrawText = drawShadowedText;
   if (nullptr != pLabel)
   {
-    bDrawOutline = pLabel->drawOutline();
-    bDrawShadow = pLabel->drawShadow();
+    bDrawOutline = pLabel->property("drawOutline").toBool();
+    bDrawShadow = pLabel->property("drawShadow").toBool();
     fnDrawText = drawNormalText;
     if (bDrawOutline)
     {
