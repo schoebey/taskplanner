@@ -16,57 +16,103 @@ typedef void(*tfnDrawText)(QPainter*, const QPointF&, const QString&,
 
 namespace
 {
-void drawShadowedText(QPainter* pPainter, const QPointF& pt, const QString& sText,
-                      const QColor& col, const QColor& shadowColor)
-{
-  if (nullptr == pPainter)  { return; }
-
-  pPainter->save();
-  QFont f(pPainter->font());
-  QFontMetrics m(f);
-
-  QString sKey = QString("%1_%2x%3_%4_outline").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
-
-  QPixmap* pPixmap = QPixmapCache::find(sKey);
-  if (nullptr == pPixmap)
+  void drawNormalText(QPainter* pPainter, const QPointF& pt, const QString& sText,
+                        const QColor& col, const QColor& shadowColor)
   {
-    QImage img(m.width(sText), m.height() + 2, QImage::Format_ARGB32);
-    if (!img.isNull())
+    if (nullptr == pPainter)  { return; }
+
+    pPainter->save();
+    QFont f(pPainter->font());
+    QFontMetrics m(f);
+
+    QString sKey = QString("%1_%2x%3_%4_normal").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
+
+    QPixmap* pPixmap = QPixmapCache::find(sKey);
+    if (nullptr == pPixmap)
     {
-      img.fill(Qt::transparent);
+      QImage img(m.width(sText), m.height() + 2, QImage::Format_ARGB32);
+      if (!img.isNull())
+      {
+        img.fill(Qt::transparent);
 
-      QPainterPath textPath;
-      textPath.addText(0, img.height()-2, f, sText);
+        QPainterPath textPath;
+        textPath.addText(0, img.height()-2, f, sText);
 
-      QPainterPath shadowPath;
-      shadowPath.addText(0, img.height()-1, f, sText);
 
-      QPainter p(&img);
-      p.setPen(Qt::NoPen);
-      p.setBrush(shadowColor);
-      p.setRenderHint(QPainter::Antialiasing, true);
-      p.setRenderHint(QPainter::HighQualityAntialiasing, true);
-      p.setRenderHint(QPainter::SmoothPixmapTransform, true);
-      p.drawPath(shadowPath);
-      p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
-      p.setBrush(QColor(0,0,0,255));
-      p.drawPath(textPath);
-      p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-      p.setPen(Qt::NoPen);
-      p.setBrush(col);
-      p.drawPath(textPath);
-      QPixmapCache::insert(sKey, QPixmap::fromImage(img));
-      pPixmap = QPixmapCache::find(sKey);
+        QPainter p(&img);
+
+        p.setRenderHint(QPainter::Antialiasing, true);
+        p.setRenderHint(QPainter::HighQualityAntialiasing, true);
+        p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+        p.setPen(Qt::NoPen);
+        p.setBrush(col);
+        p.drawPath(textPath);
+
+        QPixmapCache::insert(sKey, QPixmap::fromImage(img));
+        pPixmap = QPixmapCache::find(sKey);
+      }
+    }
+
+    pPainter->restore();
+
+    if (nullptr != pPixmap)
+    {
+      pPainter->drawPixmap(pt.x(), pt.y(), *pPixmap);
     }
   }
 
-  pPainter->restore();
-
-  if (nullptr != pPixmap)
+  void drawShadowedText(QPainter* pPainter, const QPointF& pt, const QString& sText,
+                        const QColor& col, const QColor& shadowColor)
   {
-    pPainter->drawPixmap(pt.x(), pt.y(), *pPixmap);
+    if (nullptr == pPainter)  { return; }
+
+    pPainter->save();
+    QFont f(pPainter->font());
+    QFontMetrics m(f);
+
+    QString sKey = QString("%1_%2x%3_%4_shadow").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
+
+    QPixmap* pPixmap = QPixmapCache::find(sKey);
+    if (nullptr == pPixmap)
+    {
+      QImage img(m.width(sText), m.height() + 2, QImage::Format_ARGB32);
+      if (!img.isNull())
+      {
+        img.fill(Qt::transparent);
+
+        QPainterPath textPath;
+        textPath.addText(0, img.height()-2, f, sText);
+
+        QPainterPath shadowPath;
+        shadowPath.addText(0, img.height()-1, f, sText);
+
+        QPainter p(&img);
+        p.setPen(Qt::NoPen);
+        p.setBrush(shadowColor);
+        p.setRenderHint(QPainter::Antialiasing, true);
+        p.setRenderHint(QPainter::HighQualityAntialiasing, true);
+        p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+        p.drawPath(shadowPath);
+        p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+        p.setBrush(QColor(0,0,0,255));
+        p.drawPath(textPath);
+        p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        p.setPen(Qt::NoPen);
+        p.setBrush(col);
+        p.drawPath(textPath);
+        QPixmapCache::insert(sKey, QPixmap::fromImage(img));
+        pPixmap = QPixmapCache::find(sKey);
+      }
+    }
+
+    pPainter->restore();
+
+    if (nullptr != pPixmap)
+    {
+      pPainter->drawPixmap(pt.x(), pt.y(), *pPixmap);
+    }
   }
-}
 
 void drawOutlinedText(QPainter* pPainter, const QPointF& pt, const QString& sText,
                       const QColor& col, const QColor& shadowColor)
@@ -413,9 +459,13 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
 
   EditableLabel* pLabel = dynamic_cast<EditableLabel*>(painter->device());
   bool bDrawOutline = false;
+  bool bDrawShadow = false;
+  tfnDrawText fnDrawText = drawShadowedText;
   if (nullptr != pLabel)
   {
     bDrawOutline = pLabel->drawOutline();
+    bDrawShadow = pLabel->drawShadow();
+    fnDrawText = drawNormalText;
     if (bDrawOutline)
     {
       QColor outlineColor(0, 0, 0, 25);
@@ -426,13 +476,15 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
       shadowColor = outlineColor;
       shadowColor.setAlpha(100);
 
-      qt_format_text(drawOutlinedText, painter->font(), rect, flags,
-                     nullptr, text, nullptr, painter,
-                     textColor, outlineColor);
+      fnDrawText = drawOutlinedText;
+    }
+    else if (bDrawShadow)
+    {
+      fnDrawText = drawShadowedText;
     }
   }
 
-  qt_format_text(drawShadowedText, painter->font(), rect, flags,
+  qt_format_text(fnDrawText, painter->font(), rect, flags,
                  nullptr, text, nullptr, painter,
                  textColor, shadowColor);
 }
