@@ -55,6 +55,7 @@ void AddTaskCommand::redo()
     {
       bool bAccepted = pTask->setPropertyValue(el.first, el.second);
       assert(bAccepted);
+      Q_UNUSED(bAccepted)
     }
 
     pGroup->addTask(pTask->id());

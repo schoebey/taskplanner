@@ -198,14 +198,14 @@ TaskWidget *TaskListWidget::taskWidgetAt(QPoint pt)
   return nullptr;
 }
 
-void TaskListWidget::resizeEvent(QResizeEvent */*pEvent*/)
+void TaskListWidget::resizeEvent(QResizeEvent* /*pEvent*/)
 {
   updatePositions();
 
   emit sizeChanged();
 }
 
-void TaskListWidget::moveEvent(QMoveEvent */*pEvent*/)
+void TaskListWidget::moveEvent(QMoveEvent* /*pEvent*/)
 {
   updatePositions();
 }
