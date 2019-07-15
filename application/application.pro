@@ -1,7 +1,12 @@
 CONFIG += c++11
 QT += core gui
-TARGET = taskplanner
 
+APP_NAME = taskplanner
+ORGANIZATION_NAME = ancor
+DEFINES += APP_NAME=\\\"$$APP_NAME\\\" \
+           ORGANIZATION_NAME=\\\"$$ORGANIZATION_NAME\\\"
+
+TARGET = $$APP_NAME
 macx {
   DESTDIR = ../
 }
