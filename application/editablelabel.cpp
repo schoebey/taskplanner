@@ -8,7 +8,7 @@
 
 
 EditableLabel::EditableLabel(QWidget* pParent)
-  : QLabel(pParent),
+  : DecoratedLabel(pParent),
     m_pLineEdit(new QLineEdit(this)),
     m_iMinWidth(0)
 {
@@ -99,33 +99,6 @@ QSize EditableLabel::sizeHint() const
 void EditableLabel::resizeEvent(QResizeEvent* pEvent)
 {
   QLabel::resizeEvent(pEvent);
-//  updateGeometry();
-
-  // only emit this if size really has changed!
-//  if (pEvent->oldSize() != pEvent->size())
-//  {
-//    emit sizeChanged();
-  //  }
-}
-
-bool EditableLabel::drawOutline() const
-{
-  return m_bDrawOutline;
-}
-
-void EditableLabel::setDrawOutline(bool bDraw)
-{
-  m_bDrawOutline = bDraw;
-}
-
-bool EditableLabel::drawShadow() const
-{
-  return m_bDrawShadow;
-}
-
-void EditableLabel::setDrawShadow(bool bDraw)
-{
-  m_bDrawShadow = bDraw;
 }
 
 void EditableLabel::onEditingFinished()

@@ -47,9 +47,8 @@ namespace
   }
 }
 
-TaskWidgetOverlay::TaskWidgetOverlay(TaskWidget *parent)
-  : QFrame(parent),
-    m_pParent(parent)
+TaskWidgetOverlay::TaskWidgetOverlay(QWidget* pParent)
+  : QFrame(pParent)
 {
   setAttribute(Qt::WA_TransparentForMouseEvents);
   setFocusPolicy(Qt::NoFocus);

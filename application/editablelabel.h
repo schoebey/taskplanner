@@ -1,13 +1,12 @@
 #ifndef EDITABLELABEL_H
 #define EDITABLELABEL_H
 
-#include <QLabel>
+#include "decoratedlabel.h"
 #include <functional>
 
-#include <functional>
 
 class QLineEdit;
-class EditableLabel : public QLabel
+class EditableLabel : public DecoratedLabel
 {
   Q_OBJECT
 public:
@@ -20,14 +19,6 @@ public:
   QSize sizeHint() const override;
 
   void resizeEvent(QResizeEvent*) override;
-
-  Q_PROPERTY(bool drawOutline READ drawOutline WRITE setDrawOutline)
-  bool drawOutline() const;
-  void setDrawOutline(bool bDraw);
-
-  Q_PROPERTY(bool drawShadow READ drawShadow WRITE setDrawShadow)
-  bool drawShadow() const;
-  void setDrawShadow(bool bDraw);
 
   void setDisplayFunction(const std::function<QString(const QString&)> fnDisplay);
 
@@ -49,8 +40,6 @@ private slots:
 private:
   QLineEdit* m_pLineEdit = nullptr;
   int m_iSuggestedWidth = -1;
-  bool m_bDrawOutline = false;
-  bool m_bDrawShadow = false;
   QString m_sEditText;
   std::function<QString(const QString&)> m_fnToDisplay;
   int m_iMinWidth;
