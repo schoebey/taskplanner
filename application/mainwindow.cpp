@@ -143,16 +143,22 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
   startTimer(3000);
 
+  QMenu* pMenuOptions = new QMenu(tr("Options"), ui->menuTools);
+  ui->menuTools->addMenu(pMenuOptions);
+
+
   auto pDetector = new HibernationDetector(this);
   bOk = connect(pDetector, SIGNAL(wokeUpFromHibernation(QDateTime, QDateTime)),
                 this, SLOT(onWokeUpFromHibernation(QDateTime, QDateTime)));
   assert(bOk);
   Q_UNUSED(bOk)
 
+
   m_pEnableHibernationDetection = new QAction(tr("hibernation detection"), this);
   m_pEnableHibernationDetection->setCheckable(true);
   connect(m_pEnableHibernationDetection, &QAction::toggled, pDetector, &HibernationDetector::setEnabled);
-  ui->menuTools->addAction(m_pEnableHibernationDetection);
+  pMenuOptions->addAction(m_pEnableHibernationDetection);
+
 
 
   loadSettings();
@@ -174,7 +180,7 @@ void MainWindow::closeEvent(QCloseEvent* /*event*/)
 void MainWindow::saveSettings()
 {
   // write window state, currently loaded file etc. to a settings file
-  QSettings settings("settings.ini", QSettings::IniFormat);
+  QSettings settings(QSettings::IniFormat, QSettings::UserScope, ORGANIZATION_NAME, APP_NAME);
 
   settings.beginGroup("window");
   settings.setValue("state", saveState());
@@ -192,7 +198,7 @@ void MainWindow::saveSettings()
 
 void MainWindow::loadSettings()
 {
-  QSettings settings("settings.ini", QSettings::IniFormat);
+  QSettings settings(QSettings::IniFormat, QSettings::UserScope, ORGANIZATION_NAME, APP_NAME);
 
   settings.beginGroup("window");
   restoreGeometry(settings.value("geometry").toByteArray());
