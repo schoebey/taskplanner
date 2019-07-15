@@ -624,7 +624,7 @@ void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int iPos)
   }
 }
 
-void TaskWidget::onTaskRemoved(TaskWidget */*pTaskWidget*/)
+void TaskWidget::onTaskRemoved(TaskWidget* /*pTaskWidget*/)
 {
   emit sizeChanged();
 }

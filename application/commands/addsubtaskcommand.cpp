@@ -53,6 +53,7 @@ void AddSubTaskCommand::redo()
     {
       bool bAccepted = pTask->setPropertyValue(el.first, el.second);
       assert(bAccepted);
+      Q_UNUSED(bAccepted)
     }
 
     pTask->setGroup(pParentTask->group());
