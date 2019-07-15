@@ -117,6 +117,16 @@ void EditableLabel::setDrawOutline(bool bDraw)
   m_bDrawOutline = bDraw;
 }
 
+bool EditableLabel::drawShadow() const
+{
+  return m_bDrawShadow;
+}
+
+void EditableLabel::setDrawShadow(bool bDraw)
+{
+  m_bDrawShadow = bDraw;
+}
+
 void EditableLabel::onEditingFinished()
 {
   setMinimumWidth(m_iMinWidth);
