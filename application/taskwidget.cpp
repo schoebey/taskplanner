@@ -38,6 +38,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   m_taskId(id)
 {
   ui->setupUi(this);
+  ui->pTaskListWidget->setAutoResize(true);
   m_pOverlay = new TaskWidgetOverlay(ui->pFrame);
 
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
@@ -50,7 +51,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(ui->pShowDetails, SIGNAL(toggled(bool)), this, SLOT(setExpanded(bool)));
   connect(ui->pTaskListWidget, &TaskListWidget::taskInserted, this, &TaskWidget::onTaskInserted);
   connect(ui->pTaskListWidget, &TaskListWidget::taskRemoved, this, &TaskWidget::onTaskRemoved);
-  connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::sizeChanged);
+  connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::updateSize, Qt::QueuedConnection);
 
   setUpContextMenu();
 
@@ -171,7 +172,7 @@ QString TaskWidget::description() const
 void TaskWidget::setDescription(const QString& sDescription)
 {
   ui->pDescription->setEditText(sDescription);
-  emit sizeChanged();
+  updateSize();
 }
 
 TaskListWidget* TaskWidget::previousTaskListWidget() const
@@ -411,7 +412,7 @@ void TaskWidget::addProperty(const QString& sName,
         setPropertyValue(sName, sValue);
       }
 
-      emit sizeChanged();
+      updateSize();
     }
   }
 
@@ -460,7 +461,7 @@ bool TaskWidget::removeProperty(const QString& sName)
     it->second.pFrame->deleteLater();
     m_propertyLineEdits.erase(it);
 
-    emit sizeChanged();
+    updateSize();
     return true;
   }
 
@@ -480,7 +481,7 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
       it->second.pValue->deleteLater();
       it->second.pFrame->deleteLater();
       m_propertyLineEdits.erase(it);
-      emit sizeChanged();
+      updateSize();
 
       setUpContextMenu();
     }
@@ -621,13 +622,13 @@ void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int iPos)
   {
     emit taskMovedTo(pTaskWidget->id(), m_taskId, iPos);
 
-    emit sizeChanged();
+    updateSize();
   }
 }
 
 void TaskWidget::onTaskRemoved(TaskWidget* /*pTaskWidget*/)
 {
-  emit sizeChanged();
+  updateSize();
 }
 
 HighlightingMethod TaskWidget::highlight() const
@@ -685,11 +686,15 @@ void TaskWidget::updateSize()
   int iWidth = ui->pProperties->width();
   ui->pDescription->suggestWidth(iWidth);
 
+
   QMetaObject::invokeMethod(this, "updateSize2", Qt::QueuedConnection);
 }
 
 void TaskWidget::updateSize2()
 {
+  layout()->invalidate();
+  layout()->update();
+
   int iSuggestedHeight = sizeHint().height();
   resize(width(), iSuggestedHeight);
 }
@@ -781,7 +786,7 @@ void TaskWidget::onTitleEdited()
 void TaskWidget::onDescriptionEdited()
 {
   emit descriptionChanged(m_taskId, ui->pDescription->editText());
-  emit sizeChanged();
+  updateSize();
 }
 
 void TaskWidget::on_pStartStop_toggled(bool bOn)
@@ -877,6 +882,8 @@ void TaskWidget::resizeEvent(QResizeEvent* pEvent)
   m_pOverlay->resize(size());
 
   m_cache = QPixmap();
+
+  emit sizeChanged();
 }
 
 void TaskWidget::focusInEvent(QFocusEvent* pEvent)
@@ -926,10 +933,21 @@ void TaskWidget::setExpanded(bool bExpanded)
 
     emit propertyChanged(m_taskId, "expanded", bExpanded ? "true" : "false");
 
+    if (bExpanded)
+    {
+      resize(m_bExpandedSize);
+    }
+    else
+    {
+      m_bExpandedSize = size();
+      resize(width(), 15);
+    }
+
+
     ui->pStartStop->style()->unpolish(ui->pStartStop);
     ui->pStartStop->style()->polish(ui->pStartStop);
 
-    emit sizeChanged();
+    updateSize();
   }
 }
 
@@ -952,7 +970,7 @@ void TaskWidget::removeTask(TaskWidget *pTaskWidget)
 {
   pTaskWidget->setParentContainerWidget(nullptr);
   ui->pTaskListWidget->removeTask(pTaskWidget);
-  emit sizeChanged();
+  updateSize();
 }
 
 void TaskWidget::onDeleteTriggered()
@@ -990,7 +1008,7 @@ void TaskWidget::onLinkPasted()
 
 void TaskWidget::showEvent(QShowEvent* /*pEvent*/)
 {
-  emit sizeChanged();
+  updateSize();
 }
 
 bool TaskWidget::onMouseMoved(const QPoint& pt)
