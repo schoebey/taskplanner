@@ -35,6 +35,8 @@ public:
 
   bool onMouseMoved(const QPoint &pt);
 
+  void setAutoResize(bool bAutoResize);
+
 signals:
   void taskInserted(TaskWidget* pTaskWidget, int iPos);
   void taskRemoved(TaskWidget* pTaskWidget);
@@ -55,6 +57,7 @@ private:
   std::vector<TaskWidget*> m_vpTaskWidgets;
   static TaskListWidget* m_pMouseHoveringOver;
   QImage m_backgroundImage;
+  bool m_bAutoResize = false;
 };
 
 #endif // TASKLISTWIDGET_H

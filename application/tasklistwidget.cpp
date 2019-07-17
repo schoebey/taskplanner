@@ -250,11 +250,22 @@ void TaskListWidget::updatePositions(int iSpace, int iSpacePos)
   {
     QWidget* pWidget = m_vpTaskWidgets[iWidget];
     moveWidget(pWidget, origin);
-    pWidget->resize(width(), pWidget->sizeHint().height());
+    pWidget->resize(width(), pWidget->height());
     origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
   }
 
-  setMinimumHeight(origin.y());
+
+  // only resize the list if it is a nested list (one within a task widget)
+  // group widget lists have to have maximum height at all times...
+  if (m_bAutoResize)
+  {
+    setMinimumHeight(origin.y());
+    setMaximumHeight(origin.y());
+  }
+  else
+  {
+    setMinimumHeight(origin.y());
+  }
 }
 
 int TaskListWidget::indexFromPoint(QPoint pt)
@@ -334,4 +345,9 @@ bool TaskListWidget::onMouseMoved(const QPoint& pt)
   }
 
   return false;
+}
+
+void TaskListWidget::setAutoResize(bool bAutoResize)
+{
+  m_bAutoResize = bAutoResize;
 }

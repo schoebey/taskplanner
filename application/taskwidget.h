@@ -175,6 +175,8 @@ private:
 
   std::map<QUrl, LinkWidget*> m_linkWidgets;
 
+  QSize m_bExpandedSize;
+
   static TaskWidget* m_pDraggingTaskWidget;
   static TaskWidget* m_pTaskWidgetUnderMouse;
 };
