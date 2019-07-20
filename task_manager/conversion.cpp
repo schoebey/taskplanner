@@ -49,13 +49,13 @@ namespace conversion
 
       // due today
       qint64 iMsecsTo = now.msecsTo(dt);
-      qint64 iSecsTo = iMsecsTo / 1000;
-      qint64 iHoursTo = iMsecsTo / 3600000;
-      qint64 iMinsTo = iMsecsTo / 60000 - iHoursTo * 3600000;
+      qint64 iSecsTo = static_cast<int>(floor(iMsecsTo / 1000. + 0.5));
+      qint64 iHoursTo = static_cast<int>(floor(iMsecsTo / 3600000. + 0.5));
+      qint64 iMinsTo = static_cast<int>(floor(iMsecsTo / 60000. + 0.5)) - iHoursTo * 3600000;
       qint64 iDaysTo = now.daysTo(dt);
-      qint64 iWeeksTo = iDaysTo / 7;
-      qint64 iMonthsTo = iWeeksTo / 4;
-      qint64 iYearsTo = iDaysTo / 365;
+      qint64 iWeeksTo = static_cast<int>(floor(iDaysTo / 7. + 0.5));
+      qint64 iMonthsTo = static_cast<int>(floor(iWeeksTo / 4. + 0.5));
+      qint64 iYearsTo = static_cast<int>(floor(iDaysTo / 365. + 0.5));
       std::vector<qint64> viCounters = {iYearsTo, iMonthsTo, iWeeksTo, iDaysTo, iHoursTo, iMinsTo, iSecsTo};
 
       enum class Type
