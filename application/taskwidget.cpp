@@ -40,6 +40,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   ui->setupUi(this);
   ui->pTaskListWidget->setAutoResize(true);
   m_pOverlay = new TaskWidgetOverlay(ui->pFrame);
+  m_pOverlay->stackUnder(ui->pShowDetails);
 
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
@@ -373,7 +374,7 @@ void TaskWidget::addProperty(const QString& sName,
             qint64 iSecsTo = QDateTime::currentDateTime().msecsTo(dt) / 1000;
             if (0 < iSecsTo)
             {
-              int iTimeoutMs = std::max<int>(1000, static_cast<int>(iSecsTo * 1000));
+              int iTimeoutMs = std::min<int>(300000, static_cast<int>(iSecsTo * 1000));
 
               if (iTimeoutMs <= 10000)
               {
@@ -386,6 +387,10 @@ void TaskWidget::addProperty(const QString& sName,
               else if (iTimeoutMs <= 60000)
               {
                 iTimeoutMs = 15000;
+              }
+              else if (iTimeoutMs <= 600000)
+              {
+                iTimeoutMs = 150000;
               }
 
               pTimer->start(iTimeoutMs);
@@ -605,9 +610,14 @@ void TaskWidget::setAutoPriority(double dPriority)
     // TODO: tell the overlay widget that the prio has changed
     // let it change its color/property based on the new prio
     // have priority buckets for high/medium/low?
-    m_pOverlay->setProperty("autoPriority", static_cast<int>(dPriority));
-    m_pOverlay->style()->unpolish(m_pOverlay);
-    m_pOverlay->style()->polish(m_pOverlay);
+    int iPrioCategory = static_cast<int>(dPriority);
+    if (iPrioCategory != m_pOverlay->property("autoPriority").toInt())
+    {
+      m_pOverlay->setProperty("autoPriority", iPrioCategory);
+      m_pOverlay->style()->unpolish(m_pOverlay);
+      m_pOverlay->style()->polish(m_pOverlay);
+      m_pOverlay->update();
+    }
   }
 }
 
@@ -940,7 +950,7 @@ void TaskWidget::setExpanded(bool bExpanded)
     else
     {
       m_bExpandedSize = size();
-      resize(width(), 15);
+      resize(width(), 1);
     }
 
 

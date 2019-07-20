@@ -235,7 +235,7 @@ void TaskListWidget::updatePositions(int iSpace, int iSpacePos)
   {
     QWidget* pWidget = m_vpTaskWidgets[iWidget];
     moveWidget(pWidget, origin);
-    pWidget->resize(width(), pWidget->sizeHint().height());
+    pWidget->resize(width(), pWidget->height());
     origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
   }
 
