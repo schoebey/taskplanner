@@ -696,7 +696,6 @@ void TaskWidget::updateSize()
   int iWidth = ui->pProperties->width();
   ui->pDescription->suggestWidth(iWidth);
 
-
   QMetaObject::invokeMethod(this, "updateSize2", Qt::QueuedConnection);
 }
 
@@ -705,7 +704,23 @@ void TaskWidget::updateSize2()
   layout()->invalidate();
   layout()->update();
 
-  int iSuggestedHeight = sizeHint().height();
+
+
+  // TODO: it seems that the suggested size from sizeHint is not sufficient
+  // if a child widget has just resized.
+  // even though the layout has just been refreshed, the new size is not taken into account. Why not?
+
+  // Update: the sizehint of the frame and shadow seem correct for this instance. why not the outermost widget?
+  qDebug() << this->name() << "minimumSizeHint" << minimumSizeHint();
+  qDebug() << this->name() << "sizeHint" << sizeHint();
+  qDebug() << this->name() << "pDynamicProperties" << ui->pDynamicProperties->sizeHint();
+  qDebug() << this->name() << "pTitle" << ui->pTitle->sizeHint();
+  qDebug() << this->name() << "tasklistwidget sizehint" << ui->pTaskListWidget->sizeHint();
+  qDebug() << this->name() << "pShadow sizehint" << ui->pShadow->sizeHint();
+  qDebug() << this->name() << "pFrame sizehint" << ui->pFrame->sizeHint();
+
+
+  int iSuggestedHeight = ui->pFrame->sizeHint().height();
   resize(width(), iSuggestedHeight);
 }
 
