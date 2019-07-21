@@ -37,6 +37,7 @@ public:
 
   void setAutoResize(bool bAutoResize);
 
+  QSize sizeHint() const override;
 signals:
   void taskInserted(TaskWidget* pTaskWidget, int iPos);
   void taskRemoved(TaskWidget* pTaskWidget);
@@ -48,16 +49,19 @@ private:
 
   void resizeEvent(QResizeEvent* pEvent) override;
   void moveEvent(QMoveEvent* pEvent) override;
+  QSize minimumSizeHint() const override;
 
 private slots:
   void updateTaskPositions();
   void updatePositions(int iSpace = -1, int iSpacePos = 0);
+  void setSize(int iWidth, int iHeight);
 
 private:
   std::vector<TaskWidget*> m_vpTaskWidgets;
   static TaskListWidget* m_pMouseHoveringOver;
   QImage m_backgroundImage;
   bool m_bAutoResize = false;
+  QSize m_minimumSize;
 };
 
 #endif // TASKLISTWIDGET_H
