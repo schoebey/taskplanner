@@ -197,11 +197,15 @@ TaskWidget *TaskListWidget::taskWidgetAt(QPoint pt)
   return nullptr;
 }
 
-void TaskListWidget::resizeEvent(QResizeEvent* /*pEvent*/)
+void TaskListWidget::resizeEvent(QResizeEvent* pEvent)
 {
+  QFrame::resizeEvent(pEvent);
+
   updatePositions();
 
   emit sizeChanged();
+
+  qDebug() << "tasklistwidget size changed" << pEvent->size();
 }
 
 void TaskListWidget::moveEvent(QMoveEvent* /*pEvent*/)
@@ -212,6 +216,16 @@ void TaskListWidget::moveEvent(QMoveEvent* /*pEvent*/)
 void TaskListWidget::updateTaskPositions()
 {
   updatePositions(-1, 0);
+}
+
+QSize TaskListWidget::minimumSizeHint() const
+{
+  return m_minimumSize;
+}
+
+QSize TaskListWidget::sizeHint() const
+{
+  return m_minimumSize;
 }
 
 void TaskListWidget::updatePositions(int iSpace, int iSpacePos)
@@ -259,13 +273,22 @@ void TaskListWidget::updatePositions(int iSpace, int iSpacePos)
   // group widget lists have to have maximum height at all times...
   if (m_bAutoResize)
   {
+    int iHeight(height());
+    qDebug() << this << iHeight << origin.y();
     setMinimumHeight(origin.y());
     setMaximumHeight(origin.y());
+    m_minimumSize = QSize(width(), origin.y());
+    updateGeometry();
   }
   else
   {
     setMinimumHeight(origin.y());
   }
+}
+
+void TaskListWidget::setSize(int iWidth, int iHeight)
+{
+  resize(iWidth, iHeight);
 }
 
 int TaskListWidget::indexFromPoint(QPoint pt)
