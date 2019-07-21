@@ -204,8 +204,6 @@ void TaskListWidget::resizeEvent(QResizeEvent* pEvent)
   updatePositions();
 
   emit sizeChanged();
-
-  qDebug() << "tasklistwidget size changed" << pEvent->size();
 }
 
 void TaskListWidget::moveEvent(QMoveEvent* /*pEvent*/)
@@ -228,24 +226,25 @@ QSize TaskListWidget::sizeHint() const
   return m_minimumSize;
 }
 
-void TaskListWidget::updatePositions(int iSpace, int iSpacePos)
+void TaskListWidget::updatePositions(int iSpace, int iGhostPos)
 {
   QPoint origin(0,0);
   origin.setY(origin.y() + c_iItemSpacing);
 
-  size_t spacePos = 0;
-  if (-1 == iSpacePos)
+  size_t ghostPos = 0;
+  if (-1 == iGhostPos)
   {
-    spacePos = m_vpTaskWidgets.size();
+    ghostPos = m_vpTaskWidgets.size();
   }
   else
   {
-    spacePos = static_cast<size_t>(iSpacePos);
+    ghostPos = static_cast<size_t>(iGhostPos);
   }
 
 
+
   // find the new widgets position
-  for (size_t iWidget = 0; iWidget < std::min<size_t>(spacePos, m_vpTaskWidgets.size()); ++iWidget)
+  for (size_t iWidget = 0; iWidget < std::min<size_t>(ghostPos, m_vpTaskWidgets.size()); ++iWidget)
   {
     QWidget* pWidget = m_vpTaskWidgets[iWidget];
     moveWidget(pWidget, origin);
@@ -253,14 +252,14 @@ void TaskListWidget::updatePositions(int iSpace, int iSpacePos)
     origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
   }
 
-  if (-1 < iSpace && spacePos < m_vpTaskWidgets.size())
+  if (-1 < iSpace && ghostPos < m_vpTaskWidgets.size())
   {
     // make room for the new widget
     origin.setY(origin.y() + iSpace + c_iItemSpacing);
   }
 
 
-  for (size_t iWidget = spacePos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
+  for (size_t iWidget = ghostPos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
   {
     QWidget* pWidget = m_vpTaskWidgets[iWidget];
     moveWidget(pWidget, origin);
