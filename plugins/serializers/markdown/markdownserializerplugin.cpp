@@ -9,5 +9,4 @@ MarkdownSerializerPlugin::MarkdownSerializerPlugin()
 
 void MarkdownSerializerPlugin::initialize()
 {
-  qDebug() << "hello from the plugin";
 }
