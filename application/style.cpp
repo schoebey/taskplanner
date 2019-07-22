@@ -457,14 +457,14 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
   QColor shadowColor(0, 0, 0, 100);
 
 
-  EditableLabel* pLabel = dynamic_cast<EditableLabel*>(painter->device());
+  DecoratedLabel* pLabel = dynamic_cast<DecoratedLabel*>(painter->device());
   bool bDrawOutline = false;
   bool bDrawShadow = false;
   tfnDrawText fnDrawText = drawShadowedText;
   if (nullptr != pLabel)
   {
-    bDrawOutline = pLabel->property("drawOutline").toBool();
-    bDrawShadow = pLabel->property("drawShadow").toBool();
+    bDrawOutline = pLabel->drawOutline();
+    bDrawShadow = pLabel->drawShadow();
     fnDrawText = drawNormalText;
     if (bDrawOutline)
     {

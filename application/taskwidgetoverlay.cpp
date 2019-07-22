@@ -220,8 +220,10 @@ bool TaskWidgetOverlay::eventFilter(QObject* watched, QEvent* event)
       QResizeEvent* pResizeEvent = dynamic_cast<QResizeEvent*>(event);
       if (nullptr != pResizeEvent)
       {
-        move(0, 0);
-        resize(pResizeEvent->size());
+        move(parentWidget()->contentsRect().topLeft());
+        auto margins = parentWidget()->contentsMargins();
+        resize(pResizeEvent->size() - QSize(margins.left() + margins.right(),
+                                            margins.top() + margins.bottom()));
       }
      } break;
     default:
