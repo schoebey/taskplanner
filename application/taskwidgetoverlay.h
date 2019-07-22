@@ -36,6 +36,7 @@ public slots:
 
 private:
   void paintEvent(QPaintEvent* pEvent) override;
+  bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
   HighlightingMethod m_method = EHighlightMethod::eNoHighlight;
