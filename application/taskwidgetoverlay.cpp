@@ -52,6 +52,10 @@ TaskWidgetOverlay::TaskWidgetOverlay(QWidget* pParent)
 {
   setAttribute(Qt::WA_TransparentForMouseEvents);
   setFocusPolicy(Qt::NoFocus);
+  if (nullptr != pParent)
+  {
+    pParent->installEventFilter(this);
+  }
 }
 
 HighlightingMethod TaskWidgetOverlay::highlight() const
@@ -194,8 +198,7 @@ void TaskWidgetOverlay::paintEvent(QPaintEvent* /*pEvent*/)
   QColor borderColor(m_borderColor);
   QColor backgroundColor(m_highlightColor);
 
-  static const int c_iBorderOffset = 5;
-  QRectF rct(rect().adjusted(c_iBorderOffset, c_iBorderOffset, -c_iBorderOffset, -c_iBorderOffset));
+  QRectF rct(rect());
 
   painter.setPen(Qt::NoPen);
   painter.setBrush(m_backgroundBrush);
@@ -206,4 +209,26 @@ void TaskWidgetOverlay::paintEvent(QPaintEvent* /*pEvent*/)
   painter.drawRoundedRect(rct, 5, 5);
 }
 
+bool TaskWidgetOverlay::eventFilter(QObject* watched, QEvent* event)
+{
+  if (watched == parentWidget())
+  {
+    switch (event->type())
+    {
+    case QEvent::Resize:
+    {
+      QResizeEvent* pResizeEvent = dynamic_cast<QResizeEvent*>(event);
+      if (nullptr != pResizeEvent)
+      {
+        move(0, 0);
+        resize(pResizeEvent->size());
+      }
+     } break;
+    default:
+      break;
+    }
+  }
+
+  return false;
+}
 

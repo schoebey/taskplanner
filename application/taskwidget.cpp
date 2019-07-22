@@ -40,7 +40,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   ui->setupUi(this);
   ui->pTaskListWidget->setAutoResize(true);
   m_pOverlay = new TaskWidgetOverlay(ui->pFrame);
-  m_pOverlay->stackUnder(ui->pShowDetails);
+  m_pOverlay->stackUnder(ui->pProperties);
 
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
@@ -887,9 +887,6 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
 void TaskWidget::resizeEvent(QResizeEvent* pEvent)
 {
   QWidget::resizeEvent(pEvent);
-
-  m_pOverlay->move(0, 0);
-  m_pOverlay->resize(size());
 
   m_cache = QPixmap();
 
