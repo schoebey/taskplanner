@@ -94,7 +94,7 @@ namespace
 
           while (!(*ppStream)->atEnd())
           {
-            qint64 iLastValidPos = (*ppStream)->pos();
+
             QString sLine = (*ppStream)->readLine();
             if (sLine.startsWith(sChildStartTag) ||
                 !sLine.startsWith("#"))
@@ -103,7 +103,8 @@ namespace
             }
             else
             {
-              (*ppStream)->seek(iLastValidPos);
+              qint64 iCurrentPos = (*ppStream)->pos();
+              (*ppStream)->seek(iCurrentPos - sLine.size());
               break;
             }
           }
