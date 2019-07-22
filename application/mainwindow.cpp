@@ -360,7 +360,6 @@ void MainWindow::loadPlugins(const QString& sInitialSearchPath)
 
 void MainWindow::reloadStylesheet(const QString& sPath)
 {
-  qDebug() << sPath;
   QFile f(sPath);
   if (f.open(QIODevice::ReadOnly))
   {
@@ -1172,7 +1171,6 @@ void MainWindow::sortGroup(group_id groupId)
     if (nullptr != pTask &&
         groupId == pTask->group())
     {
-      qDebug() << pTask->autoPriority();
       sortedTaskIds[pTask->autoPriority()].push_back(id);
     }
   }

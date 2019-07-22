@@ -44,7 +44,6 @@ EReportError TextReport::create_impl(const Manager& manager) const
   if (!pDevice->isOpen() &&
       !pDevice->open(QIODevice::ReadWrite | QIODevice::Truncate))
   {
-    qDebug() << pDevice->errorString();
     return EReportError::eInternalError;
   }
 
