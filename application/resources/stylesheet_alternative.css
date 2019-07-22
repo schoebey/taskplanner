@@ -105,10 +105,15 @@ QToolBar {
   margin-top: 8px;
 }
 
+DecoratedLabel {
+  qproperty-drawShadow: false;
+  qproperty-drawOutline: false;
+}
 
 EditableLabel {
   border: 0px solid red;
 }
+
 
 QPushButton {
   border: 1px solid rgba(70, 70, 70, 255);
@@ -209,12 +214,25 @@ OverlayWidget #report {
   border-bottom-left-radius: 5px;
 }
 
-
 TaskWidget {
+  qproperty-dropShadow: false;
+}
+
+TaskWidget, TaskWidget #pShadow {
+  border: 0px;
+}
+
+TaskWidget #pShadow {
+  border: 10px;
+  border-image: url(:/dropshadow.png) 10 10 10 10;
+  padding: -12 -12 -8px -12;
+}
+
+TaskWidget #pFrame {
+  spacing: -10px;
   border: 0px solid rgba(50, 50, 50, 128);
   border-radius: 7px;
   margin: 4px;
-  qproperty-dropShadow: false;
   color: #8C8987;
   background-color: #F7F4F2;
 }
@@ -224,12 +242,17 @@ TaskWidget QLabel {
   color: #8C8987;
 }
 
-TaskWidget TaskWidget {
+TaskWidget TaskWidget #pFrame {
   border: 1px solid #ddd;
 }
 
+TaskWidget TaskWidget #pShadow {
+  border: 0px;
+  border-image: -1;
+  padding: 0px;
+}
+
 TaskWidget #pTitle {
-  qproperty-drawOutline: false;
   padding-left: 4px;
   font-size: 10px;
 }
