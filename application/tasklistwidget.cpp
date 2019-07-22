@@ -94,7 +94,6 @@ bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
     }
 
     QPoint currentPos = pTaskWidget->mapToGlobal(QPoint(0,0));
-    qDebug() << currentPos.x() << currentPos.y();
     pTaskWidget->setParent(this);
     pTaskWidget->setTaskListWidget(this);
     pTaskWidget->resize(width(), pTaskWidget->sizeHint().height());
@@ -167,7 +166,7 @@ void TaskListWidget::reorderTasks(const std::vector<task_id>& vIds)
   if (vpTaskWidgets != m_vpTaskWidgets)
   {
     m_vpTaskWidgets = vpTaskWidgets;
-    QMetaObject::invokeMethod(this, "UpdatePositions", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, "updatePositions", Qt::QueuedConnection);
   }
 }
 

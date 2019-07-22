@@ -217,8 +217,7 @@ void MoveTaskCommand::undo()
            m_pManager->task(m_newParentTaskId), m_pWidgetManager->taskWidget(m_newParentTaskId),
            m_pManager->task(m_oldParentTaskId), m_pWidgetManager->taskWidget(m_oldParentTaskId),
            m_iOldPosition, m_pManager);
-  qDebug() << QString("reverting task %1 from position %2 back to position %3").arg(int(m_taskId)).arg(m_iNewPosition).arg(m_iOldPosition);
-}
+  }
 
 void MoveTaskCommand::redo()
 {
@@ -228,5 +227,4 @@ void MoveTaskCommand::redo()
            m_pManager->task(m_oldParentTaskId), m_pWidgetManager->taskWidget(m_oldParentTaskId),
            m_pManager->task(m_newParentTaskId), m_pWidgetManager->taskWidget(m_newParentTaskId),
            m_iNewPosition, m_pManager);
-  qDebug() << QString("moving task %1 from position %2 to position %3").arg(int(m_taskId)).arg(m_iOldPosition).arg(m_iNewPosition);
-}
+ }
