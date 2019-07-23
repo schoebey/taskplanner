@@ -9,63 +9,6 @@ MainWindow #frame {
   padding: -12px;
 }
 
-WindowTitleMenuBar QLabel {
-	color: white;
-	font: 10pt;
-}
-
-QMenuBar {
-  color: white;
-  background: rgb(50, 50, 50);
-  padding: 10 10 10 10;
-  min-height: 20px;
-}
-
-QMenuBar::item {
-    padding: 1px 10px;
-    background: transparent;
-	border: 1px solid transparent;
-	border-bottom: 0px;
-}
-
-QMenuBar::item:selected { /* when selected using mouse or keyboard */
-    background: #777;
-	border: 1px solid transparent;
-	border-bottom: 0px;
-}
-
-QMenuBar::item:pressed {
-    background: rgb(30, 30, 30);
-	border: 1px solid #555;
-	border-bottom: 0px;
-}
-
-QMenu {
-  color: white;
-  background: rgb(30, 30, 30);
-  border: 1px solid #555;
-  padding-top: 5px;
-}
-
-QMenu::item {
-    padding: 2px 25px 2px 20px;
-    border-left: 10px solid transparent; /* reserve space for selection border */
-}
-
-QMenu::item:selected { /* when user selects item using mouse or keyboard */
-    background-color: #777;
-}
-
-QMenu::item:disabled {
-  color: #444;
-}
-
-QToolBar {
-  border: 0px;
-  background: rgba(255,255,255,20);
-  min-height: 50px;
-}
-
 .AboutDialog #pContents {
   min-width: 350px;
   min-height: 200px;
@@ -103,6 +46,12 @@ QToolBar {
 
 EditableLabel {
   border: 0px solid red;
+}
+
+QToolBar {
+  border: 0px;
+  background: rgba(255,255,255,20);
+  min-height: 50px;
 }
 
 QPushButton {
@@ -210,17 +159,24 @@ OverlayWidget #report {
 #inprogress { qproperty-backgroundImage: url(:/task_background_2.png); } 
 #done { qproperty-backgroundImage: url(:/task_background_3.png); }
 
+TaskListWidget {
+  background: transparent;
+}
 
-TaskWidget {
+TaskWidget, TaskWidget #pShadow {
+  border: 0px;
+}
+
+TaskWidget #pFrame{
   border: 1px solid rgba(50, 50, 50, 128);
   border-radius: 7px;
   margin: 4px;
-  qproperty-dropShadow: false;
 }
 
 TaskWidget #pTitle {
   qproperty-drawOutline: true;
   padding-left: 4px;
+  font-size: 11pt;
   color: rgba(255, 255, 255, 255);
 }
 
@@ -310,7 +266,7 @@ TaskWidgetOverlay[autoPriority="1"] {
 }
 
 LinkWidget {
-  padding: 3px 7px 3px 7px;
+  padding: 3px;
   margin: 0px;
 }
 
@@ -352,6 +308,10 @@ LinkWidget:focus {
   border: 0px solid red;
 }
 
+#pDynamicProperties QLabel {
+  font-size: 11pt;
+}
+
 #pSeparator {
   border-top: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
                 stop:0 rgba(0, 0, 0, 0),
@@ -375,6 +335,9 @@ LinkWidget:focus {
   padding-right: 4px;
 }
 
+#pPropertyFrame QLabel {
+  font-size: 10pt;
+}
  
 #priority_label {
   color: black;
@@ -400,8 +363,4 @@ ToolBarInfoDisplay {
 ToolBarInfoDisplay QLabel {
   color: white;
   font-size: 20pt;
-}
-
-TaskListWidget {
-	background-color: transparent;
 }
