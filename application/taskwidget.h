@@ -66,10 +66,6 @@ public:
   double backgroundImageBlendFactor() const;
   void setBackgroundImageBlendFactor(double dFactor);
 
-  Q_PROPERTY(bool dropShadow READ dropShadow WRITE setDropShadow)
-  bool dropShadow() const;
-  void setDropShadow(bool bOn);
-
   Q_PROPERTY(QBrush overlayBackground READ overlayBackground WRITE setOverlayBackground)
   QBrush overlayBackground() const;
   void setOverlayBackground(const QBrush& b);
@@ -152,7 +148,6 @@ private:
   QPoint m_mouseDownPos;
   QImage m_backgroundImage[2];
   double m_dBackgroundImageBlendFactor = 0;
-  bool m_bDropShadow = true;
   double m_dAutoPriority = 0;
 
   TaskListWidget* m_pTaskListWidget = nullptr;

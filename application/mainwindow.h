@@ -20,6 +20,7 @@ class Manager;
 class WidgetManager;
 class TaskCreationDialog;
 class QSignalMapper;
+class QFileSystemWatcher;
 class ToolBarInfoDisplay;
 class MainWindow : public QMainWindow
 {
@@ -90,12 +91,14 @@ private:
   void loadPlugins(const QString &sInitialSearchPath = QString());
   void saveSettings();
   void loadSettings();
+  void onChooseStylesheet();
   void onChooseScript();
   void showError(const QString& sErrorMessage);
 
 private:
   Ui::MainWindow *ui;
   QString m_sFileName;
+  QString m_sStylesheetPath;
   QDateTime m_lastSaveTime;
   Manager* m_pManager = nullptr;
   WidgetManager* m_pWidgetManager = nullptr;
@@ -105,6 +108,7 @@ private:
   QUndoStack m_undoStack;
   std::vector<std::shared_ptr<QObject>> m_vspPlugins;
   QAction* m_pEnableHibernationDetection;
+  QFileSystemWatcher* m_pWatcher;
   ToolBarInfoDisplay* m_pInfoDisplay;
 };
 
