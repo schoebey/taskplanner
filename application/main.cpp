@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include <QApplication>
 
 #include "mainwindow.h"
@@ -143,6 +144,7 @@ int main(int argc, char *argv[])
   QApplication app(argc, argv);
 
   QString version(GIT_VERSION);
+  QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
   QGuiApplication::setApplicationDisplayName(QString("%1 (%2)").arg(APP_NAME).arg(version));
 
   app.setStyle(new Style());
