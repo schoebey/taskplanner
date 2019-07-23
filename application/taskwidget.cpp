@@ -247,18 +247,6 @@ void TaskWidget::dropEvent(QDropEvent* pEvent)
   }
 }
 
-bool TaskWidget::dropShadow() const
-{
-  return m_bDropShadow;
-}
-
-void TaskWidget::setDropShadow(bool bOn)
-{
-  m_bDropShadow = bOn;
-  m_cache = QPixmap();
-  update();
-}
-
 QBrush TaskWidget::overlayBackground() const
 {
   return m_pOverlay->background();
@@ -845,34 +833,23 @@ void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
     QRectF rct(rect());
     rct.adjust(c_dBorderOffset, c_dBorderOffset, -c_dBorderOffset, -c_dBorderOffset);
 
-//    if (nullptr == taskListWidget()->)
-//    {
-//      painter.setBrush(QColor(255, 255, 255, 30));
-//    }
-//    else
-    {
-      if (m_bDropShadow)
-      {
-        painter.drawImage(rect(), QImage(":/dropshadow.png"));
-      }
-      painter.save();
-      QPainterPath path;
-      path.addRoundedRect(rct, 7, 7);
-      painter.setClipPath(path);
-      QPointF offset(pos().x()/5, pos().y()/5);
-      QBrush b(m_backgroundImage[0]);
-      painter.setPen(Qt::NoPen);
-      painter.setBrush(b);
-      painter.drawRect(rct);
+    painter.save();
+    QPainterPath path;
+    path.addRoundedRect(rct, 7, 7);
+    painter.setClipPath(path);
+    QPointF offset(pos().x()/5, pos().y()/5);
+    QBrush b(m_backgroundImage[0]);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(b);
+    painter.drawRect(rct);
 
 
-      QBrush f(m_backgroundImage[1]);
-      painter.setOpacity(m_dBackgroundImageBlendFactor);
-      painter.setBrush(f);
-      painter.drawRect(rct);
+    QBrush f(m_backgroundImage[1]);
+    painter.setOpacity(m_dBackgroundImageBlendFactor);
+    painter.setBrush(f);
+    painter.drawRect(rct);
 
-      painter.restore();
-    }
+    painter.restore();
 
     painter.setPen(QColor(255, 255, 255, 80));
     painter.drawRoundedRect(rct.adjusted(1, 1, -1, -1), 5, 5);

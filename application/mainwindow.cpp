@@ -98,23 +98,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
-  QFileSystemWatcher* pWatcher = new QFileSystemWatcher(this);
-  pWatcher->addPath("application/resources/stylesheet.css");
-  connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
-
-  if (QFileInfo("stylesheet.css").exists())
-  {
-    reloadStylesheet("stylesheet.css");
-    pWatcher->addPath("stylesheet.css");
-    connect(pWatcher, SIGNAL(fileChanged(QString)), this, SLOT(reloadStylesheet(QString)));
-  }
-  else
-  {
-    reloadStylesheet(":/stylesheet.css");
-  }
-
-
-
   static const std::vector<QString> c_vsPluginFolders = { QCoreApplication::applicationDirPath() + "/plugins/serializers",
                                                           QCoreApplication::applicationDirPath() + "/plugins/reports" };
   for (const auto& sPath : c_vsPluginFolders)
@@ -130,12 +113,12 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QAction* pPasteFromClipboardAction = new QAction(tr("paste"), this);
   pPasteFromClipboardAction->setShortcut(Qt::CTRL + Qt::Key_V);
   pPasteFromClipboardAction->setShortcutContext(Qt::WindowShortcut);
-  connect(pPasteFromClipboardAction, SIGNAL(triggered()), this, SLOT(onPasteFromClipboard()));
+  connect(pPasteFromClipboardAction, &QAction::triggered, this, &MainWindow::onPasteFromClipboard);
   addAction(pPasteFromClipboardAction);
 
   QAction* pReloadAction = new QAction(tr("reload current document"), this);
   pReloadAction->setShortcut(Qt::CTRL + Qt::Key_R);
-  connect(pReloadAction, SIGNAL(triggered()), this, SLOT(onReloadDocument()));
+  connect(pReloadAction, &QAction::triggered, this, &MainWindow::onReloadDocument);
   addAction(pReloadAction);
 
   initTaskUi();
@@ -159,8 +142,39 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   pMenuOptions->addAction(m_pEnableHibernationDetection);
 
 
+  QAction* pChooseStyleSheet = new QAction(tr("Stylesheet..."), this);
+  connect(pChooseStyleSheet, &QAction::triggered, this, &MainWindow::onChooseStylesheet);
+  pMenuOptions->addAction(pChooseStyleSheet);
+
 
   loadSettings();
+
+
+  m_pWatcher = new QFileSystemWatcher(this);
+  connect(m_pWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::reloadStylesheet);
+
+  if (m_sStylesheetPath.isEmpty())
+  {
+    if (QFileInfo("stylesheet.css").exists())
+    {
+      reloadStylesheet("stylesheet.css");
+    }
+    else
+    {
+      reloadStylesheet(":/stylesheet.css");
+    }
+  }
+  else
+  {
+    m_pWatcher->addPath(m_sStylesheetPath);
+  }
+
+  m_pWatcher->addPath("application/resources/stylesheet.css");
+
+  if (QFileInfo("stylesheet.css").exists())
+  {
+    m_pWatcher->addPath("stylesheet.css");
+  }
 }
 
 MainWindow::~MainWindow()
@@ -192,6 +206,7 @@ void MainWindow::saveSettings()
 
   settings.beginGroup("options");
   settings.setValue("hibernationDetection", m_pEnableHibernationDetection->isChecked());
+  settings.setValue("stylesheet", m_sStylesheetPath);
   settings.endGroup();
 }
 
@@ -210,7 +225,13 @@ void MainWindow::loadSettings()
 
   settings.beginGroup("options");
   m_pEnableHibernationDetection->setChecked(settings.value("hibernationDetection", true).toBool());
+  m_sStylesheetPath = settings.value("stylesheet", QString()).toString();
   settings.endGroup();
+
+  if (!m_sStylesheetPath.isEmpty())
+  {
+    reloadStylesheet(m_sStylesheetPath);
+  }
 }
 
 void MainWindow::initTaskUi()
@@ -1346,4 +1367,16 @@ bool MainWindow::eventFilter(QObject* /*pWatched*/, QEvent* pEvent)
   }
 
   return false;
+}
+
+void MainWindow::onChooseStylesheet()
+{
+  QString sFileName = QFileDialog::getOpenFileName(this, tr("Choose stylesheet..."), QString(), "stylesheet (*.css)");
+  if (sFileName.isEmpty())  { return; }
+
+  m_sStylesheetPath = sFileName;
+
+  reloadStylesheet(sFileName);
+
+  m_pWatcher->addPath(m_sStylesheetPath);
 }

@@ -220,7 +220,6 @@ OverlayWidget #report {
 }
 
 TaskWidget {
-  qproperty-dropShadow: false;
 }
 
 TaskWidget, TaskWidget #pShadow {
