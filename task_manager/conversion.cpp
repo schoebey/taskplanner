@@ -271,6 +271,9 @@ namespace conversion
 
     // try to match natural language input
     /*
+in two seconds
+in 20 s
+in 10 secs
 in 5 minutes
 in 5 years
 in 2 days
@@ -281,6 +284,7 @@ in two and a half weeks
 in 5mins
 in a hundred years
 */
+    std::function<void(QDateTime&, int)> addSecs = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(iOffset); };
     std::function<void(QDateTime&, int)> addMins = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(60 * iOffset); };
     std::function<void(QDateTime&, int)> addHours = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(3600 * iOffset); };
     std::function<void(QDateTime&, int)> addDays = [](QDateTime& dt, int iOffset) { dt = dt.addDays(iOffset); };
@@ -288,6 +292,7 @@ in a hundred years
     std::function<void(QDateTime&, int)> addMonths = [](QDateTime& dt, int iOffset) { dt = dt.addMonths(iOffset); };
     std::function<void(QDateTime&, int)> addYears = [](QDateTime& dt, int iOffset) { dt = dt.addYears(iOffset); };
     std::vector<std::pair<QRegExp, std::function<void(QDateTime&, int)>>> addUnitQuantity;
+    addUnitQuantity.push_back(std::make_pair(QRegExp("s(?:ec(?:ond)?)?(?:s)?"), addSecs));
     addUnitQuantity.push_back(std::make_pair(QRegExp("m(?:in(?:ute)?)?(?:s)?"), addMins));
     addUnitQuantity.push_back(std::make_pair(QRegExp("h(?:our)?(?:s)?"), addHours));
     addUnitQuantity.push_back(std::make_pair(QRegExp("d(?:ay)?(?:s)?"), addDays));
