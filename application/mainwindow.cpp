@@ -905,6 +905,7 @@ void MainWindow::on_actionDisplayReport_triggered()
     QString s(ba.data());
 
     OverlayWidget* pOverlay = new OverlayWidget(this);
+    pOverlay->setObjectName("ReportDialog");
     QLabel* pLabel = new QLabel(s);
     pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     pLabel->setObjectName("report");
