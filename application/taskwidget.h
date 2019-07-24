@@ -101,6 +101,7 @@ signals:
   void linkAdded(task_id id, QUrl url);
   void linkRemoved(task_id id, QUrl url);
   void linkInserted(task_id id, QUrl url, int iPos);
+  void attentionNeeded();
 
 private slots:
   void onTitleEdited();
@@ -119,13 +120,13 @@ private slots:
   void onTaskRemoved(TaskWidget *pTaskWidget);
 
 private:
-  bool eventFilter(QObject* pObj, QEvent* pEvent) override;
-
+  void emphasise();
   void setUpContextMenu();
 
 private:
   Q_DISABLE_COPY(TaskWidget)
 
+  bool eventFilter(QObject* pObj, QEvent* pEvent) override;
   void mousePressEvent(QMouseEvent* pMouseEvent) override;
   void mouseMoveEvent(QMouseEvent* pMouseEvent) override;
   void paintEvent(QPaintEvent* pEvent) override;
