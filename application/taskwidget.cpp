@@ -53,6 +53,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(ui->pTaskListWidget, &TaskListWidget::taskInserted, this, &TaskWidget::onTaskInserted);
   connect(ui->pTaskListWidget, &TaskListWidget::taskRemoved, this, &TaskWidget::onTaskRemoved);
   connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::updateSize, Qt::QueuedConnection);
+  connect(this, &TaskWidget::attentionNeeded, this, &TaskWidget::emphasise);
 
   setUpContextMenu();
 
@@ -350,7 +351,7 @@ void TaskWidget::addProperty(const QString& sName,
       {
         pValue->setDisplayFunction(conversion::fancy::dateToString);
         QTimer* pTimer = new QTimer(pValue);
-        connect(pTimer, &QTimer::timeout, [pValue, pTimer]()
+        connect(pTimer, &QTimer::timeout, [this, pValue, pTimer]()
         {
           bool bStatus(false);
           QDateTime dt = conversion::fromString<QDateTime>(pValue->editText(), bStatus);
@@ -360,9 +361,10 @@ void TaskWidget::addProperty(const QString& sName,
 
             // restart the timer with a closer timeout as the due date approaches
             qint64 iSecsTo = QDateTime::currentDateTime().msecsTo(dt) / 1000;
-            if (0 < iSecsTo)
+            if (0 <= iSecsTo)
             {
-              int iTimeoutMs = std::min<int>(300000, static_cast<int>(iSecsTo * 1000));
+              static const int c_iMaxTimeoutMs = 300000;
+              int iTimeoutMs = std::min<int>(c_iMaxTimeoutMs, static_cast<int>(iSecsTo * 1000));
 
               if (iTimeoutMs <= 10000)
               {
@@ -376,9 +378,16 @@ void TaskWidget::addProperty(const QString& sName,
               {
                 iTimeoutMs = 15000;
               }
-              else if (iTimeoutMs <= 600000)
+              else if (iTimeoutMs <= c_iMaxTimeoutMs)
               {
-                iTimeoutMs = 150000;
+                iTimeoutMs = c_iMaxTimeoutMs / 2;
+              }
+
+              // signal the outside world that this task needs attention
+              bool bAttentionNeeded = iSecsTo <= 3600;
+              if (bAttentionNeeded)
+              {
+                emit attentionNeeded();
               }
 
               pTimer->start(iTimeoutMs);
@@ -1007,4 +1016,21 @@ bool TaskWidget::onMouseMoved(const QPoint& pt)
   }
 
   return bRv;
+}
+
+void TaskWidget::emphasise()
+{
+  QPropertyAnimation* pAnimation = new QPropertyAnimation(this, "pos");
+  static const int c_iDuration = 700;
+  pAnimation->setDuration(c_iDuration);
+  pAnimation->setStartValue(pos() - QPoint(0,50));
+//  static const double c_dNofShakes = 5;
+//  for (int i = 0; i < c_dNofShakes; ++i)
+//  {
+//    pAnimation->setKeyValueAt(2 * i / c_dNofShakes, pos() - QPoint(20, 0));
+//    pAnimation->setKeyValueAt((2 * i + 1) / c_dNofShakes, pos() - QPoint(-20, 0));
+//  }
+  pAnimation->setEndValue(pos());
+  pAnimation->setEasingCurve(QEasingCurve::OutBounce);
+  pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 }
