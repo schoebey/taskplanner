@@ -14,6 +14,7 @@ class AddTaskCommand : public QUndoCommand
 {
 public:
     AddTaskCommand(group_id groupId,
+                   task_id parentTaskId,
                    const QString& sName,
                    const QString& sDescription,
                    Manager* pManager,
@@ -26,6 +27,7 @@ public:
 protected:
     task_id m_taskId;
     group_id m_groupId;
+    task_id m_parentTaskId;
     std::map<QString, QString> m_properties;
     Manager* m_pManager;
     WidgetManager* m_pWidgetManager;
