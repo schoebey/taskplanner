@@ -39,7 +39,6 @@ SOURCES += \
     $$PWD/commands/changetaskpropertycommand.cpp \
     $$PWD/commands/changegrouppropertycommand.cpp \
     $$PWD/commands/deletetaskcommand.cpp \
-    $$PWD/commands/addsubtaskcommand.cpp \
     $$PWD/mousehandlingframe.cpp \
     $$PWD/aboutdialog.cpp \
     hibernationdetector.cpp \
@@ -67,7 +66,6 @@ HEADERS += \
     $$PWD/commands/changetaskpropertycommand.h \
     $$PWD/commands/changegrouppropertycommand.h \
     $$PWD/commands/deletetaskcommand.h \
-    $$PWD/commands/addsubtaskcommand.h \
     $$PWD/mousehandlingframe.h \
     $$PWD/aboutdialog.h \
     hibernationdetector.h \

@@ -21,7 +21,6 @@
 #include "commands/movetaskcommand.h"
 #include "commands/addtaskcommand.h"
 #include "commands/deletetaskcommand.h"
-#include "commands/addsubtaskcommand.h"
 
 
 #include <QFileSystemWatcher>
@@ -413,7 +412,7 @@ void MainWindow::onNewTaskAccepted()
   if (nullptr != pGroup &&
       nullptr != pGroupWidget)
   {
-    AddTaskCommand* pCommand = new AddTaskCommand(groupId,
+    AddTaskCommand* pCommand = new AddTaskCommand(groupId, -1,
                                                   m_pTaskCreationDialog->name(),
                                                   m_pTaskCreationDialog->description(),
                                                   m_pManager, m_pWidgetManager);
@@ -448,10 +447,11 @@ void MainWindow::onNewSubTaskAccepted()
   if (nullptr != pParentTask)
   {
 
-    AddSubTaskCommand* pCommand = new AddSubTaskCommand(parentTaskId,
-                                                        m_pTaskCreationDialog->name(),
-                                                        m_pTaskCreationDialog->description(),
-                                                        m_pManager, m_pWidgetManager);
+    AddTaskCommand* pCommand = new AddTaskCommand(-1,
+                                                  parentTaskId,
+                                                  m_pTaskCreationDialog->name(),
+                                                  m_pTaskCreationDialog->description(),
+                                                  m_pManager, m_pWidgetManager);
     m_undoStack.push(pCommand);
 
     emit documentModified();

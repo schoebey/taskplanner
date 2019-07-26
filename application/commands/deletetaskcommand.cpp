@@ -6,6 +6,7 @@ DeleteTaskCommand::DeleteTaskCommand(task_id taskId,
                                      Manager* pManager,
                                      WidgetManager* pWidgetManager)
   : AddTaskCommand(pManager->task(taskId)->group(),
+                   pManager->task(taskId)->parentTask(),
                    QString(), QString(),
                    pManager, pWidgetManager)
 {
