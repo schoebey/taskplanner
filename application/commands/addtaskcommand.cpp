@@ -9,12 +9,14 @@
 #include <cassert>
 
 AddTaskCommand::AddTaskCommand(group_id groupId,
+                               task_id parentTaskId,
                                const QString& sName,
                                const QString& sDescription,
                                Manager* pManager,
                                WidgetManager* pWidgetManager)
   : m_taskId(-1),
     m_groupId(groupId),
+    m_parentTaskId(parentTaskId),
     m_pManager(pManager),
     m_pWidgetManager(pWidgetManager)
 {
@@ -35,8 +37,17 @@ void AddTaskCommand::undo()
     }
   }
 
+
+  TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(m_parentTaskId);
   GroupWidget* pGroupWidget = m_pWidgetManager->groupWidget(m_groupId);
-  pGroupWidget->removeTask(m_pWidgetManager->taskWidget(m_taskId));
+  if (nullptr != pParentTaskWidget)
+  {
+    pParentTaskWidget->removeTask(m_pWidgetManager->taskWidget(m_taskId));
+  }
+  else if (nullptr != pGroupWidget)
+  {
+    pGroupWidget->removeTask(m_pWidgetManager->taskWidget(m_taskId));
+  }
   m_pWidgetManager->deleteTaskWidget(m_taskId);
   m_pManager->removeTask(m_taskId);
 }
@@ -45,8 +56,12 @@ void AddTaskCommand::redo()
 {
   IGroup* pGroup = m_pManager->group(m_groupId);
   GroupWidget* pGroupWidget = m_pWidgetManager->groupWidget(m_groupId);
-  if (nullptr != pGroup &&
-      nullptr != pGroupWidget)
+
+  ITask* pParentTask = m_pManager->task(m_parentTaskId);
+  auto pParentTaskWidget = m_pWidgetManager->taskWidget(m_parentTaskId);
+
+  if ((nullptr != pGroup && nullptr != pGroupWidget) ||
+      (nullptr != pParentTask && nullptr != pParentTaskWidget))
   {
     ITask* pTask = m_pManager->addTask(m_taskId);
     m_taskId = pTask->id();
@@ -58,7 +73,18 @@ void AddTaskCommand::redo()
       Q_UNUSED(bAccepted)
     }
 
-    pGroup->addTask(pTask->id());
+    if (nullptr != pParentTask)
+    {
+      pParentTask->addTask(m_taskId);
+      pTask->setGroup(pParentTask->group());
+    }
+    else if (nullptr != pGroup)
+    {
+      pGroup->addTask(pTask->id());
+      pTask->setGroup(m_groupId);
+    }
+
+
     auto pTaskWidget = m_pWidgetManager->createTaskWidget(pTask->id());
 
     int iPos = -1;
@@ -69,7 +95,16 @@ void AddTaskCommand::redo()
       iPos = it->second.toInt(&bOk);
       if (!bOk) { iPos = -1; }
     }
-    pGroupWidget->insertTask(pTaskWidget, iPos);
+
+    if (nullptr != pParentTaskWidget)
+    {
+      pParentTaskWidget->insertTask(pTaskWidget, iPos);
+    }
+    else if (nullptr != pGroupWidget)
+    {
+      pGroupWidget->insertTask(pTaskWidget, iPos);
+    }
+
     pTaskWidget->show();
   }
 }
