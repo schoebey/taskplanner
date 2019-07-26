@@ -60,6 +60,13 @@ bool SerializableManager::removeTask(task_id id)
       removeTask(childId);
     }
 
+    // remove the task from its parent if it has one
+    auto pParent = task(it->second->parentTask());
+    if (nullptr != pParent)
+    {
+      pParent->removeTask(id);
+    }
+
     // remove the task from its group
     IGroup* pGroup = group(it->second->group());
     if (nullptr != pGroup)
