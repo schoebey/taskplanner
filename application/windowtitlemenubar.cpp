@@ -12,6 +12,11 @@ WindowTitleMenuBar::WindowTitleMenuBar(QWidget *pParent)
 {
 #ifndef Q_OS_MAC
   m_pTitle = new QLabel("hello world", this);
+
+  auto pAppIcon = new QLabel(this);
+  pAppIcon->setObjectName("AppIcon");
+  pAppIcon->move(0, 0);
+
   m_pRightButtonBox = new QFrame(this);
   QHBoxLayout* pLayout = new QHBoxLayout(m_pRightButtonBox);
   m_pRightButtonBox->setLayout(pLayout);
