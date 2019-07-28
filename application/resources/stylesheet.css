@@ -9,6 +9,73 @@ MainWindow #frame {
   padding: -12px;
 }
 
+WindowTitleMenuBar {
+    background-color: transparent;
+}
+
+WindowTitleMenuBar QLabel {
+  color: white;
+  font: 10pt;
+}
+
+#AppIcon {
+  border: 0px solid red;
+  border-radius: 5px;
+  min-width: 32px;
+  max-width: 32px;
+  min-height: 32px;	
+  max-height: 32px;
+  margin: 5 5 5 5;
+  background: url(:/icons/appicon_32.png);
+}
+
+
+QMenuBar {
+  color: white;
+  padding: 10 10 10 42;
+  min-height: 20px;
+}
+
+QMenuBar::item {
+    padding: 1px 10px;
+    background: transparent;
+	border: 1px solid transparent;
+	border-bottom: 0px;
+}
+
+QMenuBar::item:selected { /* when selected using mouse or keyboard */
+    background: #777;
+	border: 1px solid transparent;
+	border-bottom: 0px;
+}
+
+QMenuBar::item:pressed {
+    background: rgb(30, 30, 30);
+	border: 1px solid #555;
+	border-bottom: 0px;
+}
+
+QMenu {
+  color: white;
+  background: rgb(30, 30, 30);
+  border: 1px solid #555;
+  padding-top: 5px;
+}
+
+QMenu::item {
+    padding: 2px 25px 2px 20px;
+    border-left: 10px solid transparent; /* reserve space for selection border */
+}
+
+QMenu::item:selected { /* when user selects item using mouse or keyboard */
+    background-color: #777;
+}
+
+QMenu::item:disabled {
+  color: #444;
+}
+
+
 .AboutDialog #pContents {
   min-width: 350px;
   min-height: 200px;
