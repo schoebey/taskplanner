@@ -57,6 +57,7 @@ private slots:
   void setSize(int iWidth, int iHeight);
 
 private:
+  QFrame* m_pGhost = nullptr;
   std::vector<TaskWidget*> m_vpTaskWidgets;
   static TaskListWidget* m_pMouseHoveringOver;
   QImage m_backgroundImage;

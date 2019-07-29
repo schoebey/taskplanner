@@ -59,9 +59,11 @@ namespace widgetAnimation
 
 TaskListWidget* TaskListWidget::m_pMouseHoveringOver = nullptr;
 TaskListWidget::TaskListWidget(QWidget *pParent)
-  : QFrame(pParent)
+  : QFrame(pParent),
+    m_pGhost(new QFrame(this))
 {
   qApp->installEventFilter(this);
+  m_pGhost->setObjectName("pGhost");
 }
 
 TaskListWidget *TaskListWidget::TaskListWidgetUnderMouse()
@@ -228,6 +230,7 @@ QSize TaskListWidget::sizeHint() const
 
 void TaskListWidget::updatePositions(int iSpace, int iGhostPos)
 {
+
   QPoint origin(0,0);
   origin.setY(origin.y() + c_iItemSpacing);
 
@@ -242,7 +245,6 @@ void TaskListWidget::updatePositions(int iSpace, int iGhostPos)
   }
 
 
-
   // find the new widgets position
   for (size_t iWidget = 0; iWidget < std::min<size_t>(ghostPos, m_vpTaskWidgets.size()); ++iWidget)
   {
@@ -254,9 +256,13 @@ void TaskListWidget::updatePositions(int iSpace, int iGhostPos)
 
   if (-1 < iSpace && ghostPos < m_vpTaskWidgets.size())
   {
+    m_pGhost->move(0, origin.y());
+
     // make room for the new widget
     origin.setY(origin.y() + iSpace + c_iItemSpacing);
   }
+
+  m_pGhost->resize(width(), iSpace);
 
 
   for (size_t iWidget = ghostPos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
@@ -268,12 +274,12 @@ void TaskListWidget::updatePositions(int iSpace, int iGhostPos)
   }
 
 
+
   // only resize the list if it is a nested list (one within a task widget)
   // group widget lists have to have maximum height at all times...
   if (m_bAutoResize)
   {
     int iHeight(height());
-    qDebug() << this << iHeight << origin.y();
     setMinimumHeight(origin.y());
     setMaximumHeight(origin.y());
     m_minimumSize = QSize(width(), origin.y());
@@ -316,8 +322,6 @@ bool TaskListWidget::onMouseMoved(const QPoint& pt)
 {
   if (rect().contains(pt))
   {
-    TaskWidget* pTaskWidget = taskWidgetAt(pt);
-
     if (nullptr != TaskWidget::DraggingTaskWidget())
     {
       if (this != m_pMouseHoveringOver)
@@ -326,6 +330,7 @@ bool TaskListWidget::onMouseMoved(const QPoint& pt)
       }
     }
 
+    TaskWidget* pTaskWidget = taskWidgetAt(pt);
     if (nullptr != pTaskWidget)
     {
       m_pMouseHoveringOver = nullptr;
