@@ -1,9 +1,9 @@
 MainWindow, QDialog {
   background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                stop:0 #B4ADA7,
-                stop:0.35 #D2CECC,
-                stop:0.65 #D2CECC,
-                stop:1 #B4ADA7);
+                stop:0 #303030,
+                stop:0.35 #252525,
+                stop:0.65 #252525,
+                stop:1 #303030);
 }
 
 MainWindow #frame {
@@ -160,7 +160,7 @@ QScrollArea #scrollAreaWidgetContents {
 }
 
 GroupWidget {
-  background-color: rgba(255,255,255,10);
+  background-color: #333333;
   width: 150px;
   border-radius: 7px;
 }
@@ -227,7 +227,6 @@ TaskWidget {
   border: 0px;
 }
 
-
 TaskWidget #pShadow {
   border-image: url(:/dropshadow.png) 15 15 15 15;
   border-top: 20px;
@@ -265,8 +264,8 @@ TaskWidget TaskWidget #pBackdrop {
 }
 
 TaskWidget TaskWidget #pFrame {
-  border: 1px solid rgba(0,0,0,10);
-  background-color: rgba(0,0,0,20);
+  border: 1px solid rgba(255,255,255,10);
+  background-color: rgba(255,255,255,20);
   padding: -1;
   margin: 5px;
 }
@@ -287,10 +286,10 @@ TaskWidget #pDescription {
 
 TaskWidget #pShowDetails {
   border: 0px; 
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px; 
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 8px; 
   background: qradialgradient(cx:0, cy:0, radius: 1,
-                fx:0, fy:0, stop:0 #FFD899, stop:0.95 #FFD899, stop:1 transparent); 
+                fx:0, fy:0, stop:0 #DAA858, stop:0.95 #DAA858, stop:1 transparent); 
   padding: 6px;
   min-height: 15px;
   width: 15px;
@@ -302,23 +301,23 @@ TaskWidget #pShowDetails {
 
 TaskWidget TaskWidget #pShowDetails {
   background: qradialgradient(cx:0, cy:0, radius: 1,
-                fx:0, fy:0, stop:0 white, stop:0.95 white, stop:1 transparent); 
+                fx:0, fy:0, stop:0 rgba(0,0,0,50), stop:0.95 rgba(0,0,0,50), stop:1 transparent); 
   background-image: url(:/icons/arrow_right_dark.png);
   background-repeat: no-repeat;
   background-position: top left;
 }
 
 TaskWidget #pShowDetails:checked {
-  border-bottom-right-radius: 5px; 
+  border-bottom-right-radius: 6px;
   border-bottom-left-radius: 0px; 
   background-image: url(:/icons/arrow_down_dark.png);
 }
 
 TaskWidget #pStartStop {
   border: 0px;
-  border-top-right-radius: 5px;
+  border-top-right-radius: 6px;
   background: qradialgradient(cx:1, cy:0, radius: 1,
-                fx:1, fy:0, stop:0 white, stop:0.95 white, stop:1 transparent); 
+                fx:1, fy:0, stop:0 rgba(0,0,0,50), stop:0.95 rgba(0,0,0,50), stop:1 transparent); 
   padding: 6px;
   min-height: 15px;
   width: 15px;
@@ -330,8 +329,8 @@ TaskWidget #pStartStop {
 
 
 TaskWidget[expanded=false] #pStartStop {
-  border-bottom-right-radius: 5px; 
-  border-bottom-left-radius: 5px; 
+  border-bottom-right-radius: 6px; 
+  border-bottom-left-radius: 6px; 
 }
 
 TaskWidget #pStartStop:checked {
@@ -339,12 +338,12 @@ TaskWidget #pStartStop:checked {
 }
 
 TaskWidgetOverlay {
-  border-top-right-radius: 7px;
+    border-top-right-radius: 7px;
   border-bottom-right-radius: 7px;
-  qproperty-background: rgba(255, 255, 255, 100);
+  qproperty-background: rgba(255, 255, 255, 0);
   
   margin: 0 0 0 16;
-  background-color: #F8F4F1;
+  background-color: #575757;
 }
 
 TaskWidget TaskWidget TaskWidgetOverlay {

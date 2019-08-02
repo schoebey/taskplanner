@@ -15,13 +15,13 @@
 #include "aboutdialog.h"
 #include "hibernationdetector.h"
 #include "toolbarinfodisplay.h"
+#include "plugininterface.h"
 
 #include "commands/changetaskpropertycommand.h"
 #include "commands/changegrouppropertycommand.h"
 #include "commands/movetaskcommand.h"
 #include "commands/addtaskcommand.h"
 #include "commands/deletetaskcommand.h"
-
 
 #include <QFileSystemWatcher>
 #include <QDebug>
@@ -36,10 +36,10 @@
 #include <QClipboard>
 #include <QThread>
 #include <QPluginLoader>
-#include <plugininterface.h>
-
 #include <QMouseEvent>
+#include <QPixmapCache>
 #include <QSettings>
+
 #include <array>
 #include <future>
 #include <memory>
@@ -380,6 +380,10 @@ void MainWindow::loadPlugins(const QString& sInitialSearchPath)
 
 void MainWindow::reloadStylesheet(const QString& sPath)
 {
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+  QPixmapCache::clear();
+
   QFile f(sPath);
   if (f.open(QIODevice::ReadOnly))
   {

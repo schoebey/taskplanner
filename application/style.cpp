@@ -17,7 +17,7 @@ typedef void(*tfnDrawText)(QPainter*, const QPointF&, const QString&,
 namespace
 {
   void drawNormalText(QPainter* pPainter, const QPointF& pt, const QString& sText,
-                        const QColor& col, const QColor& shadowColor)
+                      const QColor& col, const QColor& shadowColor)
   {
     if (nullptr == pPainter)  { return; }
 
@@ -114,53 +114,54 @@ namespace
     }
   }
 
-void drawOutlinedText(QPainter* pPainter, const QPointF& pt, const QString& sText,
-                      const QColor& col, const QColor& shadowColor)
-{
-  if (nullptr == pPainter)  { return; }
-
-  pPainter->save();
-
-  QFont f(pPainter->font());
-  QFontMetrics m(f);
-
-  QString sKey = QString("%1_%2x%3_%4_shadow").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
-
-  QPixmap* pPixmap = QPixmapCache::find(sKey);
-  if (nullptr == pPixmap)
+  void drawOutlinedText(QPainter* pPainter, const QPointF& pt, const QString& sText,
+                        const QColor& col, const QColor& outlineColor)
   {
-    QImage img(m.width(sText), m.height() + 2, QImage::Format_ARGB32);
-    if (!img.isNull())
+    if (nullptr == pPainter)  { return; }
+
+    pPainter->save();
+
+    QFont f(pPainter->font());
+    QFontMetrics m(f);
+    const int iOutlineSize = m.height() / 5;
+
+    QString sKey = QString("%1_%2x%3_%4_outline").arg(sText).arg(m.width(sText)).arg(m.height()).arg(outlineColor.name());
+
+    QPixmap* pPixmap = QPixmapCache::find(sKey);
+    if (nullptr == pPixmap)
     {
-      img.fill(Qt::transparent);
+      QImage img(m.width(sText) + iOutlineSize, m.height() + 2, QImage::Format_ARGB32);
+      if (!img.isNull())
+      {
+        img.fill(Qt::transparent);
 
-      QPainterPath textPath;
-      textPath.addText(0, img.height()-2, f, sText);
+        QPainterPath textPath;
+        textPath.addText(iOutlineSize/2, img.height()-2, f, sText);
 
-      QPainter p(&img);
-      p.setPen(QPen(shadowColor, 5));
-      p.setBrush(shadowColor);
-      p.setRenderHint(QPainter::Antialiasing, true);
-      p.setRenderHint(QPainter::HighQualityAntialiasing, true);
-      p.setRenderHint(QPainter::SmoothPixmapTransform, true);
-      p.drawPath(textPath);
+        QPainter p(&img);
+        p.setPen(QPen(outlineColor, iOutlineSize));
+        p.setBrush(outlineColor);
+        p.setRenderHint(QPainter::Antialiasing, true);
+        p.setRenderHint(QPainter::HighQualityAntialiasing, true);
+        p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+        p.drawPath(textPath);
 
-      p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-      p.setPen(Qt::NoPen);
-      p.setBrush(col);
-      p.drawPath(textPath);
-      QPixmapCache::insert(sKey, QPixmap::fromImage(img));
-      pPixmap = QPixmapCache::find(sKey);
+        p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        p.setPen(Qt::NoPen);
+        p.setBrush(col);
+        p.drawPath(textPath);
+        QPixmapCache::insert(sKey, QPixmap::fromImage(img));
+        pPixmap = QPixmapCache::find(sKey);
+      }
+    }
+
+    pPainter->restore();
+
+    if (nullptr != pPixmap)
+    {
+      pPainter->drawPixmap(pt.x(), pt.y(), *pPixmap);
     }
   }
-
-  pPainter->restore();
-
-  if (nullptr != pPixmap)
-  {
-    pPainter->drawPixmap(pt.x(), pt.y(), *pPixmap);
-  }
-}
 
 
   void qt_format_text(tfnDrawText fnDrawText,
@@ -353,7 +354,7 @@ void drawOutlinedText(QPainter* pPainter, const QPointF& pt, const QString& sTex
                           textColor, shadowColor);
           }
 //          painter->setPen(Qt::yellow);
-//          painter->drawRect(bounds);
+//          painter->drawRect(r);
           if (restore) {
               painter->restore();
           }
@@ -497,9 +498,4 @@ QRect Style::itemTextRect(const QFontMetrics & metrics,
 {
 
   return metrics.boundingRect(rectangle, alignment, text);
-
-  QRectF rect;
-  //qt_format_text(metrics, rectangle, alignment, nullptr, text, &rect);
-
-  return rect.toRect();
 }

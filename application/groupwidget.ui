@@ -35,7 +35,7 @@
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
-     <widget class="TaskListWidget" name="pTaskListWidget">
+     <widget class="TaskListWidget" name="pGroupTaskListWidget">
       <property name="geometry">
        <rect>
         <x>0</x>

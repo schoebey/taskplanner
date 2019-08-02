@@ -1,6 +1,7 @@
 #include "tasklistwidget.h"
 #include "taskwidget.h"
 
+#include <QStyle>
 #include <QDebug>
 #include <QEvent>
 #include <QMouseEvent>
@@ -108,6 +109,8 @@ bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
 
     pTaskWidget->show();
+    pTaskWidget->style()->unpolish(pTaskWidget);
+    pTaskWidget->style()->polish(pTaskWidget);
 
     QMetaObject::invokeMethod(this, "updatePositions", Qt::QueuedConnection);
 
@@ -279,7 +282,6 @@ void TaskListWidget::updatePositions(int iSpace, int iGhostPos)
   // group widget lists have to have maximum height at all times...
   if (m_bAutoResize)
   {
-    int iHeight(height());
     setMinimumHeight(origin.y());
     setMaximumHeight(origin.y());
     m_minimumSize = QSize(width(), origin.y());

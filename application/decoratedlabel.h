@@ -5,6 +5,7 @@
 
 class DecoratedLabel : public QLabel
 {
+  Q_OBJECT
 public:
   DecoratedLabel(QWidget* pParent = nullptr);
   DecoratedLabel(const QString& sText, QWidget* pParent = nullptr);

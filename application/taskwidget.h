@@ -62,10 +62,6 @@ public:
 
   void setBackgroundImage(const QImage& image);
 
-  Q_PROPERTY(double backgroundImageBlendFactor READ backgroundImageBlendFactor WRITE setBackgroundImageBlendFactor)
-  double backgroundImageBlendFactor() const;
-  void setBackgroundImageBlendFactor(double dFactor);
-
   Q_PROPERTY(QBrush overlayBackground READ overlayBackground WRITE setOverlayBackground)
   QBrush overlayBackground() const;
   void setOverlayBackground(const QBrush& b);
@@ -127,7 +123,6 @@ private:
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;
   void mousePressEvent(QMouseEvent* pMouseEvent) override;
   void mouseMoveEvent(QMouseEvent* pMouseEvent) override;
-  void paintEvent(QPaintEvent* pEvent) override;
   void resizeEvent(QResizeEvent* pEvent) override;
   void focusInEvent(QFocusEvent* pEvent) override;
   void focusOutEvent(QFocusEvent* pEvent) override;
@@ -139,14 +134,11 @@ private:
   void dropEvent(QDropEvent* pEvent) override;
 
   Ui::TaskWidget *ui;
-  QPixmap m_cache;
 
   task_id m_taskId;
 
   bool m_bMouseDown = false;
   QPoint m_mouseDownPos;
-  QImage m_backgroundImage[2];
-  double m_dBackgroundImageBlendFactor = 0;
   double m_dAutoPriority = 0;
 
   TaskListWidget* m_pTaskListWidget = nullptr;
@@ -169,7 +161,7 @@ private:
 
   std::map<QUrl, LinkWidget*> m_linkWidgets;
 
-  QSize m_bExpandedSize;
+  QSize m_expandedSize;
 
   static TaskWidget* m_pDraggingTaskWidget;
   static TaskWidget* m_pTaskWidgetUnderMouse;

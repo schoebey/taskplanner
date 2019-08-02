@@ -91,6 +91,11 @@ QSize EditableLabel::sizeHint() const
   if (wordWrap())  { iFlags |= Qt::TextWordWrap; }
   QRect boundingRect = style()->itemTextRect(fm, r, iFlags, true, text());
 
+  if (drawOutline())
+  {
+    boundingRect.adjust(-3, 0, 3, 0);
+  }
+
 
   return boundingRect.size();
 }
