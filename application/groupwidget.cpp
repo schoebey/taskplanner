@@ -19,7 +19,7 @@ GroupWidget::GroupWidget(group_id id, QWidget *parent) :
   connect(ui->pAddTask, &QPushButton::clicked, this, &GroupWidget::onNewTaskClicked);
   connect(ui->pTitle, &EditableLabel::editingFinished, this, &GroupWidget::onTitleEdited);
   connect(ui->pSortTasks, &QPushButton::toggled, this, &GroupWidget::onSortClicked);
-  connect(ui->pTaskListWidget, &TaskListWidget::taskInserted, this, &GroupWidget::onTaskInserted);
+  connect(ui->pGroupTaskListWidget, &TaskListWidget::taskInserted, this, &GroupWidget::onTaskInserted);
 
   setUpContextMenu();
 }
@@ -109,12 +109,12 @@ void GroupWidget::setBackgroundImage(const QImage& img)
 {
   m_backgroundImage = img;
 
-  ui->pTaskListWidget->setBackgroundImage(img);
+  ui->pGroupTaskListWidget->setBackgroundImage(img);
 }
 
 void GroupWidget::reorderTasks(const std::vector<task_id>& vIds)
 {
-  ui->pTaskListWidget->reorderTasks(vIds);
+  ui->pGroupTaskListWidget->reorderTasks(vIds);
 }
 
 void GroupWidget::setAutoSortingEnabled(bool bEnabled)
@@ -124,12 +124,12 @@ void GroupWidget::setAutoSortingEnabled(bool bEnabled)
 
 void GroupWidget::requestInsert(TaskWidget *pTaskWidget, int iPos)
 {
-  ui->pTaskListWidget->requestInsert(pTaskWidget, iPos);
+  ui->pGroupTaskListWidget->requestInsert(pTaskWidget, iPos);
 }
 
 bool GroupWidget::insertTask(TaskWidget *pTaskWidget, int iPos)
 {
-  if (ui->pTaskListWidget->insertTask(pTaskWidget, iPos))
+  if (ui->pGroupTaskListWidget->insertTask(pTaskWidget, iPos))
   {
     pTaskWidget->setParentContainerWidget(this);
     return true;
@@ -139,7 +139,7 @@ bool GroupWidget::insertTask(TaskWidget *pTaskWidget, int iPos)
 
 void GroupWidget::removeTask(TaskWidget *pTaskWidget)
 {
-  ui->pTaskListWidget->removeTask(pTaskWidget);
+  ui->pGroupTaskListWidget->removeTask(pTaskWidget);
   pTaskWidget->setParentContainerWidget(nullptr);
 }
 
@@ -167,6 +167,6 @@ void GroupWidget::onSortClicked(bool bChecked)
 
 bool GroupWidget::onMouseMoved(const QPoint& pt)
 {
-  return ui->pTaskListWidget->onMouseMoved(ui->pTaskListWidget->mapFrom(this, pt));
+  return ui->pGroupTaskListWidget->onMouseMoved(ui->pGroupTaskListWidget->mapFrom(this, pt));
 }
 

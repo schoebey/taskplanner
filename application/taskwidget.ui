@@ -42,7 +42,7 @@
     <number>0</number>
    </property>
    <item row="0" column="0">
-    <widget class="QFrame" name="pShadow">
+    <widget class="BlendableImageWidget" name="pBackdrop">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -300,6 +300,12 @@
    <class>TaskListWidget</class>
    <extends>QWidget</extends>
    <header>tasklistwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BlendableImageWidget</class>
+   <extends>QFrame</extends>
+   <header>blendableimagewidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
