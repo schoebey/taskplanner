@@ -41,6 +41,8 @@ SOURCES += \
     $$PWD/commands/deletetaskcommand.cpp \
     $$PWD/mousehandlingframe.cpp \
     $$PWD/aboutdialog.cpp \
+    blendableimagewidget.cpp \
+    floatingwidget.cpp \
     hibernationdetector.cpp \
     tasklistwidget.cpp \
     toolbarinfodisplay.cpp \
@@ -69,6 +71,8 @@ HEADERS += \
     $$PWD/commands/deletetaskcommand.h \
     $$PWD/mousehandlingframe.h \
     $$PWD/aboutdialog.h \
+    blendableimagewidget.h \
+    floatingwidget.h \
     hibernationdetector.h \
     itaskcontainerwidget.h \
     tasklistwidget.h \

@@ -8,6 +8,7 @@
 #include "task.h"
 #include "tasklistwidget.h"
 #include "decoratedlabel.h"
+#include "groupwidget.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -41,6 +42,10 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   ui->pTaskListWidget->setAutoResize(true);
   m_pOverlay = new TaskWidgetOverlay(ui->pFrame);
   m_pOverlay->stackUnder(ui->pProperties);
+
+  auto pShadow = new FloatingWidget(this);
+  pShadow->setObjectName("pShadow");
+  pShadow->stackUnder(ui->pBackdrop);
 
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
@@ -209,30 +214,7 @@ void TaskWidget::setTaskListWidget(TaskListWidget* pTaskListWidget)
 
 void TaskWidget::setBackgroundImage(const QImage& image)
 {
-  m_backgroundImage[1] = m_backgroundImage[0];
-  m_backgroundImage[0] = image;
-  m_dBackgroundImageBlendFactor = 1;
-
-  QPropertyAnimation* pAnimation = new QPropertyAnimation(this, "backgroundImageBlendFactor");
-  static const int c_iDuration = 1000;
-  pAnimation->setDuration(c_iDuration);
-  pAnimation->setStartValue(1);
-  pAnimation->setEndValue(0);
-  pAnimation->setEasingCurve(QEasingCurve::Linear);
-  pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-
-  //ui->pTaskListWidget->setBackgroundImage(image);
-}
-
-double TaskWidget::backgroundImageBlendFactor() const
-{
-  return m_dBackgroundImageBlendFactor;
-}
-
-void TaskWidget::setBackgroundImageBlendFactor(double dFactor)
-{
-  m_dBackgroundImageBlendFactor = dFactor;
-  update();
+  ui->pBackdrop->setBackgroundImage(image);
 }
 
 void TaskWidget::dragEnterEvent(QDragEnterEvent* pEvent)
@@ -702,7 +684,7 @@ void TaskWidget::updateSize2()
   layout()->update();
 
 
-  int iSuggestedHeight = ui->pFrame->sizeHint().height();
+  int iSuggestedHeight = ui->pBackdrop->sizeHint().height();
   resize(width(), iSuggestedHeight);
 }
 
@@ -826,55 +808,11 @@ void TaskWidget::onPropertyEdited()
   }
 }
 
-void TaskWidget::paintEvent(QPaintEvent* /*pEvent*/)
-{
-  bool bRefreshCache = m_cache.isNull() || !qFuzzyIsNull(m_dBackgroundImageBlendFactor);
-  if (bRefreshCache)
-  {
-    m_cache = QPixmap(width(), height());
-    m_cache.fill(Qt::transparent);
-    QPainter painter(&m_cache);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-
-    static const double c_dBorderOffset = 4.5;
-    QRectF rct(rect());
-    rct.adjust(c_dBorderOffset, c_dBorderOffset, -c_dBorderOffset, -c_dBorderOffset);
-
-    painter.save();
-    QPainterPath path;
-    path.addRoundedRect(rct, 7, 7);
-    painter.setClipPath(path);
-    QPointF offset(pos().x()/5, pos().y()/5);
-    QBrush b(m_backgroundImage[0]);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(b);
-    painter.drawRect(rct);
-
-
-    QBrush f(m_backgroundImage[1]);
-    painter.setOpacity(m_dBackgroundImageBlendFactor);
-    painter.setBrush(f);
-    painter.drawRect(rct);
-
-    painter.restore();
-
-    painter.setPen(QColor(255, 255, 255, 80));
-    painter.drawRoundedRect(rct.adjusted(1, 1, -1, -1), 5, 5);
-  }
-  //else
-  {
-    QPainter painter(this);
-    painter.drawPixmap(0, 0, m_cache);
-  }
-}
-
 void TaskWidget::resizeEvent(QResizeEvent* pEvent)
 {
   QWidget::resizeEvent(pEvent);
 
-  m_cache = QPixmap();
+//  m_cache = QPixmap();
 
   emit sizeChanged();
 }
@@ -928,11 +866,11 @@ void TaskWidget::setExpanded(bool bExpanded)
 
     if (bExpanded)
     {
-      resize(m_bExpandedSize);
+      resize(m_expandedSize);
     }
     else
     {
-      m_bExpandedSize = size();
+      m_expandedSize = size();
       resize(width(), 1);
     }
 

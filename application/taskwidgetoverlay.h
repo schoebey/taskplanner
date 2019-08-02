@@ -2,12 +2,12 @@
 #define TASKWIDGETOVERLAY_H
 
 #include "highlightmethod.h"
+#include "floatingwidget.h"
 
-#include <QFrame>
 #include <QVariant>
 
 class TaskWidget;
-class TaskWidgetOverlay : public QFrame
+class TaskWidgetOverlay : public FloatingWidget
 {
   Q_OBJECT
 public:
@@ -36,7 +36,6 @@ public slots:
 
 private:
   void paintEvent(QPaintEvent* pEvent) override;
-  bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
   HighlightingMethod m_method = EHighlightMethod::eNoHighlight;
