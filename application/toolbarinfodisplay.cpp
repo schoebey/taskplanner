@@ -22,13 +22,18 @@ ToolBarInfoDisplay::ToolBarInfoDisplay(QWidget *parent)
   startScript("test");
 }
 
-bool ToolBarInfoDisplay::startScript(const QString& sFileName)
+bool ToolBarInfoDisplay::startScript(const QString& sFileName,
+                                     QString* psErrorMessage)
 {
+  m_sScriptPath.clear();
+
   QFile scriptFile(sFileName);
   if (!scriptFile.open(QIODevice::ReadOnly))
   {
     return false;
   }
+
+  m_sScriptPath = sFileName;
 
   QTextStream stream(&scriptFile);
   QString contents = stream.readAll();
@@ -39,10 +44,25 @@ bool ToolBarInfoDisplay::startScript(const QString& sFileName)
 
   QJSValue scriptObject = m_engine.newQObject(this);
   m_engine.globalObject().setProperty("display", scriptObject);
-
-  auto fnEval = [this, contents, sFileName]()
+  QJSValue fn = m_engine.evaluate(contents, sFileName);
+  if (fn.isError())
   {
-    auto res = m_engine.evaluate(contents, sFileName);
+    if (nullptr != psErrorMessage)
+    {
+      *psErrorMessage = tr("JavaScript error: %1").arg(fn.toString());
+    }
+
+    return false;
+  }
+
+  auto fnEval = [this, fn]()
+  {
+    auto fnNonConst = fn;
+    auto res = fnNonConst.call();
+    if (res.isError())
+    {
+      emit showError(tr("JavaScript error: %1").arg(res.toString()));
+    }
   };
 
   m_thread = std::thread{fnEval};
@@ -68,6 +88,11 @@ QString ToolBarInfoDisplay::text() const
 void ToolBarInfoDisplay::setText(const QString& sText)
 {
   m_pLabel->setText(sText);
+}
+
+QString ToolBarInfoDisplay::scriptPath() const
+{
+  return m_sScriptPath;
 }
 
 void ToolBarInfoDisplay::UpdateInfo()
