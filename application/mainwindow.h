@@ -20,6 +20,7 @@ class Manager;
 class WidgetManager;
 class TaskCreationDialog;
 class QSignalMapper;
+class ToolBarInfoDisplay;
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -89,6 +90,8 @@ private:
   void loadPlugins(const QString &sInitialSearchPath = QString());
   void saveSettings();
   void loadSettings();
+  void onChooseScript();
+  void showError(const QString& sErrorMessage);
 
 private:
   Ui::MainWindow *ui;
@@ -102,6 +105,7 @@ private:
   QUndoStack m_undoStack;
   std::vector<std::shared_ptr<QObject>> m_vspPlugins;
   QAction* m_pEnableHibernationDetection;
+  ToolBarInfoDisplay* m_pInfoDisplay;
 };
 
 #endif // MAINWINDOW_H

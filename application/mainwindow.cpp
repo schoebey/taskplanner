@@ -89,8 +89,9 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   ui->pMainToolBar->insertAction(ui->actionReport, ui->actionDisplayReport);
 
 
-  QWidget* pInfoDisplay = new ToolBarInfoDisplay(this);
-  auto pInfoDisplayAction = ui->pInfoToolBar->addWidget(pInfoDisplay);
+  m_pInfoDisplay = new ToolBarInfoDisplay(this);
+  auto pInfoDisplayAction = ui->pInfoToolBar->addWidget(m_pInfoDisplay);
+  connect(m_pInfoDisplay, &ToolBarInfoDisplay::showError, this, &MainWindow::showError);
 
   QWidget* pSpacer = new QWidget();
   pSpacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
@@ -159,6 +160,11 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   pMenuOptions->addAction(m_pEnableHibernationDetection);
 
 
+  QAction* pChooseScript = new QAction(tr("Info display script..."), this);
+  connect(pChooseScript, &QAction::triggered, this, &MainWindow::onChooseScript);
+//  pMenuOptions->addAction(pChooseScript);
+  ui->menuTools->addAction(pChooseScript);
+
 
   loadSettings();
 }
@@ -192,6 +198,7 @@ void MainWindow::saveSettings()
 
   settings.beginGroup("options");
   settings.setValue("hibernationDetection", m_pEnableHibernationDetection->isChecked());
+  settings.setValue("infoDisplayScriptPath", m_pInfoDisplay->scriptPath());
   settings.endGroup();
 }
 
@@ -210,6 +217,7 @@ void MainWindow::loadSettings()
 
   settings.beginGroup("options");
   m_pEnableHibernationDetection->setChecked(settings.value("hibernationDetection", true).toBool());
+  m_pInfoDisplay->startScript(settings.value("infoDisplayScriptPath").toString());
   settings.endGroup();
 }
 
@@ -1346,4 +1354,21 @@ bool MainWindow::eventFilter(QObject* /*pWatched*/, QEvent* pEvent)
   }
 
   return false;
+}
+
+void MainWindow::onChooseScript()
+{
+  QString sFileName = QFileDialog::getOpenFileName(this, tr("Choose script..."), QString(), "javascript (*.js)");
+  if (sFileName.isEmpty())  { return; }
+
+  QString sErrorMessage;
+  if (!m_pInfoDisplay->startScript(sFileName, &sErrorMessage))
+  {
+    QMessageBox::critical(this, tr("JavaScript"), sErrorMessage);
+  }
+}
+
+void MainWindow::showError(const QString& sErrorMessage)
+{
+  QMessageBox::critical(this, tr("error"), sErrorMessage);
 }

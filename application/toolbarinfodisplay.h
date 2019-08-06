@@ -14,12 +14,17 @@ class ToolBarInfoDisplay : public QFrame
 public:
   explicit ToolBarInfoDisplay(QWidget *parent = nullptr);
 
-  bool startScript(const QString& sFileName);
+  bool startScript(const QString& sFileName, QString* psErrorMessage = nullptr);
   void stopScript();
 
   Q_PROPERTY(QString text READ text WRITE setText)
   QString text() const;
   void setText(const QString& sText);
+
+  QString scriptPath() const;
+
+signals:
+  void showError(const QString& sError);
 
 private:
   void UpdateInfo();
@@ -28,6 +33,7 @@ private:
   QLabel* m_pLabel = nullptr;
   QJSEngine m_engine;
   std::thread m_thread;
+  QString m_sScriptPath;
 };
 
 #endif // TOOLBARINFODISPLAY_H
