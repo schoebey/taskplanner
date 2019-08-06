@@ -1,5 +1,5 @@
 CONFIG += c++11
-QT += core gui
+QT += core gui qml
 
 APP_NAME = taskplanner
 ORGANIZATION_NAME = ancor

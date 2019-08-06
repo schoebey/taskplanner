@@ -4,6 +4,8 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QDate>
+#include <QFile>
+#include <QTextStream>
 
 ToolBarInfoDisplay::ToolBarInfoDisplay(QWidget *parent)
   : QFrame(parent)
@@ -16,6 +18,56 @@ ToolBarInfoDisplay::ToolBarInfoDisplay(QWidget *parent)
 
   startTimer(60000);
   UpdateInfo();
+
+  startScript("test");
+}
+
+bool ToolBarInfoDisplay::startScript(const QString& sFileName)
+{
+  QFile scriptFile(sFileName);
+  if (!scriptFile.open(QIODevice::ReadOnly))
+  {
+    return false;
+  }
+
+  QTextStream stream(&scriptFile);
+  QString contents = stream.readAll();
+  scriptFile.close();
+
+  // stop a potentially already running thread
+  stopScript();
+
+  QJSValue scriptObject = m_engine.newQObject(this);
+  m_engine.globalObject().setProperty("display", scriptObject);
+
+  auto fnEval = [this, contents, sFileName]()
+  {
+    auto res = m_engine.evaluate(contents, sFileName);
+  };
+
+  m_thread = std::thread{fnEval};
+  m_thread.detach();
+
+  return true;
+}
+
+void ToolBarInfoDisplay::stopScript()
+{
+  // TODO: signal the script that it should stop
+  if (m_thread.joinable())
+  {
+    m_thread.join();
+  }
+}
+
+QString ToolBarInfoDisplay::text() const
+{
+  return m_pLabel->text();
+}
+
+void ToolBarInfoDisplay::setText(const QString& sText)
+{
+  m_pLabel->setText(sText);
 }
 
 void ToolBarInfoDisplay::UpdateInfo()
