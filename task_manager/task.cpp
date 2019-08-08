@@ -194,8 +194,11 @@ double Task::autoPriority() const
     iUserDefinedPriority = property<int>("priority");
   }
 
+  // nof days in the system should only modify the auto priority in the range [0, 1[
+  // therefore, the max time in system is 10 years. All tasks older than that will get
+  // the same modifier and ultimately the same autoPriority.
   return std::max<double>(dDueTimeWeight, iUserDefinedPriority) +
-      static_cast<double>(iNofDaysInSystem) / 100.;
+      std::min<double>(0.999999, static_cast<double>(iNofDaysInSystem) / 3650.);
 }
 
 task_id Task::parentTask() const
