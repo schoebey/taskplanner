@@ -17,6 +17,9 @@
 #include "toolbarinfodisplay.h"
 #include "plugininterface.h"
 
+#include "search/searchframe.h"
+#include "search/searchcontroller.h"
+
 #include "commands/changetaskpropertycommand.h"
 #include "commands/changegrouppropertycommand.h"
 #include "commands/movetaskcommand.h"
@@ -63,13 +66,18 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   ui(new Ui::MainWindow),
   m_pManager(pManager),
   m_pWidgetManager(new WidgetManager(m_pManager, this)),
-  m_pTimeoutGroupIdMapper(new QSignalMapper(this))
+  m_pTimeoutGroupIdMapper(new QSignalMapper(this)),
+  m_pSearchFrame(new SearchFrame(this)),
+  m_spSearchController(std::make_shared<SearchController>(m_pManager, m_pWidgetManager))
 {
 #ifndef Q_OS_MAC
   setWindowFlags(Qt::FramelessWindowHint);
 #endif
 
   ui->setupUi(this);
+  m_pSearchFrame->hide();
+  connect(m_pSearchFrame, &SearchFrame::searchTermChanged,
+          m_spSearchController.get(), &SearchController::onSearchTermChanged);
 
   qApp->installEventFilter(this);
 
@@ -1408,4 +1416,9 @@ void MainWindow::onChooseScript()
 void MainWindow::showError(const QString& sErrorMessage)
 {
   QMessageBox::critical(this, tr("error"), sErrorMessage);
+}
+
+void MainWindow::on_actionFind_triggered()
+{
+  m_pSearchFrame->show();
 }

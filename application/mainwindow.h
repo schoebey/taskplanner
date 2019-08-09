@@ -20,6 +20,8 @@ class Manager;
 class WidgetManager;
 class TaskCreationDialog;
 class QSignalMapper;
+class SearchFrame;
+class SearchController;
 class QFileSystemWatcher;
 class ToolBarInfoDisplay;
 class MainWindow : public QMainWindow
@@ -78,6 +80,8 @@ private slots:
   void on_actionAbout_triggered();
   void onWokeUpFromHibernation(const QDateTime& sleepTime,
                                const QDateTime& wakeUpTime);
+  void on_actionFind_triggered();
+
 signals:
   void timeTrackingStopped(task_id taskId);
   void documentModified();
@@ -110,6 +114,8 @@ private:
   QAction* m_pEnableHibernationDetection;
   QFileSystemWatcher* m_pWatcher;
   ToolBarInfoDisplay* m_pInfoDisplay;
+  SearchFrame* m_pSearchFrame;
+  std::shared_ptr<SearchController> m_spSearchController;
 };
 
 #endif // MAINWINDOW_H

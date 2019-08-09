@@ -143,6 +143,11 @@ void GroupWidget::removeTask(TaskWidget *pTaskWidget)
   pTaskWidget->setParentContainerWidget(nullptr);
 }
 
+std::vector<TaskWidget*> GroupWidget::tasks() const
+{
+  return ui->pTaskListWidget->tasks();
+}
+
 void GroupWidget::onNewTaskClicked()
 {
   emit newTaskClicked(m_groupId);

@@ -904,6 +904,11 @@ void TaskWidget::removeTask(TaskWidget *pTaskWidget)
   updateSize();
 }
 
+std::vector<TaskWidget*> TaskWidget::tasks() const
+{
+  return ui->pTaskListWidget->tasks();
+}
+
 void TaskWidget::onDeleteTriggered()
 {
   emit taskDeleted(id());

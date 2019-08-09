@@ -136,6 +136,11 @@ void TaskListWidget::removeTask(TaskWidget* pTaskWidget)
   }
 }
 
+std::vector<TaskWidget*> TaskListWidget::tasks() const
+{
+  return m_vpTaskWidgets;
+}
+
 void TaskListWidget::setBackgroundImage(const QImage &img)
 {
   m_backgroundImage = img;
