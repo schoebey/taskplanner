@@ -48,7 +48,9 @@ SOURCES += \
     toolbarinfodisplay.cpp \
     widgetresizer.cpp \
     windowtitlemenubar.cpp \
-    decoratedlabel.cpp
+    decoratedlabel.cpp \
+    $$PWD/search/searchframe.cpp \
+    $$PWD/search/searchcontroller.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -79,14 +81,17 @@ HEADERS += \
     toolbarinfodisplay.h \
     widgetresizer.h \
     windowtitlemenubar.h \
-    decoratedlabel.h
+    decoratedlabel.h \
+    $$PWD/search/searchframe.h \
+    $$PWD/search/searchcontroller.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
     $$PWD/mainwindow.ui \
     $$PWD/taskwidget.ui \
     $$PWD/linkwidget.ui \
-    $$PWD/aboutdialog.ui
+    $$PWD/aboutdialog.ui \
+    $$PWD/search/searchframe.ui
 
 RESOURCES += \
     $$PWD/resources/resource.qrc

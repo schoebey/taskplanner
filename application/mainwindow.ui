@@ -69,6 +69,7 @@
     <property name="title">
      <string>Edit</string>
     </property>
+    <addaction name="actionFind"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -191,6 +192,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="text">
+    <string>Find...</string>
    </property>
   </action>
  </widget>

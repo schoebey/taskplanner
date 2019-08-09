@@ -44,6 +44,7 @@ public:
   void requestInsert(TaskWidget* pTaskWidget, int iPos = -1) override;
   bool insertTask(TaskWidget* pTaskWidget, int iPos = -1) override;
   void removeTask(TaskWidget* pTaskWidget) override;
+  std::vector<TaskWidget*> tasks() const override;
 
   bool onMouseMoved(const QPoint &pt);
 
