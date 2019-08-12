@@ -80,7 +80,6 @@ double Task::autoPriority() const
 
   // for now: use due date, added date and duration as a base for computing the priority
   double dDueTimeWeight = 0;
-  int iNofDaysTaskShouldBeInProgress = 0;
   QDateTime dueDate = property<QDateTime>("due date");
   if (dueDate.isValid())
   {
@@ -164,17 +163,17 @@ double Task::autoPriority() const
 //    }
 
 
-    int iNofDays = property<int>("duration (days)");
-    QDateTime startDate = dueDate.addDays(-iNofDays);
-
-    int iNofDaysToStart = QDateTime::currentDateTime().daysTo(startDate);
-    if (0 >= iNofDaysToStart)
-    {
-      int iNofDaysToDue = QDateTime::currentDateTime().daysTo(dueDate);
-      iNofDaysTaskShouldBeInProgress = iNofDays - iNofDaysToDue;
-
-//      dDueTimeWeight += something;
-    }
+//    int iNofDays = property<int>("duration (days)");
+//    QDateTime startDate = dueDate.addDays(-iNofDays);
+//   
+//    int iNofDaysToStart = QDateTime::currentDateTime().daysTo(startDate);
+//    if (0 >= iNofDaysToStart)
+//    {
+//      int iNofDaysToDue = QDateTime::currentDateTime().daysTo(dueDate);
+//        int iNofDaysTaskShouldBeInProgress = iNofDays - iNofDaysToDue;
+//   
+//        dDueTimeWeight += something;
+//    }
   }
 
 

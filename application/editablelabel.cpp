@@ -9,7 +9,8 @@
 
 EditableLabel::EditableLabel(QWidget* pParent)
   : QLabel(pParent),
-    m_pLineEdit(new QLineEdit(this))
+    m_pLineEdit(new QLineEdit(this)),
+    m_iMinWidth(0)
 {
   m_pLineEdit->hide();
   m_fnToDisplay = [](const QString& s){ return s; };
