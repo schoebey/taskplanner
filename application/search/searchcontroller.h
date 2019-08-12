@@ -12,9 +12,8 @@ class SearchController : public QObject
 {
   Q_OBJECT
 
-  typedef std::vector<TaskWidget*> tvHitType;
-
 public:
+  typedef std::vector<TaskWidget*> tvHitType;
   SearchController(Manager* pManager,
                    WidgetManager* pWidgetManager);
   ~SearchController() override;

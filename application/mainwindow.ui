@@ -198,6 +198,9 @@
    <property name="text">
     <string>Find...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
   </action>
  </widget>
  <customwidgets>

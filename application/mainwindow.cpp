@@ -78,6 +78,10 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   m_pSearchFrame->hide();
   connect(m_pSearchFrame, &SearchFrame::searchTermChanged,
           m_spSearchController.get(), &SearchController::onSearchTermChanged);
+  connect(m_pSearchFrame, &SearchFrame::findNext,
+          m_spSearchController.get(), &SearchController::onNext);
+  connect(m_pSearchFrame, &SearchFrame::findPrevious,
+          m_spSearchController.get(), &SearchController::onPrev);
 
   qApp->installEventFilter(this);
 
@@ -1421,4 +1425,6 @@ void MainWindow::showError(const QString& sErrorMessage)
 void MainWindow::on_actionFind_triggered()
 {
   m_pSearchFrame->show();
+  m_pSearchFrame->raise();
+  m_pSearchFrame->onOpen();
 }
