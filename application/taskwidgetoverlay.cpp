@@ -42,6 +42,17 @@ namespace
       borderColor = Qt::red;
       highlightColor = QColor(255, 0, 0, 100);
      }
+    if (method.testFlag(EHighlightMethod::eSearchResult))
+    {
+      borderColor = QColor(255, 200, 0, 100);
+      highlightColor = QColor(255, 200, 0, 200);
+
+      if (method.testFlag(EHighlightMethod::eFocus))
+      {
+        borderColor.setAlpha(255);
+        highlightColor.setAlpha(255);
+      }
+    }
 
     return std::make_pair(borderColor, highlightColor);
   }
@@ -109,8 +120,8 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
 
 
   // animate highlight color fade
-  if (newlySetFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
-      newlySetFlags.testFlag(EHighlightMethod::eHover))
+//  if (newlySetFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
+//      newlySetFlags.testFlag(EHighlightMethod::eHover))
   {
     if (newHighlightColor.isValid())
     {
@@ -120,14 +131,14 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
       setHighlightColor(newHighlightColor, 1500);
     }
   }
-  else if (newlyRemovedFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
-           newlyRemovedFlags.testFlag(EHighlightMethod::eHover))
-  {
-    if (newHighlightColor.isValid())
-    {
-      setHighlightColor(newHighlightColor, 1500);
-    }
-  }
+//  else if (newlyRemovedFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
+//           newlyRemovedFlags.testFlag(EHighlightMethod::eHover))
+//  {
+//    if (newHighlightColor.isValid())
+//    {
+//      setHighlightColor(newHighlightColor, 1500);
+//    }
+//  }
 }
 
 QColor TaskWidgetOverlay::highlightColor() const

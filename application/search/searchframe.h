@@ -13,6 +13,7 @@ class SearchFrame : public QFrame
 public:
   SearchFrame(QWidget* pParent);
 
+  void onOpen();
 
 signals:
   void findNext();
@@ -20,7 +21,9 @@ signals:
   void searchTermChanged(const QString& sTerm);
 
 private:
+  void keyPressEvent(QKeyEvent* pEvent);
   void onTextChanged(const QString& sText);
+  void setFocusOnLineEdit();
   void onExit();
 
 private:
