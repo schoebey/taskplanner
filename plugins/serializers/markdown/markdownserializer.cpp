@@ -44,6 +44,7 @@ namespace
   public:
     StreamSwapper(QTextStream** ppStream, const QString& sHeader)
       : m_ppStream(ppStream),
+        m_pOriginalStream(nullptr),
         m_sHeader(sHeader)
     { }
 

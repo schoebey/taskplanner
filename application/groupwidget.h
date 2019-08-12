@@ -66,6 +66,8 @@ protected slots:
   void onSortClicked(bool bChecked);
 
 private:
+  Q_DISABLE_COPY(GroupWidget)
+  
   Ui::GroupWidget *ui;
   group_id m_groupId;
   QImage m_backgroundImage;

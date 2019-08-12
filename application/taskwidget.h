@@ -128,6 +128,8 @@ private:
   void setUpContextMenu();
 
 private:
+  Q_DISABLE_COPY(TaskWidget)
+
   void mousePressEvent(QMouseEvent* pMouseEvent) override;
   void mouseMoveEvent(QMouseEvent* pMouseEvent) override;
   void paintEvent(QPaintEvent* pEvent) override;
