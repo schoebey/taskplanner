@@ -69,6 +69,9 @@ public:
   void edit();
 
   bool onMouseMoved(const QPoint &pt);
+
+  void ensureVisible();
+
 public slots:
   void setExpanded(bool bExpanded);
 
@@ -76,6 +79,7 @@ public slots:
   bool insertTask(TaskWidget* pTaskWidget, int iPos = -1) override;
   void removeTask(TaskWidget* pTaskWidget) override;
   std::vector<TaskWidget*> tasks() const override;
+  void ensureVisible(TaskWidget* pTaskWidget) override;
 
   void addLink(const QUrl& link);
   void removeLink(const QUrl& link);

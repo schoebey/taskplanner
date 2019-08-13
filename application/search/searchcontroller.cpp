@@ -17,7 +17,7 @@ namespace {
                      SearchController::tvHitType& vpHits,
                      const QString& sSearchTerm)
   {
-    if (pWidget->name().contains(sSearchTerm))
+    if (pWidget->name().contains(sSearchTerm, Qt::CaseInsensitive))
     {
       vpHits.push_back(pWidget);
     }
@@ -107,7 +107,9 @@ void SearchController::setCurrent(tvHitType::iterator it)
   m_hitIter = it;
   if (m_hitIter != m_vpHits.end())
   {
-    highlight(*m_hitIter, eActiveSearchResult);
+    TaskWidget* pCurrent = *m_hitIter;
+    pCurrent->ensureVisible();
+    highlight(pCurrent, eActiveSearchResult);
     emit positionChanged(static_cast<size_t>(m_hitIter - m_vpHits.begin()), hitCount());
   }
   else

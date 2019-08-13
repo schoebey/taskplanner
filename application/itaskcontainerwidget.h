@@ -11,6 +11,7 @@ public:
   virtual bool insertTask(TaskWidget* pTaskWidget, int iPos = -1) = 0;
   virtual void removeTask(TaskWidget* pTaskWidget) = 0;
   virtual std::vector<TaskWidget*> tasks() const = 0;
+  virtual void ensureVisible(TaskWidget* pTaskWidget) = 0;
 };
 
 #endif // ITASKCONTAINERWIDGET_H
