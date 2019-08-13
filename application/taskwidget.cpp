@@ -909,6 +909,15 @@ std::vector<TaskWidget*> TaskWidget::tasks() const
   return ui->pTaskListWidget->tasks();
 }
 
+void TaskWidget::ensureVisible(TaskWidget* pTaskWidget)
+{
+  if (isAncestorOf(pTaskWidget))
+  {
+    setExpanded(true);
+    m_pContainer->ensureVisible(pTaskWidget);
+  }
+}
+
 void TaskWidget::onDeleteTriggered()
 {
   emit taskDeleted(id());
@@ -959,6 +968,11 @@ bool TaskWidget::onMouseMoved(const QPoint& pt)
   }
 
   return bRv;
+}
+
+void TaskWidget::ensureVisible()
+{
+  m_pContainer->ensureVisible(this);
 }
 
 void TaskWidget::emphasise()

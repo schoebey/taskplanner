@@ -141,6 +141,11 @@ std::vector<TaskWidget*> TaskListWidget::tasks() const
   return m_vpTaskWidgets;
 }
 
+void TaskListWidget::ensureVisible(TaskWidget* /*pTaskWidget*/)
+{
+  // task list widget always shows all its child task widgets - nothing to do here.
+}
+
 void TaskListWidget::setBackgroundImage(const QImage &img)
 {
   m_backgroundImage = img;
