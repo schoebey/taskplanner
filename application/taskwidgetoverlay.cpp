@@ -26,7 +26,12 @@ namespace
     }
     if (method.testFlag(EHighlightMethod::eHover))
     {
-      highlightColor = QColor(255, 255, 255, 50);
+      double dBlendFactor = 0.75;
+      highlightColor = colorsFromMethod(method & ~EHighlightMethod::eHover).second;
+      highlightColor = QColor(highlightColor.red() * (1 - dBlendFactor) + 255 * dBlendFactor,
+                              highlightColor.green() * (1 - dBlendFactor) + 255 * dBlendFactor,
+                              highlightColor.blue() * (1 - dBlendFactor) + 255 * dBlendFactor,
+                              150);
     }
     if (method.testFlag(EHighlightMethod::eInsertPossible))
     {
@@ -50,6 +55,7 @@ namespace
       if (method.testFlag(EHighlightMethod::eFocus))
       {
         borderColor.setAlpha(255);
+        highlightColor = QColor(100, 130, 255, 200);
         highlightColor.setAlpha(255);
       }
     }
@@ -74,6 +80,7 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
   HighlightingMethod newlyRemovedFlags = (m_method ^ method) & m_method;
 
 
+
   // first, backup current colors
   QColor currentBorderColor(m_borderColor);
   QColor currentHighlightColor(m_highlightColor);
@@ -81,6 +88,8 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
 
   // remove all non-permanent flags
   m_method = method & ~EHighlightMethod::eValueAccepted
+                    & ~EHighlightMethod::eValueRejected;
+  newlyRemovedFlags & ~EHighlightMethod::eValueAccepted
                     & ~EHighlightMethod::eValueRejected;
 
 
@@ -120,25 +129,25 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
 
 
   // animate highlight color fade
-//  if (newlySetFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
-//      newlySetFlags.testFlag(EHighlightMethod::eHover))
+  if (0 != newlySetFlags &&
+      !newlySetFlags.testFlag(EHighlightMethod::eValueAccepted) &&
+      !newlySetFlags.testFlag(EHighlightMethod::eValueRejected))
   {
     if (newHighlightColor.isValid())
     {
       QColor emphasis(newHighlightColor);
       emphasis.setAlpha(100);
       setHighlightColor(emphasis);
+      setHighlightColor(newHighlightColor, 500);
+    }
+  }
+  else if (0 != newlyRemovedFlags)
+  {
+    if (newHighlightColor.isValid())
+    {
       setHighlightColor(newHighlightColor, 1500);
     }
   }
-//  else if (newlyRemovedFlags.testFlag(EHighlightMethod::eTimeTrackingActive) ||
-//           newlyRemovedFlags.testFlag(EHighlightMethod::eHover))
-//  {
-//    if (newHighlightColor.isValid())
-//    {
-//      setHighlightColor(newHighlightColor, 1500);
-//    }
-//  }
 }
 
 QColor TaskWidgetOverlay::highlightColor() const
