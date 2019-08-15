@@ -8,59 +8,68 @@
 
 namespace
 {
-  std::pair<QColor, QColor> colorsFromMethod(HighlightingMethod method)
+  struct SHighlightProperties
   {
-    QColor borderColor(0,0,0,0);
-    QColor highlightColor(0,0,0,0);
+    QColor borderColor;
+    QColor highlightColor;
+    int iFadeTimeMs = 1500;
+  };
+
+  SHighlightProperties colorsFromMethod(HighlightingMethod method)
+  {
+    SHighlightProperties props;
+    props.borderColor = QColor(0,0,0,0);
+    props.highlightColor = QColor(0,0,0,0);
 
     // determine colors in descending ascending of importance
     // the last tested flag will overwrite all other colors
     if (method.testFlag(EHighlightMethod::eTimeTrackingActive))
     {
-      borderColor = QColor(255, 200, 0);
-      highlightColor = QColor(255, 200, 0, 50);
+      props.borderColor = QColor(255, 200, 0);
+      props.highlightColor = QColor(255, 200, 0, 50);
     }
     if (method.testFlag(EHighlightMethod::eFocus))
     {
-      borderColor = QColor(140, 180, 255);
+      props.borderColor = QColor(140, 180, 255);
     }
     if (method.testFlag(EHighlightMethod::eHover))
     {
       double dBlendFactor = 0.75;
-      highlightColor = colorsFromMethod(method & ~EHighlightMethod::eHover).second;
-      highlightColor = QColor(highlightColor.red() * (1 - dBlendFactor) + 255 * dBlendFactor,
-                              highlightColor.green() * (1 - dBlendFactor) + 255 * dBlendFactor,
-                              highlightColor.blue() * (1 - dBlendFactor) + 255 * dBlendFactor,
-                              150);
+      props.highlightColor = colorsFromMethod(method & ~EHighlightMethod::eHover).highlightColor;
+      props.highlightColor = QColor(props.highlightColor.red() * (1 - dBlendFactor) + 255 * dBlendFactor,
+                                    props.highlightColor.green() * (1 - dBlendFactor) + 255 * dBlendFactor,
+                                    props.highlightColor.blue() * (1 - dBlendFactor) + 255 * dBlendFactor,
+                                    150);
     }
     if (method.testFlag(EHighlightMethod::eInsertPossible))
     {
-      borderColor = Qt::red;
+      props.borderColor = Qt::red;
     }
     if (method.testFlag(EHighlightMethod::eValueAccepted))
     {
-      borderColor = Qt::green;
-      highlightColor = QColor(0, 255, 0, 100);
+      props.borderColor = Qt::green;
+      props.highlightColor = QColor(0, 255, 0, 100);
      }
     if (method.testFlag(EHighlightMethod::eValueRejected))
     {
-      borderColor = Qt::red;
-      highlightColor = QColor(255, 0, 0, 100);
+      props.borderColor = Qt::red;
+      props.highlightColor = QColor(255, 0, 0, 100);
      }
     if (method.testFlag(EHighlightMethod::eSearchResult))
     {
-      borderColor = QColor(255, 200, 0, 100);
-      highlightColor = QColor(255, 200, 0, 200);
+      props.borderColor = QColor(255, 200, 0, 100);
+      props.highlightColor = QColor(255, 200, 0, 200);
+      props.iFadeTimeMs = 10;
 
       if (method.testFlag(EHighlightMethod::eFocus))
       {
-        borderColor.setAlpha(255);
-        highlightColor = QColor(100, 130, 255, 200);
-        highlightColor.setAlpha(255);
+        props.borderColor.setAlpha(255);
+        props.highlightColor = QColor(100, 130, 255, 200);
+        props.highlightColor.setAlpha(255);
       }
     }
 
-    return std::make_pair(borderColor, highlightColor);
+    return props;
   }
 }
 
@@ -95,8 +104,8 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
 
   // then, determine the new colors based on the given method
   auto colors = colorsFromMethod(method);
-  QColor newBorderColor(colors.first);
-  QColor newHighlightColor(colors.second);
+  QColor newBorderColor(colors.borderColor);
+  QColor newHighlightColor(colors.highlightColor);
 
 
   // then, determine the animations based on the state changes of 'method'
@@ -110,13 +119,13 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
     if (newBorderColor.isValid())
     {
       setBorderColor(newBorderColor);
-      setBorderColor(newColors.first, 1500);
+      setBorderColor(newColors.borderColor, colors.iFadeTimeMs);
     }
 
     if (newHighlightColor.isValid())
     {
       setHighlightColor(newHighlightColor);
-      setHighlightColor(newColors.second, 1500);
+      setHighlightColor(newColors.highlightColor, colors.iFadeTimeMs);
     }
   }
   else
@@ -138,14 +147,14 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
       QColor emphasis(newHighlightColor);
       emphasis.setAlpha(100);
       setHighlightColor(emphasis);
-      setHighlightColor(newHighlightColor, 500);
+      setHighlightColor(newHighlightColor, colors.iFadeTimeMs);
     }
   }
   else if (0 != newlyRemovedFlags)
   {
     if (newHighlightColor.isValid())
     {
-      setHighlightColor(newHighlightColor, 1500);
+      setHighlightColor(newHighlightColor, colors.iFadeTimeMs);
     }
   }
 }
