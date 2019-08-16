@@ -13,7 +13,7 @@ enum EHighlightMethod
   eHover = 0x10,
   eInsertPossible = 0x20,
   eSearchResult = 0x40,
-  eActiveSearchResult = 0x41
+  eActiveSearchResult = eSearchResult | eFocus
 };
 Q_DECLARE_FLAGS(HighlightingMethod, EHighlightMethod)
 
