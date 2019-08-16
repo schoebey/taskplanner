@@ -82,6 +82,18 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
           m_spSearchController.get(), &SearchController::onNext);
   connect(m_pSearchFrame, &SearchFrame::findPrevious,
           m_spSearchController.get(), &SearchController::onPrev);
+  connect(m_spSearchController.get(), &SearchController::positionChanged,
+          m_pSearchFrame, &SearchFrame::onPositionChanged);
+
+  auto pFindNext = ui->menuEdit->addAction(tr("Find next"));
+  pFindNext->setShortcut(Qt::Key_F3);
+  connect(pFindNext, &QAction::triggered,
+          m_spSearchController.get(), &SearchController::onNext);
+
+  auto pFindPrev = ui->menuEdit->addAction(tr("Find previous"));
+  pFindPrev->setShortcut(Qt::Key_Shift + Qt::Key_F3);
+  connect(pFindPrev, &QAction::triggered,
+          m_spSearchController.get(), &SearchController::onPrev);
 
   qApp->installEventFilter(this);
 

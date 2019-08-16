@@ -15,6 +15,8 @@ public:
 
   void onOpen();
 
+  void onPositionChanged(size_t currentPos, size_t total);
+
 signals:
   void findNext();
   void findPrevious();

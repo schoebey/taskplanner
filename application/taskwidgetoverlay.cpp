@@ -89,7 +89,6 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
   HighlightingMethod newlyRemovedFlags = (m_method ^ method) & m_method;
 
 
-
   // first, backup current colors
   QColor currentBorderColor(m_borderColor);
   QColor currentHighlightColor(m_highlightColor);

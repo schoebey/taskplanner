@@ -11,6 +11,14 @@
 
 #include <cmath>
 
+QString keyFromSettings(const QString& sText, const QString& sModifier,
+                        const QFontMetrics& m, QColor col, QColor shadowCol)
+{
+  return QString("%1_%2x%3_%4_%5_%6")
+      .arg(sText).arg(m.width(sText)).arg(m.height())
+      .arg(col.name()).arg(shadowCol.name()).arg(sModifier);
+}
+
 typedef void(*tfnDrawText)(QPainter*, const QPointF&, const QString&,
                            const QColor&, const QColor&);
 
@@ -25,8 +33,7 @@ namespace
     QFont f(pPainter->font());
     QFontMetrics m(f);
 
-    QString sKey = QString("%1_%2x%3_%4_normal").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
-
+    QString sKey = keyFromSettings(sText, "normal", m, col, shadowColor);
     QPixmap* pPixmap = QPixmapCache::find(sKey);
     if (nullptr == pPixmap)
     {
@@ -71,8 +78,8 @@ namespace
     QFont f(pPainter->font());
     QFontMetrics m(f);
 
-    QString sKey = QString("%1_%2x%3_%4_shadow").arg(sText).arg(m.width(sText)).arg(m.height()).arg(shadowColor.name());
 
+    QString sKey = keyFromSettings(sText, "shadow", m, col, shadowColor);
     QPixmap* pPixmap = QPixmapCache::find(sKey);
     if (nullptr == pPixmap)
     {
@@ -125,12 +132,8 @@ namespace
     QFontMetrics m(f);
     const int iOutlineSize = m.height() / 5;
 
-    QString sKey = QString("%1_%2x%3_%4_outline").arg(sText).arg(m.width(sText)).arg(m.height()).arg(outlineColor.name());
 
-    QPixmap* pPixmap = QPixmapCache::find(sKey);
-    if (nullptr == pPixmap)
-    {
-      QImage img(m.width(sText) + iOutlineSize, m.height() + 2, QImage::Format_ARGB32);
+    QString sKey = keyFromSettings(sText, "outlined", m, col, shadowColor);    QPixmap* pPixmap = QPixmapCache::find(sKey);    if (nullptr == pPixmap)    {      QImage img(m.width(sText) + iOutlineSize, m.height() + 2, QImage::Format_ARGB32);
       if (!img.isNull())
       {
         img.fill(Qt::transparent);

@@ -652,6 +652,14 @@ void TaskWidget::setHighlight(HighlightingMethod method)
 {
   m_pOverlay->setHighlight(method);
 
+  setProperty("highlight", static_cast<int>(method));
+
+  for (QWidget* pChildWidget : std::vector<QWidget*>{this, ui->pTitle, ui->pDescription})
+  {
+    pChildWidget->style()->unpolish(pChildWidget);
+    pChildWidget->style()->polish(pChildWidget);
+  }
+
   if (method.testFlag(EHighlightMethod::eValueRejected))
   {
     QPropertyAnimation* pAnimation = new QPropertyAnimation(this, "pos");

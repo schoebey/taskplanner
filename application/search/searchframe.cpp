@@ -43,6 +43,16 @@ void SearchFrame::onOpen()
   emit searchTermChanged(ui->pText->text());
 }
 
+void SearchFrame::onPositionChanged(size_t currentPos, size_t total)
+{
+  ui->pHitsInfo->setText(tr("%1 of %2").arg(currentPos + 1).arg(total));
+  if (!isVisible())
+  {
+    setVisible(true);
+    onOpen();
+  }
+}
+
 void SearchFrame::onExit()
 {
   emit searchTermChanged(QString());

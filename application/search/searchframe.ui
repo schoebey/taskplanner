@@ -7,15 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>487</width>
-    <height>46</height>
+    <height>76</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="1">
-    <widget class="QLineEdit" name="pText"/>
+   <item row="0" column="2">
+    <widget class="QPushButton" name="pFindPrev">
+     <property name="text">
+      <string>prev</string>
+     </property>
+    </widget>
    </item>
    <item row="0" column="3">
     <widget class="QPushButton" name="pFindNext">
@@ -24,6 +28,16 @@
      </property>
     </widget>
    </item>
+   <item row="0" column="4">
+    <widget class="QToolButton" name="pClose">
+     <property name="text">
+      <string>X</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLineEdit" name="pText"/>
+   </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
@@ -31,17 +45,10 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="2">
-    <widget class="QPushButton" name="pFindPrev">
+   <item row="1" column="0" colspan="5">
+    <widget class="QLabel" name="pHitsInfo">
      <property name="text">
-      <string>prev</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="4">
-    <widget class="QToolButton" name="pClose">
-     <property name="text">
-      <string>X</string>
+      <string/>
      </property>
     </widget>
    </item>
