@@ -57,6 +57,8 @@ private slots:
   void setSize(int iWidth, int iHeight);
 
 private:
+  Q_DISABLE_COPY(TaskListWidget)
+
   QFrame* m_pGhost = nullptr;
   std::vector<TaskWidget*> m_vpTaskWidgets;
   static TaskListWidget* m_pMouseHoveringOver;
