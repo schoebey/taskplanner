@@ -91,7 +91,7 @@ bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
       std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
   {
     // insert the new widget
-    if (-1 == iPos || iPos >= m_vpTaskWidgets.size())
+    if (-1 == iPos || iPos >= static_cast<int>(m_vpTaskWidgets.size()))
     {
       iPos = static_cast<int>(m_vpTaskWidgets.size());
     }

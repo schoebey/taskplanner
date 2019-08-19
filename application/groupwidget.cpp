@@ -145,7 +145,7 @@ void GroupWidget::removeTask(TaskWidget *pTaskWidget)
 
 std::vector<TaskWidget*> GroupWidget::tasks() const
 {
-  return ui->pTaskListWidget->tasks();
+  return ui->pGroupTaskListWidget->tasks();
 }
 
 void GroupWidget::ensureVisible(TaskWidget* pTaskWidget)

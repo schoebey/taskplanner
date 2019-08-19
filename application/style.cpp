@@ -133,7 +133,7 @@ namespace
     const int iOutlineSize = m.height() / 5;
 
 
-    QString sKey = keyFromSettings(sText, "outlined", m, col, shadowColor);    QPixmap* pPixmap = QPixmapCache::find(sKey);    if (nullptr == pPixmap)    {      QImage img(m.width(sText) + iOutlineSize, m.height() + 2, QImage::Format_ARGB32);
+    QString sKey = keyFromSettings(sText, "outlined", m, col, outlineColor);    QPixmap* pPixmap = QPixmapCache::find(sKey);    if (nullptr == pPixmap)    {      QImage img(m.width(sText) + iOutlineSize, m.height() + 2, QImage::Format_ARGB32);
       if (!img.isNull())
       {
         img.fill(Qt::transparent);
@@ -465,7 +465,7 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
   tfnDrawText fnDrawText = drawShadowedText;
   if (nullptr != pLabel)
   {
-    bool bDrawOutline = pLabel->drawOutline();    bool bDrawShadow = pLabel->drawShadow();    fnDrawText = drawNormalText;
+    bool bDrawOutline = pLabel->drawOutline();    bool bDrawShadow = pLabel->drawShadow();    fnDrawText = drawNormalText;
     if (bDrawOutline)
     {
       QColor outlineColor(0, 0, 0, 25);
