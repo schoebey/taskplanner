@@ -43,7 +43,7 @@ namespace
         img.fill(Qt::transparent);
 
         QPainterPath textPath;
-        textPath.addText(0, img.height()-2, f, sText);
+        textPath.addText(0, m.ascent(), f, sText);
 
 
         QPainter p(&img);
@@ -65,7 +65,8 @@ namespace
 
     if (nullptr != pPixmap)
     {
-      pPainter->drawPixmap(pt.x(), pt.y(), *pPixmap);
+      pPainter->drawPixmap(static_cast<int>(pt.x()),
+                           static_cast<int>(pt.y()), *pPixmap);
     }
   }
 
@@ -89,10 +90,10 @@ namespace
         img.fill(Qt::transparent);
 
         QPainterPath textPath;
-        textPath.addText(0, img.height()-2, f, sText);
+        textPath.addText(0, m.ascent(), f, sText);
 
         QPainterPath shadowPath;
-        shadowPath.addText(0, img.height()-1, f, sText);
+        shadowPath.addText(0, m.ascent() + 1, f, sText);
 
         QPainter p(&img);
         p.setPen(Qt::NoPen);
@@ -117,7 +118,8 @@ namespace
 
     if (nullptr != pPixmap)
     {
-      pPainter->drawPixmap(pt.x(), pt.y(), *pPixmap);
+      pPainter->drawPixmap(static_cast<int>(pt.x()),
+                           static_cast<int>(pt.y()), *pPixmap);
     }
   }
 
@@ -133,13 +135,17 @@ namespace
     const int iOutlineSize = m.height() / 5;
 
 
-    QString sKey = keyFromSettings(sText, "outlined", m, col, outlineColor);    QPixmap* pPixmap = QPixmapCache::find(sKey);    if (nullptr == pPixmap)    {      QImage img(m.width(sText) + iOutlineSize, m.height() + 2, QImage::Format_ARGB32);
+    QString sKey = keyFromSettings(sText, "outlined", m, col, outlineColor);
+    QPixmap* pPixmap = QPixmapCache::find(sKey);
+    if (nullptr == pPixmap)
+    {
+      QImage img(m.width(sText) + iOutlineSize, m.height() + 2, QImage::Format_ARGB32);
       if (!img.isNull())
       {
         img.fill(Qt::transparent);
 
         QPainterPath textPath;
-        textPath.addText(iOutlineSize/2, img.height()-2, f, sText);
+        textPath.addText(iOutlineSize/2, m.ascent(), f, sText);
 
         QPainter p(&img);
         p.setPen(QPen(outlineColor, iOutlineSize));
@@ -162,7 +168,8 @@ namespace
 
     if (nullptr != pPixmap)
     {
-      pPainter->drawPixmap(pt.x(), pt.y(), *pPixmap);
+      pPainter->drawPixmap(static_cast<int>(pt.x()),
+                           static_cast<int>(pt.y()), *pPixmap);
     }
   }
 
@@ -176,9 +183,12 @@ namespace
                       QRectF *brect,
                       QPainter *painter = nullptr,
                       const QColor& textColor = QColor(),
-                      const QColor& shadowColor = QColor())
+                      const QColor& shadowColor = QColor(),
+                      const QColor& highlightColor = QColor(),
+                      int iHighlightStart = -1,
+                      int iHighlightCount = -1)
   {
-      Q_ASSERT( !((tf & ~Qt::TextDontPrint)!=0 && option!=0) ); // we either have an option or flags
+      Q_ASSERT( !((tf & ~Qt::TextDontPrint)!=0 && option!=nullptr) ); // we either have an option or flags
       if (option) {
           tf |= option->alignment();
           if (option->wrapMode() != QTextOption::NoWrap)
@@ -350,10 +360,27 @@ namespace
               else if (tf & Qt::AlignHCenter)
                 xoff = (r.width() - width) / 2;
 
+
+              QPointF pt(line.x() + r.x() + xoff, line.y() + r.y() + yoff);
+              QString lineText = finalText.mid(line.textStart(),
+                                              line.textLength());
+
+              // highlight a section on this line if necessary
+              int iHighlightInLineStart = iHighlightStart - line.textStart();
+              if (line.textStart() <= iHighlightInLineStart &&
+                  iHighlightInLineStart - line.textStart() < line.textLength())
+              {
+                QRect highlightRect(static_cast<int>(pt.x()) + fm.boundingRect(lineText.left(iHighlightInLineStart)).width(),
+                                    static_cast<int>(pt.y()),
+                                    static_cast<int>(fm.width(lineText.mid(iHighlightInLineStart, iHighlightCount))),
+                                    fm.height() + 2);
+                painter->fillRect(highlightRect, highlightColor);
+              }
+
+
               //line.draw(painter, QPointF(r.x() + xoff, r.y() + yoff));
-              fnDrawText(painter, QPointF(line.x() + r.x() + xoff, line.y() + r.y() + yoff),
-                         finalText.mid(line.textStart(),
-                                       line.textLength()),
+              fnDrawText(painter, pt,
+                         lineText,
                           textColor, shadowColor);
           }
 //          painter->setPen(Qt::yellow);
@@ -459,13 +486,21 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
 {
   QColor textColor = pal.color(textRole);
   QColor shadowColor(0, 0, 0, 100);
+  QColor highlightColor(0,255,0);
+
+
+  QWidget* pWidget = dynamic_cast<QWidget*>(painter->device());
+  int iHighlightStart = nullptr != pWidget ? pWidget->property("highlightStart").toInt() : -1;
+  int iHighlightCount = nullptr != pWidget ? pWidget->property("highlightCount").toInt() : -1;
 
 
   DecoratedLabel* pLabel = dynamic_cast<DecoratedLabel*>(painter->device());
   tfnDrawText fnDrawText = drawShadowedText;
   if (nullptr != pLabel)
   {
-    bool bDrawOutline = pLabel->drawOutline();    bool bDrawShadow = pLabel->drawShadow();    fnDrawText = drawNormalText;
+    bool bDrawOutline = pLabel->drawOutline();
+    bool bDrawShadow = pLabel->drawShadow();
+    fnDrawText = drawNormalText;
     if (bDrawOutline)
     {
       QColor outlineColor(0, 0, 0, 25);
@@ -486,7 +521,8 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
 
   qt_format_text(fnDrawText, painter->font(), rect, flags,
                  nullptr, text, nullptr, painter,
-                 textColor, shadowColor);
+                 textColor, shadowColor, highlightColor,
+                 iHighlightStart, iHighlightCount);
 }
 
 QRect Style::itemTextRect(const QFontMetrics & metrics,
