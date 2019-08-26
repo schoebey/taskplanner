@@ -4,6 +4,20 @@
 #include "groupwidget.h"
 #include "taskwidget.h"
 
+/*
+
+  instead of just storing pointers to task widgets, store additional information
+  such as the text label that contains the hit and its hit index (start/end index).
+
+  this way, the label can pass this information to its draw call which in turn
+  can highlight the passage in question.
+
+  hit type: struct { label*, start_index, count}
+
+  ensure_visible: climbs up to closest taskwidget, proceeds normally from there
+
+*/
+
 namespace {
   void highlight(TaskWidget* pWidget, EHighlightMethod method)
   {
