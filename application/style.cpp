@@ -3,6 +3,8 @@
 #include "editablelabel.h"
 #include "linkwidget.h"
 #include "styleExtension.h"
+#include "search/matchinfo.h"
+
 
 #include <QPainter>
 #include <QPixmap>
@@ -185,8 +187,9 @@ namespace
                       const QColor& textColor = QColor(),
                       const QColor& shadowColor = QColor(),
                       const QColor& highlightColor = QColor(),
-                      int iHighlightStart = -1,
-                      int iHighlightCount = -1)
+                      const tvMatchInfo& vHighlights = tvMatchInfo(),
+                      const QColor& activeHighlightColor = QColor(),
+                      const tvMatchInfo& vActiveHighlights = tvMatchInfo())
   {
       Q_ASSERT( !((tf & ~Qt::TextDontPrint)!=0 && option!=nullptr) ); // we either have an option or flags
       if (option) {
@@ -366,15 +369,22 @@ namespace
                                               line.textLength());
 
               // highlight a section on this line if necessary
-              int iHighlightInLineStart = iHighlightStart - line.textStart();
-              if (line.textStart() <= iHighlightInLineStart &&
-                  iHighlightInLineStart - line.textStart() < line.textLength())
+              std::vector<std::pair<tvMatchInfo, QColor>> highlights{{vHighlights, highlightColor},{vActiveHighlights, activeHighlightColor}};
+              for (const auto h : highlights)
               {
-                QRect highlightRect(static_cast<int>(pt.x()) + fm.boundingRect(lineText.left(iHighlightInLineStart)).width(),
-                                    static_cast<int>(pt.y()),
-                                    static_cast<int>(fm.width(lineText.mid(iHighlightInLineStart, iHighlightCount))),
-                                    fm.height() + 2);
-                painter->fillRect(highlightRect, highlightColor);
+                for (const auto& highlight : h.first)
+                {
+                  int iHighlightInLineStart = highlight.iStart - line.textStart();
+                  if (line.textStart() <= iHighlightInLineStart &&
+                      iHighlightInLineStart - line.textStart() < line.textLength())
+                  {
+                    QRect highlightRect(static_cast<int>(pt.x()) + fm.boundingRect(lineText.left(iHighlightInLineStart)).width(),
+                                        static_cast<int>(pt.y()),
+                                        static_cast<int>(fm.width(lineText.mid(iHighlightInLineStart, highlight.iSize))),
+                                        fm.height() + 2);
+                    painter->fillRect(highlightRect.adjusted(-1, -1, 1, 1), h.second);
+                  }
+                }
               }
 
 
@@ -486,12 +496,13 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
 {
   QColor textColor = pal.color(textRole);
   QColor shadowColor(0, 0, 0, 100);
-  QColor highlightColor(0,255,0);
+  QColor highlightColor(255, 255, 0);
+  QColor activeHighlightColor(0, 100, 255);
 
 
   QWidget* pWidget = dynamic_cast<QWidget*>(painter->device());
-  int iHighlightStart = nullptr != pWidget ? pWidget->property("highlightStart").toInt() : -1;
-  int iHighlightCount = nullptr != pWidget ? pWidget->property("highlightCount").toInt() : -1;
+  tvMatchInfo vHighlights = pWidget->property("highlights").value<tvMatchInfo>();
+  tvMatchInfo vActiveHighlights = pWidget->property("active").value<tvMatchInfo>();
 
 
   DecoratedLabel* pLabel = dynamic_cast<DecoratedLabel*>(painter->device());
@@ -521,8 +532,9 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
 
   qt_format_text(fnDrawText, painter->font(), rect, flags,
                  nullptr, text, nullptr, painter,
-                 textColor, shadowColor, highlightColor,
-                 iHighlightStart, iHighlightCount);
+                 textColor, shadowColor,
+                 highlightColor, vHighlights,
+                 activeHighlightColor, vActiveHighlights);
 }
 
 QRect Style::itemTextRect(const QFontMetrics & metrics,

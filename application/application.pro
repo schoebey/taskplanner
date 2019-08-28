@@ -83,7 +83,8 @@ HEADERS += \
     windowtitlemenubar.h \
     decoratedlabel.h \
     $$PWD/search/searchframe.h \
-    $$PWD/search/searchcontroller.h
+    $$PWD/search/searchcontroller.h \
+    search/matchinfo.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
