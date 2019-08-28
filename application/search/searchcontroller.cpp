@@ -4,6 +4,9 @@
 #include "groupwidget.h"
 #include "taskwidget.h"
 
+#include <QRegularExpression>
+#include <QLabel>
+
 /*
 
   instead of just storing pointers to task widgets, store additional information
@@ -16,29 +19,87 @@
 
   ensure_visible: climbs up to closest taskwidget, proceeds normally from there
 
+
+  struct SHighlight
+  {
+    int start;
+    int count;
+  };
+  register metatype
+
+  when searching, either delegate the search to the task widget, or get a list
+  of labels from it and search "manually".
+
+  hitType:
+  * QRect
+  * start index
+  * hit size
+  std::map<QWidget*, std::vector<tHitType>>  search(term, widget)
+  {
+    for all child labels of widget:
+    determine start and size indexes for all hits within label
+    call style for a list of rects from that list
+    set the vector of hits as a property of the label
+  }
 */
 
 namespace {
-  void highlight(TaskWidget* pWidget, EHighlightMethod method)
+  void ensureVisible(QWidget* pWidget, QWidget* pOriginal)
   {
-    if (nullptr != pWidget)
+    if (nullptr == pWidget)  { return; }
+    TaskWidget* pTaskWidget = dynamic_cast<TaskWidget*>(pWidget);
+    if (nullptr == pTaskWidget)
     {
-      pWidget->setHighlight(method);
+      ensureVisible(pWidget->parentWidget(), pOriginal);
+    }
+    else
+    {
+      pTaskWidget->ensureVisible(pOriginal);
     }
   }
 
-  void findRecursive(TaskWidget* pWidget,
-                     SearchController::tvHitType& vpHits,
-                     const QString& sSearchTerm)
+  void ensureVisible(QWidget* pWidget)
   {
-    if (pWidget->name().contains(sSearchTerm, Qt::CaseInsensitive))
-    {
-      vpHits.push_back(pWidget);
-    }
+    ensureVisible(pWidget, pWidget);
+  }
 
-    for (const auto& pChild : pWidget->tasks())
+  void highlight(QWidget* pWidget, const tvMatchInfo& vMatches,
+                 EHighlightMethod method = EHighlightMethod::eSearchResult)
+  {
+    if (nullptr != pWidget)
     {
-      findRecursive(pChild, vpHits, sSearchTerm);
+      switch (method)
+      {
+      case EHighlightMethod::eSearchResult:
+        pWidget->setProperty("highlights", QVariant::fromValue(vMatches));
+        break;
+      case EHighlightMethod::eActiveSearchResult:
+        pWidget->setProperty("active", QVariant::fromValue(vMatches));
+        break;
+      default:
+        break;
+      }
+      pWidget->update();
+    }
+  }
+
+  void find(const QString& sTerm,
+            const QWidget* pWidget,
+            SearchController::tMatches& matches)
+  {
+    QRegularExpression rx(sTerm);
+    auto labels = pWidget->findChildren<QLabel*>();
+    for (const auto pLabel : labels)
+    {
+      auto match = rx.match(pLabel->text());
+      if (match.hasMatch())
+      {
+        SMatchInfo matchType;
+        matchType.pWidget = pLabel;
+        matchType.iStart = match.capturedStart(0);
+        matchType.iSize = match.capturedLength(0);
+        matches.push_back(matchType);
+      }
     }
   }
 }
@@ -48,7 +109,7 @@ SearchController::SearchController(Manager* pManager,
   : QObject(),
     m_pTaskManager(pManager),
     m_pWidgetManager(pWidgetManager),
-    m_hitIter(m_vpHits.end())
+    m_hitIter(m_hits.end())
 {
 }
 
@@ -59,23 +120,32 @@ SearchController::~SearchController()
 
 size_t SearchController::hitCount() const
 {
-  return m_vpHits.size();
+  return m_hits.size();
 }
 
 void SearchController::onSearchTermChanged(const QString& sTerm)
 {
-  TaskWidget* pCurrentHit = nullptr;
-  if (m_hitIter != m_vpHits.end())
+  QWidget* pCurrentWidget = nullptr;
+  int iCurrentIndex = -1;
+  if (m_hitIter != m_hits.end())
   {
-    pCurrentHit = *m_hitIter;
+    pCurrentWidget = m_hitIter->pWidget;
+    iCurrentIndex = m_hitIter->iStart;
   }
 
-  for (auto& el :m_vpHits)
+  std::map<QWidget*, tvMatchInfo> matchesByWidget;
+  for (auto& el : m_hits)
   {
-    highlight(el, eNoHighlight);
+    matchesByWidget[el.pWidget].push_back(el);
   }
 
-  m_vpHits.clear();
+  for (const auto& el : matchesByWidget)
+  {
+    highlight(el.first, tvMatchInfo{}, eActiveSearchResult);
+    highlight(el.first, tvMatchInfo{}, eSearchResult);
+  }
+
+  m_hits.clear();
   if (!sTerm.isEmpty())
   {
     for (const auto& groupId : m_pTaskManager->groupIds())
@@ -87,74 +157,87 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
         {
           if (nullptr != pTask)
           {
-            findRecursive(pTask, m_vpHits, sTerm);
+            //findRecursive(pTask, m_hits, sTerm);
+            find(sTerm, pTask, m_hits);
           }
         }
       }
     }
   }
 
-  for (auto& el :m_vpHits)
+
+  matchesByWidget.clear();
+  for (auto& el : m_hits)
   {
-    highlight(el, eSearchResult);
+    matchesByWidget[el.pWidget].push_back(el);
   }
 
-  m_hitIter = m_vpHits.end();
-  auto it = std::find(m_vpHits.begin(), m_vpHits.end(), pCurrentHit);
-  if (m_vpHits.end() != it)
+  for (const auto& el : matchesByWidget)
+  {
+    highlight(el.first, el.second, eSearchResult);
+  }
+
+  m_hitIter = m_hits.end();
+  auto it = std::find_if(m_hits.begin(), m_hits.end(),
+                         [pCurrentWidget, iCurrentIndex](const tMatches::value_type& el )
+  {
+    return el.pWidget == pCurrentWidget && el.iStart == iCurrentIndex;
+  });
+
+  if (m_hits.end() != it)
   {
     setCurrent(it);
   }
   else
   {
-    setCurrent(m_vpHits.begin());
+    setCurrent(m_hits.begin());
   }
 }
 
-void SearchController::setCurrent(tvHitType::iterator it)
+void SearchController::setCurrent(tMatches::iterator it)
 {
-  if (m_hitIter != m_vpHits.end())
+  if (m_hitIter != m_hits.end())
   {
-    highlight(*m_hitIter, eSearchResult);
+    // clear the active highlight
+    highlight(m_hitIter->pWidget, tvMatchInfo{}, eActiveSearchResult);
   }
 
   m_hitIter = it;
-  if (m_hitIter != m_vpHits.end())
+  if (m_hitIter != m_hits.end())
   {
-    TaskWidget* pCurrent = *m_hitIter;
-    pCurrent->ensureVisible();
-    highlight(pCurrent, eActiveSearchResult);
-    emit positionChanged(static_cast<size_t>(m_hitIter - m_vpHits.begin()), hitCount());
+    QWidget* pCurrent = m_hitIter->pWidget;
+    ensureVisible(pCurrent);
+    highlight(m_hitIter->pWidget, tvMatchInfo{*m_hitIter}, eActiveSearchResult);
+    emit positionChanged(static_cast<size_t>(m_hitIter - m_hits.begin()), hitCount());
   }
   else
   {
-    highlight(nullptr, eActiveSearchResult);
     emit positionChanged(0, hitCount());
   }
 }
 
 void SearchController::onNext()
 {
-  if (m_hitIter != m_vpHits.end() &&
-      m_hitIter != m_vpHits.end() - 1)
+  if (m_hitIter != m_hits.end() &&
+      m_hitIter != m_hits.end() - 1)
   {
     setCurrent(m_hitIter + 1);
   }
   else
   {
-    setCurrent(m_vpHits.begin());
+    setCurrent(m_hits.begin());
   }
 }
 
 void SearchController::onPrev()
 {
-  if (m_hitIter != m_vpHits.end() &&
-      m_hitIter != m_vpHits.begin())
+  if (m_hitIter != m_hits.end() &&
+      m_hitIter != m_hits.begin())
   {
     setCurrent(m_hitIter - 1);
   }
-  else if (!m_vpHits.empty())
+  else if (!m_hits.empty())
   {
-    setCurrent(m_vpHits.end() - 1);
+    setCurrent(m_hits.end() - 1);
   }
 }
