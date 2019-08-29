@@ -159,7 +159,6 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
         {
           if (nullptr != pTask)
           {
-            //findRecursive(pTask, m_hits, sTerm);
             find(sTerm, pTask, m_hits);
           }
         }

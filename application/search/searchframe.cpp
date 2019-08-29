@@ -45,11 +45,18 @@ void SearchFrame::onOpen()
 
 void SearchFrame::onPositionChanged(size_t currentPos, size_t total)
 {
-  ui->pHitsInfo->setText(tr("%1 of %2").arg(currentPos + 1).arg(total));
-  if (!isVisible())
+  if (0 == total)
   {
-    setVisible(true);
-    onOpen();
+    ui->pHitsInfo->setText(tr("0 matches"));
+  }
+  else
+  {
+    ui->pHitsInfo->setText(tr("%1 of %2").arg(currentPos + 1).arg(total));
+    if (!isVisible())
+    {
+      setVisible(true);
+      onOpen();
+    }
   }
 }
 
