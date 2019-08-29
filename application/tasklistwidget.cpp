@@ -141,7 +141,7 @@ std::vector<TaskWidget*> TaskListWidget::tasks() const
   return m_vpTaskWidgets;
 }
 
-void TaskListWidget::ensureVisible(TaskWidget* /*pTaskWidget*/)
+void TaskListWidget::ensureVisible(QWidget* /*pWidget*/)
 {
   // task list widget always shows all its child task widgets - nothing to do here.
 }

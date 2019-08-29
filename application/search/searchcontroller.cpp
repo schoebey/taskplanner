@@ -89,6 +89,8 @@ namespace {
   {
     QRegularExpression rx(sTerm);
     auto labels = pWidget->findChildren<QLabel*>();
+    std::sort(labels.begin(), labels.end(), [pWidget](const QLabel* pLhs, const QLabel* pRhs)
+    { return pLhs->mapTo(pWidget, pLhs->pos()).y() < pRhs->mapTo(pWidget, pRhs->pos()).y(); });
     for (const auto pLabel : labels)
     {
       auto match = rx.match(pLabel->text());
