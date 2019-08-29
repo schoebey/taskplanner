@@ -79,7 +79,7 @@ public slots:
   bool insertTask(TaskWidget* pTaskWidget, int iPos = -1) override;
   void removeTask(TaskWidget* pTaskWidget) override;
   std::vector<TaskWidget*> tasks() const override;
-  void ensureVisible(TaskWidget* pTaskWidget) override;
+  void ensureVisible(QWidget* pWidget) override;
 
   void addLink(const QUrl& link);
   void removeLink(const QUrl& link);

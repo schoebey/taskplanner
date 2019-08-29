@@ -148,9 +148,9 @@ std::vector<TaskWidget*> GroupWidget::tasks() const
   return ui->pGroupTaskListWidget->tasks();
 }
 
-void GroupWidget::ensureVisible(TaskWidget* pTaskWidget)
+void GroupWidget::ensureVisible(QWidget* pWidget)
 {
-  ui->scrollArea->ensureWidgetVisible(pTaskWidget);
+  ui->scrollArea->ensureWidgetVisible(pWidget);
 }
 
 void GroupWidget::onNewTaskClicked()

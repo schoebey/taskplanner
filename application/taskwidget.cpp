@@ -917,12 +917,12 @@ std::vector<TaskWidget*> TaskWidget::tasks() const
   return ui->pTaskListWidget->tasks();
 }
 
-void TaskWidget::ensureVisible(TaskWidget* pTaskWidget)
+void TaskWidget::ensureVisible(QWidget* pWidget)
 {
-  if (isAncestorOf(pTaskWidget))
+  if (isAncestorOf(pWidget))
   {
     setExpanded(true);
-    m_pContainer->ensureVisible(pTaskWidget);
+    m_pContainer->ensureVisible(pWidget);
   }
 }
 
