@@ -497,7 +497,7 @@ void Style::drawItemText(QPainter* painter, const QRect& rect, int flags,
   QColor textColor = pal.color(textRole);
   QColor shadowColor(0, 0, 0, 100);
   QColor highlightColor(255, 255, 0);
-  QColor activeHighlightColor(0, 100, 255);
+  QColor activeHighlightColor(80, 185, 255);
 
 
   QWidget* pWidget = dynamic_cast<QWidget*>(painter->device());
