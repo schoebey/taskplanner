@@ -369,22 +369,27 @@ namespace
                                               line.textLength());
 
               // highlight a section on this line if necessary
+
+              painter->save();
+              painter->setRenderHint(QPainter::Antialiasing, true);
               std::vector<std::pair<tvMatchInfo, QColor>> highlights{{vHighlights, highlightColor},{vActiveHighlights, activeHighlightColor}};
               for (const auto h : highlights)
               {
+                painter->setPen(h.second.darker());
+                painter->setBrush(h.second);
                 for (const auto& highlight : h.first)
                 {
                   int iHighlightInLineStart = highlight.iStart - line.textStart();
-                  if (line.textStart() <= iHighlightInLineStart &&
-                      iHighlightInLineStart - line.textStart() < line.textLength())
+                  if (0 <= iHighlightInLineStart && iHighlightInLineStart < line.textLength())
                   {
-                    QRect highlightRect(static_cast<int>(pt.x()) + fm.boundingRect(lineText.left(iHighlightInLineStart)).width(),
+                    QRect highlightRect(static_cast<int>(pt.x()) + fm.width(lineText.left(iHighlightInLineStart)),
                                         static_cast<int>(pt.y()),
                                         static_cast<int>(fm.width(lineText.mid(iHighlightInLineStart, highlight.iSize))),
                                         fm.height() + 2);
-                    painter->fillRect(highlightRect.adjusted(-1, -1, 1, 1), h.second);
+                    painter->drawRoundedRect(highlightRect/*.adjusted(-0.5, -0.5, 0.5, 0.5)*/, 2, 2);
                   }
                 }
+                painter->restore();
               }
 
 

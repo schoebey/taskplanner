@@ -93,8 +93,8 @@ namespace {
     { return pLhs->mapTo(pWidget, pLhs->pos()).y() < pRhs->mapTo(pWidget, pRhs->pos()).y(); });
     for (const auto pLabel : labels)
     {
-      auto match = rx.match(pLabel->text());
-      if (match.hasMatch())
+      QRegularExpressionMatch match;
+      while (static_cast<void>(match = rx.match(pLabel->text(), match.capturedStart() + 1)), match.hasMatch())
       {
         SMatchInfo matchType;
         matchType.pWidget = pLabel;
