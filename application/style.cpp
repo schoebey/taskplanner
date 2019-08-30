@@ -372,34 +372,43 @@ namespace
 
               painter->save();
               painter->setRenderHint(QPainter::Antialiasing, true);
+              bool bDrawingFocus = false;
               std::vector<std::pair<tvMatchInfo, QColor>> highlights{{vHighlights, highlightColor},{vActiveHighlights, activeHighlightColor}};
               for (const auto h : highlights)
               {
-                painter->setPen(h.second.darker());
+                painter->setPen(h.second.darker(180));
                 painter->setBrush(h.second);
                 for (const auto& highlight : h.first)
                 {
                   int iHighlightInLineStart = highlight.iStart - line.textStart();
                   if (0 <= iHighlightInLineStart && iHighlightInLineStart < line.textLength())
                   {
-                    QRect highlightRect(static_cast<int>(pt.x()) + fm.width(lineText.left(iHighlightInLineStart)),
+                    QRectF highlightRect(static_cast<int>(pt.x() + fm.width(lineText.left(iHighlightInLineStart))),
                                         static_cast<int>(pt.y()),
                                         static_cast<int>(fm.width(lineText.mid(iHighlightInLineStart, highlight.iSize))),
-                                        fm.height() + 2);
-                    painter->drawRoundedRect(highlightRect/*.adjusted(-0.5, -0.5, 0.5, 0.5)*/, 2, 2);
+                                        static_cast<int>(fm.height() + 1));
+
+
+                    // only do this when drawing the current focus
+                    if (bDrawingFocus &&
+                        highlightRect.right() > r.right())
+                    {
+                      pt.setX(pt.x() - (highlightRect.right() - r.right()));
+                      highlightRect.moveRight(r.right());
+                    }
+
+                    painter->drawRoundedRect(highlightRect.adjusted(-0.5, 0.5, 0.5, 0.5), 1, 1);
                   }
                 }
-                painter->restore();
+
+                bDrawingFocus = true;
               }
+              painter->restore();
 
 
-              //line.draw(painter, QPointF(r.x() + xoff, r.y() + yoff));
-              fnDrawText(painter, pt,
-                         lineText,
-                          textColor, shadowColor);
+              fnDrawText(painter, pt, lineText, textColor, shadowColor);
           }
-//          painter->setPen(Qt::yellow);
-//          painter->drawRect(r);
+
           if (restore) {
               painter->restore();
           }
