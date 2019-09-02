@@ -74,7 +74,6 @@ LinkWidget::LinkWidget(const QUrl& link)
     request.setUrl(QUrl(sFaviconPath));
 
     QNetworkReply *reply = m_spNetworkAccessManager->get(request);
-    connect(reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
     connect(reply, SIGNAL(finished()), this, SLOT(fileDownloaded()));
   }
 
@@ -252,26 +251,17 @@ void LinkWidget::openLink()
 
 void LinkWidget::fileDownloaded()
 {
-  QFile f("test.png");
-  f.open(QIODevice::WriteOnly);
-  f.write(m_iconFromWeb.constData(), m_iconFromWeb.size());
-  f.close();
-
-  QImage img;
-  if (img.loadFromData(m_iconFromWeb) && !img.isNull())
-  {
-    ui->pIcon->setPixmap(QPixmap::fromImage(img));
-  }
-}
-
-
-void LinkWidget::onReadyRead()
-{
   QNetworkReply* pReply = dynamic_cast<QNetworkReply*>(sender());
   if (nullptr != pReply)
   {
-    QByteArray bytes(pReply->readAll());
-    m_iconFromWeb.append(bytes);
+    QByteArray ba = pReply->readAll();
 
+    QImage img;
+    if (img.loadFromData(ba) && !img.isNull())
+    {
+      ui->pIcon->setPixmap(QPixmap::fromImage(img));
+    }
   }
 }
+
+

@@ -74,7 +74,6 @@ private slots:
   void onDeleteTriggered();
   void openLink();
   void fileDownloaded();
-  void onReadyRead();
 
 protected:
   Ui::LinkWidget* ui;
@@ -85,7 +84,6 @@ protected:
   LinkWidget* m_pToolTip = nullptr;
   QMenu* m_pContextMenu = nullptr;
   std::shared_ptr<QNetworkAccessManager> m_spNetworkAccessManager;
-  QByteArray m_iconFromWeb;
 };
 
 #endif // LINKWIDGET_H
