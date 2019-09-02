@@ -27,6 +27,7 @@ private:
   void onTextChanged(const QString& sText);
   void setFocusOnLineEdit();
   void onExit();
+  void showSearchInfo(const QString& sInfo);
 
 private:
   Ui::SearchFrame *ui;

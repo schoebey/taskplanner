@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>487</width>
-    <height>76</height>
+    <height>45</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,20 +21,6 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="3">
-    <widget class="QPushButton" name="pFindNext">
-     <property name="text">
-      <string>next</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="4">
-    <widget class="QToolButton" name="pClose">
-     <property name="text">
-      <string>X</string>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="1">
     <widget class="QLineEdit" name="pText"/>
    </item>
@@ -45,32 +31,22 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="5">
-    <widget class="QLabel" name="pHitsInfo">
+   <item row="0" column="4">
+    <widget class="QPushButton" name="pClose">
      <property name="text">
-      <string/>
+      <string>X</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QPushButton" name="pFindNext">
+     <property name="text">
+      <string>next</string>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>pClose</sender>
-   <signal>clicked()</signal>
-   <receiver>SearchFrame</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>468</x>
-     <y>27</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>305</x>
-     <y>2</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

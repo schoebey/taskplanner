@@ -2,6 +2,9 @@
 #include "ui_searchframe.h"
 
 #include <QKeyEvent>
+#include <QMainWindow>
+#include <QStatusBar>
+
 
 SearchFrame::SearchFrame(QWidget* pParent)
   : QFrame(pParent),
@@ -9,7 +12,7 @@ SearchFrame::SearchFrame(QWidget* pParent)
 {
   ui->setupUi(this);
   connect(ui->pText, &QLineEdit::textChanged, this, &SearchFrame::onTextChanged);
-  connect(ui->pClose, &QToolButton::clicked, this, &SearchFrame::onExit);
+  connect(ui->pClose, &QPushButton::clicked, this, &SearchFrame::onExit);
   connect(ui->pFindNext, &QPushButton::clicked, this, &SearchFrame::findNext);
   connect(ui->pFindPrev, &QPushButton::clicked, this, &SearchFrame::findPrevious);
   connect(ui->pText, &QLineEdit::returnPressed, this, &SearchFrame::findNext);
@@ -39,6 +42,7 @@ void SearchFrame::setFocusOnLineEdit()
 
 void SearchFrame::onOpen()
 {
+  resize(width(), minimumSizeHint().height());
   setFocusOnLineEdit();
   emit searchTermChanged(ui->pText->text());
 }
@@ -47,11 +51,11 @@ void SearchFrame::onPositionChanged(size_t currentPos, size_t total)
 {
   if (0 == total)
   {
-    ui->pHitsInfo->setText(tr("0 matches"));
+    showSearchInfo(tr("0 matches"));
   }
   else
   {
-    ui->pHitsInfo->setText(tr("%1 of %2").arg(currentPos + 1).arg(total));
+    showSearchInfo(tr("%1 of %2").arg(currentPos + 1).arg(total));
     if (!isVisible())
     {
       setVisible(true);
@@ -64,4 +68,14 @@ void SearchFrame::onExit()
 {
   emit searchTermChanged(QString());
   hide();
+  showSearchInfo(QString());
+}
+
+void SearchFrame::showSearchInfo(const QString& sInfo)
+{
+  auto* pMainWindow = static_cast<QMainWindow*>(window());
+  if (nullptr != pMainWindow && nullptr != pMainWindow->statusBar())
+  {
+    pMainWindow->statusBar()->showMessage(sInfo);
+  }
 }
