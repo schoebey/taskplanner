@@ -196,8 +196,21 @@ double Task::autoPriority() const
   // nof days in the system should only modify the auto priority in the range [0, 1[
   // therefore, the max time in system is 10 years. All tasks older than that will get
   // the same modifier and ultimately the same autoPriority.
-  return std::max<double>(dDueTimeWeight, iUserDefinedPriority) +
+  double dAutoPriority = std::max<double>(dDueTimeWeight, iUserDefinedPriority) +
       std::min<double>(0.999999, static_cast<double>(iNofDaysInSystem) / 3650.);
+
+
+  // determine the maximum of all the child priorites
+  for (auto id : m_subTaskIds)
+  {
+    auto pSubTask = m_pManager->task(id);
+    if (nullptr != pSubTask)
+    {
+      dAutoPriority = std::max<double>(dAutoPriority, pSubTask->autoPriority());
+    }
+  }
+
+  return dAutoPriority;
 }
 
 task_id Task::parentTask() const
