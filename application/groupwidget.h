@@ -37,6 +37,7 @@ public:
   QImage backgroundImage() const;
   void setBackgroundImage(const QImage& img);
 
+  void reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets) override;
   void reorderTasks(const std::vector<task_id>& vIds);
 
   void setAutoSortingEnabled(bool bEnabled);

@@ -1219,34 +1219,58 @@ void MainWindow::onSortGroupTriggered(int iGroupId)
   sortGroup(static_cast<group_id>(iGroupId));
 }
 
-void MainWindow::sortGroup(group_id groupId)
-{
-  std::map<double, std::vector<task_id>> sortedTaskIds;
-  for (const auto& id : m_pManager->taskIds())
+namespace {
+  void fnSort(Manager* pManager, std::vector<task_id>& vTaskIds)
   {
-    ITask* pTask = m_pManager->task(id);
-    if (nullptr != pTask &&
-        groupId == pTask->group())
+    auto greaterThan = [pManager](task_id lhs, task_id rhs)
     {
-      sortedTaskIds[pTask->autoPriority()].push_back(id);
-    }
+      auto pLhs = pManager->task(lhs);
+      auto pRhs = pManager->task(rhs);
+      return nullptr != pLhs && nullptr != pRhs && pLhs->autoPriority() > pRhs->autoPriority();
+    };
+    std::sort(vTaskIds.begin(), vTaskIds.end(), greaterThan);
   }
 
+  void sortTask(Manager* pManager, WidgetManager* pWidgetManager, task_id taskId)
+  {
+    auto pTask = pManager->task(taskId);
+    auto pTaskWidget = pWidgetManager->taskWidget(taskId);
+    if (nullptr != pTask && nullptr != pTaskWidget)
+    {
+      std::vector<task_id> vIds;
+      for (auto taskId : pTask->taskIds())  { vIds.push_back(taskId); }
 
+      fnSort(pManager, vIds);
+
+      std::vector<TaskWidget*> vpTaskWidgets;
+      std::transform(vIds.begin(), vIds.end(), std::back_inserter(vpTaskWidgets),
+                     [pWidgetManager](task_id taskId) { return pWidgetManager->taskWidget(taskId); });
+
+      pTaskWidget->reorderTasks(vpTaskWidgets);
+
+      for (auto taskId : vIds)
+      {
+        sortTask(pManager, pWidgetManager, taskId);
+      }
+    }
+  }
+}
+
+void MainWindow::sortGroup(group_id groupId)
+{
+  auto pGroup = m_pManager->group(groupId);
   GroupWidget* pGroupWidget = m_pWidgetManager->groupWidget(groupId);
-  if (nullptr != pGroupWidget)
+  if (nullptr != pGroup && nullptr != pGroupWidget)
   {
     std::vector<task_id> vIds;
-    for (const auto& el : sortedTaskIds)
-    {
-      std::vector<task_id> vIdsOfSamePrio;
-      for (const auto& id : el.second)
-      {
-        vIdsOfSamePrio.push_back(id);
-      }
-      vIds.insert(vIds.begin(), vIdsOfSamePrio.begin(), vIdsOfSamePrio.end());
-    }
+    for (auto taskId : pGroup->taskIds())  { vIds.push_back(taskId); }
+    fnSort(m_pManager, vIds);
     pGroupWidget->reorderTasks(vIds);
+
+    for (auto taskId : vIds)
+    {
+      sortTask(m_pManager, m_pWidgetManager, taskId);
+    }
   }
 }
 

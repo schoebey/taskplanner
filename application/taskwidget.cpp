@@ -999,3 +999,9 @@ void TaskWidget::emphasise()
   pAnimation->setEasingCurve(QEasingCurve::OutBounce);
   pAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 }
+
+
+void TaskWidget::reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets)
+{
+  ui->pTaskListWidget->reorderTasks(vpTaskWidgets);
+}

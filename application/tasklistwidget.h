@@ -31,6 +31,7 @@ public:
   void setBackgroundImage(const QImage& img);
   QImage backgroundImage();
 
+  void reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets) override;
   void reorderTasks(const std::vector<task_id> &vIds);
 
   int indexFromPoint(QPoint pt);

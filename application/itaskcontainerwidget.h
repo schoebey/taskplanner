@@ -13,6 +13,7 @@ public:
   virtual void removeTask(TaskWidget* pTaskWidget) = 0;
   virtual std::vector<TaskWidget*> tasks() const = 0;
   virtual void ensureVisible(QWidget* pWidget) = 0;
+  virtual void reorderTasks(const std::vector<TaskWidget*> &vpTasks) = 0;
 };
 
 #endif // ITASKCONTAINERWIDGET_H

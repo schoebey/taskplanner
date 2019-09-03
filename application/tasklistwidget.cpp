@@ -160,6 +160,15 @@ QImage TaskListWidget::backgroundImage()
   return m_backgroundImage;
 }
 
+void TaskListWidget::reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets)
+{
+  if (vpTaskWidgets != m_vpTaskWidgets)
+  {
+    m_vpTaskWidgets = vpTaskWidgets;
+    QMetaObject::invokeMethod(this, "updatePositions", Qt::QueuedConnection);
+  }
+}
+
 void TaskListWidget::reorderTasks(const std::vector<task_id>& vIds)
 {
   std::vector<TaskWidget*> vpTaskWidgets;
@@ -178,11 +187,7 @@ void TaskListWidget::reorderTasks(const std::vector<task_id>& vIds)
     }
   }
 
-  if (vpTaskWidgets != m_vpTaskWidgets)
-  {
-    m_vpTaskWidgets = vpTaskWidgets;
-    QMetaObject::invokeMethod(this, "updatePositions", Qt::QueuedConnection);
-  }
+  reorderTasks(vpTaskWidgets);
 }
 
 void TaskListWidget::ShowGhost(TaskWidget* pTaskWidget, int iPos)

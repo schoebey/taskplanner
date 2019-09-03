@@ -112,6 +112,11 @@ void GroupWidget::setBackgroundImage(const QImage& img)
   ui->pGroupTaskListWidget->setBackgroundImage(img);
 }
 
+void GroupWidget::reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets)
+{
+  ui->pGroupTaskListWidget->reorderTasks(vpTaskWidgets);
+}
+
 void GroupWidget::reorderTasks(const std::vector<task_id>& vIds)
 {
   ui->pGroupTaskListWidget->reorderTasks(vIds);
