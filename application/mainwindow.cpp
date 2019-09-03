@@ -323,22 +323,6 @@ void MainWindow::updateTaskUi()
           }
         }
       }
-
-
-      // afer all the tasks have been created, the group properties can be set
-      for (auto groupId : m_pManager->groupIds())
-      {
-        pGroupWidget = m_pWidgetManager->groupWidget(groupId);
-        IGroup* pGroup = m_pManager->group(groupId);
-
-        if (nullptr != pGroup &&
-            nullptr != pGroupWidget)
-        {
-          bool bOk(false);
-          bool bAutoSortingEnabled = conversion::fromString<bool>(pGroup->propertyValue("autoSorting"), bOk);
-          if (bOk)  { pGroupWidget->setAutoSortingEnabled(bAutoSortingEnabled); }
-        }
-      }
     }
   }
 
@@ -358,6 +342,22 @@ void MainWindow::updateTaskUi()
           pParentTaskWidget->insertTask(pTaskWidget);
         }
       }
+    }
+  }
+
+
+  // afer all the tasks have been created, the group properties can be set
+  for (auto groupId : m_pManager->groupIds())
+  {
+    auto pGroupWidget = m_pWidgetManager->groupWidget(groupId);
+    IGroup* pGroup = m_pManager->group(groupId);
+
+    if (nullptr != pGroup &&
+        nullptr != pGroupWidget)
+    {
+      bool bOk(false);
+      bool bAutoSortingEnabled = conversion::fromString<bool>(pGroup->propertyValue("autoSorting"), bOk);
+      if (bOk)  { pGroupWidget->setAutoSortingEnabled(bAutoSortingEnabled); }
     }
   }
 
