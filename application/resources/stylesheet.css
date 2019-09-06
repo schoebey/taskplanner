@@ -1,7 +1,9 @@
 MainWindow {
-  background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                stop:0 rgb(50, 50, 50),
-                stop:1 rgb(30, 30, 30));
+  background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #B4ADA7,
+                stop:0.35 #D2CECC,
+                stop:0.65 #D2CECC,
+                stop:1 #B4ADA7);
 }
 
 MainWindow #frame {
@@ -18,21 +20,9 @@ WindowTitleMenuBar QLabel {
   font: 10pt;
 }
 
-#AppIcon {
-  border: 0px solid red;
-  border-radius: 5px;
-  min-width: 32px;
-  max-width: 32px;
-  min-height: 32px;	
-  max-height: 32px;
-  margin: 5 5 5 5;
-  background: url(:/icons/appicon_32.png);
-}
-
-
 QMenuBar {
   color: white;
-  padding: 10 10 10 42;
+  padding: 10 10 10 10;
   min-height: 20px;
 }
 
@@ -75,6 +65,11 @@ QMenu::item:disabled {
   color: #444;
 }
 
+QToolBar {
+  border: 0px;
+  background: rgba(255,255,255,20);
+  min-height: 50px;
+}
 
 .AboutDialog #pContents {
   min-width: 350px;
@@ -110,16 +105,15 @@ QMenu::item:disabled {
   margin-top: 8px;
 }
 
+DecoratedLabel {
+  qproperty-drawShadow: false;
+  qproperty-drawOutline: false;
+}
 
 EditableLabel {
   border: 0px solid red;
 }
 
-QToolBar {
-  border: 0px;
-  background: rgba(255,255,255,20);
-  min-height: 50px;
-}
 
 QPushButton {
   border: 1px solid rgba(70, 70, 70, 255);
@@ -175,6 +169,11 @@ OverlayWidget > #pClose {
   border-top-right-radius: 5px;
 }
 
+#backlog { qproperty-backgroundImage: -1; } 
+#inprogress { qproperty-backgroundImage: -1; } 
+#testing { qproperty-backgroundImage: -1; }
+#done { qproperty-backgroundImage: -1; }
+
 OverlayWidget {
   border: 0px;
   border-radius: 10px;
@@ -220,34 +219,41 @@ OverlayWidget #report {
   border-bottom-left-radius: 5px;
 }
 
-
-
-#backlog { qproperty-backgroundImage: url(:/task_background_1.png); } 
-#inprogress { qproperty-backgroundImage: url(:/task_background_2.png); } 
-#done { qproperty-backgroundImage: url(:/task_background_3.png); }
-
-TaskListWidget {
-  background: transparent;
-  font-size: 8pt; 
+TaskWidget {
+  qproperty-dropShadow: false;
 }
 
 TaskWidget, TaskWidget #pShadow {
   border: 0px;
 }
 
-TaskWidget #pFrame{
-  border: 1px solid rgba(50, 50, 50, 128);
-  border-radius: 7px;
-  margin: 4px;
+TaskWidget #pFrame {
+  border: 1px solid rgba(255,255,255,200);
+  border-radius: 5px;
+  margin: 2px;
+  color: #8C8987;
+  background-color: #F7F4F2;
+}
+
+TaskWidget QLabel {
+  font-size: 10px;
+  color: #8C8987;
+}
+
+TaskWidget TaskWidget #pFrame {
+  border: 1px solid rgba(255,255,255,150);
+}
+
+TaskWidget TaskWidget #pShadow {
+  border: 0px;
+  border-image: -1;
+  padding: 0px;
 }
 
 TaskWidget #pTitle {
-  qproperty-drawOutline: true;
-  qproperty-drawShadow: false;
-  padding-left: 4px; 
-  color: rgba(255, 255, 255, 255);
-  font-size: 8pt;  
-} 
+  padding-left: 4px;
+  font-size: 10px;
+}
 
 TaskWidget #pLinks {
   border: 0px solid #ff9900;
@@ -255,8 +261,6 @@ TaskWidget #pLinks {
 
 TaskWidget #pDescription {
   padding: 0 10 0 10;
-  border: 0px solid red;
-  color: black;
 }
 
 TaskWidget #pShowDetails {
@@ -335,7 +339,7 @@ TaskWidgetOverlay[autoPriority="1"] {
 }
 
 LinkWidget {
-  padding: 3px;
+  padding: 3px 7px 3px 7px;
   margin: 0px;
 }
 
@@ -376,7 +380,7 @@ LinkWidget:focus {
   padding: 0 0 6px 0;
   border: 0px solid red;
 }
- 
+
 #pSeparator {
   border-top: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
                 stop:0 rgba(0, 0, 0, 0),
@@ -400,14 +404,6 @@ LinkWidget:focus {
   padding-right: 4px;
 }
 
-#pPropertyFrame QLabel {
-  font-size: 10pt;
-}
- 
-#priority_label {
-  color: black;
-  border: 0px solid black; 
-}
 #priority_value {
   color: white;
   background:  rgba(0, 0, 0, 25);
@@ -428,4 +424,8 @@ ToolBarInfoDisplay {
 ToolBarInfoDisplay QLabel {
   color: white;
   font-size: 20pt;
+}
+
+TaskListWidget {
+	background-color: transparent;
 }
