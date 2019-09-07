@@ -42,6 +42,11 @@ void EditableLabel::edit()
   connect(m_pLineEdit, &QLineEdit::textChanged, this, fn);
 }
 
+void EditableLabel::setValue(const QString& sVal)
+{
+  setEditText(sVal);
+}
+
 void EditableLabel::suggestWidth(int iWidth)
 {
   if (m_iSuggestedWidth != iWidth)
@@ -110,5 +115,6 @@ void EditableLabel::onEditingFinished()
 {
   setMinimumWidth(m_iMinWidth);
   emit editingFinished();
+  emit valueChanged(editText());
 }
 

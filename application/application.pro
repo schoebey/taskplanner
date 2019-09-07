@@ -50,7 +50,8 @@ SOURCES += \
     windowtitlemenubar.cpp \
     decoratedlabel.cpp \
     $$PWD/search/searchframe.cpp \
-    $$PWD/search/searchcontroller.cpp
+    $$PWD/search/searchcontroller.cpp \
+    propertyeditorfactory.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -84,7 +85,8 @@ HEADERS += \
     decoratedlabel.h \
     $$PWD/search/searchframe.h \
     $$PWD/search/searchcontroller.h \
-    search/matchinfo.h
+    search/matchinfo.h \
+    propertyeditorfactory.h
 
 FORMS += \
     $$PWD/groupwidget.ui \

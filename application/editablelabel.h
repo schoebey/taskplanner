@@ -25,6 +25,7 @@ public:
 public slots:
   void edit();
 
+  void setValue(const QString& sVal);
   void setEditText(const QString& sText);
   QString editText() const;
 
@@ -33,6 +34,7 @@ public slots:
 signals:
   void editingFinished();
   void sizeChanged();
+  void valueChanged(const QString&);
 
 private slots:
   void onEditingFinished();

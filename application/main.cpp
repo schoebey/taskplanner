@@ -9,6 +9,9 @@
 #include "style.h"
 #include "property.h"
 #include "constraint.h"
+#include "propertyeditorfactory.h"
+#include "editablelabel.h"
+#include "taskwidget.h"
 
 #include <QDateTime>
 #include <QColor>
@@ -120,6 +123,9 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Group, "description", QString, false);
   REGISTER_PROPERTY(Group, "autoSorting", bool, false);
 
+
+
+  PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("due date");
 
 //  TODO: configure order of comparison for properties, e.g.:
 //    (due date - expected duration), priority(high,med,low), category(feature,bugfix,refactoring,documentation)
