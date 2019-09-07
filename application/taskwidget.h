@@ -72,7 +72,7 @@ public:
 
   void ensureVisible();
 
-  bool onPropertyValueChanged(const QString& sName, const QString& sValue);
+  void onPropertyValueChanged(const QString& sPropertyName, const QString& sValue);
 public slots:
   void setExpanded(bool bExpanded);
 
@@ -95,6 +95,7 @@ signals:
   void timeTrackingStarted(task_id id);
   void timeTrackingStopped(task_id id);
   void propertyChanged(task_id id, const QString& sName, const QString& sValue);
+  void propertyValueChanged(const QString& sName, const QString& sValue);
   void propertyRemoved(task_id id, const QString& sName);
   void sizeChanged();
   void newSubTaskRequested(task_id taskId);

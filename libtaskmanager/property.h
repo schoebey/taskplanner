@@ -240,7 +240,41 @@ namespace factory
   LIBTASKMANAGER tDescriptors& descriptorsFactory(size_t scopeHashCode, size_t typeHashCode = 0);
 }
 
-#define REGISTER_PROPERTY(scope, name, type, visible) Properties<scope>::registerProperty<type>(name, #type, visible);
+#define REGISTER_PROPERTY(scope, name, type, visible) \
+  Properties<scope>::registerProperty<type>(name, #type, visible);
+
+/*
+ the user has to be able to register new properties and assign them
+ both a display widget and an editor.
+ since the editor can be of unknown complexity, several functions
+ should simplify their usage:
+  * createEditor(T): creates and opens the editor and passes the current property to it (if necessary). Returns a widget pointer.
+  * the editor needs a signal named accepted(T) that is emitted whenever the user enters a value the editor accepts.
+    * the editor is closed after emitting this signal
+  * the editor also needs a signal 'reject'. The editor is closed after sending this signal and the old value is retained.
+  *
+  the appropriate signals could be provided by a 'moderator' class that positions itself between the editor
+  and the property storage
+
+
+  what if the display widget takes care of editing as well?
+  the widget would only need to have a setter and getter function for the property values,
+  one to update its internal value with the current value of the property, one to update
+  the current property value with the value the user has chosen.
+  -> class editor
+     +setPropertyValue(T) (public)
+     +propertyChanged(QString) (signal), will be connected directly to the signal of the task widget
+
+     the editor widget chooses to switch between editing and display view (depending on the editor,
+     a switch might not even be necessary if the widget is in persistent editing mode (e.g. a checkbox)
+
+
+   binding the editor to the property is bad,
+   rather create an editor registry where an editor is bound to a property:
+   EditorRegistry::registerEditor<property, editor>();
+   EditorRegistry::createEditor<Property>();
+*/
+#define REGISTER_PROPERTY_EDITOR(scope, name, type, visible, editorClass) \
 
 template<typename SCOPE>
 class Properties

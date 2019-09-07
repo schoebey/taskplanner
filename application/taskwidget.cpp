@@ -880,6 +880,12 @@ void TaskWidget::onPropertyEdited()
   }
 }
 
+void TaskWidget::onPropertyValueChanged(const QString& sPropertyName,
+                                        const QString& sValue)
+{
+
+}
+
 void TaskWidget::resizeEvent(QResizeEvent* pEvent)
 {
   QWidget::resizeEvent(pEvent);
