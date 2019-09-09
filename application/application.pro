@@ -51,7 +51,8 @@ SOURCES += \
     decoratedlabel.cpp \
     $$PWD/search/searchframe.cpp \
     $$PWD/search/searchcontroller.cpp \
-    propertyeditorfactory.cpp
+    propertyeditorfactory.cpp \
+    datetimelabel.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -86,7 +87,8 @@ HEADERS += \
     $$PWD/search/searchframe.h \
     $$PWD/search/searchcontroller.h \
     search/matchinfo.h \
-    propertyeditorfactory.h
+    propertyeditorfactory.h \
+    datetimelabel.h
 
 FORMS += \
     $$PWD/groupwidget.ui \

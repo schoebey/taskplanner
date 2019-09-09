@@ -9,6 +9,7 @@
 #include "tasklistwidget.h"
 #include "decoratedlabel.h"
 #include "groupwidget.h"
+#include "propertyeditorfactory.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -130,7 +131,7 @@ void TaskWidget::setUpContextMenu()
   QMenu* pPropertiesMenu = m_pContextMenu->addMenu(tr("Add properties"));
   for (const auto& sPropertyName : Properties<Task>::registeredPropertyNames())
   {
-    if (m_propertyLineEdits.find(sPropertyName) == m_propertyLineEdits.end() &&
+    if (m_propertyEditors.find(sPropertyName) == m_propertyEditors.end() &&
         Properties<Task>::visible(sPropertyName))
     {
       QAction* pAction = new QAction(sPropertyName, this);
@@ -140,12 +141,12 @@ void TaskWidget::setUpContextMenu()
     }
   }
 
-  if (!m_propertyLineEdits.empty())
+  if (!m_propertyEditors.empty())
   {
     QMenu* pRemovePropertiesMenu = m_pContextMenu->addMenu(tr("Remove properties"));
     for (const auto& sPropertyName : Properties<Task>::registeredPropertyNames())
     {
-      if (m_propertyLineEdits.find(sPropertyName) != m_propertyLineEdits.end() &&
+      if (m_propertyEditors.find(sPropertyName) != m_propertyEditors.end() &&
           Properties<Task>::visible(sPropertyName))
       {
         QAction* pAction = new QAction(sPropertyName, this);
@@ -321,7 +322,7 @@ void TaskWidget::addProperty(const QString& sName,
     if (nullptr != pGrid)
     {
       QFrame* pFrame = new MouseHandlingFrame();
-      m_propertyLineEdits[sName].pFrame = pFrame;
+      m_propertyEditors[sName].pFrame = pFrame;
       pFrame->setObjectName("pPropertyFrame");
       QHBoxLayout* pHboxLayout = new QHBoxLayout();
       pHboxLayout->setSpacing(0);
@@ -330,81 +331,35 @@ void TaskWidget::addProperty(const QString& sName,
       QLabel* pLabel = new DecoratedLabel(sName);
       pLabel->setFocusPolicy(Qt::NoFocus);
       pLabel->setObjectName(QString("%1_label").arg(sName));
-      m_propertyLineEdits[sName].pLabel = pLabel;
+      m_propertyEditors[sName].pLabel = pLabel;
 
-      EditableLabel* pValue = new EditableLabel(this);
-      connect(pFrame, SIGNAL(mouseDoubleClicked(QPoint)), pValue, SLOT(edit()));
-      pValue->setObjectName(QString("%1_value").arg(sName));
-      pValue->setFocusPolicy(Qt::NoFocus);
-      pValue->setProperty("name", sName);
-      pValue->setAlignment(Qt::AlignCenter);
-      if ("due date" == sName)
+
+      QWidget* pEditor = PropertyEditorFactory::createAndConnect<TaskWidget>(sName, this);
+      if (nullptr != pEditor)
       {
-        pValue->setDisplayFunction(conversion::fancy::dateToString);
-        QTimer* pTimer = new QTimer(pValue);
-        connect(pTimer, &QTimer::timeout, [this, pValue, pTimer]()
-        {
-          bool bStatus(false);
-          QDateTime dt = conversion::fromString<QDateTime>(pValue->editText(), bStatus);
-          if (bStatus)
-          {
-            pValue->updateDisplay();
-
-            // restart the timer with a closer timeout as the due date approaches
-            qint64 iSecsTo = QDateTime::currentDateTime().msecsTo(dt) / 1000;
-            if (0 <= iSecsTo)
-            {
-              static const int c_iMaxTimeoutMs = 300000;
-              int iTimeoutMs = std::min<int>(c_iMaxTimeoutMs, static_cast<int>(iSecsTo * 1000));
-
-              if (iTimeoutMs <= 10000)
-              {
-                iTimeoutMs = 1000;
-              }
-              else if (iTimeoutMs <= 30000)
-              {
-                iTimeoutMs = 5000;
-              }
-              else if (iTimeoutMs <= 60000)
-              {
-                iTimeoutMs = 15000;
-              }
-              else if (iTimeoutMs <= c_iMaxTimeoutMs)
-              {
-                iTimeoutMs = c_iMaxTimeoutMs / 2;
-              }
-
-              // signal the outside world that this task needs attention
-              bool bAttentionNeeded = iSecsTo <= 3600;
-              if (bAttentionNeeded)
-              {
-                emit attentionNeeded();
-              }
-
-              pTimer->start(iTimeoutMs);
-            }
-          }
-
-          emit priorityUpdateRequested(m_taskId);
-        });
-        m_updateTimers[pValue] = pTimer;
-        pTimer->setSingleShot(true);
-        pTimer->start(1000);
+        connect(pEditor, SIGNAL(attentionNeeded()), this, SIGNAL(attentionNeeded()));
+        connect(pFrame, SIGNAL(mouseDoubleClicked(QPoint)), pEditor, SLOT(edit()));
+        pEditor->setObjectName(QString("%1_value").arg(sName));
+        pEditor->setProperty("name", sName);
       }
-      m_propertyLineEdits[sName].pValue = pValue;
+
+      m_propertyEditors[sName].pValue = pEditor;
 
 
-      connect(pValue, SIGNAL(editingFinished()), this, SLOT(onPropertyEdited()));
-      int iRow = pGrid->rowCount();
-      pHboxLayout->addWidget(pLabel);
-      pHboxLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-      pHboxLayout->addWidget(pValue);
-      pGrid->addWidget(pFrame, iRow, 0);
-      pFrame->setVisible(true);
-
-      if (!sValue.isEmpty())
+      //connect(pValue, SIGNAL(editingFinished()), this, SLOT(onPropertyEdited()));
+      if (nullptr != pEditor)
       {
-        setPropertyValue(sName, sValue);
+        int iRow = pGrid->rowCount();
+        pHboxLayout->addWidget(pLabel);
+        pHboxLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+        pHboxLayout->addWidget(pEditor);
+        pGrid->addWidget(pFrame, iRow, 0);
+        pFrame->setVisible(true);
+
+        if (!sValue.isEmpty())
+        {
+          setPropertyValue(sName, sValue);
+        }
       }
 
       updateSize();
@@ -417,7 +372,7 @@ void TaskWidget::addProperty(const QString& sName,
 std::set<QString> TaskWidget::propertyNames() const
 {
   std::set<QString> names = {"name", "description"};
-  for (const auto& el : m_propertyLineEdits)
+  for (const auto& el : m_propertyEditors)
   {
     names.insert(el.first);
   }
@@ -426,8 +381,8 @@ std::set<QString> TaskWidget::propertyNames() const
 
 bool TaskWidget::hasPropertyValue(const QString& sName) const
 {
-  auto it = m_propertyLineEdits.find(sName);
-  return it != m_propertyLineEdits.end();
+  auto it = m_propertyEditors.find(sName);
+  return it != m_propertyEditors.end();
 }
 
 QString TaskWidget::propertyValue(const QString& sName) const
@@ -436,10 +391,10 @@ QString TaskWidget::propertyValue(const QString& sName) const
   else if ("description" == sName)  { return description(); }
   else
   {
-    auto it = m_propertyLineEdits.find(sName);
-    if (it != m_propertyLineEdits.end())
+    auto it = m_propertyEditors.find(sName);
+    if (it != m_propertyEditors.end())
     {
-      return it->second.pValue->editText();
+      return it->second.sValue;
     }
   }
 
@@ -448,13 +403,13 @@ QString TaskWidget::propertyValue(const QString& sName) const
 
 bool TaskWidget::removeProperty(const QString& sName)
 {
-  auto it = m_propertyLineEdits.find(sName);
-  if (it != m_propertyLineEdits.end())
+  auto it = m_propertyEditors.find(sName);
+  if (it != m_propertyEditors.end())
   {
     it->second.pLabel->deleteLater();
     it->second.pValue->deleteLater();
     it->second.pFrame->deleteLater();
-    m_propertyLineEdits.erase(it);
+    m_propertyEditors.erase(it);
 
     updateSize();
     return true;
@@ -467,30 +422,23 @@ bool TaskWidget::removeProperty(const QString& sName)
 
 bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
 {
-  auto it = m_propertyLineEdits.find(sName);
-  if (it != m_propertyLineEdits.end())
+  auto it = m_propertyEditors.find(sName);
+  if (it != m_propertyEditors.end())
   {
     if (sValue.isEmpty())
     {
       it->second.pLabel->deleteLater();
       it->second.pValue->deleteLater();
       it->second.pFrame->deleteLater();
-      m_propertyLineEdits.erase(it);
+      m_propertyEditors.erase(it);
       updateSize();
 
       setUpContextMenu();
     }
     else
     {
-      it->second.pValue->setEditText(sValue);
-    }
-
-
-    // restart the update timer so that its timeout can adapt to the new value
-    auto itTimer = m_updateTimers.find(it->second.pValue);
-    if (itTimer != m_updateTimers.end())
-    {
-      itTimer->second->start(1000);
+      emit propertyValueChanged(sName, sValue);
+      it->second.sValue = sValue;
     }
 
     return true;
@@ -839,7 +787,7 @@ void TaskWidget::onPropertyEdited()
 void TaskWidget::onPropertyValueChanged(const QString& sPropertyName,
                                         const QString& sValue)
 {
-
+  emit propertyChanged(m_taskId, sPropertyName, sValue);
 }
 
 void TaskWidget::resizeEvent(QResizeEvent* pEvent)

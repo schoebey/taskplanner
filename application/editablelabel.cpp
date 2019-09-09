@@ -113,6 +113,7 @@ void EditableLabel::resizeEvent(QResizeEvent* pEvent)
 
 void EditableLabel::onEditingFinished()
 {
+  onEditingFinishedImpl();
   setMinimumWidth(m_iMinWidth);
   emit editingFinished();
   emit valueChanged(editText());

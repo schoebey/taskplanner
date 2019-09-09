@@ -40,6 +40,9 @@ private slots:
   void onEditingFinished();
 
 private:
+  virtual void onEditingFinishedImpl() {}
+
+private:
   QLineEdit* m_pLineEdit = nullptr;
   int m_iSuggestedWidth = -1;
   QString m_sEditText;

@@ -22,6 +22,7 @@ namespace detail {
   {
   public:
     creator_base_base(const QString& s) : m_sPropertyName(s) {}
+    virtual ~creator_base_base() {}
     QString m_sPropertyName;
   };
 
@@ -82,10 +83,10 @@ public:
   static QWidget* createAndConnect(const QString& sPropertyName, T* pReceiver)
   {
     auto spCreator = creator(sPropertyName);
-    auto spCastCreator = std::dynamic_pointer_cast<detail::creator_base<T>>();
+    auto spCastCreator = std::dynamic_pointer_cast<detail::creator_base<T>>(spCreator);
     if (nullptr != spCastCreator)
     {
-      return spCastCreator->createAndConnect(pReceiver);
+      return spCastCreator->createAndConnect(pReceiver, pReceiver);
     }
 
     return nullptr;
