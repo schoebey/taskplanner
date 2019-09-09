@@ -13,6 +13,7 @@
 #include "propertyeditorfactory.h"
 #include "editablelabel.h"
 #include "taskwidget.h"
+#include "datetimelabel.h"
 #include "version.h"
 
 #include <QDateTime>
@@ -94,7 +95,7 @@ int main(int argc, char *argv[])
 
 
 
-  PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("due date");
+  PropertyEditorFactory::registerEditor<DateTimeLabel, TaskWidget>("due date");
 
 //  TODO: configure order of comparison for properties, e.g.:
 //    (due date - expected duration), priority(high,med,low), category(feature,bugfix,refactoring,documentation)

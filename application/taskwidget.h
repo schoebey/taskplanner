@@ -164,10 +164,10 @@ private:
   {
     QFrame* pFrame = nullptr;
     QLabel* pLabel = nullptr;
-    EditableLabel* pValue = nullptr;
+    QWidget* pValue = nullptr;
+    QString sValue;
   };
-  std::map<QString, SPropertyWidgets> m_propertyLineEdits;
-  std::map<EditableLabel*, QPointer<QTimer>> m_updateTimers;
+  std::map<QString, SPropertyWidgets> m_propertyEditors;
 
   ITaskContainerWidget* m_pContainer = nullptr;
 
