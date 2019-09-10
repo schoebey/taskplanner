@@ -126,7 +126,16 @@ int main(int argc, char *argv[])
 
 
 
+  auto fnInit = [](EditableLabel* pLabel)
+  {
+    pLabel->setFocusPolicy(Qt::NoFocus);
+    pLabel->setAlignment(Qt::AlignCenter);
+  };
+
   PropertyEditorFactory::registerEditor<DateTimeLabel, TaskWidget>("due date");
+  PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("duration (days)", fnInit);
+  PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("category", fnInit);
+  PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("priority", fnInit);
 
 //  TODO: configure order of comparison for properties, e.g.:
 //    (due date - expected duration), priority(high,med,low), category(feature,bugfix,refactoring,documentation)
