@@ -39,8 +39,15 @@ namespace detail {
   template<typename EditorClass, typename T> class creator : public creator_base<T>
   {
   public:
-    creator(const QString& s) : creator_base<T>(s) {}
-    QWidget* create(QWidget* pParent) const override { return new EditorClass(pParent); }
+    creator(const QString& s, std::function<void(EditorClass*)> initializer)
+      : creator_base<T>(s),
+        m_initializer(initializer) {}
+    QWidget* create(QWidget* pParent) const override
+    {
+      EditorClass* pEditor = new EditorClass(pParent);
+      if (m_initializer) { m_initializer(pEditor); }
+      return pEditor;
+    }
     QWidget* createAndConnect(QWidget* pParent, T* pReceiver) const override
     {
       EditorClass* pEditor = new EditorClass(pParent);
@@ -59,8 +66,12 @@ namespace detail {
           pEditor->setValue(sValue);
         }
       });
+
+      if (m_initializer) { m_initializer(pEditor); }
       return pEditor;
     }
+  private:
+    std::function<void(EditorClass*)> m_initializer;
   };
 }
 
@@ -74,9 +85,9 @@ private:
 public:
   template<typename EditorClass, typename T>
   // TODO: enforce the necessary signals/slots via enable_if
-  static void registerEditor(const QString& sPropertyName)
+  static void registerEditor(const QString& sPropertyName, std::function<void(EditorClass*)> initializer = nullptr)
   {
-    registerCreator(sPropertyName, new detail::creator<EditorClass, T>(sPropertyName));
+    registerCreator(sPropertyName, new detail::creator<EditorClass, T>(sPropertyName, initializer));
   }
 
   template<typename T>

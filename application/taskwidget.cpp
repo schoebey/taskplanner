@@ -370,7 +370,6 @@ void TaskWidget::addProperty(const QString& sName,
       m_propertyEditors[sName].pValue = pEditor;
 
 
-      //connect(pValue, SIGNAL(editingFinished()), this, SLOT(onPropertyEdited()));
       if (nullptr != pEditor)
       {
         int iRow = pGrid->rowCount();
