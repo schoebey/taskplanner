@@ -13,6 +13,7 @@ PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("due date");
 QWidget* pEditor = PropertyEditorFactory::createAndConnect<TaskWidget>("due date", this);
 */
 class QWidget;
+
 namespace detail {
   // because of memory issues (accessing a static object from different translation units),
   // the map needs to be in the cpp file, thus the need
@@ -36,34 +37,46 @@ namespace detail {
   };
 
 
-  template<typename EditorClass, typename T> class creator : public creator_base<T>
+  template<typename EditorClass, typename T, typename EditorBaseClass>
+  class creator : public creator_base<T>
   {
   public:
-    creator(const QString& s, std::function<void(EditorClass*)> initializer)
+    creator(const QString& s,
+            void(EditorBaseClass::*valueChangedSignal)(const QString&),
+            std::function<void(EditorClass*, const QString&)> fnSet,
+            std::function<void(EditorClass*)> initializer
+            )
       : creator_base<T>(s),
-        m_initializer(initializer) {}
+        m_valueChangedSignal(valueChangedSignal),
+        m_fnSet(fnSet),
+        m_initializer(initializer)
+    {}
+
     QWidget* create(QWidget* pParent) const override
     {
       EditorClass* pEditor = new EditorClass(pParent);
       if (m_initializer) { m_initializer(pEditor); }
       return pEditor;
     }
+
     QWidget* createAndConnect(QWidget* pParent, T* pReceiver) const override
     {
       EditorClass* pEditor = new EditorClass(pParent);
       QString sPropertyName = this->m_sPropertyName;
-      QObject::connect(pEditor, &EditorClass::valueChanged,
+      QObject::connect(pEditor, m_valueChangedSignal,
               [pReceiver, sPropertyName](const QString& sVal)
       {
         pReceiver->onPropertyValueChanged(sPropertyName, sVal);
       });
+
+      auto fnSet = m_fnSet;
       QObject::connect(pReceiver, &T::propertyValueChanged,
-                       [pEditor, sPropertyName](const QString& sName,
-                                                const QString& sValue)
+                       [pEditor, sPropertyName, fnSet](const QString& sName,
+                                                       const QString& sValue)
       {
         if (sName == sPropertyName)
         {
-          pEditor->setValue(sValue);
+          fnSet(pEditor, sValue);
         }
       });
 
@@ -71,6 +84,8 @@ namespace detail {
       return pEditor;
     }
   private:
+    void(EditorBaseClass::*m_valueChangedSignal)(const QString&);
+    std::function<void(EditorClass*, const QString&)> m_fnSet;
     std::function<void(EditorClass*)> m_initializer;
   };
 }
@@ -83,11 +98,16 @@ private:
 
   static std::shared_ptr<detail::creator_base_base> creator(const QString& sPropertyName);
 public:
-  template<typename EditorClass, typename T>
+  template<typename EditorClass,
+           typename T,
+           typename EditorBaseClass>
   // TODO: enforce the necessary signals/slots via enable_if
-  static void registerEditor(const QString& sPropertyName, std::function<void(EditorClass*)> initializer = nullptr)
+  static void registerEditor(const QString& sPropertyName,
+                             void(EditorBaseClass::*valueChangedSignal)(const QString&) = &EditorClass::valueChanged,
+                             std::function<void(EditorClass*, const QString&)> fnSet = [](EditorClass* pE, const QString& s) { pE->setValue(s); },
+                             std::function<void(EditorClass*)> initializer = nullptr)
   {
-    registerCreator(sPropertyName, new detail::creator<EditorClass, T>(sPropertyName, initializer));
+    registerCreator(sPropertyName, new detail::creator<EditorClass, T, EditorBaseClass>(sPropertyName, valueChangedSignal, fnSet, initializer));
   }
 
   template<typename T>

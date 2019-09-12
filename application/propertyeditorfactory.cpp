@@ -20,4 +20,3 @@ PropertyEditorFactory::creator(const QString& sPropertyName)
   }
   return nullptr;
 }
-
