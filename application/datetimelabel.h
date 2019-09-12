@@ -9,6 +9,8 @@ class DateTimeLabel : public EditableLabel
 {
   Q_OBJECT
 public:
+  using EditableLabel::valueChanged;
+
   DateTimeLabel(QWidget* pParent);
 
 signals:

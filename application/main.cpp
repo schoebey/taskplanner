@@ -16,6 +16,7 @@
 
 #include <QDateTime>
 #include <QColor>
+#include <QComboBox>
 
 #include <QFileInfo>
 #include <cassert>
@@ -132,10 +133,36 @@ int main(int argc, char *argv[])
     pLabel->setAlignment(Qt::AlignCenter);
   };
 
-  PropertyEditorFactory::registerEditor<DateTimeLabel, TaskWidget>("due date");
-  PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("duration (days)", fnInit);
-  PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("category", fnInit);
-  PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("priority", fnInit);
+  auto fnInitComboBox = [](QComboBox* pComboBox)
+  {
+    auto spDescriptor = Properties<Task>::descriptor("category");
+    if (nullptr != spDescriptor)
+    {
+      QRegularExpression rx(R"(\[==:(\w*)\])");
+      QString sConstraint = spDescriptor->constraint()->toString();
+
+      QRegularExpressionMatch match = rx.match(sConstraint);
+      while (match.hasMatch())
+      {
+        QString sCap = match.captured(1);
+        pComboBox->addItem(sCap);
+
+        match = rx.match(sConstraint, match.capturedStart() + match.capturedLength());
+      }
+    }
+  };
+
+//  auto fn = &QComboBox::currentTextChanged;
+//  fn;
+//  void (QComboBox::*)(const QString&) f = &QComboBox::currentTextChanged;
+
+//  idea: bind the signal to the creator within the factory.
+//      upon creating the editor, its signal can be connected to the desired slot (which
+//      could be provided when creating the editor so as to not enforce a certain class structure)
+  PropertyEditorFactory::registerEditor<DateTimeLabel, TaskWidget>("due date", &EditableLabel::valueChanged);
+  PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("duration (days)", &EditableLabel::valueChanged, &EditableLabel::setValue, fnInit);
+  PropertyEditorFactory::registerEditor<QComboBox, TaskWidget>("category", &QComboBox::currentTextChanged, &QComboBox::setCurrentText, fnInitComboBox);
+  PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("priority", &EditableLabel::valueChanged, &EditableLabel::setValue, fnInit);
 
 //  TODO: configure order of comparison for properties, e.g.:
 //    (due date - expected duration), priority(high,med,low), category(feature,bugfix,refactoring,documentation)
