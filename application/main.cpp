@@ -152,13 +152,6 @@ int main(int argc, char *argv[])
     }
   };
 
-//  auto fn = &QComboBox::currentTextChanged;
-//  fn;
-//  void (QComboBox::*)(const QString&) f = &QComboBox::currentTextChanged;
-
-//  idea: bind the signal to the creator within the factory.
-//      upon creating the editor, its signal can be connected to the desired slot (which
-//      could be provided when creating the editor so as to not enforce a certain class structure)
   PropertyEditorFactory::registerEditor<DateTimeLabel, TaskWidget>("due date", &EditableLabel::valueChanged);
   PropertyEditorFactory::registerEditor<EditableLabel, TaskWidget>("duration (days)", &EditableLabel::valueChanged, &EditableLabel::setValue, fnInit);
   PropertyEditorFactory::registerEditor<QComboBox, TaskWidget>("category", &QComboBox::currentTextChanged, &QComboBox::setCurrentText, fnInitComboBox);
