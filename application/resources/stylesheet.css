@@ -341,6 +341,12 @@ TaskWidgetOverlay[autoPriority="1"] {
 LinkWidget {
   padding: 3px 7px 3px 7px;
   margin: 0px;
+  background: qradialgradient(cx:0.5, cy:0.5, radius: 0.4,
+                fx:0.5, fy:0.5, stop:0 rgba(0,0,0,30), stop:1 transparent);
+}
+
+MainWindow > LinkWidget {
+  background: transparent;
 }
 
 LinkWidget #pIcon {
