@@ -435,3 +435,14 @@ ToolBarInfoDisplay QLabel {
 TaskListWidget {
 	background-color: transparent;
 }
+
+SearchFrame {
+  border: 1px solid rgba(200,200,200,200);
+  background: rgba(190, 186, 184, 240);
+  border-bottom-right-radius: 15px;
+}
+
+SearchFrame #pClose {
+  max-width: 20px;
+  border-bottom-right-radius: 10px;
+}
