@@ -29,6 +29,15 @@ namespace widgetAnimation {
   void deleteWidgetAnimation(QWidget*);
 }
 
+namespace {
+  void forceUpdate(QWidget* pWidget)
+  {
+    pWidget->style()->unpolish(pWidget);
+    pWidget->style()->polish(pWidget);
+    pWidget->update();
+  }
+}
+
 
 TaskWidget* TaskWidget::m_pDraggingTaskWidget = nullptr;
 TaskWidget* TaskWidget::m_pTaskWidgetUnderMouse = nullptr;
@@ -592,10 +601,19 @@ void TaskWidget::setAutoPriority(double dPriority)
     int iPrioCategory = static_cast<int>(dPriority);
     if (iPrioCategory != m_pOverlay->property("autoPriority").toInt())
     {
-      m_pOverlay->setProperty("autoPriority", iPrioCategory);
       m_pOverlay->style()->unpolish(m_pOverlay);
+      m_pOverlay->setProperty("autoPriority", iPrioCategory);
       m_pOverlay->style()->polish(m_pOverlay);
       m_pOverlay->update();
+
+
+      setProperty("autoPriority", iPrioCategory);
+      forceUpdate(this);
+
+      for (auto* pLabel : findChildren<QLabel*>())
+      {
+        forceUpdate(pLabel);
+      }
     }
   }
 }

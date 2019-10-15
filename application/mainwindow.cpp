@@ -1027,6 +1027,10 @@ void MainWindow::onPropertyChanged(task_id taskId,
           pTaskWidget->setOverlayBackground(color);
         }
       }
+      else if ("priority" == sPropertyName)
+      {
+        pTaskWidget->setAutoPriority(pTask->autoPriority());
+      }
     }
 
     auto itTimer = m_autoSortTimers.find(pTask->group());
