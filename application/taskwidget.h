@@ -104,6 +104,7 @@ signals:
   void linkRemoved(task_id id, QUrl url);
   void linkInserted(task_id id, QUrl url, int iPos);
   void attentionNeeded();
+  void priorityUpdateRequested(task_id);
 
 private slots:
   void onTitleEdited();

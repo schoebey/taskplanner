@@ -81,6 +81,7 @@ private slots:
   void onWokeUpFromHibernation(const QDateTime& sleepTime,
                                const QDateTime& wakeUpTime);
   void on_actionFind_triggered();
+  void onPriorityUpdateRequested(task_id);
 
 signals:
   void timeTrackingStopped(task_id taskId);

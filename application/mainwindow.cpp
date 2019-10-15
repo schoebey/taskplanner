@@ -148,7 +148,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
   initTaskUi();
 
-  startTimer(3000);
+//  startTimer(3000);
 
   QMenu* pMenuOptions = new QMenu(tr("Options"), ui->menuTools);
   ui->menuTools->addMenu(pMenuOptions);
@@ -1467,4 +1467,15 @@ void MainWindow::on_actionFind_triggered()
   m_pSearchFrame->show();
   m_pSearchFrame->raise();
   m_pSearchFrame->onOpen();
+}
+
+void MainWindow::onPriorityUpdateRequested(task_id id)
+{
+  auto pTask = m_pManager->task(id);
+  auto pTaskWidget = m_pWidgetManager->taskWidget(id);
+
+  if (nullptr != pTask && nullptr != pTaskWidget)
+  {
+    pTaskWidget->setAutoPriority(pTask->autoPriority());
+  }
 }

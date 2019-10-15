@@ -384,6 +384,8 @@ void TaskWidget::addProperty(const QString& sName,
               pTimer->start(iTimeoutMs);
             }
           }
+
+          emit priorityUpdateRequested(m_taskId);
         });
         m_updateTimers[pValue] = pTimer;
         pTimer->setSingleShot(true);
