@@ -310,6 +310,9 @@ TaskWidgetOverlay {
 TaskWidgetOverlay[autoPriority="10"] {
   qproperty-background: rgba(0, 0, 0, 100);
 }
+TaskWidget[autoPriority="10"] QLabel {
+  color: rgb(255, 255, 255);
+}
 TaskWidgetOverlay[autoPriority="9"] {
   qproperty-background: rgba(255, 0, 0, 100);
 }
