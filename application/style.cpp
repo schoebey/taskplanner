@@ -334,7 +334,7 @@ namespace
       if (tf & Qt::AlignBottom)
           yoff = r.height() - height;
       else if (tf & Qt::AlignVCenter)
-          yoff = (r.height() - height)/2 - 2;
+          yoff = (r.height() - height)/2 - 1;
       if (tf & Qt::AlignRight)
           xoff = r.width() - width;
       else if (tf & Qt::AlignHCenter)

@@ -226,7 +226,7 @@ void TaskWidgetOverlay::paintEvent(QPaintEvent* /*pEvent*/)
   painter.setBrush(m_backgroundBrush);
   painter.drawRoundedRect(rct, 5, 5);
 
-  painter.setPen(QPen(borderColor, 3));
-  painter.setBrush(backgroundColor);
-  painter.drawRoundedRect(rct, 5, 5);
+//  painter.setPen(QPen(borderColor, 3));
+//  painter.setBrush(backgroundColor);
+//  painter.drawRoundedRect(rct, 5, 5);
 }

@@ -235,6 +235,11 @@ TaskWidget #pFrame {
   background-color: #F7F4F2;
 }
 
+TaskWidget:focus {
+  border: 2px solid rgba(50, 80, 255, 150);
+  border-radius: 7px;
+}
+
 TaskWidget QLabel {
   font-size: 10px;
   color: #8C8987;
