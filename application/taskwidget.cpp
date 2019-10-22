@@ -361,7 +361,16 @@ void TaskWidget::addProperty(const QString& sName,
       QWidget* pEditor = PropertyEditorFactory::createAndConnect<TaskWidget>(sName, this);
       if (nullptr != pEditor)
       {
-        connect(pEditor, SIGNAL(attentionNeeded()), this, SIGNAL(attentionNeeded()));
+        if (-1 != pEditor->metaObject()->indexOfSignal("attentionNeeded()"))
+        {
+          connect(pEditor, SIGNAL(attentionNeeded()), this, SIGNAL(attentionNeeded()));
+        }
+
+        if (-1 != pEditor->metaObject()->indexOfSignal("priorityUpdateRequested()"))
+        {
+          connect(pEditor, SIGNAL(priorityUpdateRequested()), this, SIGNAL(priorityUpdateRequested()));
+        }
+
         connect(pFrame, SIGNAL(mouseDoubleClicked(QPoint)), pEditor, SLOT(edit()));
         pEditor->setObjectName(QString("%1_value").arg(sName));
         pEditor->setProperty("name", sName);
@@ -623,6 +632,11 @@ void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int iPos)
 void TaskWidget::onTaskRemoved(TaskWidget* /*pTaskWidget*/)
 {
   updateSize();
+}
+
+void TaskWidget::requestPriorityUpdate()
+{
+  emit priorityUpdateRequested(m_taskId);
 }
 
 HighlightingMethod TaskWidget::highlight() const
