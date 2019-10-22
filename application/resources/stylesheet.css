@@ -219,10 +219,6 @@ OverlayWidget #report {
   border-bottom-left-radius: 5px;
 }
 
-TaskWidget {
-  qproperty-dropShadow: false;
-}
-
 TaskWidget, TaskWidget #pShadow {
   border: 0px;
 }

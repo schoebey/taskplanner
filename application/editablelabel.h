@@ -2,6 +2,7 @@
 #define EDITABLELABEL_H
 
 #include "decoratedlabel.h"
+
 #include <functional>
 
 
