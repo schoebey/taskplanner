@@ -479,3 +479,9 @@ SearchFrame #pClose {
   max-width: 20px;
   border-bottom-right-radius: 10px;
 }
+
+#pDateTimeEditor {
+  border: 1px solid white;
+  border-radius: 5px;
+  background: rgba(130, 130, 130, 180);
+}

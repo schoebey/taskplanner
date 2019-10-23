@@ -23,9 +23,9 @@ public:
 
   void setDisplayFunction(const std::function<QString(const QString&)> fnDisplay);
 
-public slots:
-  void edit();
+  virtual void edit();
 
+public slots:
   void setValue(const QString& sVal);
   void setEditText(const QString& sText);
   QString editText() const;
