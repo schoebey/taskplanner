@@ -38,7 +38,7 @@ void GroupWidget::setUpContextMenu()
   }
 
   QAction* pAddTaskAction = new QAction(tr("new task"), this);
-  pAddTaskAction->setShortcut(Qt::CTRL + Qt::Key_N);
+  pAddTaskAction->setShortcut(Qt::Key_N);
   pAddTaskAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
   addAction(pAddTaskAction);
   connect(pAddTaskAction, SIGNAL(triggered()), this, SLOT(onNewTaskClicked()));

@@ -105,6 +105,7 @@ void AddTaskCommand::redo()
       pGroupWidget->insertTask(pTaskWidget, iPos);
     }
 
+    pTaskWidget->setFocus();
     pTaskWidget->show();
   }
 }

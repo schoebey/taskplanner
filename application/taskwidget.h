@@ -110,6 +110,7 @@ private slots:
   void onTitleEdited();
   void onDescriptionEdited();
   void on_pStartStop_toggled(bool bOn);
+  void setTimeTrackingEnabled(bool bEnabled);
   void onTimeTrackingStopped(task_id id);
   void onPropertyEdited();
   void onAddPropertyTriggered();
