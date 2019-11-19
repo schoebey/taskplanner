@@ -69,6 +69,15 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::updateSize, Qt::QueuedConnection);
   connect(this, &TaskWidget::attentionNeeded, this, &TaskWidget::emphasise);
 
+  QAction* pToggleTimeTrackingAction = new QAction(this);
+  pToggleTimeTrackingAction->setShortcut(Qt::Key_T);
+  pToggleTimeTrackingAction->setShortcutContext(Qt::WidgetShortcut);
+  addAction(pToggleTimeTrackingAction);
+  connect(pToggleTimeTrackingAction, &QAction::triggered, [this]()
+  {
+    this->setTimeTrackingEnabled(!ui->pStartStop->isChecked());
+  });
+
   setUpContextMenu();
 
   setExpanded(true);
@@ -808,7 +817,14 @@ void TaskWidget::onDescriptionEdited()
 
 void TaskWidget::on_pStartStop_toggled(bool bOn)
 {
-  if (bOn) {
+  setTimeTrackingEnabled(bOn);
+}
+
+void TaskWidget::setTimeTrackingEnabled(bool bEnabled)
+{
+  ui->pStartStop->setChecked(bEnabled);
+
+  if (bEnabled) {
     emit timeTrackingStarted(m_taskId);
     setHighlight(highlight() | EHighlightMethod::eTimeTrackingActive);
   }
