@@ -277,14 +277,14 @@ TaskWidget #pShowDetails {
   min-height: 15px;
   width: 20px;
   color: rgba(255, 255, 255, 128);
-  background-image: url(:/icons/arrow_right.png);
+  background-image: url(:/icons/arrow_right_dark.png);
   background-repeat: no-repeat;
   background-position: center center;
 }
 
 TaskWidget #pShowDetails:checked {
   border-bottom-left-radius: 0px;
-  background-image: url(:/icons/arrow_down.png);
+  background-image: url(:/icons/arrow_down_dark.png);
 }
 
 TaskWidget #pStartStop {
@@ -295,7 +295,7 @@ TaskWidget #pStartStop {
   min-height: 15px;
   width: 20px;
   color: rgba(255, 255, 255, 128);
-  background-image: url(:/icons/timer_start.png);
+  background-image: url(:/icons/timer_start_dark.png);
   background-repeat: no-repeat;
   background-position: center center;
 }
@@ -305,7 +305,7 @@ TaskWidget[expanded=false] #pStartStop {
 }
 
 TaskWidget #pStartStop:checked {
-  background-image: url(:/icons/timer_stop.png);
+  background-image: url(:/icons/timer_stop_dark.png);
 }
 
 TaskWidgetOverlay {
@@ -344,6 +344,35 @@ TaskWidgetOverlay[autoPriority="2"] {
 }
 TaskWidgetOverlay[autoPriority="1"] {
   qproperty-background: rgba(0, 255, 150, 100);
+}
+
+
+TaskWidget[autoPriority="10"] #pShowDetails,
+TaskWidget[autoPriority="9"] #pShowDetails,
+TaskWidget[autoPriority="8"] #pShowDetails,
+TaskWidget[autoPriority="7"] #pShowDetails {
+  background-image: url(:/icons/arrow_right.png);
+}
+
+TaskWidget[autoPriority="10"] #pShowDetails:checked,
+TaskWidget[autoPriority="9"] #pShowDetails:checked,
+TaskWidget[autoPriority="8"] #pShowDetails:checked,
+TaskWidget[autoPriority="7"] #pShowDetails:checked {
+  background-image: url(:/icons/arrow_down.png);
+}
+
+TaskWidget[autoPriority="10"] #pStartStop,
+TaskWidget[autoPriority="9"] #pStartStop,
+TaskWidget[autoPriority="8"] #pStartStop,
+TaskWidget[autoPriority="7"] #pStartStop  {
+  background-image: url(:/icons/timer_start.png);
+}
+
+TaskWidget[autoPriority="10"] #pStartStop:checked,
+TaskWidget[autoPriority="9"] #pStartStop:checked,
+TaskWidget[autoPriority="8"] #pStartStop:checked,
+TaskWidget[autoPriority="7"] #pStartStop:checked {
+  background-image: url(:/icons/timer_stop.png);
 }
 
 LinkWidget {
