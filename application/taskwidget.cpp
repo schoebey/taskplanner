@@ -620,6 +620,8 @@ void TaskWidget::setAutoPriority(double dPriority)
 
       setProperty("autoPriority", iPrioCategory);
       forceUpdate(this);
+      forceUpdate(ui->pShowDetails);
+      forceUpdate(ui->pStartStop);
 
       for (auto* pLabel : findChildren<QLabel*>())
       {
