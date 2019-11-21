@@ -478,6 +478,26 @@ void MainWindow::onNewTaskAccepted()
   }
 }
 
+void MainWindow::createNewSubTask()
+{
+  QWidget* pFocusWidget = qApp->focusWidget();
+  TaskWidget* pTaskWidget = dynamic_cast<TaskWidget*>(pFocusWidget);
+
+  // from the current focus widget, climb up the hierarchy
+  // to its nearest parent task widget
+  while (nullptr != pFocusWidget &&
+         nullptr == pTaskWidget)
+  {
+    pFocusWidget = pFocusWidget->parentWidget();
+    pTaskWidget = dynamic_cast<TaskWidget*>(pFocusWidget);
+  }
+
+  if (nullptr != pTaskWidget)
+  {
+    createNewSubTask(pTaskWidget->id());
+  }
+}
+
 void MainWindow::createNewSubTask(task_id taskId)
 {
   ITask* pTask = m_pManager->task(taskId);
