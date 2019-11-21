@@ -54,6 +54,7 @@ signals:
   void taskMovedTo(task_id taskId, group_id groupId, int iPos);
   void renamed(group_id groupId, const QString& sNewName);
   void newTaskClicked(group_id);
+  void newSubTaskClicked();
   void autoSortEnabled(group_id);
   void autoSortDisabled(group_id);
 
@@ -65,6 +66,7 @@ protected:
 protected slots:
   void onTaskInserted(TaskWidget* pTaskWidget, int iPos = -1);
   void onNewTaskClicked();
+  void onNewSubTaskClicked();
   void onTitleEdited();
   void onSortClicked(bool bChecked);
 

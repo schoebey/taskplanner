@@ -42,6 +42,13 @@ void GroupWidget::setUpContextMenu()
   pAddTaskAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
   addAction(pAddTaskAction);
   connect(pAddTaskAction, SIGNAL(triggered()), this, SLOT(onNewTaskClicked()));
+
+
+  QAction* pAddSubTaskAction = new QAction(tr("new subtask"), this);
+  pAddSubTaskAction->setShortcut(Qt::SHIFT + Qt::Key_N);
+  pAddSubTaskAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  addAction(pAddSubTaskAction);
+  connect(pAddSubTaskAction, SIGNAL(triggered()), this, SLOT(onNewSubTaskClicked()));
 }
 
 void GroupWidget::onTaskInserted(TaskWidget *pTaskWidget, int iPos)
@@ -161,6 +168,11 @@ void GroupWidget::ensureVisible(QWidget* pWidget)
 void GroupWidget::onNewTaskClicked()
 {
   emit newTaskClicked(m_groupId);
+}
+
+void GroupWidget::onNewSubTaskClicked()
+{
+  emit newSubTaskClicked();
 }
 
 void GroupWidget::onTitleEdited()

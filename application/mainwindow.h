@@ -57,6 +57,7 @@ private slots:
   void onTaskRemoved(task_id parentTaskId, task_id childTaskId);
   void onTaskAdded(task_id parentTaskId, task_id childTaskId);
   void onNewTaskAccepted();
+  void createNewSubTask();
   void createNewSubTask(task_id taskId);
   void onNewSubTaskAccepted();
   void reloadStylesheet(const QString& sPath);
