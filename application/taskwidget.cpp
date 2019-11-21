@@ -260,6 +260,7 @@ void TaskWidget::setOverlayBackground(const QBrush& b)
 
 void TaskWidget::edit()
 {
+  connect(ui->pTitle, &EditableLabel::editingFinished, ui->pDescription, &EditableLabel::edit);
   ui->pTitle->edit();
 }
 
