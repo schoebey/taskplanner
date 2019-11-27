@@ -62,7 +62,6 @@ GroupWidget* WidgetManager::createGroupWidget(group_id id)
 
   QObject::connect(pGroupWidget, SIGNAL(renamed(group_id, QString)),          m_pController, SLOT(renameGroup(group_id, QString)));
   QObject::connect(pGroupWidget, SIGNAL(newTaskClicked(group_id)),            m_pController, SLOT(createNewTask(group_id)));
-  QObject::connect(pGroupWidget, SIGNAL(newSubTaskClicked()),                 m_pController, SLOT(createNewSubTask()));
   QObject::connect(pGroupWidget, SIGNAL(taskMovedTo(task_id, group_id, int)), m_pController, SLOT(onTaskMoved(task_id, group_id, int)));
   QObject::connect(pGroupWidget, SIGNAL(autoSortEnabled(group_id)),           m_pController, SLOT(setAutoSortEnabled(group_id)));
   QObject::connect(pGroupWidget, SIGNAL(autoSortDisabled(group_id)),          m_pController, SLOT(setAutoSortDisabled(group_id)));

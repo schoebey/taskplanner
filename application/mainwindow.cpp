@@ -162,6 +162,12 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   connect(pReloadAction, &QAction::triggered, this, &MainWindow::onReloadDocument);
   addAction(pReloadAction);
 
+  QAction* pAddSubTaskAction = new QAction(tr("new subtask"), this);
+  pAddSubTaskAction->setShortcut(Qt::SHIFT + Qt::Key_N);
+  pAddSubTaskAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  addAction(pAddSubTaskAction);
+  connect(pAddSubTaskAction, &QAction::triggered, this, static_cast<void(MainWindow::*)(void)>(&MainWindow::createNewSubTask));
+
   initTaskUi();
 
 //  startTimer(3000);
