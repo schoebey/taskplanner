@@ -168,6 +168,15 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   addAction(pAddSubTaskAction);
   connect(pAddSubTaskAction, &QAction::triggered, this, static_cast<void(MainWindow::*)(void)>(&MainWindow::createNewSubTask));
 
+  QSignalMapper* pMapper = new QSignalMapper(this);
+  QAction* pSetPriorityAction = new QAction(tr("set priority"), this);
+  pSetPriorityAction->setShortcut(Qt::Key_0);
+  pSetPriorityAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  addAction(pSetPriorityAction);
+  pMapper->setMapping(pSetPriorityAction, 0);
+  connect(pSetPriorityAction, &QAction::triggered, pMapper, static_cast<void(QSignalMapper::*)(void)>(&QSignalMapper::map));
+  connect(pMapper, static_cast<void(QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &MainWindow::setAutoPriority);
+
   initTaskUi();
 
 //  startTimer(3000);
@@ -497,6 +506,16 @@ void MainWindow::onNewTaskAccepted()
     m_undoStack.push(pCommand);
 
     emit documentModified();
+  }
+}
+
+void MainWindow::setAutoPriority(double dPriority)
+{
+  auto pTaskWidget = closestAncestor(qApp->focusWidget());
+
+  if (nullptr != pTaskWidget)
+  {
+    pTaskWidget->setAutoPriority(dPriority);
   }
 }
 
