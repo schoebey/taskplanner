@@ -56,6 +56,22 @@ namespace
     QString sPath = info.path() + "/~" + info.fileName();
     return sPath;
   }
+
+  TaskWidget* closestAncestor(QWidget* pWidget)
+  {
+    TaskWidget* pTaskWidget = dynamic_cast<TaskWidget*>(pWidget);
+
+    // from pWidget, climb up the hierarchy
+    // to its nearest parent task widget
+    while (nullptr != pWidget &&
+           nullptr == pTaskWidget)
+    {
+      pWidget = pWidget->parentWidget();
+      pTaskWidget = dynamic_cast<TaskWidget*>(pWidget);
+    }
+
+    return pTaskWidget;
+  }
 }
 
 
@@ -480,17 +496,7 @@ void MainWindow::onNewTaskAccepted()
 
 void MainWindow::createNewSubTask()
 {
-  QWidget* pFocusWidget = qApp->focusWidget();
-  TaskWidget* pTaskWidget = dynamic_cast<TaskWidget*>(pFocusWidget);
-
-  // from the current focus widget, climb up the hierarchy
-  // to its nearest parent task widget
-  while (nullptr != pFocusWidget &&
-         nullptr == pTaskWidget)
-  {
-    pFocusWidget = pFocusWidget->parentWidget();
-    pTaskWidget = dynamic_cast<TaskWidget*>(pFocusWidget);
-  }
+  auto pTaskWidget = closestAncestor(qApp->focusWidget());
 
   if (nullptr != pTaskWidget)
   {
