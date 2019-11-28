@@ -422,6 +422,8 @@ void TaskWidget::addProperty(const QString& sName,
   }
 
   setUpContextMenu();
+
+  onPropertyValueChanged(sName, sValue);
 }
 
 std::set<QString> TaskWidget::propertyNames() const
@@ -477,9 +479,17 @@ bool TaskWidget::removeProperty(const QString& sName)
 
 bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
 {
+  emit propertyChanged(m_taskId, sName, sValue);
+
+  return true;
+}
+
+bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sValue)
+{
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {
+    bool bValueChanged = false;
     if (sValue.isEmpty())
     {
       it->second.pLabel->deleteLater();
@@ -492,6 +502,7 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
     }
     else
     {
+      bValueChanged = sValue != it->second.pValue->text();
       it->second.pValue->setEditText(sValue);
     }
 
@@ -852,7 +863,7 @@ void TaskWidget::onPropertyEdited()
   if (nullptr != pSender)
   {
     QString sPropertyName = pSender->property("name").toString();
-    emit propertyChanged(m_taskId, sPropertyName, pSender->editText());
+    setPropertyValue(sPropertyName, pSender->editText());
   }
 }
 
@@ -910,7 +921,7 @@ void TaskWidget::setExpanded(bool bExpanded)
   {
     setProperty("expanded", bExpanded);
 
-    emit propertyChanged(m_taskId, "expanded", bExpanded ? "true" : "false");
+    setPropertyValue("expanded", bExpanded ? "true" : "false");
 
     if (bExpanded)
     {
