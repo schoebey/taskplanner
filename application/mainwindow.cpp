@@ -168,14 +168,18 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   addAction(pAddSubTaskAction);
   connect(pAddSubTaskAction, &QAction::triggered, this, static_cast<void(MainWindow::*)(void)>(&MainWindow::createNewSubTask));
 
+
   QSignalMapper* pMapper = new QSignalMapper(this);
-  QAction* pSetPriorityAction = new QAction(tr("set priority"), this);
-  pSetPriorityAction->setShortcut(Qt::Key_0);
-  pSetPriorityAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-  addAction(pSetPriorityAction);
-  pMapper->setMapping(pSetPriorityAction, 0);
-  connect(pSetPriorityAction, &QAction::triggered, pMapper, static_cast<void(QSignalMapper::*)(void)>(&QSignalMapper::map));
-  connect(pMapper, static_cast<void(QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &MainWindow::setAutoPriority);
+  for (int i = 0; i < 10; ++i)
+  {
+    QAction* pSetPriorityAction = new QAction(tr("set priority"), this);
+    pSetPriorityAction->setShortcut(Qt::Key_0 + i);
+    pSetPriorityAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    addAction(pSetPriorityAction);
+    pMapper->setMapping(pSetPriorityAction, i);
+    connect(pSetPriorityAction, &QAction::triggered, pMapper, static_cast<void(QSignalMapper::*)(void)>(&QSignalMapper::map));
+    connect(pMapper, static_cast<void(QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &MainWindow::setPriority);
+  }
 
   initTaskUi();
 
@@ -509,13 +513,13 @@ void MainWindow::onNewTaskAccepted()
   }
 }
 
-void MainWindow::setAutoPriority(double dPriority)
+void MainWindow::setPriority(int iPriority)
 {
   auto pTaskWidget = closestAncestor(qApp->focusWidget());
 
   if (nullptr != pTaskWidget)
   {
-    pTaskWidget->setAutoPriority(dPriority);
+    pTaskWidget->setPropertyValue("priority", QString::number(iPriority));
   }
 }
 
@@ -1067,7 +1071,7 @@ void MainWindow::onPropertyChanged(task_id taskId,
       pTaskWidget->setHighlight(pTaskWidget->highlight() |
                                (bNewValueAccepted ? EHighlightMethod::eValueAccepted :
                                                    EHighlightMethod::eValueRejected));
-      pTaskWidget->setPropertyValue(sPropertyName, pTask->propertyValue(sPropertyName));
+      pTaskWidget->onPropertyValueChanged(sPropertyName, pTask->propertyValue(sPropertyName));
 
       if ("color" == sPropertyName)
       {
