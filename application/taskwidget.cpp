@@ -415,6 +415,7 @@ void TaskWidget::addProperty(const QString& sName,
       if (!sValue.isEmpty())
       {
         setPropertyValue(sName, sValue);
+        onPropertyValueChanged(sName, sValue);
       }
 
       updateSize();
@@ -422,8 +423,6 @@ void TaskWidget::addProperty(const QString& sName,
   }
 
   setUpContextMenu();
-
-  onPropertyValueChanged(sName, sValue);
 }
 
 std::set<QString> TaskWidget::propertyNames() const
