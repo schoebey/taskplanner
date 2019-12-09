@@ -97,10 +97,12 @@ bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
     }
 
     QPoint currentPos = pTaskWidget->mapToGlobal(QPoint(0,0));
+    auto bHasFocus = pTaskWidget->hasFocus();
     pTaskWidget->setParent(this);
     pTaskWidget->setTaskListWidget(this);
     pTaskWidget->resize(width(), pTaskWidget->sizeHint().height());
     pTaskWidget->move(mapFromGlobal(currentPos));
+    if (bHasFocus)  { pTaskWidget->setFocus(); }
     pTaskWidget->show();
 
     connect(pTaskWidget, &TaskWidget::sizeChanged, this, &TaskListWidget::updateTaskPositions, Qt::QueuedConnection);
