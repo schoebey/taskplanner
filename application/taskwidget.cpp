@@ -488,7 +488,6 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {
-    bool bValueChanged = false;
     if (sValue.isEmpty())
     {
       it->second.pLabel->deleteLater();
@@ -501,7 +500,6 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
     }
     else
     {
-      bValueChanged = sValue != it->second.pValue->text();
       it->second.pValue->setEditText(sValue);
     }
 
