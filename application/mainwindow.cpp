@@ -1029,7 +1029,7 @@ void MainWindow::on_actionReport_triggered()
         if (f.open(QIODevice::ReadWrite | QIODevice::Truncate))
         {
           spReport->setParameter("device", QVariant::fromValue<QIODevice*>(&f));
-          spReport->setParameter("fileName", sFileName);
+          spReport->setParameter("numberOfDays", 30);
           spReport->create(*m_pManager);
           f.close();
         }

@@ -12,9 +12,9 @@ namespace
 {
   RegisterReport<TextReport> s("text", "txt");
 
-  static const QString c_sPara_FileName = "fileName";
   static const QString c_sPara_Device = "device";
   static const QString c_sTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
+  static const QString c_sNofDays = "numberOfDays";
 
   QStringList fullName(const ITask* pTask, const Manager* pManager)
   {
@@ -35,11 +35,14 @@ TextReport::TextReport()
 {
   //registerParameter(c_sPara_FileName, QVariant::String, true);
   registerParameter(c_sPara_Device, QVariant::UserType, true);
+  registerParameter(c_sNofDays, QVariant::Int, false);
 }
 
 EReportError TextReport::create_impl(const Manager& manager) const
 {
   QIODevice* pDevice = parameter(c_sPara_Device).value<QIODevice*>();
+
+  int iNofDays = hasParameter(c_sNofDays) ? parameter(c_sNofDays).value<int>() : 7;
 
   if (!pDevice->isOpen() &&
       !pDevice->open(QIODevice::ReadWrite | QIODevice::Truncate))
@@ -52,7 +55,7 @@ EReportError TextReport::create_impl(const Manager& manager) const
   s.setCodec("UTF-8");
 
   // generate a report for the past seven days
-  QDateTime startDate(QDate::currentDate().addDays(-7));
+  QDateTime startDate(QDate::currentDate().addDays(-iNofDays));
   QDateTime stopDate(QDate::currentDate().addDays(1));
 
   auto numerationFromInt = [](int i) -> QString
