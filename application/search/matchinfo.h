@@ -3,12 +3,13 @@
 
 #include <QMetaType>
 #include <QRect>
+#include <QPointer>
 
 #include <vector>
 
 struct SMatchInfo
 {
-  QWidget* pWidget = nullptr;
+  QPointer<QWidget> pWidget;
   QRect rect;
   int iStart = -1;
   int iSize = -1;
