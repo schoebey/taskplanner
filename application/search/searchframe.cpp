@@ -4,6 +4,7 @@
 #include <QKeyEvent>
 #include <QMainWindow>
 #include <QStatusBar>
+#include <QAction>
 
 
 SearchFrame::SearchFrame(QWidget* pParent)
@@ -16,18 +17,12 @@ SearchFrame::SearchFrame(QWidget* pParent)
   connect(ui->pFindNext, &QPushButton::clicked, this, &SearchFrame::findNext);
   connect(ui->pFindPrev, &QPushButton::clicked, this, &SearchFrame::findPrevious);
   connect(ui->pText, &QLineEdit::returnPressed, this, &SearchFrame::findNext);
-}
 
-void SearchFrame::keyPressEvent(QKeyEvent* pEvent)
-{
-  switch (pEvent->key())
-  {
-  case Qt::Key_Escape:
-    onExit();
-    break;
-  default:
-    break;
-  }
+  auto pEsc = new QAction("close");
+  pEsc->setShortcut(Qt::Key_Escape);
+  pEsc->setShortcutContext(Qt::WindowShortcut);
+  connect(pEsc, &QAction::triggered, [&](){ onExit(); });
+  addAction(pEsc);
 }
 
 void SearchFrame::onTextChanged(const QString& sText)
