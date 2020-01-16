@@ -1042,6 +1042,67 @@ void MainWindow::on_actionAbout_triggered()
 {
   AboutDialog* pAboutDialog = new AboutDialog(this);
   pAboutDialog->setAutoDeleteOnClose(true);
+
+  auto taskIds = m_pManager->taskIds();
+  std::map<int, std::set<ITask*>> tasksByAge;
+  std::map<ITask*, int> nofChildrenByTask;
+  for (const auto& id : taskIds)
+  {
+    ITask* pTask = m_pManager->task(id);
+    if (nullptr != pTask)
+    {
+      QDateTime addedDate = QDateTime::fromString(pTask->propertyValue("added date"), conversion::c_sDateTimeFormat);
+      if (addedDate.isValid())
+      {
+        int iNofDaysInSystem = addedDate.daysTo(QDateTime::currentDateTime());
+        tasksByAge[iNofDaysInSystem].insert(pTask);
+      }
+
+      int iNofChildren = pTask->taskIds().size();
+      nofChildrenByTask[pTask] += iNofChildren;
+      ITask* pParentTask = m_pManager->task(pTask->parentTask());
+      if (nullptr != pParentTask)
+      {
+        nofChildrenByTask[pParentTask] += iNofChildren;
+      }
+    }
+  }
+
+  QString sOldestTask = "error reading task age";
+  int iNofDays = 0;
+  if (!tasksByAge.empty() &&
+      !tasksByAge.begin()->second.empty())
+  {
+    auto it = tasksByAge.begin()->second.begin();
+    sOldestTask = (*it)->name();
+    iNofDays = tasksByAge.begin()->first;
+  }
+
+
+  QString sTaskWithMostChildren = "none found";
+  int iNofChildren = 0;
+  for (const auto& el : nofChildrenByTask)
+  {
+    if (iNofChildren < el.second)
+    {
+      iNofChildren = el.second;
+      ITask* pTask = el.first;
+      sTaskWithMostChildren = pTask->name();
+    }
+  }
+
+  QString sStats = QString("tasks: %1\n"
+                           "oldest task:\n"
+                           "  %2 (age: %3 days)\n"
+                           "task with most children: \n"
+                           "  %4 (children: %5)")
+      .arg(taskIds.size())
+      .arg(sOldestTask)
+      .arg(iNofDays)
+      .arg(sTaskWithMostChildren)
+      .arg(iNofChildren);
+  pAboutDialog->setStatistics(sStats);
+
   pAboutDialog->appear();
 }
 

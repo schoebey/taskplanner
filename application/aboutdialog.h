@@ -15,6 +15,7 @@ public:
   explicit AboutDialog(QWidget *parent = nullptr);
   ~AboutDialog();
 
+  void setStatistics(const QString& sText);
 private slots:
   void onLinkClicked(const QString& sLink);
 private:

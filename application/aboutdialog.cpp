@@ -38,3 +38,8 @@ void AboutDialog::onLinkClicked(const QString& sLink)
 {
   QDesktopServices::openUrl(sLink);
 }
+
+void AboutDialog::setStatistics(const QString& sText)
+{
+  ui->pStats->setText(sText);
+}
