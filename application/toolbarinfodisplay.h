@@ -56,7 +56,7 @@ signals:
 
 private:
   void UpdateInfo();
-  void timerEvent(QTimerEvent* pEvent);
+  void timerEvent(QTimerEvent* pEvent) override;
 
 
   QLabel* m_pLabel = nullptr;
