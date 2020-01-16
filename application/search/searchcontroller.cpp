@@ -219,26 +219,46 @@ void SearchController::setCurrent(tMatches::iterator it)
 
 void SearchController::onNext()
 {
+  auto it = m_hitIter;
   if (m_hitIter != m_hits.end() &&
       m_hitIter != m_hits.end() - 1)
   {
-    setCurrent(m_hitIter + 1);
+    it = m_hitIter + 1;
   }
   else
   {
-    setCurrent(m_hits.begin());
+    it = m_hits.begin();
   }
+
+  // advance the iterator from this position to the next valid one,
+  // removing all invalid elements inbetween.
+  while (nullptr == it->pWidget)
+  {
+    it = m_hits.erase(it);
+  }
+
+  setCurrent(it);
 }
 
 void SearchController::onPrev()
 {
+  auto it = m_hitIter;
   if (m_hitIter != m_hits.end() &&
       m_hitIter != m_hits.begin())
   {
-    setCurrent(m_hitIter - 1);
+    it = m_hitIter - 1;
   }
   else if (!m_hits.empty())
   {
-    setCurrent(m_hits.end() - 1);
+    it = m_hits.end() - 1;
   }
+
+  // reverse the iterator from this position to the previous valid one,
+  // removing all invalid elements inbetween.
+  while (nullptr == it->pWidget)
+  {
+    it = m_hits.erase(it) - 1;
+  }
+
+  setCurrent(it);
 }
