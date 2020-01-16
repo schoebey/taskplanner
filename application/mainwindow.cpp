@@ -169,6 +169,8 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
   static const std::vector<QString> c_vsPluginFolders = { QCoreApplication::applicationDirPath() + "/plugins/serializers",
                                                           QCoreApplication::applicationDirPath() + "/plugins/reports",
+                                                          QCoreApplication::applicationDirPath() + "/../plugins/serializers",
+                                                          QCoreApplication::applicationDirPath() + "/../plugins/reports",
                                                           QCoreApplication::applicationDirPath() + "/../lib",
                                                           QCoreApplication::applicationDirPath() + "/../lib/" + taskplanner::project_name};
   for (const auto& sPath : c_vsPluginFolders)
@@ -1132,6 +1134,69 @@ void MainWindow::on_actionAbout_triggered()
 {
   AboutDialog* pAboutDialog = new AboutDialog(this);
   pAboutDialog->setAutoDeleteOnClose(true);
+
+  QDateTime current = QDateTime::currentDateTime();
+
+  auto taskIds = m_pManager->taskIds();
+  std::map<qint64, std::set<ITask*>> tasksByAge;
+  std::map<ITask*, int> nofChildrenByTask;
+  for (const auto& id : taskIds)
+  {
+    ITask* pTask = m_pManager->task(id);
+    if (nullptr != pTask)
+    {
+      QDateTime addedDate = QDateTime::fromString(pTask->propertyValue("added date"), conversion::c_sDateTimeFormat);
+      if (addedDate.isValid())
+      {
+        qint64 iNofMsecsInSystem = addedDate.msecsTo(current);
+        tasksByAge[iNofMsecsInSystem].insert(pTask);
+      }
+
+      int iNofChildren = pTask->taskIds().size();
+      nofChildrenByTask[pTask] += iNofChildren;
+      ITask* pParentTask = m_pManager->task(pTask->parentTask());
+      if (nullptr != pParentTask)
+      {
+        nofChildrenByTask[pParentTask] += iNofChildren;
+      }
+    }
+  }
+
+  QString sOldestTask = "error reading task age";
+  qint64 iNofMsecs = 0;
+  if (!tasksByAge.empty() &&
+      !tasksByAge.rbegin()->second.empty())
+  {
+    auto it = tasksByAge.rbegin()->second.begin();
+    sOldestTask = (*it)->name();
+    iNofMsecs = tasksByAge.rbegin()->first;
+  }
+
+
+  QString sTaskWithMostChildren = "none found";
+  int iNofChildren = 0;
+  for (const auto& el : nofChildrenByTask)
+  {
+    if (iNofChildren < el.second)
+    {
+      iNofChildren = el.second;
+      ITask* pTask = el.first;
+      sTaskWithMostChildren = pTask->name();
+    }
+  }
+
+  QString sStats = QString("tasks: %1\n"
+                           "oldest task:\n"
+                           "  %2 (age: %3 days)\n"
+                           "task with most children: \n"
+                           "  %4 (children: %5)")
+      .arg(taskIds.size())
+      .arg(sOldestTask)
+      .arg(iNofMsecs / 1000 / 3600 / 24., 0, 'f', 2)
+      .arg(sTaskWithMostChildren)
+      .arg(iNofChildren);
+  pAboutDialog->setStatistics(sStats);
+
   pAboutDialog->appear();
 }
 
