@@ -52,7 +52,7 @@ public:
     EqualsConstraint<T>::registerCreator();
   }
 
-  int version() const
+  int version() const override
   {
     return 0;
   }
@@ -93,7 +93,7 @@ public:
   }
 
   void addConstraint(const QString& sName,
-                     const QString& sConfiguration)
+                     const QString& sConfiguration) override
   {
     m_spConstraint = ConstraintFactory::create<T>(sName, sConfiguration);
   }
