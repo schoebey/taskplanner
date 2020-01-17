@@ -54,6 +54,26 @@
 
 namespace
 {
+  bool IsVisibleToTopLevel(Manager* pManager, task_id id)
+  {
+    auto pTask = pManager->task(id);
+    auto pParentTask = pManager->task(pTask->parentTask());
+
+    // if the task doesn't have a parent (it is a top level task),
+    // that means it is visible -> return from the recursion with true
+    if (nullptr == pParentTask) { return true; }
+
+    bool bOk = false;
+    bool bExpanded = conversion::fromString<bool>(pParentTask->propertyValue("expanded"), bOk);
+    if (!bOk || bExpanded)
+    {
+      // check the parent task for visibility
+      return IsVisibleToTopLevel(pManager, pParentTask->id());
+    }
+
+    return false;
+  }
+
   QString tempFileNameFromFileName(const QString& sFileName)
   {
     QFileInfo info(sFileName);
@@ -346,6 +366,14 @@ void MainWindow::updateTaskUi()
       }
 
 
+      std::map<task_id, bool> visibilityMatrix;
+      for (const auto& taskId : pGroup->taskIds())
+      {
+        bool bIsVisibleToTopLevel = IsVisibleToTopLevel(m_pManager, taskId);
+        visibilityMatrix[taskId] = bIsVisibleToTopLevel;
+      }
+
+
       std::map<int, std::vector<ITask*>> tasksByPriority;
       for (const auto& taskId : pGroup->taskIds())
       {
@@ -362,7 +390,11 @@ void MainWindow::updateTaskUi()
         for (const auto& pTask : task.second)
         {
           TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(pTask->id());
-          if (nullptr == pTaskWidget)
+
+          // only create the widget if it is visible to the user.
+          // child tasks of collapsed parents should not be created here,
+          // but when the parent task is expanded.
+          if (nullptr == pTaskWidget && visibilityMatrix[pTask->id()])
           {
             pTaskWidget = m_pWidgetManager->createTaskWidget(pTask->id());
 
