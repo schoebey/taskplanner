@@ -14,7 +14,8 @@ DISTFILES += \
 SUBDIRS += \
     task_manager \
     plugins \
-    application/application.pro
+    application/application.pro \
+    unittests
 
 task_manager.path = $$PWD/task_manager
 plugins.path = $$PWD/plugins
