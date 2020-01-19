@@ -9,6 +9,7 @@
 #include <QUndoStack>
 #include <map>
 #include <memory>
+#include <QMessageBox>
 
 namespace Ui {
   class MainWindow;
@@ -84,6 +85,8 @@ private slots:
                                const QDateTime& wakeUpTime);
   void on_actionFind_triggered();
   void onPriorityUpdateRequested(task_id);
+  void onAddTimeToTaskRequested(task_id);
+  void onRemoveTimeToTaskRequested(task_id);
 
 signals:
   void timeTrackingStopped(task_id taskId);
@@ -101,6 +104,7 @@ private:
   void onChooseStylesheet();
   void onChooseScript();
   void showError(const QString& sErrorMessage);
+  QMessageBox::StandardButton askSave();
 
 private:
   Ui::MainWindow *ui;

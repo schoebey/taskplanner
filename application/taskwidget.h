@@ -106,6 +106,8 @@ signals:
   void linkInserted(task_id id, QUrl url, int iPos);
   void attentionNeeded();
   void priorityUpdateRequested(task_id);
+  void addTimeRequested(task_id);
+  void removeTimeRequested(task_id);
 
 private slots:
   void onTitleEdited();
@@ -169,6 +171,7 @@ private:
   ITaskContainerWidget* m_pContainer = nullptr;
 
   QMenu* m_pContextMenu = nullptr;
+  QAction* m_pTrackAction = nullptr;
 
   std::map<QUrl, LinkWidget*> m_linkWidgets;
 

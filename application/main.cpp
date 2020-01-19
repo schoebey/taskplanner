@@ -147,13 +147,14 @@ int main(int argc, char *argv[])
 //  QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
   QGuiApplication::setApplicationDisplayName(QString("%1 (%2)").arg(APP_NAME).arg(version));
 
-  app.setStyle(new Style());
 
   Manager manager;
 
 
 
   MainWindow window(&manager);
+
+  window.setStyle(new Style());
   window.show();
 
   bool bLoadedFileFromArgs = false;
