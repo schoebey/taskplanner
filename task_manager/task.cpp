@@ -301,6 +301,97 @@ void Task::stopWork(const QDateTime& when)
   }
 }
 
+void Task::insertTimeFragment(const QDateTime& start, const QDateTime& end)
+{
+  startWork(start);
+  stopWork(end);
+
+  // iterate through all time fragments and check for overlaps or fragments
+  // in close proximity to each other and fuse themg
+  std::sort(m_vTimingInfo.begin(), m_vTimingInfo.end(),
+            [](const STimeFragment& lhs, const STimeFragment& rhs)
+  {
+    return lhs.startTime < rhs.startTime;
+  });
+
+  static const int c_iMaxSecsDeltaForFuse = 60;
+  auto it = m_vTimingInfo.begin();
+  STimeFragment* pLastEl = &*it++;
+  while (it != m_vTimingInfo.end())
+  {
+    if (nullptr != pLastEl)
+    {
+      if (c_iMaxSecsDeltaForFuse >= pLastEl->stopTime.secsTo(it->startTime))
+      {
+        pLastEl->stopTime = std::max<QDateTime>(pLastEl->stopTime, it->stopTime);
+        it = m_vTimingInfo.erase(it);
+      }
+      else
+      {
+        // only if the two elements were not fused should the last element pointer
+        // point to the current element.
+        pLastEl = &*it;
+        ++it;
+      }
+    }
+    else
+    {
+      ++it;
+    }
+  }
+}
+
+void Task::removeTimeFragment(const QDateTime& start, const QDateTime& end)
+{
+  auto it = m_vTimingInfo.begin();
+  while (it != m_vTimingInfo.end())
+  {
+    if (it->startTime >= end || it->stopTime <= start)
+    {
+      // common case: no collision with [start, end]
+      ++it;
+    }
+    else
+    {
+      if (it->startTime>= start && it->stopTime <= end)
+      {
+        // the current time fragment lies completely within [start, end]
+        // -> remove the fragment
+        it = m_vTimingInfo.erase(it);
+      }
+      else if (it->startTime < start && it->stopTime > end)
+      {
+        // the time fragment that is to be excluded lies completely within the current fragment
+        // -> split the fragment
+        auto originalStop = it->stopTime;
+        it->stopTime = start;
+        STimeFragment newFragment;
+        newFragment.startTime = end;
+        newFragment.stopTime = originalStop;
+        it = m_vTimingInfo.insert(it + 1, newFragment);
+      }
+      else if (it->startTime < end && it->stopTime > end)
+      {
+        // start point of current time fragment lies within [start, end]
+        // -> chop from the beginning of the fragment
+        it->startTime = end;
+        ++it;
+      }
+      else if (it->startTime < start && it->stopTime > start)
+      {
+        // end point of current fragment lies within [start, end]
+        // -> chop from the end of the fragment
+        it->stopTime = start;
+        ++it;
+      }
+      else
+      {
+        assert(false && "all cases should be covered. This code should not be executed.");
+      }
+    }
+  }
+}
+
 bool Task::isTrackingTime() const
 {
   if (m_vTimingInfo.empty())  { return false; }

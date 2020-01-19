@@ -62,6 +62,8 @@ public:
 
   void startWork(const QDateTime& when) override;
   void stopWork(const QDateTime& when) override;
+  void insertTimeFragment(const QDateTime& start, const QDateTime& end) override;
+  void removeTimeFragment(const QDateTime& start, const QDateTime& end) override;
   bool isTrackingTime() const override;
   std::vector<STimeFragment> timeFragments() const override;
   void setTimeFragments(const std::vector<STimeFragment>& vFragments);
