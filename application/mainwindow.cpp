@@ -42,6 +42,9 @@
 #include <QMouseEvent>
 #include <QPixmapCache>
 #include <QSettings>
+#include <QDateTimeEdit>
+#include <QDialogButtonBox>
+#include <QLineEdit>
 
 #include <array>
 #include <future>
@@ -246,9 +249,19 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
-void MainWindow::closeEvent(QCloseEvent* /*event*/)
-{
-  saveFile(m_sFileName);
+void MainWindow::closeEvent(QCloseEvent* pEvent)
+{  
+  auto button = askSave();
+  if (QMessageBox::Yes == button)
+  {
+    saveFile(m_sFileName);
+  }
+  else if (QMessageBox::Cancel == button)
+  {
+    pEvent->ignore();
+    return;
+  }
+
   saveSettings();
 }
 
@@ -453,7 +466,7 @@ void MainWindow::reloadStylesheet(const QString& sPath)
   QFile f(sPath);
   if (f.open(QIODevice::ReadOnly))
   {
-    qApp->setStyleSheet(QString::fromUtf8(f.readAll()));
+    setStyleSheet(QString::fromUtf8(f.readAll()));
   }
 }
 
@@ -878,11 +891,8 @@ bool MainWindow::saveFile(const QString& sFileName, QString* psErrorMessage)
   return false;
 }
 
-void MainWindow::on_actionOpen_triggered()
+QMessageBox::StandardButton MainWindow::askSave()
 {
-  QString sFileName = QFileDialog::getOpenFileName(this, tr("Open task file..."));
-  if (sFileName.isEmpty())  { return; }
-
   if (isWindowModified())
   {
     auto msecs = m_lastSaveTime.msecsTo(QDateTime::currentDateTime());
@@ -904,11 +914,35 @@ void MainWindow::on_actionOpen_triggered()
     }
 
     auto button =
-        QMessageBox::question(this, tr("Save modifications?"),
-                              tr("Should the new document be opened?\n"
-                                 "There are unsaved modifications.\n\n"
-                                 "%1").arg(sLastSaveMessage));
-    if (QMessageBox::No == button) { return; }
+        QMessageBox::question(nullptr, tr("Save modifications?"),
+                              tr("There are unsaved modifications.\n"
+                                 "Should the current document (%1) be saved?\n\n"
+                                 "%2")
+                              .arg(QFileInfo(m_sFileName).fileName())
+                              .arg(sLastSaveMessage),
+                              QMessageBox::Yes, QMessageBox::No, QMessageBox::Cancel);
+    return static_cast<QMessageBox::StandardButton>(button);
+  }
+
+  return QMessageBox::Cancel;
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+  QString sFileName = QFileDialog::getOpenFileName(this, tr("Open task file..."));
+  if (sFileName.isEmpty())  { return; }
+
+
+  auto rv = askSave();
+  if (QMessageBox::Yes == rv)
+  {
+    // save the current file before loading a new one
+    saveFile(m_sFileName);
+  }
+  else if (QMessageBox::Cancel == rv)
+  {
+    // cancel results in not opening the selected file
+    return;
   }
 
 
@@ -1532,5 +1566,121 @@ void MainWindow::onPriorityUpdateRequested(task_id id)
   if (nullptr != pTask && nullptr != pTaskWidget)
   {
     pTaskWidget->setAutoPriority(pTask->autoPriority());
+  }
+}
+
+std::tuple<QDateTime, QDateTime> getRangeFromDialog(const QString& sTitle,
+                                                    const QString& sDetailText)
+{
+  QDialog d;
+  d.setWindowTitle(sTitle);
+
+  QGridLayout* pLayout = new QGridLayout(&d);
+  pLayout->addWidget(new QLabel(sDetailText), 0, 0, 1, 2);
+
+
+  pLayout->addWidget(new QLabel(QObject::tr("Start date time:")), 1, 0);
+  QDateTimeEdit* pStartDateTime = new QDateTimeEdit();
+  pStartDateTime->setDateTime(QDateTime::currentDateTime());
+  pStartDateTime->setCalendarPopup(true);
+  pLayout->addWidget(pStartDateTime, 1, 1);
+
+
+  pLayout->addWidget(new QLabel(QObject::tr("End date time:")), 2, 0);
+  QDateTimeEdit* pEndDateTime = new QDateTimeEdit();
+  pEndDateTime->setDateTime(QDateTime::currentDateTime());
+  pEndDateTime->setCalendarPopup(true);
+  pLayout->addWidget(pEndDateTime, 2, 1);
+
+  // TODO: alternatively, let the user input an interval length (in minutes?)
+  // -> via slider
+  // if the slider is moved, the end time gets updated
+  pLayout->addWidget(new QLabel(QObject::tr("Interval length:")), 3, 0);
+  QSlider* pSlider = new QSlider();
+  pSlider->setOrientation(Qt::Horizontal);
+  pSlider->setRange(0, 720);
+  pLayout->addWidget(pSlider, 3, 1);
+  QLineEdit* pLineEdit = new QLineEdit();
+  pLineEdit->setInputMask("000");
+  pLayout->addWidget(pLineEdit, 3, 2);
+  QObject::connect(pSlider, &QSlider::valueChanged, [&](int iVal)
+  {
+    pEndDateTime->setDateTime(pStartDateTime->dateTime().addSecs(60 * iVal));
+    int iPos = pLineEdit->cursorPosition();
+    pLineEdit->setText(QString::number(iVal));
+    pLineEdit->setCursorPosition(iPos);
+  });
+  QObject::connect(pLineEdit, &QLineEdit::textChanged, [&](const QString& sText)
+  {
+    bool bOk(false);
+    int iVal = sText.toInt(&bOk);
+    if (bOk) { pSlider->setValue(iVal); }
+  });
+  QObject::connect(pStartDateTime, &QDateTimeEdit::dateTimeChanged, [&](const QDateTime& dt)
+  {
+    pEndDateTime->setDateTime(dt.addSecs(60 * pSlider->value()));
+  });
+  QObject::connect(pEndDateTime, &QDateTimeEdit::dateTimeChanged, [&](const QDateTime& dt)
+  {
+    pSlider->setValue(pStartDateTime->dateTime().secsTo(dt) / 60);
+  });
+
+
+  QDialogButtonBox* pButtonBox = new QDialogButtonBox();
+  pButtonBox->addButton(QDialogButtonBox::Ok);
+  pButtonBox->addButton(QDialogButtonBox::Cancel);
+  pLayout->addWidget(pButtonBox, 4, 0, 1, 2);
+
+  QObject::connect(pButtonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+  QObject::connect(pButtonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+  d.setLayout(pLayout);
+
+  if (QDialog::Accepted == d.exec())
+  {
+    QDateTime start = pStartDateTime->dateTime();
+    QDateTime end = pEndDateTime->dateTime();
+
+    return std::make_tuple(start, end);
+  }
+  else
+  {
+    return std::make_tuple(QDateTime(), QDateTime());
+  }
+}
+
+void MainWindow::onAddTimeToTaskRequested(task_id id)
+{
+  auto range = getRangeFromDialog(tr("Add time to task"),
+                                  tr("Enter start and end time to be added to the task:"));
+
+  auto start = std::get<0>(range);
+  auto stop = std::get<1>(range);
+  if (start.isValid() && stop.isValid())
+  {
+    auto pTask = m_pManager->task(id);
+    if (nullptr != pTask)
+    {
+      pTask->insertTimeFragment(start, stop);
+      emit documentModified();
+    }
+  }
+}
+
+void MainWindow::onRemoveTimeToTaskRequested(task_id id)
+{
+  auto range = getRangeFromDialog(tr("Remove time from task"),
+                                  tr("Enter start and end time to be removed from the task:"));
+
+  auto start = std::get<0>(range);
+  auto stop = std::get<1>(range);
+  if (start.isValid() && stop.isValid())
+  {
+    auto pTask = m_pManager->task(id);
+    if (nullptr != pTask)
+    {
+      pTask->removeTimeFragment(start, stop);
+      emit documentModified();
+    }
   }
 }

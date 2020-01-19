@@ -69,15 +69,6 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::updateSize, Qt::QueuedConnection);
   connect(this, &TaskWidget::attentionNeeded, this, &TaskWidget::emphasise);
 
-  QAction* pToggleTimeTrackingAction = new QAction(this);
-  pToggleTimeTrackingAction->setShortcut(Qt::Key_T);
-  pToggleTimeTrackingAction->setShortcutContext(Qt::WidgetShortcut);
-  addAction(pToggleTimeTrackingAction);
-  connect(pToggleTimeTrackingAction, &QAction::triggered, [this]()
-  {
-    this->setTimeTrackingEnabled(!ui->pStartStop->isChecked());
-  });
-
   setUpContextMenu();
 
   setExpanded(true);
@@ -172,6 +163,29 @@ void TaskWidget::setUpContextMenu()
   QAction* pAction = new QAction(tr("Add subtask"), this);
   connect(pAction, SIGNAL(triggered()), this, SLOT(onAddSubtaskTriggered()));
   m_pContextMenu->addAction(pAction);
+
+
+  m_pContextMenu->addSeparator();
+  m_pTrackAction = new QAction(ui->pStartStop->isChecked() ?
+                                                tr("Stop tracking") :
+                                                tr("Start tracking"), this);
+  m_pTrackAction->setShortcut(Qt::Key_T);
+  m_pTrackAction->setShortcutContext(Qt::WidgetShortcut);
+  addAction(m_pTrackAction);
+  m_pContextMenu->addAction(m_pTrackAction);
+  connect(m_pTrackAction, &QAction::triggered, this, [&]()
+  {
+    setTimeTrackingEnabled(!ui->pStartStop->isChecked());
+  }
+  );
+
+  QAction* pAddTimeAction = new QAction(tr("Add time"), this);
+  connect(pAddTimeAction, &QAction::triggered, this, [&](){ emit addTimeRequested(id()); });
+  m_pContextMenu->addAction(pAddTimeAction);
+
+  QAction* pRemoveTimeAction = new QAction(tr("Remove time"), this);
+  connect(pRemoveTimeAction, &QAction::triggered, this, [&](){ emit removeTimeRequested(id()); });
+  m_pContextMenu->addAction(pRemoveTimeAction);
 }
 
 task_id TaskWidget::id() const
@@ -837,10 +851,12 @@ void TaskWidget::setTimeTrackingEnabled(bool bEnabled)
   ui->pStartStop->setChecked(bEnabled);
 
   if (bEnabled) {
+    m_pTrackAction->setText(tr("Stop tracking"));
     emit timeTrackingStarted(m_taskId);
     setHighlight(highlight() | EHighlightMethod::eTimeTrackingActive);
   }
   else {
+    m_pTrackAction->setText(tr("Start tracking"));
     emit timeTrackingStopped(m_taskId);
     setHighlight(highlight() & ~EHighlightMethod::eTimeTrackingActive);
   }
