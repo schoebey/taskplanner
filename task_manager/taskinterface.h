@@ -33,6 +33,24 @@ public:
 
   virtual void startWork(const QDateTime& when = QDateTime::currentDateTime()) = 0;
   virtual void stopWork(const QDateTime& when = QDateTime::currentDateTime()) = 0;
+
+  /*!
+   * \brief insetTimeFragment inserts a fragment of time into the collection
+   * of already tracked time
+   * \param start start date and time of the fragment
+   * \param end end date and time of the fragment
+   */
+  virtual void insertTimeFragment(const QDateTime& start, const QDateTime& end) = 0;
+
+  /*!
+   * \brief removeTimeFragment checks all available time fragments and alters them
+   * to make sure they don't overlap with the range \a start and \a end.
+   * This means either the start or end of a fragment can be moved, or
+   * the fragment could be deleted entirely.
+   * \param start start date and time of the fragment
+   * \param end end date and time of the fragment
+   */
+  virtual void removeTimeFragment(const QDateTime& start, const QDateTime& end) = 0;
   virtual bool isTrackingTime() const = 0;
   virtual std::vector<STimeFragment> timeFragments() const = 0;
 
