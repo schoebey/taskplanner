@@ -1,18 +1,13 @@
 CONFIG += c++11 skip_target_version_ext
 QT += core gui
 TEMPLATE = lib
-CONFIG += dll
+CONFIG += static
 
 equals(QT_MAJOR_VERSION, 5) {
   QT += widgets
 }
 
-macx {
-  DESTDIR = ../taskplanner.app/Contents/MacOS/
-}
-else {
-  DESTDIR = ../bin/
-}
+DESTDIR = ../lib
 
 include(../git_version.pri)
 include(patterns/patterns.pri)

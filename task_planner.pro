@@ -21,4 +21,6 @@ plugins.path = $$PWD/plugins
 plugins.depends = task_manager
 application.path = $$PWD/application
 application.depends = task_manager
+unittests.path = $$PWD/unittests
+unittests.depends = task_manager
 INSTALLS += task_manager
