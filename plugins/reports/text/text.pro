@@ -22,9 +22,7 @@ SOURCES += \
     textreport.cpp \
     textreportplugin.cpp
 
-
-macx: LIBS += -L$$OUT_PWD/../../../taskplanner.app/Contents/MacOS/
-else: LIBS += -L$$OUT_PWD/../../../bin/
+LIBS += -L$$OUT_PWD/../../../lib/
 
 LIBS *= -ltask_manager
 
