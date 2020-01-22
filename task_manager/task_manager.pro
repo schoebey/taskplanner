@@ -47,7 +47,8 @@ HEADERS += \
     reports/reportfactory.h \
     reports/reportinterface.h \
     reports/reportregister.h \
-    libtaskmanager.h
+    libtaskmanager.h \
+    constraint_grammar.h
 
 SOURCES += \
     constraint.cpp \
