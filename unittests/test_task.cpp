@@ -1,39 +1,84 @@
-#include "task_manager/manager.h"
-#include "task_manager/group.h"
-#include "task_manager/task.h"
+#include "libtaskmanager/manager.h"
+#include "libtaskmanager/group.h"
+#include "libtaskmanager/task.h"
 
 #include "gtest/gtest.h"
 
 namespace {
-  class TaskTest : public ::testing::Test {
-  protected:
-    TaskTest() {
-    }
+class TaskTest : public ::testing::Test {
+protected:
+  TaskTest() {
+  }
 
-    ~TaskTest() override {
-    }
+  ~TaskTest() override {
+  }
 
-    void SetUp() override {
-      m_pTask0 = m_manager.addTask(0); m_pTask0->setName("a");
-      m_pTask1 = m_manager.addTask(1); m_pTask1->setName("b");
-      m_pTask2 = m_manager.addTask(2); m_pTask2->setName("c");
+  void SetUp() override {
+    m_pTask0 = m_manager.addTask(0); m_pTask0->setName("a");
+    m_pTask1 = m_manager.addTask(1); m_pTask1->setName("b");
+    m_pTask2 = m_manager.addTask(2); m_pTask2->setName("c");
 
-      m_pGroup0 = m_manager.addGroup(0); m_pGroup0->setName("group a");
-      m_pGroup1 = m_manager.addGroup(1); m_pGroup1->setName("group b");
-      m_pGroup2 = m_manager.addGroup(2); m_pGroup2->setName("group c");
-    }
+    m_pGroup0 = m_manager.addGroup(0); m_pGroup0->setName("group a");
+    m_pGroup1 = m_manager.addGroup(1); m_pGroup1->setName("group b");
+    m_pGroup2 = m_manager.addGroup(2); m_pGroup2->setName("group c");
+  }
 
-    void TearDown() override {
-    }
+  void TearDown() override {
+  }
 
-    Manager m_manager;
-    ITask* m_pTask0;
-    ITask* m_pTask1;
-    ITask* m_pTask2;
-    IGroup* m_pGroup0;
-    IGroup* m_pGroup1;
-    IGroup* m_pGroup2;
-  };
+  Manager m_manager;
+  ITask* m_pTask0;
+  ITask* m_pTask1;
+  ITask* m_pTask2;
+  IGroup* m_pGroup0;
+  IGroup* m_pGroup1;
+  IGroup* m_pGroup2;
+};
+class TimedTaskTest : public TaskTest {
+protected:
+  TimedTaskTest() {
+  }
+
+  ~TimedTaskTest() override {
+  }
+
+  void SetUp() override {
+    TaskTest::SetUp();
+
+    m_start = QDateTime::fromString("2000-05-05T10:00:00", Qt::ISODate);
+    m_start2 = QDateTime::fromString("2000-05-05T12:00:00", Qt::ISODate);
+    m_start3 = QDateTime::fromString("2000-05-05T14:00:00", Qt::ISODate);
+    m_end = m_start.addSecs(1800);
+    m_end2 = m_start2.addSecs(1800);
+    m_end3 = m_start3.addSecs(1800);
+
+    // start the first fragment
+    m_pTask0->startWork(m_start);
+    // and stop it 30mins later
+    m_pTask0->stopWork(m_end);
+
+    // start the second fragment
+    m_pTask0->startWork(m_start2);
+    // and stop it 30mins later
+    m_pTask0->stopWork(m_end2);
+
+    // start the second fragment
+    m_pTask0->startWork(m_start3);
+    // and stop it 30mins later
+    m_pTask0->stopWork(m_end3);
+  }
+
+  void TearDown() override {
+  }
+
+
+  QDateTime m_start;
+  QDateTime m_start2;
+  QDateTime m_start3;
+  QDateTime m_end;
+  QDateTime m_end2;
+  QDateTime m_end3;
+};
 }
 
 
@@ -189,4 +234,113 @@ TEST_F(TaskTest, startStopWork_withSpecificTimepoints)
   EXPECT_EQ(startDateTime, timeFragments[0].startTime);
   EXPECT_EQ(stopDateTime, timeFragments[0].stopTime);
 }
+
+TEST_F(TimedTaskTest, insertTimeFragment_isolated)
+{
+  EXPECT_EQ(3u, m_pTask0->timeFragments().size());
+
+  // insert a time fragment that stands on its own
+  m_pTask0->insertTimeFragment(m_end.addSecs(300), m_end.addSecs(120));
+
+  EXPECT_EQ(4u, m_pTask0->timeFragments().size());
+}
+
+TEST_F(TimedTaskTest, insertTimeFragment_disappearIfFullyContainedWithinPreExisting)
+{
+  auto vFragments = m_pTask0->timeFragments();
+
+  // insert a time fragment that lies within a preexisting fragment
+  m_pTask0->insertTimeFragment(m_start.addSecs(60), m_end.addSecs(-60));
+
+  // the time fragments of the task should not have changed,
+  // since the freshly inserted one lies within a preexisting one
+  EXPECT_EQ(3u, m_pTask0->timeFragments().size());
+  EXPECT_EQ(vFragments, m_pTask0->timeFragments());
+}
+
+TEST_F(TimedTaskTest, insertTimeFragment_extendPreExistingIfOverlapOnLeft)
+{
+  auto vFragments = m_pTask0->timeFragments();
+
+  // insert a time fragment that starts before the first preexisting fragment
+  // and extends into it
+  m_pTask0->insertTimeFragment(m_start.addSecs(-300), m_start.addSecs(60));
+
+  // the amount of time fragments of the task should not have changed
+  auto vNewFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(3u, vNewFragments.size());
+
+  // the first fragment should now be larger
+  auto oldFragment = vFragments[0];
+  auto newFragment = vNewFragments[0];
+  EXPECT_EQ(300, newFragment.startTime.secsTo(oldFragment.startTime));
+  EXPECT_EQ(oldFragment.stopTime, newFragment.stopTime);
+}
+
+TEST_F(TimedTaskTest, insertTimeFragment_extendPreExistingIfOverlapOnRight)
+{
+  auto vFragments = m_pTask0->timeFragments();
+
+  // insert a time fragment that starts inside the first preexisting fragment
+  // and stops after it
+  m_pTask0->insertTimeFragment(m_start.addSecs(30), m_end.addSecs(300));
+
+  // the amount of time fragments of the task should not have changed
+  auto vNewFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(3u, vNewFragments.size());
+
+  // the first fragment should now be larger
+  auto oldFragment = vFragments[0];
+  auto newFragment = vNewFragments[0];
+  EXPECT_EQ(300, oldFragment.stopTime.secsTo(newFragment.stopTime));
+  EXPECT_EQ(oldFragment.startTime, newFragment.startTime);
+}
+
+TEST_F(TimedTaskTest, insertTimeFragment_extendPreExistingIfOverlapOnBothSides)
+{
+  auto vFragments = m_pTask0->timeFragments();
+
+  // insert a time fragment that starts before the first preexisting fragment
+  // and stops after it
+  m_pTask0->insertTimeFragment(m_start.addSecs(-300), m_end.addSecs(300));
+
+  // the amount of time fragments of the task should not have changed
+  auto vNewFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(3u, vNewFragments.size());
+
+  // the first fragment should now be larger
+  auto oldFragment = vFragments[0];
+  auto newFragment = vNewFragments[0];
+  EXPECT_EQ(300, oldFragment.stopTime.secsTo(newFragment.stopTime));
+  EXPECT_EQ(300, newFragment.startTime.secsTo(oldFragment.startTime));
+}
+
+
+TEST_F(TimedTaskTest, insertTimeFragment_mergeWithOtherFragmentsIfOverlapCoversGapInbetween)
+{
+  auto vFragments = m_pTask0->timeFragments();
+
+  // insert a time fragment that starts inside the first preexisting fragment
+  // and extends into the second preexisting fragment
+  m_pTask0->insertTimeFragment(m_start.addSecs(50), m_end.addSecs(5500));
+
+  // the amount of time fragments of the task should have changed
+  auto vNewFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(2u, vNewFragments.size());
+
+  // the first fragment should now be larger
+  auto oldFragment = vFragments[0];
+  auto oldFragment1 = vFragments[1];
+  auto newFragment = vNewFragments[0];
+  EXPECT_EQ(newFragment.startTime, oldFragment.startTime);
+  EXPECT_EQ(newFragment.stopTime, oldFragment1.stopTime);
+}
+
+
+
+
+
+
+
+
 

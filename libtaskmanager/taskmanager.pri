@@ -2,6 +2,9 @@ include(serializers/serializers.pri)
 include(reports/reports.pri)
 include(patterns/patterns.pri)
 
+INCLUDEPATH *= \
+    serializers
+
 SOURCES += \
     $$PWD/group.cpp \
     $$PWD/manager.cpp \
@@ -25,7 +28,6 @@ HEADERS += \
     $$PWD/taskinterface.h \
     $$PWD/groupinterface.h \
     $$PWD/serializablemanager.h \
-    $$PWD/container_utils.h \
     $$PWD/property.h \
     $$PWD/constraint.h \
     $$PWD/conversion.h \

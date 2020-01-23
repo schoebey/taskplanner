@@ -12,16 +12,17 @@ DISTFILES += \
     todos.md
 
 SUBDIRS += \
-    task_manager \
     plugins \
     application/application.pro \
-    unittests
+    unittests \
+    libtaskmanager \
+    libtaskmanager/libtaskmanager_static.pro \
 
-task_manager.path = $$PWD/task_manager
+libtaskmanager.path = $$PWD/libtaskmanager
 plugins.path = $$PWD/plugins
-plugins.depends = task_manager
+plugins.depends = libtaskmanager
 application.path = $$PWD/application
-application.depends = task_manager
+application.depends = libtaskmanager
 unittests.path = $$PWD/unittests
-unittests.depends = task_manager
-INSTALLS += task_manager
+unittests.depends = libtaskmanager
+INSTALLS += libtaskmanager

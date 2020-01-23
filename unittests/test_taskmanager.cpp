@@ -1,6 +1,6 @@
-#include "task_manager/manager.h"
-#include "task_manager/group.h"
-#include "task_manager/task.h"
+#include "libtaskmanager/manager.h"
+#include "libtaskmanager/group.h"
+#include "libtaskmanager/task.h"
 
 #include "gtest/gtest.h"
 

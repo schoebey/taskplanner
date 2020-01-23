@@ -306,6 +306,9 @@ void Task::insertTimeFragment(const QDateTime& start, const QDateTime& end)
   startWork(start);
   stopWork(end);
 
+  // TODO: move this code to stopWork so that merging of fragment also works
+  // with starting/stopping when providing specific date times.
+
   // iterate through all time fragments and check for overlaps or fragments
   // in close proximity to each other and fuse themg
   std::sort(m_vTimingInfo.begin(), m_vTimingInfo.end(),

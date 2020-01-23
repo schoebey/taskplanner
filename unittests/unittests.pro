@@ -9,13 +9,13 @@ macx {
 LIBS += -L$$OUT_PWD/../lib/
 
 INCLUDEPATH += $$PWD/.. \
-               $$PWD/../task_manager \
-               $$PWD/../task_manager/serializers \
-               $$PWD/../task_manager/reports
+               $$PWD/../libtaskmanager \
+               $$PWD/../libtaskmanager/serializers \
+               $$PWD/../libtaskmanager/reports
 
-DEPENDPATH += $$PWD/../task_manager
+DEPENDPATH += $$PWD/../libtaskmanager
 
-LIBS *= -ltask_manager \
+LIBS *= -ltaskmanager \
         -lgtest
 
 SOURCES += \
