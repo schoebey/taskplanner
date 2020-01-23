@@ -1,7 +1,7 @@
-#include "task_manager/property.h"
-#include "task_manager/conversion.h"
-#include "task_manager/constraint.h"
-#include "task_manager/constraint_grammar.h"
+#include "libtaskmanager/property.h"
+#include "libtaskmanager/conversion.h"
+#include "libtaskmanager/constraint.h"
+#include "libtaskmanager/constraint_grammar.h"
 
 #include "gtest/gtest.h"
 

@@ -99,14 +99,14 @@ RESOURCES += \
 
 LIBS += -L$$OUT_PWD/../lib/
 
-LIBS *= -ltask_manager
+LIBS *= -ltaskmanager
 
 unix {
     !macx: QMAKE_LFLAGS +=  -Wl,-rpath=\'\$$ORIGIN/\'
 }
 
 INCLUDEPATH += $$PWD \
-               $$PWD/../task_manager \
-               $$PWD/../task_manager/serializers \
-               $$PWD/../task_manager/reports \
-DEPENDPATH += $$PWD/../task_manager
+               $$PWD/../libtaskmanager \
+               $$PWD/../libtaskmanager/serializers \
+               $$PWD/../libtaskmanager/reports \
+DEPENDPATH += $$PWD/../libtaskmanager

@@ -24,8 +24,8 @@ SOURCES += \
 
 LIBS += -L$$OUT_PWD/../../../lib/
 
-LIBS *= -ltask_manager
+LIBS *= -ltaskmanager
 
-INCLUDEPATH += $$PWD/../../../task_manager \
-               $$PWD/../../../task_manager/serializers
-DEPENDPATH += $$PWD/../../../task_manager
+INCLUDEPATH += $$PWD/../../../libtaskmanager \
+               $$PWD/../../../libtaskmanager/serializers
+DEPENDPATH += $$PWD/../../../libtaskmanager
