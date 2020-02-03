@@ -1157,6 +1157,27 @@ void MainWindow::onPropertyChanged(task_id taskId,
       {
         pTaskWidget->setAutoPriority(pTask->autoPriority());
       }
+      else if ("expanded" == sPropertyName)
+      {
+        if (0 == sValue.compare("true", Qt::CaseInsensitive))
+        {
+          // create child task widgets
+          TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
+          auto pTask = m_pManager->task(taskId);
+          if (nullptr != pTaskWidget && nullptr != pTask)
+          {
+            for (auto childTaskId : pTask->taskIds())
+            {
+              TaskWidget* pChildTaskWidget = m_pWidgetManager->taskWidget(childTaskId);
+              if (nullptr == pChildTaskWidget)
+              {
+                pChildTaskWidget = m_pWidgetManager->createTaskWidget(childTaskId);
+                pTaskWidget->insertTask(pChildTaskWidget);
+              }
+            }
+          }
+        }
+      }
     }
 
     auto itTimer = m_autoSortTimers.find(pTask->group());
