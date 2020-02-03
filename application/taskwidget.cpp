@@ -943,9 +943,9 @@ void TaskWidget::requestInsert(TaskWidget *pTaskWidget, int iPos)
   ui->pTaskListWidget->requestInsert(pTaskWidget, iPos);
 }
 
-bool TaskWidget::insertTask(TaskWidget *pTaskWidget, int iPos)
+bool TaskWidget::insertTask(TaskWidget *pTaskWidget, int iPos, bool bAnimateInsert)
 {
-  if (ui->pTaskListWidget->insertTask(pTaskWidget, iPos))
+  if (ui->pTaskListWidget->insertTask(pTaskWidget, iPos, bAnimateInsert))
   {
     pTaskWidget->setParentContainerWidget(this);
     return true;

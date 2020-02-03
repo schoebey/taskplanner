@@ -23,7 +23,7 @@ public:
   static TaskListWidget* TaskListWidgetUnderMouse();
 
   void requestInsert(TaskWidget* pTaskWidget, int iPos = -1) override;
-  bool insertTask(TaskWidget* pTaskWidget, int iPos = -1) override;
+  bool insertTask(TaskWidget* pTaskWidget, int iPos = -1, bool bAnimateInsert = true) override;
   void removeTask(TaskWidget* pTaskWidget) override;
   std::vector<TaskWidget*> tasks() const override;
   void ensureVisible(QWidget* pWidget) override;
@@ -56,7 +56,7 @@ private:
 
 private slots:
   void updateTaskPositions();
-  void updatePositions(int iSpace = -1, int iSpacePos = 0);
+  void updatePositions(int iSpace = -1, int iSpacePos = 0, bool bAnimateMove = true);
   void setSize(int iWidth, int iHeight);
 
 private:
