@@ -315,8 +315,7 @@ TEST_F(TimedTaskTest, insertTimeFragment_extendPreExistingIfOverlapOnBothSides)
   EXPECT_EQ(300, newFragment.startTime.secsTo(oldFragment.startTime));
 }
 
-
-TEST_F(TimedTaskTest, insertTimeFragment_mergeWithOtherFragmentsIfOverlapCoversGapInbetween)
+TEST_F(TimedTaskTest, insertTimeFragment_mergeIfOverlapCoversGap)
 {
   auto vFragments = m_pTask0->timeFragments();
 
@@ -336,7 +335,18 @@ TEST_F(TimedTaskTest, insertTimeFragment_mergeWithOtherFragmentsIfOverlapCoversG
   EXPECT_EQ(newFragment.stopTime, oldFragment1.stopTime);
 }
 
+TEST_F(TimedTaskTest, removeimeFragment_isolated)
+{
+  auto vFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(3u, vFragments.size());
 
+  // remove a possibel time fragment that lies between two existing fragments
+  m_pTask0->removeTimeFragment(m_end.addSecs(300), m_end.addSecs(120));
+
+  // since the time to be removed does not touch any existing fragments,
+  // nothing should have been altered
+  EXPECT_EQ(vFragments, m_pTask0->timeFragments());
+}
 
 
 
