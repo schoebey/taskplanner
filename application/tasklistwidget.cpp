@@ -85,7 +85,7 @@ void TaskListWidget::requestInsert(TaskWidget* pTaskWidget, int iPos)
   }
 }
 
-bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
+bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos, bool bAnimateInsert)
 {
   if (m_vpTaskWidgets.end() ==
       std::find(m_vpTaskWidgets.begin(), m_vpTaskWidgets.end(), pTaskWidget))
@@ -96,7 +96,12 @@ bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
       iPos = static_cast<int>(m_vpTaskWidgets.size());
     }
 
-    QPoint currentPos = pTaskWidget->mapToGlobal(QPoint(0,0));
+    QPoint currentPos(0, 0);
+    if (bAnimateInsert)
+    {
+      currentPos = pTaskWidget->mapToGlobal(QPoint(0,0));
+    }
+
     auto bHasFocus = pTaskWidget->hasFocus();
     pTaskWidget->setParent(this);
     pTaskWidget->setTaskListWidget(this);
@@ -114,7 +119,14 @@ bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos)
     pTaskWidget->style()->unpolish(pTaskWidget);
     pTaskWidget->style()->polish(pTaskWidget);
 
-    QMetaObject::invokeMethod(this, "updatePositions", Qt::QueuedConnection);
+    if (bAnimateInsert)
+    {
+      QMetaObject::invokeMethod(this, "updatePositions", Qt::QueuedConnection);
+    }
+    else
+    {
+      updatePositions(-1, 0, false);
+    }
 
     return true;
   }
@@ -248,7 +260,7 @@ QSize TaskListWidget::sizeHint() const
   return m_minimumSize;
 }
 
-void TaskListWidget::updatePositions(int iSpace, int iGhostPos)
+void TaskListWidget::updatePositions(int iSpace, int iGhostPos, bool bAnimateMove)
 {
 
   QPoint origin(0,0);
@@ -269,7 +281,8 @@ void TaskListWidget::updatePositions(int iSpace, int iGhostPos)
   for (size_t iWidget = 0; iWidget < std::min<size_t>(ghostPos, m_vpTaskWidgets.size()); ++iWidget)
   {
     QWidget* pWidget = m_vpTaskWidgets[iWidget];
-    moveWidget(pWidget, origin);
+    if (bAnimateMove) moveWidget(pWidget, origin);
+    else pWidget->move(origin);
     pWidget->resize(width(), pWidget->height());
     origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
   }
@@ -288,7 +301,8 @@ void TaskListWidget::updatePositions(int iSpace, int iGhostPos)
   for (size_t iWidget = ghostPos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
   {
     QWidget* pWidget = m_vpTaskWidgets[iWidget];
-    moveWidget(pWidget, origin);
+    if (bAnimateMove) moveWidget(pWidget, origin);
+    else pWidget->move(origin);
     pWidget->resize(width(), pWidget->height());
     origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
   }

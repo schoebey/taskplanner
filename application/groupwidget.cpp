@@ -132,9 +132,9 @@ void GroupWidget::requestInsert(TaskWidget *pTaskWidget, int iPos)
   ui->pGroupTaskListWidget->requestInsert(pTaskWidget, iPos);
 }
 
-bool GroupWidget::insertTask(TaskWidget *pTaskWidget, int iPos)
+bool GroupWidget::insertTask(TaskWidget *pTaskWidget, int iPos, bool bAnimateInsert)
 {
-  if (ui->pGroupTaskListWidget->insertTask(pTaskWidget, iPos))
+  if (ui->pGroupTaskListWidget->insertTask(pTaskWidget, iPos, bAnimateInsert))
   {
     pTaskWidget->setParentContainerWidget(this);
     return true;
