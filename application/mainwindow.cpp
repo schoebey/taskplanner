@@ -1172,7 +1172,7 @@ void MainWindow::onPropertyChanged(task_id taskId,
               if (nullptr == pChildTaskWidget)
               {
                 pChildTaskWidget = m_pWidgetManager->createTaskWidget(childTaskId);
-                pTaskWidget->insertTask(pChildTaskWidget);
+                pTaskWidget->insertTask(pChildTaskWidget, -1, false);
               }
             }
           }

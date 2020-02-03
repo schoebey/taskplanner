@@ -77,7 +77,7 @@ public slots:
   void setExpanded(bool bExpanded);
 
   void requestInsert(TaskWidget* pTaskWidget, int iPos = -1) override;
-  bool insertTask(TaskWidget* pTaskWidget, int iPos = -1) override;
+  bool insertTask(TaskWidget* pTaskWidget, int iPos = -1, bool bAnimateInsert = true) override;
   void removeTask(TaskWidget* pTaskWidget) override;
   std::vector<TaskWidget*> tasks() const override;
   void ensureVisible(QWidget* pWidget) override;
