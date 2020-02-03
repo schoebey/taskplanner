@@ -12,7 +12,7 @@ TARGET = libtaskmanager_static
 TEMPLATE = lib
 CONFIG += staticlib
 
-DEFINES += LIB_TASK_MANAGER_LIBRARY
+DEFINES += LIB_TASK_MANAGER_STATIC
 
 
 # The following define makes your compiler emit warnings if you use
@@ -26,17 +26,5 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += \
-        lib_task_manager.cpp
-
-HEADERS += \
-        lib_task_manager.h \
-        lib_task_manager_global.h 
 
 include(taskmanager.pri)
-
-
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}

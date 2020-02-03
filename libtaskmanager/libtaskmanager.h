@@ -3,12 +3,11 @@
 
 #include <QtGlobal>
 
-//#if defined BUILD_TASKMANAGER_LIB
-// #define LIBTASKMANAGER Q_DECL_EXPORT
-//#else
-// #define LIBTASKMANAGER Q_DECL_IMPORT
-//#endif
-#define LIBTASKMANAGER
+#if defined BUILD_TASKMANAGER_LIB
+ #define LIBTASKMANAGER Q_DECL_EXPORT
+#else
+ #define LIBTASKMANAGER Q_DECL_IMPORT
+#endif
 
 
 #endif // LIBTASKMANAGER_H

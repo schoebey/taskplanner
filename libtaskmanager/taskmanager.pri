@@ -35,5 +35,6 @@ HEADERS += \
     $$PWD/parametrizable.h \
     $$PWD/parameter.h \
     $$PWD/parametrizableinterface.h \
-    $$PWD/propertyproviderinterface.h
+    $$PWD/propertyproviderinterface.h \
+    $$PWD/libtaskmanager.h
 
