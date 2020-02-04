@@ -45,6 +45,7 @@
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
 #include <QLineEdit>
+#include <QScrollArea>
 
 #include <array>
 #include <future>
@@ -1023,12 +1024,14 @@ void MainWindow::on_actionDisplayReport_triggered()
 
     OverlayWidget* pOverlay = new OverlayWidget(this);
     pOverlay->setObjectName("ReportDialog");
+    QScrollArea* pScrollArea = new QScrollArea(pOverlay);
     QLabel* pLabel = new QLabel(s);
     pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     pLabel->setObjectName("report");
     pLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     pOverlay->setAutoDeleteOnClose(true);
-    pOverlay->addWidget(pLabel);
+    pScrollArea->setWidget(pLabel);
+    pOverlay->addWidget(pScrollArea);
     pOverlay->setTitle(tr("Report"));
     pLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     pOverlay->appear();
