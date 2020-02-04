@@ -1658,6 +1658,17 @@ void MainWindow::onAddTimeToTaskRequested(task_id id)
   auto stop = std::get<1>(range);
   if (start.isValid() && stop.isValid())
   {
+    // first, free the time fragment from any other task to create a gap
+    // to prevent overlapping of time fragments of two tasks
+    for (const auto& id : m_pManager->taskIds())
+    {
+      auto pTask = m_pManager->task(id);
+      if (nullptr != pTask)
+      {
+        pTask->removeTimeFragment(start, stop);
+      }
+    }
+
     auto pTask = m_pManager->task(id);
     if (nullptr != pTask)
     {
@@ -1667,7 +1678,7 @@ void MainWindow::onAddTimeToTaskRequested(task_id id)
   }
 }
 
-void MainWindow::onRemoveTimeToTaskRequested(task_id id)
+void MainWindow::onRemoveTimeFromTaskRequested(task_id id)
 {
   auto range = getRangeFromDialog(tr("Remove time from task"),
                                   tr("Enter start and end time to be removed from the task:"));
