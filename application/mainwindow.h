@@ -86,7 +86,7 @@ private slots:
   void on_actionFind_triggered();
   void onPriorityUpdateRequested(task_id);
   void onAddTimeToTaskRequested(task_id);
-  void onRemoveTimeToTaskRequested(task_id);
+  void onRemoveTimeFromTaskRequested(task_id);
 
 signals:
   void timeTrackingStopped(task_id taskId);
