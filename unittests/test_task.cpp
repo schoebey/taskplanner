@@ -348,6 +348,62 @@ TEST_F(TimedTaskTest, removeimeFragment_isolated)
   EXPECT_EQ(vFragments, m_pTask0->timeFragments());
 }
 
+TEST_F(TimedTaskTest, removeimeFragment_shrinkIfOverlapOnLeft)
+{
+  auto vFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(3u, vFragments.size());
+
+  // remove a possible time fragment that partially overlaps the left part of an existing one
+  m_pTask0->removeTimeFragment(m_start.addSecs(-300), m_start.addSecs(300));
+
+  EXPECT_NE(vFragments, m_pTask0->timeFragments());
+
+  vFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(3u, vFragments.size());
+
+  EXPECT_EQ(m_start.addSecs(300), vFragments[0].startTime);
+  EXPECT_EQ(m_end, vFragments[0].stopTime);
+}
+
+TEST_F(TimedTaskTest, removeimeFragment_shrinkIfOverlapOnRight)
+{
+  auto vFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(3u, vFragments.size());
+
+  // remove a possible time fragment that partially overlaps the right part of an existing one
+  m_pTask0->removeTimeFragment(m_end.addSecs(-300), m_end.addSecs(300));
+
+  EXPECT_NE(vFragments, m_pTask0->timeFragments());
+
+  vFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(3u, vFragments.size());
+
+  EXPECT_EQ(m_end.addSecs(-300), vFragments[0].stopTime);
+  EXPECT_EQ(m_start, vFragments[0].startTime);
+}
+
+TEST_F(TimedTaskTest, removeimeFragment_splitIfFullyContained)
+{
+  auto vFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(3u, vFragments.size());
+
+  // remove a possible time fragment that lies in the middle of an existing one
+  m_pTask0->removeTimeFragment(m_start.addSecs(300), m_end.addSecs(-300));
+
+  EXPECT_NE(vFragments, m_pTask0->timeFragments());
+
+  vFragments = m_pTask0->timeFragments();
+  EXPECT_EQ(4u, vFragments.size());
+
+  // test the left part of the overlap
+  EXPECT_EQ(m_start, vFragments[0].startTime);
+  EXPECT_EQ(m_start.addSecs(300), vFragments[0].stopTime);
+
+  // test the right part of the overlap
+  EXPECT_EQ(m_end.addSecs(-300), vFragments[1].startTime);
+  EXPECT_EQ(m_end, vFragments[1].stopTime);
+}
+
 
 
 
