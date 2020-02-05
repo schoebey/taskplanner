@@ -79,7 +79,8 @@ GroupWidget* WidgetManager::createGroupWidget(group_id id)
 
 TaskWidget* WidgetManager::createTaskWidget(task_id id)
 {
-  TaskWidget* pTaskWidget = new TaskWidget(id);
+
+  TaskWidget* pTaskWidget = new TaskWidget(id, m_pController);
 
   QObject::connect(pTaskWidget, SIGNAL(renamed(task_id, QString)),                  m_pController, SLOT(renameTask(task_id, QString)));
   QObject::connect(pTaskWidget, SIGNAL(descriptionChanged(task_id, QString)),       m_pController, SLOT(changeTaskDescription(task_id, QString)));
