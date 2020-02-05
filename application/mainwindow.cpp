@@ -925,7 +925,7 @@ QMessageBox::StandardButton MainWindow::askSave()
     return static_cast<QMessageBox::StandardButton>(button);
   }
 
-  return QMessageBox::Cancel;
+  return QMessageBox::No;
 }
 
 void MainWindow::on_actionOpen_triggered()
