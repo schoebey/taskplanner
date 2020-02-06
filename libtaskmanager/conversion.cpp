@@ -20,6 +20,8 @@ namespace conversion
   static const std::vector<QString> powers = {"-", "thousand", "million", "billion", "trillion"};
   static const QString sAnd = "and";
 
+  static const std::vector<QString> negativePrefixes = {"minus", "negative"};
+
   namespace fancy
   {
     QString toString(const QTime& t)
@@ -172,8 +174,19 @@ namespace conversion
 
     int toInt(const QString& sNumber, bool* pbStatus, int iStartValue)
     {
-      QString sNumberCopy(sNumber.simplified());
+      QString sNumberCopy(sNumber.simplified().toLower());
       sNumberCopy.remove(" ");
+
+
+      bool bNumberIsNegative = false;
+      for (const QString& sNegativePrefix : negativePrefixes)
+      {
+        if (sNumberCopy.startsWith(sNegativePrefix))
+        {
+          bNumberIsNegative ^= true;
+          sNumberCopy.remove(0, sNegativePrefix.size());
+        }
+      }
 
 
       int iResult = 0;
@@ -235,7 +248,7 @@ namespace conversion
         *pbStatus = sNumberCopy.isEmpty();
       }
 
-      return iResult;
+      return bNumberIsNegative ? iResult : -iResult;
     }
   }
 

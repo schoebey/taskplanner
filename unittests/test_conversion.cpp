@@ -86,6 +86,10 @@ TEST(Conversion, fancy_int_fromString)
   iTest = conversion::fancy::toInt("seventytwomillionandthree", &bIsInt);
   EXPECT_TRUE(bIsInt);
   EXPECT_EQ(iTest, 72000003);
+
+  iTest = conversion::fancy::toInt("seventy two million and three", &bIsInt);
+  EXPECT_TRUE(bIsInt);
+  EXPECT_EQ(iTest, 72000003);
 }
 
 TEST(Conversion, fancy_int_fromString_failIfNotANumber)
@@ -123,7 +127,48 @@ TEST(Conversion, fancy_int_toString)
   QString s7FortyTwo = conversion::fancy::toString(742);
   QString sTest = conversion::fancy::toString(4711);
   QString sTest2 = conversion::fancy::toString(4711002);
+}
 
+TEST(Conversion, double_fromString)
+{
+  bool bConversionStatus(false);
+  double d0 = conversion::fromString<double>("3.141", bConversionStatus);
+  EXPECT_DOUBLE_EQ(3.141, d0);
+  EXPECT_TRUE(bConversionStatus);
+
+  double d1 = conversion::fromString<double>("0.07", bConversionStatus);
+  EXPECT_DOUBLE_EQ(0.07, d1);
+  EXPECT_TRUE(bConversionStatus);
+}
+
+TEST(Conversion, double_fromString_negative)
+{
+  bool bConversionStatus(false);
+  double d0 = conversion::fromString<double>("-3.141", bConversionStatus);
+  EXPECT_DOUBLE_EQ(-3.141, d0);
+  EXPECT_TRUE(bConversionStatus);
+
+  double d1 = conversion::fromString<double>("-0.07", bConversionStatus);
+  EXPECT_DOUBLE_EQ(-0.07, d1);
+  EXPECT_TRUE(bConversionStatus);
+}
+
+TEST(Conversion, double_toString)
+{
+  QString s0 = conversion::toString(3.141);
+  EXPECT_EQ("3.141", s0);
+
+  QString s1 = conversion::toString(0.07);
+  EXPECT_EQ("0.07", s1);
+}
+
+TEST(Conversion, double_toString_negative)
+{
+  QString s0 = conversion::toString(-3.141);
+  EXPECT_EQ("-3.141", s0);
+
+  QString s1 = conversion::toString(-0.07);
+  EXPECT_EQ("-0.07", s1);
 }
 
 
