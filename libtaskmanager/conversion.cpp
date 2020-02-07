@@ -240,7 +240,7 @@ namespace conversion
       iResult += iStartValue;
       if (iStartValue != iResult)
       {
-        return toInt(sNumberCopy, pbStatus, iResult);
+        return (bNumberIsNegative ? -1 : 1) * toInt(sNumberCopy, pbStatus, iResult);
       }
 
       if (nullptr != pbStatus)
@@ -248,7 +248,7 @@ namespace conversion
         *pbStatus = sNumberCopy.isEmpty();
       }
 
-      return bNumberIsNegative ? iResult : -iResult;
+      return bNumberIsNegative ? -iResult : iResult;
     }
   }
 
