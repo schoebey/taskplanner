@@ -8,9 +8,12 @@ CONFIG += c++11 skip_target_version_ext
 
 QT += core gui
 
-TARGET = libtaskmanager_static
+TARGET = taskmanager_static
 TEMPLATE = lib
 CONFIG += staticlib
+
+DESTDIR = ../lib/
+
 
 DEFINES += LIB_TASK_MANAGER_STATIC
 
