@@ -12,12 +12,9 @@ TARGET = taskmanager
 TEMPLATE = lib
 CONFIG += dll
 
-macx {
-  DESTDIR = ../taskplanner.app/Contents/MacOS/
-}
-else {
-  DESTDIR = ../bin/
-}
+include(../variables.pri)
+
+DESTDIR = $$LIB_DIR
 
 DEFINES += LIB_TASK_MANAGER_LIBRARY
 

@@ -3,6 +3,8 @@ QT += core gui
 TEMPLATE = lib
 TARGET = markdown
 
+include(../../../variables.pri)
+
 macx {
   DESTDIR = ../../../taskplanner.app/Contents/MacOS/plugins/serializers
 }
@@ -22,7 +24,7 @@ SOURCES += \
     markdownserializer.cpp \
     markdownserializerplugin.cpp
 
-LIBS += -L$$OUT_PWD/../../../lib/
+LIBS += -L$$LIB_DIR
 
 LIBS *= -ltaskmanager
 

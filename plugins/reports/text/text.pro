@@ -3,6 +3,8 @@ QT += core gui
 TEMPLATE = lib
 TARGET = text
 
+include(../../../variables.pri)
+
 macx {
   DESTDIR = ../../../taskplanner.app/Contents/MacOS/plugins/reports
 }
@@ -22,7 +24,7 @@ SOURCES += \
     textreport.cpp \
     textreportplugin.cpp
 
-LIBS += -L$$OUT_PWD/../../../lib/
+LIBS += -L$$LIB_DIR
 
 LIBS *= -ltaskmanager
 
