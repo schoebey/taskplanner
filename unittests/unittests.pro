@@ -6,7 +6,6 @@ macx {
   LIBS += -L/usr/local/lib
 }
 
-LIBS += -L$$OUT_PWD/../lib/
 
 INCLUDEPATH += $$PWD/.. \
                $$PWD/../libtaskmanager \
@@ -15,7 +14,8 @@ INCLUDEPATH += $$PWD/.. \
 
 DEPENDPATH += $$PWD/../libtaskmanager
 
-LIBS *= -ltaskmanager \
+LIBS += -L../lib/
+LIBS *= -ltaskmanager_static \
         -lgtest
 
 SOURCES += \
