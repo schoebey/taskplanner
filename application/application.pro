@@ -18,6 +18,7 @@ equals(QT_MAJOR_VERSION, 5) {
   QT += widgets
 }
 
+include(../variables.pri)
 include(../git_version.pri)
 
 SOURCES += \
@@ -97,7 +98,7 @@ FORMS += \
 RESOURCES += \
     $$PWD/resources/resource.qrc
 
-LIBS += -L$$OUT_PWD/../lib/
+LIBS += -L$$LIB_DIR
 
 LIBS *= -ltaskmanager
 
