@@ -26,3 +26,6 @@ SOURCES += \
     test_conversion.cpp \
     test_properties.cpp
 
+HEADERS += \
+    gtest_helpers.h
+
