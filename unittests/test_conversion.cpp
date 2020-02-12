@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
+#include "gtest_helpers.h"
 #include "libtaskmanager/conversion.h"
+
 
 
 TEST(Conversion, int_fromString)
@@ -124,9 +126,19 @@ TEST(Conversion, fancy_int_fromString_negative)
 TEST(Conversion, fancy_int_toString)
 {
   QString sFortyTwo = conversion::fancy::toString(42);
+  EXPECT_EQ("fortytwo", sFortyTwo);
+
   QString s7FortyTwo = conversion::fancy::toString(742);
+  EXPECT_EQ("sevenhundredandfortytwo", s7FortyTwo);
+
   QString sTest = conversion::fancy::toString(4711);
+  EXPECT_EQ("fourthousandsevenhundredandeleven", sTest);
+
+  QString s2005 = conversion::fancy::toString(2005);
+  EXPECT_EQ("twothousandandfive", s2005);
+
   QString sTest2 = conversion::fancy::toString(4711002);
+  EXPECT_EQ("fourmillionsevenhundredandeleventhousandandtwo", sTest2);
 }
 
 TEST(Conversion, double_fromString)
