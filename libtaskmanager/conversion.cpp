@@ -166,7 +166,8 @@ namespace conversion
 
       if (iRest != 0)
       {
-        sValue = toString(iRest, iDepth + 1) + sValue;
+        QString sAnd = (!sValue.isEmpty() && iHundreds == 0) ? "and" : "";
+        sValue = toString(iRest, iDepth + 1) + sAnd + sValue;
       }
 
       return sValue;
