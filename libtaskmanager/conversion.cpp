@@ -270,7 +270,8 @@ namespace conversion
                                                        "yy MM dd",
                                                        "dd.MM.yyyy",
                                                        "dd.MM.yy"};
-  template<> QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus)
+  QDateTime dateTimeFromString(const QString& sVal, bool& bConversionStatus,
+                               const QDateTime& baseDateTime)
   {
     for (const auto& format : c_sDateTimeFormats)
     {
@@ -330,7 +331,7 @@ in a hundred years
         {
           if (el.first.exactMatch(sUnit))
           {
-            QDateTime dt = QDateTime::currentDateTime();
+            QDateTime dt = baseDateTime;
             el.second(dt, iQuantity);
             bConversionStatus = true;
             return dt;
@@ -366,7 +367,7 @@ in a hundred years
                                                 QRegExp("nov(?:ember)?"),
                                                 QRegExp("dec(?:ember)?")};
     //static const std::map<QRegExp, QString> namedDates = {{QRegExp("xmas|christmas"), "Dec 24th"}};
-    QDateTime dt = QDateTime::currentDateTime();
+    QDateTime dt = baseDateTime;
     QRegExp nextInstance("^next (\\S*\\s*)");
     if (0 == nextInstance.indexIn(sVal))
     {
@@ -422,6 +423,11 @@ in a hundred years
     }
 
     return QDateTime();
+  }
+
+  template<> QDateTime fromString<QDateTime>(const QString& sVal, bool& bConversionStatus)
+  {
+    return dateTimeFromString(sVal, bConversionStatus, QDateTime::currentDateTime());
   }
 
   QString toString(const QDateTime& dt)
