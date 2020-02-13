@@ -2,7 +2,7 @@
 #include "gtest_helpers.h"
 #include "libtaskmanager/conversion.h"
 
-
+#include <QDateTime>
 
 TEST(Conversion, int_fromString)
 {
@@ -182,5 +182,50 @@ TEST(Conversion, double_toString_negative)
   QString s1 = conversion::toString(-0.07);
   EXPECT_EQ("-0.07", s1);
 }
+
+TEST(Conversion, date_fromString_nextWeekDay)
+{
+  std::vector<QString> vsDayNames = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
+  std::vector<QString> vsDayNamesShort = {"mon", "tue", "wed", "thu", "fri", "sat", "sun"};
+
+  for (int i = 0; i < vsDayNames.size(); ++i)
+  {
+    bool bStatus(false);
+    QDateTime dt = conversion::fromString<QDateTime>(QString("next %1").arg(vsDayNames[i]), bStatus);
+    EXPECT_TRUE(bStatus);
+    EXPECT_EQ(dt.date().dayOfWeek(), i + 1);
+    EXPECT_GT(dt.date().dayOfYear(), QDate::currentDate().dayOfYear());
+
+
+    dt = conversion::fromString<QDateTime>(QString("next %1").arg(vsDayNamesShort[i]), bStatus);
+    EXPECT_TRUE(bStatus);
+    EXPECT_EQ(dt.date().dayOfWeek(), i + 1);
+    EXPECT_GT(dt.date().dayOfYear(), QDate::currentDate().dayOfYear());
+  }
+}
+
+TEST(Conversion, date_fromString_nextMonth)
+{
+  std::vector<QString> vsMonthNames = {"january", "february", "march", "april", "may", "june", "july",
+                                       "august", "september", "october", "november", "december"};
+  std::vector<QString> vsMonthNamesShort = {"jan", "feb", "mar", "apr", "may", "jun", "jul",
+                                            "aug", "sep", "oct", "nov", "dec"};
+
+  for (int i = 0; i < vsMonthNames.size(); ++i)
+  {
+    bool bStatus(false);
+    QDateTime dt = conversion::fromString<QDateTime>(QString("next %1").arg(vsMonthNames[i]), bStatus);
+    EXPECT_TRUE(bStatus) << vsMonthNames[i];
+    EXPECT_EQ(dt.date().month(), i + 1) << vsMonthNames[i];
+    EXPECT_GT(dt.date(), QDate::currentDate()) << vsMonthNames[i];
+
+
+    dt = conversion::fromString<QDateTime>(QString("next %1").arg(vsMonthNamesShort[i]), bStatus);
+    EXPECT_TRUE(bStatus) << vsMonthNamesShort[i];
+    EXPECT_EQ(dt.date().month(), i + 1) << vsMonthNamesShort[i];
+    EXPECT_GT(dt.date(), QDate::currentDate()) << vsMonthNamesShort[i];
+  }
+}
+
 
 
