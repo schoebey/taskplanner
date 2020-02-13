@@ -189,7 +189,31 @@ TEST(Conversion, double_toString_negative)
   EXPECT_EQ("-0.07", s1);
 }
 
-TEST(Conversion, date_fromString_nextWeekDay)
+
+namespace
+{
+class DateTimeConversionTest : public ::testing::Test {
+protected:
+  DateTimeConversionTest() {
+  }
+
+  ~DateTimeConversionTest() override {
+  }
+
+  void SetUp() override {
+    m_baseDateTime = QDateTime::fromString("2000-05-01T00:00:00.000", Qt::ISODate);
+    m_baseDateTimeEndOfYear = QDateTime::fromString("1999-12-31T23:59:59.999", Qt::ISODate);
+  }
+
+  void TearDown() override {
+  }
+
+  QDateTime m_baseDateTime;
+  QDateTime m_baseDateTimeEndOfYear;
+};
+}
+
+TEST_F(DateTimeConversionTest, date_fromString_nextWeekDay)
 {
   std::vector<QString> vsDayNames = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
   std::vector<QString> vsDayNamesShort = {"mon", "tue", "wed", "thu", "fri", "sat", "sun"};
@@ -197,29 +221,50 @@ TEST(Conversion, date_fromString_nextWeekDay)
   for (int i = 0; i < vsDayNames.size(); ++i)
   {
     bool bStatus(false);
-    QDateTime dt = conversion::fromString<QDateTime>(QString("next %1").arg(vsDayNames[i]), bStatus);
+    QDateTime dt = conversion::dateTimeFromString(QString("next %1").arg(vsDayNames[i]), bStatus, m_baseDateTime);
     EXPECT_TRUE(bStatus);
     EXPECT_EQ(dt.date().dayOfWeek(), i + 1);
-    EXPECT_GT(dt.date().dayOfYear(), QDate::currentDate().dayOfYear());
+    EXPECT_GT(dt.date().dayOfYear(), m_baseDateTime.date().dayOfYear());
 
 
-    dt = conversion::fromString<QDateTime>(QString("next %1").arg(vsDayNamesShort[i]), bStatus);
+    dt = conversion::dateTimeFromString(QString("next %1").arg(vsDayNamesShort[i]), bStatus, m_baseDateTime);
     EXPECT_TRUE(bStatus);
     EXPECT_EQ(dt.date().dayOfWeek(), i + 1);
-    EXPECT_GT(dt.date().dayOfYear(), QDate::currentDate().dayOfYear());
+    EXPECT_GT(dt.date().dayOfYear(), m_baseDateTime.date().dayOfYear());
   }
 }
 
-TEST(Conversion, date_fromString_nextWeek)
+TEST_F(DateTimeConversionTest, date_fromString_nextWeek)
 {
   bool bStatus(false);
-  QDateTime dt = conversion::fromString<QDateTime>("next week", bStatus);
+  QDateTime dt = conversion::dateTimeFromString("next week", bStatus, m_baseDateTime);
   EXPECT_TRUE(bStatus);
-  EXPECT_EQ(dt.date().dayOfWeek(), QDate::currentDate().dayOfWeek());
-  EXPECT_EQ(dt.date().weekNumber(), QDate::currentDate().weekNumber() + 1);
+  EXPECT_EQ(dt.date().dayOfWeek(), m_baseDateTime.date().dayOfWeek());
+  EXPECT_EQ(dt.date().weekNumber(), m_baseDateTime.date().weekNumber() + 1);
+
+  // if at the end of the year, we expect a wraparound
+  dt = conversion::dateTimeFromString("next week", bStatus, m_baseDateTimeEndOfYear);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().dayOfWeek(), m_baseDateTimeEndOfYear.date().dayOfWeek());
+  EXPECT_EQ(1, dt.date().weekNumber());
 }
 
-TEST(Conversion, date_fromString_nextMonth)
+TEST_F(DateTimeConversionTest, date_fromString_nextMonth)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString("next month", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().day(), m_baseDateTime.date().day());
+  EXPECT_EQ(dt.date().month(), m_baseDateTime.date().month() + 1);
+
+  // if at the end of the year, we expect a wraparound
+  dt = conversion::dateTimeFromString("next month", bStatus, m_baseDateTimeEndOfYear);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().day(), m_baseDateTimeEndOfYear.date().day());
+  EXPECT_EQ(1, dt.date().month());
+}
+
+TEST_F(DateTimeConversionTest, date_fromString_nextMonthName)
 {
   std::vector<QString> vsMonthNames = {"january", "february", "march", "april", "may", "june", "july",
                                        "august", "september", "october", "november", "december"};
@@ -229,18 +274,58 @@ TEST(Conversion, date_fromString_nextMonth)
   for (int i = 0; i < vsMonthNames.size(); ++i)
   {
     bool bStatus(false);
-    QDateTime dt = conversion::fromString<QDateTime>(QString("next %1").arg(vsMonthNames[i]), bStatus);
+    QDateTime dt = conversion::dateTimeFromString(QString("next %1").arg(vsMonthNames[i]), bStatus, m_baseDateTime);
     EXPECT_TRUE(bStatus) << vsMonthNames[i];
     EXPECT_EQ(dt.date().month(), i + 1) << vsMonthNames[i];
-    EXPECT_GT(dt.date(), QDate::currentDate()) << vsMonthNames[i];
+    EXPECT_GT(dt, m_baseDateTime) << vsMonthNames[i];
 
 
-    dt = conversion::fromString<QDateTime>(QString("next %1").arg(vsMonthNamesShort[i]), bStatus);
+    dt = conversion::dateTimeFromString(QString("next %1").arg(vsMonthNamesShort[i]), bStatus, m_baseDateTime);
     EXPECT_TRUE(bStatus) << vsMonthNamesShort[i];
     EXPECT_EQ(dt.date().month(), i + 1) << vsMonthNamesShort[i];
-    EXPECT_GT(dt.date(), QDate::currentDate()) << vsMonthNamesShort[i];
+    EXPECT_GT(dt, m_baseDateTime) << vsMonthNamesShort[i];
   }
 }
 
+
+TEST_F(DateTimeConversionTest, date_fromString_relativeOffset_weeks)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString("in one week", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().weekNumber(), m_baseDateTime.date().weekNumber() + 1);
+
+  dt = conversion::dateTimeFromString("in 1 week", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().weekNumber(), m_baseDateTime.date().weekNumber() + 1);
+
+  dt = conversion::dateTimeFromString("in five weeks", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().weekNumber(), m_baseDateTime.date().weekNumber() + 5);
+
+  dt = conversion::dateTimeFromString("in 5 weeks", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().weekNumber(), m_baseDateTime.date().weekNumber() + 5);
+}
+
+TEST_F(DateTimeConversionTest, date_fromString_relativeOffset_days)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString("in one day", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().dayOfYear() + 1);
+
+  dt = conversion::dateTimeFromString("in 1 day", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().dayOfYear() + 1);
+
+  dt = conversion::dateTimeFromString("in five days", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().dayOfYear() + 5);
+
+  dt = conversion::dateTimeFromString("in 5 days", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().dayOfYear() + 5);
+}
 
 
