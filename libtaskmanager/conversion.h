@@ -71,6 +71,7 @@ namespace conversion
   template<> int LIBTASKMANAGER fromString<int>(const QString& sVal, bool& bConversionStatus);
 
   //-- QDateTime
+  QDateTime LIBTASKMANAGER dateTimeFromString(const QString& sVal, bool& bConversionStatus, const QDateTime& baseDateTime);
   template<> QDateTime LIBTASKMANAGER fromString<QDateTime>(const QString& sVal, bool& bConversionStatus);
   QString LIBTASKMANAGER toString(const QDateTime& dt);
 
