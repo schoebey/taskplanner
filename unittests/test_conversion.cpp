@@ -4,6 +4,12 @@
 
 #include <QDateTime>
 
+std::ostream& operator<<(std::ostream& o, const QString& s)
+{
+  o << s.toUtf8().constData();
+  return o;
+}
+
 TEST(Conversion, int_fromString)
 {
   bool bConversionStatus(false);
@@ -202,6 +208,15 @@ TEST(Conversion, date_fromString_nextWeekDay)
     EXPECT_EQ(dt.date().dayOfWeek(), i + 1);
     EXPECT_GT(dt.date().dayOfYear(), QDate::currentDate().dayOfYear());
   }
+}
+
+TEST(Conversion, date_fromString_nextWeek)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::fromString<QDateTime>("next week", bStatus);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.date().dayOfWeek(), QDate::currentDate().dayOfWeek());
+  EXPECT_EQ(dt.date().weekNumber(), QDate::currentDate().weekNumber() + 1);
 }
 
 TEST(Conversion, date_fromString_nextMonth)
