@@ -356,6 +356,7 @@ in a hundred years
     static const std::vector<QRegExp> months = {QRegExp("jan(?:uary)?"),
                                                 QRegExp("feb(?:ruary)?"),
                                                 QRegExp("mar(?:ch)?"),
+                                                QRegExp("apr(?:il)?"),
                                                 QRegExp("may"),
                                                 QRegExp("jun(?:e)?"),
                                                 QRegExp("jul(?:y)?"),
