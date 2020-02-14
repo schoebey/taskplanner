@@ -213,6 +213,38 @@ protected:
 };
 }
 
+TEST_F(DateTimeConversionTest, date_fromString_tomorow)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString(QString("tomorrow"), bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  // moving the day should not alter the time
+  EXPECT_EQ(dt.time(), m_baseDateTime.time());
+  EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().addDays(1).dayOfYear());
+
+  dt = conversion::dateTimeFromString(QString("tomorrow at noon"), bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time(), QTime(12, 0));
+  EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().addDays(1).dayOfYear());
+}
+
+
+
+TEST_F(DateTimeConversionTest, date_fromString_fixedTime)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString(QString("at 7:45 AM"), bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  // moving the day should not alter the time
+  EXPECT_EQ(dt.time(), m_baseDateTime.time());
+  EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().addDays(1).dayOfYear());
+
+  dt = conversion::dateTimeFromString(QString("on august 25th"), bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time(), QTime(12, 0));
+  EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().addDays(1).dayOfYear());
+}
+
 TEST_F(DateTimeConversionTest, date_fromString_nextWeekDay)
 {
   std::vector<QString> vsDayNames = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
@@ -326,6 +358,78 @@ TEST_F(DateTimeConversionTest, date_fromString_relativeOffset_days)
   dt = conversion::dateTimeFromString("in 5 days", bStatus, m_baseDateTime);
   EXPECT_TRUE(bStatus);
   EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().dayOfYear() + 5);
+}
+
+TEST_F(DateTimeConversionTest, time_fromString_relativeOffset_hours)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString("in one hour", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().hour(), m_baseDateTime.time().addSecs(1 * 3600).hour());
+
+  dt = conversion::dateTimeFromString("in 1 hour", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().hour(), m_baseDateTime.time().addSecs(1 * 3600).hour());
+
+  dt = conversion::dateTimeFromString("in five hours", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().hour(), m_baseDateTime.time().addSecs(5 * 3600).hour());
+
+  dt = conversion::dateTimeFromString("in 5 hours", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().hour(), m_baseDateTime.time().addSecs(5 * 3600).hour());
+
+  dt = conversion::dateTimeFromString("in -5 hours", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().hour(), m_baseDateTime.time().addSecs(-5 * 3600).hour());
+}
+
+TEST_F(DateTimeConversionTest, time_fromString_relativeOffset_minutes)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString("in one minute", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().minute(), m_baseDateTime.time().addSecs(1 * 60).minute());
+
+  dt = conversion::dateTimeFromString("in 1 minute", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().minute(), m_baseDateTime.time().addSecs(1 * 60).minute());
+
+  dt = conversion::dateTimeFromString("in five minutes", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().minute(), m_baseDateTime.time().addSecs(5 * 60).minute());
+
+  dt = conversion::dateTimeFromString("in 5 minutes", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().minute(), m_baseDateTime.time().addSecs(5 * 60).minute());
+
+  dt = conversion::dateTimeFromString("in -5 minutes", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().minute(), m_baseDateTime.time().addSecs(-5 * 60).minute());
+}
+
+TEST_F(DateTimeConversionTest, time_fromString_relativeOffset_seconds)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString("in one second", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().second(), m_baseDateTime.time().addSecs(1).second());
+
+  dt = conversion::dateTimeFromString("in 1 second", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().second(), m_baseDateTime.time().addSecs(1).second());
+
+  dt = conversion::dateTimeFromString("in five seconds", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().second(), m_baseDateTime.time().addSecs(5).second());
+
+  dt = conversion::dateTimeFromString("in 5 seconds", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().second(), m_baseDateTime.time().addSecs(5).second());
+
+  dt = conversion::dateTimeFromString("in -5 seconds", bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time().second(), m_baseDateTime.time().addSecs(-5).second());
 }
 
 
