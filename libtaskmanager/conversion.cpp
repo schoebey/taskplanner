@@ -270,6 +270,9 @@ namespace conversion
                                                        "yy MM dd",
                                                        "dd.MM.yyyy",
                                                        "dd.MM.yy"};
+
+  static const std::set<QString> c_sTimeFormats = {"hh:mm:ss",
+                                                       "hh:mm"};
   QDateTime dateTimeFromString(const QString& sVal, bool& bConversionStatus,
                                const QDateTime& baseDateTime)
   {
@@ -280,9 +283,35 @@ namespace conversion
       if (bConversionStatus)  { return dt; }
     }
 
+    for (const auto& format : c_sTimeFormats)
+    {
+      QTime t = QTime::fromString(sVal, format);
+      bConversionStatus = t.isValid();
+      if (bConversionStatus)
+      {
+        QDateTime copy(baseDateTime);
+        copy.setTime(t);
+        return copy;
+      }
+    }
+
     // if standard Qt date format didn't match, try custom matching
     // e.g. aug 25th (without year would match the next occurrence)
     // TODO: implement
+
+    // first, try to match fixed date or time points
+    // e.g. at 7:45 AM
+    // or on august 25th
+    QRegExp rx(R"(^(on|at)\s(.*))");
+    if (0 == rx.indexIn(sVal))
+    {
+      // we have an absolute time/date point. Parse it!
+      QString sDateTime = rx.cap(2);
+
+      return dateTimeFromString(sDateTime, bConversionStatus, baseDateTime);
+    }
+
+
 
     // try to match natural language input
     /*
@@ -299,6 +328,7 @@ in two and a half weeks
 in 5mins
 in a hundred years
 */
+    std::function<void(QDateTime&, const QTime&)> setTime = [](QDateTime& dt, const QTime& t) { dt.setTime(t); };
     std::function<void(QDateTime&, int)> addSecs = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(iOffset); };
     std::function<void(QDateTime&, int)> addMins = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(60 * iOffset); };
     std::function<void(QDateTime&, int)> addHours = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(3600 * iOffset); };
@@ -421,6 +451,40 @@ in a hundred years
       // named days (holidays, e.g. 'christmas')?
       // TODO: could benefit from working implementation of 'dateFromTrivialString("dec 24th")'
     }
+
+
+    // keywords, e.g. 'tomorrow', 'yesterday', 'noon', 'midnight', etc.
+    std::vector<std::pair<QRegExp, std::function<void(QDateTime&)>>> addFixQuantityForKeywords;
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("tomorrow"), std::bind(addDays, std::placeholders::_1, 1)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("yesterday"), std::bind(addDays, std::placeholders::_1, -1)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("midnight"), std::bind(setTime, std::placeholders::_1, QTime(0, 0))));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("noon"), std::bind(setTime, std::placeholders::_1, QTime(12, 0))));
+
+
+    for (const auto& el : addFixQuantityForKeywords)
+    {
+      // if keyword finds a match in the string, execute its function
+      // After a match was found, remove the whole capture and call dateFromString with the rest
+      // This way, constructs like "tomorrow at 4:53" should be possible...
+      int iIndex = el.first.indexIn(sVal);
+      if (-1 != iIndex)
+      {
+        el.second(dt);
+        QString sModifiedVal(sVal);
+        sModifiedVal.remove(iIndex, el.first.matchedLength());
+
+        if (!sModifiedVal.isEmpty())
+        {
+          return dateTimeFromString(sModifiedVal, bConversionStatus, dt);
+        }
+        else
+        {
+          bConversionStatus = true;
+          return dt;
+        }
+      }
+    }
+
 
     return QDateTime();
   }
