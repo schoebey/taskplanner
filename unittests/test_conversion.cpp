@@ -230,19 +230,32 @@ TEST_F(DateTimeConversionTest, date_fromString_tomorow)
 
 
 
-TEST_F(DateTimeConversionTest, date_fromString_fixedTime)
+TEST_F(DateTimeConversionTest, date_fromString_absoluteTime)
 {
   bool bStatus(false);
   QDateTime dt = conversion::dateTimeFromString(QString("at 7:45 AM"), bStatus, m_baseDateTime);
   EXPECT_TRUE(bStatus);
-  // moving the day should not alter the time
-  EXPECT_EQ(dt.time(), m_baseDateTime.time());
-  EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().addDays(1).dayOfYear());
+  // setting the time should not alter the day
+  EXPECT_EQ(dt.time(), QTime(7, 45));
+  EXPECT_EQ(dt.date(), m_baseDateTime.date());
+}
 
-  dt = conversion::dateTimeFromString(QString("on august 25th"), bStatus, m_baseDateTime);
+TEST_F(DateTimeConversionTest, date_fromString_absoluteDate)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString(QString("on august 25th"), bStatus, m_baseDateTime);
   EXPECT_TRUE(bStatus);
-  EXPECT_EQ(dt.time(), QTime(12, 0));
-  EXPECT_EQ(dt.date().dayOfYear(), m_baseDateTime.date().addDays(1).dayOfYear());
+  EXPECT_EQ(dt.time(), QTime(0, 0));
+  EXPECT_EQ(dt.date(), QDate(2000, 8, 25));
+}
+
+TEST_F(DateTimeConversionTest, date_fromString_absoluteDateTime)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString(QString("on august 25th at 7:45 AM"), bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time(), QTime(7, 45));
+  EXPECT_EQ(dt.date(), QDate(2000, 8, 25));
 }
 
 TEST_F(DateTimeConversionTest, date_fromString_nextWeekDay)

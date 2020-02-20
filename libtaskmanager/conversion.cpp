@@ -261,22 +261,43 @@ namespace conversion
     return fancy::toInt(sVal, &bConversionStatus);
   }
 
-  static const std::set<QString> c_sDateTimeFormats = {c_sDateTimeFormat,
-                                                       "yyyy-MM-dd hh:mm:ss",
-                                                       "yyyy-MM-dd hh:mm",
-                                                       "yyyy-MM-dd",
-                                                       "yy-MM-dd",
-                                                       "yyyy MM dd",
-                                                       "yy MM dd",
-                                                       "dd.MM.yyyy",
-                                                       "dd.MM.yy"};
+  bool setDayFromString(QDateTime& dt, const QString& s)
+  {
+    if (s.isEmpty())  { return true; }
+
+    QRegExp rx(R"(\d{1,2})");
+    if (0 <= rx.indexIn(s))
+    {
+      bool bOk(false);
+      int iDay = rx.cap(0).toInt(&bOk);
+      if (bOk && 0 < iDay && iDay < dt.date().daysInMonth())
+      {
+        dt = dt.addDays(iDay - dt.date().day());
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  static const std::set<QString> c_sDateFormats = {c_sDateTimeFormat,
+                                                   "yyyy-MM-dd",
+                                                   "yy-MM-dd",
+                                                   "yyyy MM dd",
+                                                   "yy MM dd",
+                                                   "dd.MM.yyyy",
+                                                   "dd.MM.yy"};
 
   static const std::set<QString> c_sTimeFormats = {"hh:mm:ss",
-                                                       "hh:mm"};
+                                                   "hh:mm:ss AP",
+                                                   "hh:mm:ss ap",
+                                                   "hh:mm",
+                                                   "hh:mm AP",
+                                                   "hh:mm ap"};
   QDateTime dateTimeFromString(const QString& sVal, bool& bConversionStatus,
                                const QDateTime& baseDateTime)
   {
-    for (const auto& format : c_sDateTimeFormats)
+    for (const auto& format : c_sDateFormats)
     {
       QDateTime dt = QDateTime::fromString(sVal, format);
       bConversionStatus = dt.isValid();
@@ -297,18 +318,58 @@ namespace conversion
 
     // if standard Qt date format didn't match, try custom matching
     // e.g. aug 25th (without year would match the next occurrence)
-    // TODO: implement
+
+    // try to separate date and time
 
     // first, try to match fixed date or time points
     // e.g. at 7:45 AM
-    // or on august 25th
-    QRegExp rx(R"(^(on|at)\s(.*))");
+//    on august 25th
+//    on august 25th at 7:45 PM
+    QRegExp rx(R"((^.*)( on | at |@)(.*))");
     if (0 == rx.indexIn(sVal))
     {
       // we have an absolute time/date point. Parse it!
-      QString sDateTime = rx.cap(2);
+      QString sFirstPart = rx.cap(1);
+      QString sSecondPart = rx.cap(3);
 
-      return dateTimeFromString(sDateTime, bConversionStatus, baseDateTime);
+      if (sFirstPart.isEmpty() ^ sSecondPart.isEmpty())
+      {
+        return dateTimeFromString(sFirstPart.isEmpty() ? sSecondPart : sFirstPart, bConversionStatus, baseDateTime);
+      }
+
+      QDateTime dt = dateTimeFromString(sFirstPart, bConversionStatus, baseDateTime);
+      if (bConversionStatus)
+      {
+        return dateTimeFromString(sSecondPart, bConversionStatus, dt);
+      }
+    }
+    else
+    {
+      rx = QRegExp(R"(^(on |at |@)\s*(.*)$)");
+      if (0 == rx.indexIn(sVal))
+      {
+        QString sCap = rx.cap(2);
+        if (!sCap.isEmpty())
+        {
+          return dateTimeFromString(sCap, bConversionStatus, baseDateTime);
+        }
+      }
+      else
+      {
+        QStringList parts = sVal.split(" ");
+        if (2 <= parts.size())
+        {
+          QDateTime dt = dateTimeFromString(parts[0], bConversionStatus, baseDateTime);
+          if (bConversionStatus)
+          {
+            QDateTime dt2 = dateTimeFromString(parts[1], bConversionStatus, dt);
+            if (bConversionStatus)
+            {
+              return dt2;
+            }
+          }
+        }
+      }
     }
 
 
@@ -398,10 +459,10 @@ in a hundred years
                                                 QRegExp("dec(?:ember)?")};
     //static const std::map<QRegExp, QString> namedDates = {{QRegExp("xmas|christmas"), "Dec 24th"}};
     QDateTime dt = baseDateTime;
-    QRegExp nextInstance("^next (\\S*\\s*)");
+    QRegExp nextInstance(R"(^(next )?(\S*\s*))");
     if (0 == nextInstance.indexIn(sVal))
     {
-      QString sType = nextInstance.cap(1);
+      QString sType = nextInstance.cap(2);
 
       // unit (see above)?
       for (const auto& el : addUnitQuantity)
@@ -436,13 +497,18 @@ in a hundred years
       // month (jan-dec)?
       for (int i = 0; i < months.size(); ++i)
       {
-        if (0 == months[i].indexIn(sType))
+        if (0 <= months[i].indexIn(sType))
         {
           int iCurrentMonth = dt.date().month() - 1;
           int iOffset = i - iCurrentMonth;
           if (iOffset <= 0)  iOffset += 12;
           dt = dt.addMonths(iOffset);
-          bConversionStatus = true;
+
+          QString sRest = sVal;
+          sRest.remove(nextInstance.cap(0));
+
+          // try to extract day number from the rest
+          bConversionStatus = setDayFromString(dt, sRest);
           return dt;
         }
       }
