@@ -390,6 +390,9 @@ in 5mins
 in a hundred years
 */
     std::function<void(QDateTime&, const QTime&)> setTime = [](QDateTime& dt, const QTime& t) { dt.setTime(t); };
+    std::function<void(QDateTime&, int, int, int)> setDate = [](QDateTime& dt, int iYear, int iMonth, int iDay) { dt.setDate(QDate(-1 == iYear ? dt.date().year() : iYear,
+                                                                                                                                   -1 == iMonth ? dt.date().month() : iMonth,
+                                                                                                                                   -1 == iDay ? dt.date().day() : iDay)); };
     std::function<void(QDateTime&, int)> addSecs = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(iOffset); };
     std::function<void(QDateTime&, int)> addMins = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(60 * iOffset); };
     std::function<void(QDateTime&, int)> addHours = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(3600 * iOffset); };
@@ -457,11 +460,22 @@ in a hundred years
                                                 QRegExp("oct(?:ober)?"),
                                                 QRegExp("nov(?:ember)?"),
                                                 QRegExp("dec(?:ember)?")};
-    //static const std::map<QRegExp, QString> namedDates = {{QRegExp("xmas|christmas"), "Dec 24th"}};
+    // keywords, e.g. 'tomorrow', 'yesterday', 'noon', 'midnight', etc.
+    std::vector<std::pair<QRegExp, std::function<void(QDateTime&)>>> addFixQuantityForKeywords;
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("tomorrow"), std::bind(addDays, std::placeholders::_1, 1)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("yesterday"), std::bind(addDays, std::placeholders::_1, -1)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("midnight"), std::bind(setTime, std::placeholders::_1, QTime(0, 0))));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("noon"), std::bind(setTime, std::placeholders::_1, QTime(12, 0))));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("christmas|xmas"), std::bind(setDate, std::placeholders::_1, -1, 12, 25)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("new year's eve"), std::bind(setDate, std::placeholders::_1, -1, 12, 31)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("new year"), std::bind(setDate, std::placeholders::_1, -1, 1, 1)));
+
     QDateTime dt = baseDateTime;
-    QRegExp nextInstance(R"(^(next )?(\S*\s*))");
+    QRegExp nextInstance(R"(^(next |this )?(\D*))");
     if (0 == nextInstance.indexIn(sVal))
     {
+      // TODO: differentiate this/next (-> next occurrence,or the one after)
+      QString sInst = nextInstance.cap(1);
       QString sType = nextInstance.cap(2);
 
       // unit (see above)?
@@ -516,37 +530,27 @@ in a hundred years
 
       // named days (holidays, e.g. 'christmas')?
       // TODO: could benefit from working implementation of 'dateFromTrivialString("dec 24th")'
-    }
-
-
-    // keywords, e.g. 'tomorrow', 'yesterday', 'noon', 'midnight', etc.
-    std::vector<std::pair<QRegExp, std::function<void(QDateTime&)>>> addFixQuantityForKeywords;
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("tomorrow"), std::bind(addDays, std::placeholders::_1, 1)));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("yesterday"), std::bind(addDays, std::placeholders::_1, -1)));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("midnight"), std::bind(setTime, std::placeholders::_1, QTime(0, 0))));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("noon"), std::bind(setTime, std::placeholders::_1, QTime(12, 0))));
-
-
-    for (const auto& el : addFixQuantityForKeywords)
-    {
-      // if keyword finds a match in the string, execute its function
-      // After a match was found, remove the whole capture and call dateFromString with the rest
-      // This way, constructs like "tomorrow at 4:53" should be possible...
-      int iIndex = el.first.indexIn(sVal);
-      if (-1 != iIndex)
+      for (const auto& el : addFixQuantityForKeywords)
       {
-        el.second(dt);
-        QString sModifiedVal(sVal);
-        sModifiedVal.remove(iIndex, el.first.matchedLength());
+        // if keyword finds a match in the string, execute its function
+        // After a match was found, remove the whole capture and call dateFromString with the rest
+        // This way, constructs like "tomorrow at 4:53" should be possible...
+        int iIndex = el.first.indexIn(sType);
+        if (-1 != iIndex)
+        {
+          el.second(dt);
+          QString sModifiedVal(sType);
+          sModifiedVal.remove(iIndex, el.first.matchedLength());
 
-        if (!sModifiedVal.isEmpty())
-        {
-          return dateTimeFromString(sModifiedVal, bConversionStatus, dt);
-        }
-        else
-        {
-          bConversionStatus = true;
-          return dt;
+          if (!sModifiedVal.isEmpty())
+          {
+            return dateTimeFromString(sModifiedVal, bConversionStatus, dt);
+          }
+          else
+          {
+            bConversionStatus = true;
+            return dt;
+          }
         }
       }
     }
