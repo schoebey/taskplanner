@@ -389,10 +389,33 @@ in two and a half weeks
 in 5mins
 in a hundred years
 */
-    std::function<void(QDateTime&, const QTime&)> setTime = [](QDateTime& dt, const QTime& t) { dt.setTime(t); };
-    std::function<void(QDateTime&, int, int, int)> setDate = [](QDateTime& dt, int iYear, int iMonth, int iDay) { dt.setDate(QDate(-1 == iYear ? dt.date().year() : iYear,
-                                                                                                                                   -1 == iMonth ? dt.date().month() : iMonth,
-                                                                                                                                   -1 == iDay ? dt.date().day() : iDay)); };
+    std::function<void(QDateTime&, const QTime&)> setToNextTime = [](QDateTime& dt, const QTime& t)
+    {
+      if (dt.time() > t)
+      {
+        dt.addDays(1);
+      }
+      dt.setTime(t);
+    };
+
+    std::function<void(QDateTime&, int, int, int)> setToNextDate = [](QDateTime& dt, int iYear, int iMonth, int iDay)
+    {
+      QDate date(dt.date());
+      if (-1 == iYear)
+      {
+        if (-1 != iMonth && iMonth < date.month()) { iYear = date.year() + 1; } else { iYear = date.year(); }
+      }
+
+      if (-1 == iMonth)
+      {
+        if (-1 != iDay && iDay < date.day()) { iMonth = date.month() + 1; } else { iMonth = date.month(); }
+      }
+
+
+      date = QDate(iYear, iMonth, iDay);
+
+      dt.setDate(date);
+    };
     std::function<void(QDateTime&, int)> addSecs = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(iOffset); };
     std::function<void(QDateTime&, int)> addMins = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(60 * iOffset); };
     std::function<void(QDateTime&, int)> addHours = [](QDateTime& dt, int iOffset) { dt = dt.addSecs(3600 * iOffset); };
@@ -464,11 +487,11 @@ in a hundred years
     std::vector<std::pair<QRegExp, std::function<void(QDateTime&)>>> addFixQuantityForKeywords;
     addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("tomorrow"), std::bind(addDays, std::placeholders::_1, 1)));
     addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("yesterday"), std::bind(addDays, std::placeholders::_1, -1)));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("midnight"), std::bind(setTime, std::placeholders::_1, QTime(0, 0))));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("noon"), std::bind(setTime, std::placeholders::_1, QTime(12, 0))));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("christmas|xmas"), std::bind(setDate, std::placeholders::_1, -1, 12, 25)));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("new year's eve"), std::bind(setDate, std::placeholders::_1, -1, 12, 31)));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("new year"), std::bind(setDate, std::placeholders::_1, -1, 1, 1)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("midnight"), std::bind(setToNextTime, std::placeholders::_1, QTime(0, 0))));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("noon"), std::bind(setToNextTime, std::placeholders::_1, QTime(12, 0))));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("christmas|xmas"), std::bind(setToNextDate, std::placeholders::_1, -1, 12, 25)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("new year's eve"), std::bind(setToNextDate, std::placeholders::_1, -1, 12, 31)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("new year"), std::bind(setToNextDate, std::placeholders::_1, -1, 1, 1)));
 
     QDateTime dt = baseDateTime;
     QRegExp nextInstance(R"(^(next |this )?(\D*))");
