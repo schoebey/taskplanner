@@ -446,3 +446,21 @@ TEST_F(DateTimeConversionTest, time_fromString_relativeOffset_seconds)
 }
 
 
+TEST_F(DateTimeConversionTest, date_fromString_KeyDates)
+{
+  bool bStatus(false);
+  QDateTime dt = conversion::dateTimeFromString(QString("next christmas"), bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time(), QTime(0, 0));
+  EXPECT_EQ(dt.date(), QDate(2000, 12, 25));
+
+  dt = conversion::dateTimeFromString(QString("new year's eve"), bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time(), QTime(0, 0));
+  EXPECT_EQ(dt.date(), QDate(2000, 12, 31));
+
+  dt = conversion::dateTimeFromString(QString("new year"), bStatus, m_baseDateTime);
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(dt.time(), QTime(0, 0));
+  EXPECT_EQ(dt.date(), QDate(2001, 1, 1));
+}
