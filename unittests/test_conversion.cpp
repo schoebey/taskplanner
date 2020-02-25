@@ -190,6 +190,15 @@ TEST(Conversion, double_toString_negative)
 }
 
 
+TEST(Conversion, vector_int_fromString)
+{
+//  bool bConversionStatus(false);
+//  auto vInt = conversion::fromString<std::vector<int>>("1 | 2 | 3", bConversionStatus);
+//  EXPECT_TRUE(bConversionStatus);
+//  EXPECT_EQ(vInt, {1,2,3});
+}
+
+
 namespace
 {
 class DateTimeConversionTest : public ::testing::Test {
