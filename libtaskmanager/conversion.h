@@ -12,6 +12,19 @@
 #include <QUrl>
 #include <QColor>
 
+namespace detail
+{
+  template<typename T>
+  struct is_vector{ bool value = false; };
+
+  TODO: this... type traits?
+  template<>
+  struct is_vector<std::vector<T>>
+  {
+    bool value = true;
+  };
+}
+
 namespace conversion
 {
   static const QString c_sDateTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
@@ -81,6 +94,30 @@ namespace conversion
 
   //-- std::vector<QUrl>
   template<> LIBTASKMANAGER std::vector<QUrl> fromString<std::vector<QUrl>>(const QString& sVal, bool& bConversionStatus);
+  QString LIBTASKMANAGER toString(const std::vector<QUrl>& vUrls);
+
+  //-- std::vector<T>
+  template<typename T>
+  typename std::enable_if<detail::is_vector<T>::value, T>::type
+  std::vector<T> fromString(const QString& sVal, bool& bConversionStatus)
+  {
+    std::vector<T> v;
+
+    auto list = sVal.split("|");
+    for (const auto& el : list)
+    {
+      if (!el.isEmpty())
+      {
+        v.push_back(fromString<T>(el, bConversionStatus));
+        if (!bConversionStatus)  { return false; }
+      }
+    }
+
+    bConversionStatus = true;
+
+    return v;
+  }
+
   QString LIBTASKMANAGER toString(const std::vector<QUrl>& vUrls);
 
   //-- QColor
