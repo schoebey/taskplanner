@@ -83,6 +83,8 @@ public slots:
   void ensureVisible(QWidget* pWidget) override;
   void reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets) override;
 
+  void addTag(const QString& sTag);
+
   void addLink(const QUrl& link);
   void removeLink(const QUrl& link);
   void insertLink(const QUrl& link, int iPos);

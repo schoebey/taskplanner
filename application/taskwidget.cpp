@@ -59,6 +59,9 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
 
+  pFlowLayout = new FlowLayout(ui->pTags, 0, 0, 0);
+  ui->pTags->setLayout(pFlowLayout);
+
   connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
   connect(ui->pDescription, SIGNAL(editingFinished()), this, SLOT(onDescriptionEdited()));
@@ -586,6 +589,16 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
   }
 
   return false;
+}
+
+void TaskWidget::addTag(const QString& sTag)
+{
+  QLayout* pLayout = ui->pTags->layout();
+  if (nullptr != pLayout)
+  {
+    QLabel* pLabel = new QLabel(sTag, this);
+    pLayout->addWidget(pLabel);
+  }
 }
 
 void TaskWidget::addLink(const QUrl& link)

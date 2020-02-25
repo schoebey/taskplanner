@@ -127,6 +127,15 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
     }
   }
 
+  auto tags = conversion::fromString<std::vector<QString>>(pTask->propertyValue("tags"), bOk);
+  if (bOk)
+  {
+    for (const auto& tag : tags)
+    {
+      pTaskWidget->addTag(tag);
+    }
+  }
+
   auto color = conversion::fromString<QColor>(pTask->propertyValue("color"), bOk);
   if (bOk)
   {
