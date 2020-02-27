@@ -15,14 +15,50 @@
 namespace detail
 {
   template<typename T>
-  struct is_vector{ bool value = false; };
+  using void_t = void;
 
-  TODO: this... type traits?
-  template<>
-  struct is_vector<std::vector<T>>
-  {
-    bool value = true;
-  };
+template<typename T, typename = void>
+struct has_push_back : std::false_type {};
+
+template<typename T>
+struct has_push_back<T,
+    void_t<decltype(std::declval<T>().push_back(typename T::value_type{}))>>
+                     : std::true_type{ };
+
+template<typename T, typename = void>
+struct has_begin : std::false_type {};
+
+template<typename T>
+struct has_begin<T,
+    void_t<decltype(std::declval<T>().begin())>>
+                     : std::true_type{ };
+
+template<typename T, typename = void>
+struct has_end : std::false_type {};
+
+template<typename T>
+struct has_end<T,
+    void_t<decltype(std::declval<T>().end())>>
+                     : std::true_type{ };
+
+template<typename T, typename = void>
+struct has_toString : std::false_type {};
+
+template<typename T>
+struct has_toString<T,
+    void_t<decltype(std::declval<T>().toString())>>
+                    : std::true_type {};
+
+
+template<typename T, typename = void>
+struct can_convert_to_string : std::false_type {};
+
+template<typename T>
+struct can_convert_to_string<T,
+    void_t<typename std::enable_if<has_toString<T>::value ||
+                        std::is_convertible<T, QString>::value, void>::type>>
+
+ : std::true_type {};
 }
 
 namespace conversion
@@ -42,7 +78,10 @@ namespace conversion
 
   template<typename T>
   typename std::enable_if<!std::is_convertible<T, QString>::value &&
-                          !std::is_arithmetic<T>::value, QString>::type
+                          !detail::has_toString<T>::value &&
+                          !std::is_arithmetic<T>::value &&
+                          !detail::has_begin<T>::value &&
+                          !detail::has_end<T>::value, QString>::type
   toString(const T& /*value*/);
 
   template<typename T>
@@ -60,8 +99,16 @@ namespace conversion
   }
 
   template<typename T>
+  typename std::enable_if<detail::has_toString<T>::value, QString>::type
+  toString(const T& t)
+  {
+    return t.toString();
+  }
+
+  template<typename T>
   typename std::enable_if<!std::is_convertible<QString, T>::value &&
-                          !std::is_arithmetic<T>::value, T>::type
+                          !std::is_arithmetic<T>::value &&
+                          !detail::has_push_back<T>::value, T>::type
   fromString(const QString& /*sVal*/, bool& /*bConversionStatus*/);
 
   template<typename T>
@@ -92,33 +139,44 @@ namespace conversion
   template<> bool LIBTASKMANAGER fromString<bool>(const QString& sVal, bool& bConversionStatus);
   QString LIBTASKMANAGER toString(bool bVal);
 
-  //-- std::vector<QUrl>
-  template<> LIBTASKMANAGER std::vector<QUrl> fromString<std::vector<QUrl>>(const QString& sVal, bool& bConversionStatus);
-  QString LIBTASKMANAGER toString(const std::vector<QUrl>& vUrls);
-
-  //-- std::vector<T>
+  //-- containers
   template<typename T>
-  typename std::enable_if<detail::is_vector<T>::value, T>::type
-  std::vector<T> fromString(const QString& sVal, bool& bConversionStatus)
+  typename std::enable_if<detail::has_push_back<T>::value &&
+                          !std::is_same<T, QString>::value, T>::type
+  fromString(const QString& sVal, bool& bConversionStatus)
   {
-    std::vector<T> v;
+    T container;
 
     auto list = sVal.split("|");
     for (const auto& el : list)
     {
       if (!el.isEmpty())
       {
-        v.push_back(fromString<T>(el, bConversionStatus));
-        if (!bConversionStatus)  { return false; }
+        container.push_back(fromString<typename T::value_type>(el, bConversionStatus));
+        if (!bConversionStatus)  { return T(); }
       }
     }
 
     bConversionStatus = true;
 
-    return v;
+    return container;
   }
 
-  QString LIBTASKMANAGER toString(const std::vector<QUrl>& vUrls);
+
+  template<typename T>
+  typename std::enable_if<detail::has_begin<T>::value &&
+                          detail::has_end<T>::value &&
+                          !std::is_same<T, QString>::value, QString>::type
+  toString(const T& t)
+  {
+    QStringList list;
+    for (const auto& el : t)
+    {
+      list.append(toString(el));
+    }
+
+    return list.join("|");
+  }
 
   //-- QColor
   template<> QColor LIBTASKMANAGER fromString<QColor>(const QString& sVal, bool& bConversionStatus);

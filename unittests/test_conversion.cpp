@@ -192,10 +192,30 @@ TEST(Conversion, double_toString_negative)
 
 TEST(Conversion, vector_int_fromString)
 {
-//  bool bConversionStatus(false);
-//  auto vInt = conversion::fromString<std::vector<int>>("1 | 2 | 3", bConversionStatus);
-//  EXPECT_TRUE(bConversionStatus);
-//  EXPECT_EQ(vInt, {1,2,3});
+  bool bConversionStatus(false);
+  auto vNominal = std::vector<int>{1,2,3};
+  auto vInt = conversion::fromString<std::vector<int>>("1 | 2 | 3", bConversionStatus);
+  EXPECT_TRUE(bConversionStatus);
+  EXPECT_EQ(vInt, vNominal);
+}
+TEST(Conversion, vector_int_toString)
+{
+  QString sResult = conversion::toString(std::vector<int>{1,2,3});
+  EXPECT_EQ(sResult, "1|2|3");
+}
+
+TEST(Conversion, vector_string_fromString)
+{
+  bool bConversionStatus(false);
+  auto vNominal = std::vector<QString>{"1","2","3"};
+  auto vString = conversion::fromString<std::vector<QString>>("1|2|3", bConversionStatus);
+  EXPECT_TRUE(bConversionStatus);
+  EXPECT_EQ(vString, vNominal);
+}
+TEST(Conversion, vector_string_toString)
+{
+  QString sResult = conversion::toString(std::vector<QString>{"1", "2", "3"});
+  EXPECT_EQ(sResult, "1|2|3");
 }
 
 
