@@ -612,37 +612,6 @@ in a hundred years
   }
 
   template<>
-  std::vector<QUrl> fromString<std::vector<QUrl> >(const QString& sVal, bool& bConversionStatus)
-  {
-    std::vector<QUrl> vUrls;
-
-    auto list = sVal.split("|");
-    for (const auto& el : list)
-    {
-      if (!el.isEmpty())
-      {
-        vUrls.push_back(QUrl(el));
-      }
-    }
-
-    bConversionStatus = true;
-
-    return vUrls;
-  }
-
-  QString toString(const std::vector<QUrl>& vUrls)
-  {
-    QStringList list;
-
-    for (const auto& el : vUrls)
-    {
-      list.append(el.toString());
-    }
-
-    return list.join("|");
-  }
-
-  template<>
   QColor fromString<QColor>(const QString& sVal, bool& bConversionStatus)
   {
     QColor c(sVal);
