@@ -598,6 +598,19 @@ void TaskWidget::addTag(const QString& sTag)
   {
     QLabel* pLabel = new QLabel(sTag, this);
     pLayout->addWidget(pLabel);
+
+    emit tagAdded(m_taskId, sTag);
+  }
+}
+
+void TaskWidget::removeTag(const QString& sTag)
+{
+  QLayout* pLayout = ui->pTags->layout();
+  if (nullptr != pLayout)
+  {
+    // TODO: find & remove label
+
+    emit tagRemoved(m_taskId, sTag);
   }
 }
 

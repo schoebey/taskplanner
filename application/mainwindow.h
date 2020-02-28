@@ -51,6 +51,8 @@ private slots:
   void onTaskMoved(task_id id, task_id newParentTaskId, int iPos);
   void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
   void onPropertyRemoved(task_id taskId, const QString& sPropertyName);
+  void onTagAdded(task_id taskId, const QString& sTag);
+  void onTagRemoved(task_id taskId, const QString& sTag);
   void onLinkAdded(task_id taskId, QUrl url);
   void onLinkRemoved(task_id taskId, QUrl url);
   void onLinkInserted(task_id taskId, QUrl url, int iPos);

@@ -94,6 +94,8 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
   QObject::connect(pTaskWidget, SIGNAL(newSubTaskRequested(task_id)),               m_pController, SLOT(createNewSubTask(task_id)));
   QObject::connect(pTaskWidget, SIGNAL(addTimeRequested(task_id)),                  m_pController, SLOT(onAddTimeToTaskRequested(task_id)));
   QObject::connect(pTaskWidget, SIGNAL(removeTimeRequested(task_id)),               m_pController, SLOT(onRemoveTimeFromTaskRequested(task_id)));
+  QObject::connect(pTaskWidget, SIGNAL(tagAdded(task_id, QString)),                 m_pController, SLOT(onTagAdded(task_id, QString)));
+  QObject::connect(pTaskWidget, SIGNAL(tagRemoved(task_id, QString)),               m_pController, SLOT(onTagRemoved(task_id, QString)));
   QObject::connect(pTaskWidget, SIGNAL(linkAdded(task_id, QUrl)),                   m_pController, SLOT(onLinkAdded(task_id, QUrl)));
   QObject::connect(pTaskWidget, SIGNAL(linkRemoved(task_id, QUrl)),                 m_pController, SLOT(onLinkRemoved(task_id, QUrl)));
   QObject::connect(pTaskWidget, SIGNAL(linkInserted(task_id, QUrl, int)),           m_pController, SLOT(onLinkInserted(task_id, QUrl, int)));

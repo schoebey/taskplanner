@@ -86,6 +86,7 @@ HEADERS += \
     $$PWD/search/searchframe.h \
     $$PWD/search/searchcontroller.h \
     search/matchinfo.h \
+    propertieshelpers.h \
     search/searchoptions.h
 
 FORMS += \
