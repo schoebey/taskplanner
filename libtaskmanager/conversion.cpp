@@ -205,7 +205,7 @@ namespace conversion
         }
       }
 
-      for (int i = 0; i < tens.size(); ++i)
+      for (size_t i = 0; i < tens.size(); ++i)
       {
         if (sNumberCopy.startsWith(tens[i]))
         {
@@ -214,7 +214,7 @@ namespace conversion
         }
       }
 
-      for (int i = 0; i < ones.size(); ++i)
+      for (size_t i = 0; i < ones.size(); ++i)
       {
         if (sNumberCopy.startsWith(ones[i]))
         {
@@ -229,7 +229,7 @@ namespace conversion
         sNumberCopy.remove(0, hundred.size());
       }
 
-      for (int i = 0; i < powers.size(); ++i)
+      for (size_t i = 0; i < powers.size(); ++i)
       {
         if (sNumberCopy.startsWith(powers[i]))
         {
@@ -385,7 +385,7 @@ in a hundred years
     {
       if (dt.time() > t)
       {
-        dt.addDays(1);
+        dt = dt.addDays(1);
       }
       dt.setTime(t);
     };
@@ -509,7 +509,7 @@ in a hundred years
       }
 
       // weekday (mon-sun)? for this, string format "on XY" would also work
-      for (int i = 0; i < weekdays.size(); ++i)
+      for (size_t i = 0; i < weekdays.size(); ++i)
       {
         if (0 == weekdays[i].indexIn(sType))
         {
@@ -524,7 +524,7 @@ in a hundred years
 
 
       // month (jan-dec)?
-      for (int i = 0; i < months.size(); ++i)
+      for (size_t i = 0; i < months.size(); ++i)
       {
         if (0 <= months[i].indexIn(sType))
         {
