@@ -1,5 +1,6 @@
 #include "linkwidget.h"
 #include "ui_linkwidget.h"
+#include "styleExtension.h"
 
 #include <QPainter>
 #include <QContextMenuEvent>

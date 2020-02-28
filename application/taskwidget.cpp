@@ -9,6 +9,7 @@
 #include "tasklistwidget.h"
 #include "decoratedlabel.h"
 #include "groupwidget.h"
+#include "tagwidget.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -596,7 +597,7 @@ void TaskWidget::addTag(const QString& sTag)
   QLayout* pLayout = ui->pTags->layout();
   if (nullptr != pLayout)
   {
-    QLabel* pLabel = new QLabel(sTag, this);
+    QLabel* pLabel = new TagWidget(sTag, this);
     pLayout->addWidget(pLabel);
 
     emit tagAdded(m_taskId, sTag);

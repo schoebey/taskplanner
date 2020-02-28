@@ -429,7 +429,7 @@ void Style::drawControl(ControlElement element,
 {
   switch (element)
   {
-  case CustomControlElements::CE_LinkWidget:
+  case customControlElements::CE_LinkWidget:
   {
     const QStyleOptionLinkWidget* pLinkOption = qstyleoption_cast<const QStyleOptionLinkWidget*>(pOption);
     if (nullptr != pLinkOption)
@@ -483,6 +483,14 @@ void Style::drawControl(ControlElement element,
         pPainter->drawPath(path);
         pPainter->restore();
       }
+    }
+  } break;
+  case customControlElements::CE_TagWidget:
+  {
+    const QStyleOptionFrame* pTagOption = qstyleoption_cast<const QStyleOptionFrame*>(pOption);
+    if (nullptr != pTagOption)
+    {
+      pPainter->drawRect(pTagOption->rect);
     }
   } break;
   default:
