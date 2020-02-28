@@ -30,13 +30,13 @@ namespace
 namespace conversion
 {
   template<>
-  QString toString<SCustomType>(const SCustomType& t)
+  QString toString<SCustomType>(const SCustomType& /*t*/)
   {
     return QString();
   }
 
   template<>
-  SCustomType fromString<SCustomType>(const QString& s, bool& /*bStatus*/)
+  SCustomType fromString<SCustomType>(const QString& /*s*/, bool& /*bStatus*/)
   {
     return SCustomType();
   }

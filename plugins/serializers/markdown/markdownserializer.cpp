@@ -169,11 +169,6 @@ namespace
     return QString("[%1|%2]").arg(f.startTime.toString(c_sTimeFormat)).arg(stopTime.toString(c_sTimeFormat));
   }
 
-  template<> QString convertFrom(const SPriority& prio)
-  {
-    return convertFrom(prio.categories);
-  }
-
   template<> QString convertFrom(const QString& s)
   {
     return s;

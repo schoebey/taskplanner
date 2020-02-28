@@ -16,6 +16,7 @@
 #include "hibernationdetector.h"
 #include "toolbarinfodisplay.h"
 #include "plugininterface.h"
+#include "propertieshelpers.h"
 #include "version.h"
 
 #include "search/searchframe.h"
@@ -1139,42 +1140,20 @@ void MainWindow::onPropertyChanged(task_id taskId,
                                    const QString& sPropertyName,
                                    const QString& sValue)
 {
-  ITask* pTask = m_pManager->task(taskId);
-  if (nullptr != pTask)
+  if (properties::onPropertyChanged(m_pManager, m_pWidgetManager,
+                                    m_undoStack, taskId, sPropertyName,
+                                    sValue))
   {
-    QString sOldValue = pTask->propertyValue(sPropertyName);
-    if (sOldValue == sValue)  { return; }
-
-    bool bNewValueAccepted = pTask->setPropertyValue(sPropertyName, sValue);
-
-
-    TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
-    if (nullptr != pTaskWidget)
+    // property value has changed. re-sort the tasks within its group.
+    auto pTask = m_pManager->task(taskId);
+    if (nullptr != pTask)
     {
-      if (bNewValueAccepted)
+      auto itTimer = m_autoSortTimers.find(pTask->group());
+      if (itTimer != m_autoSortTimers.end() &&
+          nullptr != itTimer->second &&
+          itTimer->second->isActive())
       {
-        ChangeTaskPropertyCommand* pChangeCommand =
-            new ChangeTaskPropertyCommand(taskId, sPropertyName, sOldValue, sValue, m_pManager, m_pWidgetManager);
-        m_undoStack.push(pChangeCommand);
-      }
-
-      pTaskWidget->setHighlight(pTaskWidget->highlight() |
-                               (bNewValueAccepted ? EHighlightMethod::eValueAccepted :
-                                                   EHighlightMethod::eValueRejected));
-      pTaskWidget->onPropertyValueChanged(sPropertyName, pTask->propertyValue(sPropertyName));
-
-      if ("color" == sPropertyName)
-      {
-        bool bOk(false);
-        auto color = conversion::fromString<QColor>(pTask->propertyValue("color"), bOk);
-        if (bOk)
-        {
-          pTaskWidget->setOverlayBackground(color);
-        }
-      }
-      else if ("priority" == sPropertyName)
-      {
-        pTaskWidget->setAutoPriority(pTask->autoPriority());
+        sortGroup(pTask->group());
       }
       else if ("expanded" == sPropertyName)
       {
@@ -1199,14 +1178,6 @@ void MainWindow::onPropertyChanged(task_id taskId,
       }
     }
 
-    auto itTimer = m_autoSortTimers.find(pTask->group());
-    if (itTimer != m_autoSortTimers.end() &&
-        nullptr != itTimer->second &&
-        itTimer->second->isActive())
-    {
-      sortGroup(pTask->group());
-    }
-
     emit documentModified();
   }
 }
@@ -1225,70 +1196,18 @@ void MainWindow::onPropertyRemoved(task_id taskId, const QString& sPropertyName)
 
 void MainWindow::onLinkAdded(task_id taskId, QUrl url)
 {
-  ITask* pTask = m_pManager->task(taskId);
-  if (nullptr != pTask)
-  {
-    bool bOk(false);
-    auto links = conversion::fromString<std::vector<QUrl>>(pTask->propertyValue("links"), bOk);
-    if (bOk)
-    {
-      auto it = std::find(links.begin(), links.end(), url);
-      if (it == links.end())
-      {
-        links.push_back(url);
-        QUndoCommand* pCommand = new ChangeTaskPropertyCommand(taskId, "links",
-                                                               pTask->propertyValue("links"), conversion::toString(links),
-                                                               m_pManager, m_pWidgetManager);
-        m_undoStack.push(pCommand);
-      }
-      else
-      {
-        // link already present - do nothing
-      }
-    }
-    else
-    {
-      assert(false);
-    }
-  }
-  else
-  {
-    assert(false);
-  }
+  properties::
+  onContainerElementAdded(m_pManager,
+                          m_pWidgetManager,
+                          m_undoStack, taskId, url, "links");
 }
 
 void MainWindow::onLinkRemoved(task_id taskId, QUrl url)
 {
-  ITask* pTask = m_pManager->task(taskId);
-  if (nullptr != pTask)
-  {
-    bool bOk(false);
-    auto links = conversion::fromString<std::vector<QUrl>>(pTask->propertyValue("links"), bOk);
-    if (bOk)
-    {
-      auto it = std::find(links.begin(), links.end(), url);
-      if (it != links.end())
-      {
-        links.erase(it);
-        QUndoCommand* pCommand = new ChangeTaskPropertyCommand(taskId, "links",
-                                                               pTask->propertyValue("links"), conversion::toString(links),
-                                                               m_pManager, m_pWidgetManager);
-        m_undoStack.push(pCommand);
-      }
-      else
-      {
-        // link not present - do nothing
-      }
-    }
-    else
-    {
-      assert(false);
-    }
-  }
-  else
-  {
-    assert(false);
-  }
+  properties::
+  onContainerElementRemoved(m_pManager,
+                            m_pWidgetManager,
+                            m_undoStack, taskId, url, "links");
 }
 
 void MainWindow::onLinkInserted(task_id /*taskId*/, QUrl /*url*/, int /*iPos*/)

@@ -105,28 +105,28 @@ TEST_F(TaskTest, AddTask)
 {
   EXPECT_TRUE(m_pTask1->addTask(m_pTask0->id()));
   EXPECT_EQ(m_pTask0->parentTask(), m_pTask1->id());
-  ASSERT_NE(0, m_pTask1->taskIds().size());
+  ASSERT_NE(0u, m_pTask1->taskIds().size());
   EXPECT_EQ(m_pTask0->id(), *m_pTask1->taskIds().begin());
 }
 
 TEST_F(TaskTest, AddTask_AutoRemoveIfChildOfOther)
 {
   m_pTask2->addTask(m_pTask0->id());
-  EXPECT_EQ(1, m_pTask2->taskIds().size());
+  EXPECT_EQ(1u, m_pTask2->taskIds().size());
 
   EXPECT_TRUE(m_pTask1->addTask(m_pTask0->id()));
   EXPECT_EQ(m_pTask0->parentTask(), m_pTask1->id());
 
   // if adding the task to m_pTask1 was successful,
   // it should have been removed automatically from m_pTask2
-  EXPECT_EQ(0, m_pTask2->taskIds().size());
+  EXPECT_EQ(0u, m_pTask2->taskIds().size());
 }
 
 TEST_F(TaskTest, RemoveTask)
 {
   m_pTask1->addTask(m_pTask0->id());
   EXPECT_TRUE(m_pTask1->removeTask(m_pTask0->id()));
-  EXPECT_EQ(0, m_pTask1->taskIds().size());
+  EXPECT_EQ(0u, m_pTask1->taskIds().size());
 }
 
 TEST_F(TaskTest, RemoveTask_FailIfNoSubTask)
@@ -136,7 +136,7 @@ TEST_F(TaskTest, RemoveTask_FailIfNoSubTask)
 
   m_pTask1->addTask(m_pTask0->id());
   EXPECT_TRUE(m_pTask1->removeTask(m_pTask0->id()));
-  EXPECT_EQ(0, m_pTask1->taskIds().size());
+  EXPECT_EQ(0u, m_pTask1->taskIds().size());
 }
 
 TEST_F(TaskTest, RemoveTask_FailIfNoDirectDescendant)
@@ -156,7 +156,7 @@ TEST_F(TaskTest, setGroup)
 {
   m_pTask0->setGroup(m_pGroup0->id());
 
-  ASSERT_NE(0, m_pGroup0->taskIds().size());
+  ASSERT_NE(0u, m_pGroup0->taskIds().size());
   EXPECT_EQ(m_pTask0->id(), *m_pGroup0->taskIds().begin());
   EXPECT_EQ(m_pGroup0->id(), m_pTask0->group());
 }
@@ -167,7 +167,7 @@ TEST_F(TaskTest, setGroup_AutoRemoveIfInDifferentGroup)
   EXPECT_EQ(1u, m_pGroup1->taskIds().size());
 
   m_pTask0->setGroup(m_pGroup0->id());
-  EXPECT_EQ(0, m_pGroup1->taskIds().size());
+  EXPECT_EQ(0u, m_pGroup1->taskIds().size());
 
   ASSERT_EQ(1u, m_pGroup0->taskIds().size());
   EXPECT_EQ(m_pTask0->id(), *m_pGroup0->taskIds().begin());
