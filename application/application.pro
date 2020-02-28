@@ -51,7 +51,9 @@ SOURCES += \
     windowtitlemenubar.cpp \
     decoratedlabel.cpp \
     $$PWD/search/searchframe.cpp \
-    $$PWD/search/searchcontroller.cpp
+    $$PWD/search/searchcontroller.cpp \
+    colorspacewidget.cpp \
+    colorpicker.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -86,8 +88,11 @@ HEADERS += \
     $$PWD/search/searchframe.h \
     $$PWD/search/searchcontroller.h \
     search/matchinfo.h \
+    search/searchoptions.h \
     propertieshelpers.h \
-    search/searchoptions.h
+    styleExtension.h \
+    colorspacewidget.h \
+    colorpicker.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
