@@ -490,7 +490,19 @@ void Style::drawControl(ControlElement element,
     const QStyleOptionFrame* pTagOption = qstyleoption_cast<const QStyleOptionFrame*>(pOption);
     if (nullptr != pTagOption)
     {
-      pPainter->drawRect(pTagOption->rect);
+      QRectF r = pTagOption->rect;
+      QPolygonF poly;
+      poly << QPointF(r.topLeft() + QPointF(10, 0));
+      poly << QPointF(r.topRight());
+      poly << QPointF(r.bottomRight());
+      poly << QPointF(r.bottomLeft() + QPointF(10, 0));
+      poly << QPointF(r.bottomLeft() + QPointF(0, -r.height() / 2));
+      pPainter->save();
+      pPainter->setRenderHint(QPainter::Antialiasing, true);
+      pPainter->setPen(pOption->palette.color(QPalette::Text));
+      pPainter->setBrush(pOption->palette.color(QPalette::AlternateBase));
+      pPainter->drawPolygon(poly);
+      pPainter->restore();
     }
   } break;
   default:
