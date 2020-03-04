@@ -594,14 +594,9 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
 
 void TaskWidget::addTag(const QString& sTag)
 {
-  QLayout* pLayout = ui->pTags->layout();
-  if (nullptr != pLayout)
-  {
-    QLabel* pLabel = new TagWidget(sTag, this);
-    pLayout->addWidget(pLabel);
+  ui->pTags->addItem(new TagWidget(sTag, this));
 
-    emit tagAdded(m_taskId, sTag);
-  }
+  emit tagAdded(m_taskId, sTag);
 }
 
 void TaskWidget::removeTag(const QString& sTag)

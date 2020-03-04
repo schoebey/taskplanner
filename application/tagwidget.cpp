@@ -8,16 +8,17 @@
 
 #include <cmath>
 
+template<> TagWidget* Draggable<TagWidget>::m_pDraggingInstance = nullptr;
 
 TagWidget::TagWidget(const QString& sText, QWidget* pParent)
   : QLabel(sText, pParent),
-    Draggable<TagWidget> (this)
+    Draggable<TagWidget>(this)
 {
-
 }
 
 void TagWidget::paintEvent(QPaintEvent* /*pEvent*/)
 {
+  TODO: own style option with text and other stuff
   QStyleOptionFrame opt;
   opt.initFrom(this);
 
@@ -25,19 +26,3 @@ void TagWidget::paintEvent(QPaintEvent* /*pEvent*/)
   style()->drawControl(customControlElements::CE_TagWidget, &opt, &painter, this);
 }
 
-void TagWidget::mouseMoveEvent(QMouseEvent* pMouseEvent)
-{
-  QFrame::mouseMoveEvent(pMouseEvent);
-
-  onMouseMove(pMouseEvent);
-}
-
-void TagWidget::mousePressEvent(QMouseEvent* pMouseEvent)
-{
-  setMouseDown(true, pMouseEvent->pos());
-}
-
-void TagWidget::mouseReleaseEvent(QMouseEvent* /*pMouseEvent*/)
-{
-  setMouseDown(false);
-}

@@ -52,7 +52,8 @@ SOURCES += \
     decoratedlabel.cpp \
     $$PWD/search/searchframe.cpp \
     $$PWD/search/searchcontroller.cpp \
-    tagwidget.cpp
+    tagwidget.cpp \
+    tagwidgetcontainer.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -90,7 +91,9 @@ HEADERS += \
     search/searchoptions.h \
     propertieshelpers.h \
     tagwidget.h \
-    styleExtension.h
+    styleExtension.h \
+    tagwidgetcontainer.h \
+    draggable.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
