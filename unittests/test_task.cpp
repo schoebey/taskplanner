@@ -27,12 +27,12 @@ protected:
   }
 
   Manager m_manager;
-  ITask* m_pTask0;
-  ITask* m_pTask1;
-  ITask* m_pTask2;
-  IGroup* m_pGroup0;
-  IGroup* m_pGroup1;
-  IGroup* m_pGroup2;
+  ITask* m_pTask0 = nullptr;
+  ITask* m_pTask1 = nullptr;
+  ITask* m_pTask2 = nullptr;
+  IGroup* m_pGroup0 = nullptr;
+  IGroup* m_pGroup1 = nullptr;
+  IGroup* m_pGroup2 = nullptr;
 };
 class TimedTaskTest : public TaskTest {
 protected:
