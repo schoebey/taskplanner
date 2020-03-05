@@ -12,15 +12,16 @@ namespace
   }
 }
 
-template<> DraggableContainer<TagWidget>* DraggableContainer<TagWidget>::m_pContainerUnderMouse = nullptr;
+//template<> std::set<DraggableContainer<TagWidget>*> DraggableContainer<TagWidget>::m_containersUnderMouse;
+
 TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
   : QFrame(pParent),
-    DraggableContainer<TagWidget>(this)
+    DraggableContainer<DraggableTagWidget>(this)
 {
 
 }
 
-bool TagWidgetContainer::addItem_impl(TagWidget* pT)
+bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
 {
   QLayout* pLayout = layout();
   if (nullptr != pLayout)
@@ -32,12 +33,12 @@ bool TagWidgetContainer::addItem_impl(TagWidget* pT)
   return false;
 }
 
-bool TagWidgetContainer::removeItem_impl(TagWidget* pT)
+bool TagWidgetContainer::removeItem_impl(DraggableTagWidget* pT)
 {
   return true;
 }
 
-bool TagWidgetContainer::insertItem_impl(TagWidget* pT, QPoint pt)
+bool TagWidgetContainer::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
 {
   QGridLayout* pLayout = dynamic_cast<QGridLayout*>(layout());
   if (nullptr != pLayout)

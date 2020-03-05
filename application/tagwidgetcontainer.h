@@ -6,16 +6,16 @@
 
 #include <QFrame>
 
-class TagWidgetContainer : public QFrame, public DraggableContainer<TagWidget>
+class TagWidgetContainer : public QFrame, public DraggableContainer<DraggableTagWidget>
 {
 public:
   TagWidgetContainer(QWidget* pParent);
   ~TagWidgetContainer() = default;
 
 private:
-  bool addItem_impl(TagWidget* pT) override;
-  bool removeItem_impl(TagWidget* pT) override;
-  bool insertItem_impl(TagWidget* pT, QPoint pt) override;
+  bool addItem_impl(DraggableTagWidget* pT) override;
+  bool removeItem_impl(DraggableTagWidget* pT) override;
+  bool insertItem_impl(DraggableTagWidget* pT, QPoint pt) override;
 };
 
 #endif // TAGWIDGETCONTAINER_H

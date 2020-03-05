@@ -20,14 +20,16 @@ public:
   QColor color;
 };
 
-class TagWidget : public QLabel, public Draggable<TagWidget>
+class TagWidget : public QLabel
 {
 public:
   TagWidget(const QString& sText, QWidget* pParent);
+
 private:
   void paintEvent(QPaintEvent* pEvent) override;
   QSize sizeHint() const override;
 };
 
+using DraggableTagWidget = Draggable<TagWidget>;
 
 #endif // TAGWIDGET_H

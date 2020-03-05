@@ -14,11 +14,10 @@ QStyleOptionTagWidget::QStyleOptionTagWidget()
 
 }
 
-template<> TagWidget* Draggable<TagWidget>::m_pDraggingInstance = nullptr;
+template<> Draggable<TagWidget>* Draggable<TagWidget>::m_pDraggingInstance = nullptr;
 
 TagWidget::TagWidget(const QString& sText, QWidget* pParent)
-  : QLabel(sText, pParent),
-    Draggable<TagWidget>(this)
+  : QLabel(sText, pParent)
 {
 }
 
