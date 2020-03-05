@@ -1,4 +1,5 @@
 #include "style.h"
+#include "tagwidget.h"
 
 #include "editablelabel.h"
 #include "linkwidget.h"
@@ -487,7 +488,7 @@ void Style::drawControl(ControlElement element,
   } break;
   case customControlElements::CE_TagWidget:
   {
-    const QStyleOptionFrame* pTagOption = qstyleoption_cast<const QStyleOptionFrame*>(pOption);
+    const QStyleOptionTagWidget* pTagOption = qstyleoption_cast<const QStyleOptionTagWidget*>(pOption);
     if (nullptr != pTagOption)
     {
       QRectF r = pTagOption->rect;
@@ -500,8 +501,9 @@ void Style::drawControl(ControlElement element,
       pPainter->save();
       pPainter->setRenderHint(QPainter::Antialiasing, true);
       pPainter->setPen(pOption->palette.color(QPalette::Text));
-      pPainter->setBrush(pOption->palette.color(QPalette::AlternateBase));
+      pPainter->setBrush(pTagOption->color);
       pPainter->drawPolygon(poly);
+      pPainter->drawText(pTagOption->rect, pTagOption->sText);
       pPainter->restore();
     }
   } break;
@@ -519,6 +521,10 @@ int Style::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, c
     return 0;
   case customPixelMetrics::PM_ResizerActiveArea:
     return 5;
+  case customPixelMetrics::PM_TagHeader:
+    return 10;
+  case customPixelMetrics::PM_TagBorder:
+    return 3;
   default:
     return QProxyStyle::pixelMetric(metric, option, widget);
   }
