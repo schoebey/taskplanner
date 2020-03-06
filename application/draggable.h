@@ -8,46 +8,15 @@
 #include <cmath>
 #include <cassert>
 #include <QWidget>
-
-class EventFilterHandler
-{
-public:
-  virtual bool onEventFilter(QObject* pObject, QEvent* pEvent) = 0;
-
-protected:
-  EventFilterHandler() = default;
-  ~EventFilterHandler() = default;
-};
-
-class EventFilter : public QObject
-{
-  Q_OBJECT
-public:
-  EventFilter(EventFilterHandler* pHandler)
-    : m_pHandler(pHandler)
-  {}
-
-  ~EventFilter() = default;
-
-  bool eventFilter(QObject* pObject, QEvent* pEvent) override
-  {
-    return m_pHandler->onEventFilter(pObject, pEvent);
-  }
-private:
-  EventFilterHandler* m_pHandler = nullptr;
-};
-
+#include <QFrame>
 
 template<typename T>
-class DraggableContainer : public EventFilterHandler
+class DraggableContainer : public QFrame
 {
 public:
-  DraggableContainer(QWidget* pThis)
-    : m_eventFilter(this),
-      m_pThis(pThis)
-  {
-    qApp->installEventFilter(&m_eventFilter);
-  }
+  DraggableContainer(QWidget* pParent)
+    : QFrame(pParent)
+  {}
 
   ~DraggableContainer()
   {}
@@ -86,8 +55,7 @@ public:
 
   static DraggableContainer<T>* containerUnderMouse()
   {
-//    return m_containersUnderMouse.empty() ? nullptr :
-//                                            *m_containersUnderMouse.begin();
+    return m_pContainerUnderMouse;
     return nullptr;
   }
 
@@ -96,7 +64,7 @@ private:
   virtual bool removeItem_impl(T* pT) = 0;
   virtual bool insertItem_impl(T* pT, QPoint pt) = 0;
 
-  void onMouseMove(QMouseEvent* pMouseEvent)
+  void mouseMoveEvent(QMouseEvent* pMouseEvent) override
   {
 //    if (m_pThis->rect().contains(pMouseEvent->pos()))
 //    {
@@ -112,26 +80,16 @@ private:
 //    }
   }
 
-  bool onEventFilter(QObject* pObj, QEvent* pEvent) override
+  void enterEvent(QEvent* pEvent) override
   {
-    if (m_pThis == pObj)
-    {
-      switch (pEvent->type())
-      {
-      case QEvent::MouseMove:
-        onMouseMove(dynamic_cast<QMouseEvent*>(pEvent));
-        break;
-      default:
-        break;
-      }
-    }
-
-    return false;
+    m_pContainerUnderMouse = this;
+  }
+  void leaveEvent(QEvent* pEvent) override
+  {
+    m_pContainerUnderMouse = nullptr;
   }
 
-//  static std::set<DraggableContainer<T>*> m_containersUnderMouse;
-  EventFilter m_eventFilter;
-  QWidget* m_pThis;
+  static DraggableContainer<T>* m_pContainerUnderMouse;
 };
 
 template<typename T>

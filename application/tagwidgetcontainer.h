@@ -6,7 +6,7 @@
 
 #include <QFrame>
 
-class TagWidgetContainer : public QFrame, public DraggableContainer<DraggableTagWidget>
+class TagWidgetContainer : public DraggableContainer<DraggableTagWidget>
 {
 public:
   TagWidgetContainer(QWidget* pParent);

@@ -12,11 +12,10 @@ namespace
   }
 }
 
-//template<> std::set<DraggableContainer<TagWidget>*> DraggableContainer<TagWidget>::m_containersUnderMouse;
+template<> DraggableContainer<DraggableTagWidget>* DraggableContainer<DraggableTagWidget>::m_pContainerUnderMouse = nullptr;
 
 TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
-  : QFrame(pParent),
-    DraggableContainer<DraggableTagWidget>(this)
+  : DraggableContainer<DraggableTagWidget>(pParent)
 {
 
 }
@@ -40,6 +39,9 @@ bool TagWidgetContainer::removeItem_impl(DraggableTagWidget* pT)
 
 bool TagWidgetContainer::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
 {
+  // tODO: cover flowlayout.
+  // this could also be done in the base:
+  // determine the layout type, then call the appropriate insert function
   QGridLayout* pLayout = dynamic_cast<QGridLayout*>(layout());
   if (nullptr != pLayout)
   {
