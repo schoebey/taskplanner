@@ -1,23 +1,19 @@
 #include "tagwidgetcontainer.h"
+#include "flowlayout.h"
+#include "layoututils.h"
 
 #include <QLayout>
 
-namespace
-{
-  double dist(const QPoint& p1, const QPoint& p2)
-  {
-     double dX = p1.x() - p2.x();
-     double dY = p1.y() - p2.y();
-     return sqrt(dX * dX + dY * dY);
-  }
-}
-
-template<> DraggableContainer<DraggableTagWidget>* DraggableContainer<DraggableTagWidget>::m_pContainerUnderMouse = nullptr;
+template<> std::set<DraggableContainer<DraggableTagWidget>*>
+DraggableContainer<DraggableTagWidget>::m_visibleContainers = std::set<DraggableContainer<DraggableTagWidget>*>();
 
 TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
-  : DraggableContainer<DraggableTagWidget>(pParent)
+  : DraggableContainer<DraggableTagWidget>(pParent),
+    m_pPlaceholder(new QFrame())
 {
-
+  QLayout* pLayout = new FlowLayout(this);
+  setLayout(pLayout);
+  m_pPlaceholder->setStyleSheet("border: 1px dashed red; background: green;");
 }
 
 bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
@@ -39,37 +35,30 @@ bool TagWidgetContainer::removeItem_impl(DraggableTagWidget* pT)
 
 bool TagWidgetContainer::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
 {
-  // tODO: cover flowlayout.
-  // this could also be done in the base:
-  // determine the layout type, then call the appropriate insert function
-  QGridLayout* pLayout = dynamic_cast<QGridLayout*>(layout());
-  if (nullptr != pLayout)
+  m_pPlaceholder->setParent(nullptr);
+  m_pPlaceholder->hide();
+  FlowLayout* pLayout = dynamic_cast<FlowLayout*>(layout());
+  return tools::addToFlowLayout(pT, pLayout, pt);
+}
+
+bool TagWidgetContainer::showPlaceholderAt(const QPoint& pt, const QSize& s)
+{
+  m_pPlaceholder->setParent(nullptr);
+  m_pPlaceholder->setMinimumSize(s);
+
+  FlowLayout* pLayout = dynamic_cast<FlowLayout*>(layout());
+  if (tools::addToFlowLayout(m_pPlaceholder, pLayout, pt))
   {
-    int iRow = -1;
-    int iColumn = -1;
-    double dMinDist = std::numeric_limits<double>::max();
-    for (int i = 0; i < pLayout->rowCount(); ++i)
-    {
-      for (int j = 0; j < pLayout->columnCount(); ++j)
-      {
-        auto pItem = pLayout->itemAtPosition(i, j);
-        if (nullptr != pItem) {
-          QWidget* pWidget = pItem->widget();
-          QPoint ptCenter = pWidget->mapTo(this, pWidget->rect().center());
-
-          double dDist = dist(pt, ptCenter);
-          if (dDist < dMinDist)
-          {
-            dMinDist = dDist;
-            iRow = pt.x() < ptCenter.x() ? i : i + 1;
-            iColumn = pt.y() < ptCenter.y() ? j : j + 1;
-          }
-        }
-      }
-    }
-
-    pLayout->addWidget(pT, iRow, iColumn);
+    m_pPlaceholder->show();
     return true;
   }
+
+  m_pPlaceholder->hide();
   return false;
+}
+
+void TagWidgetContainer::hidePlaceholder()
+{
+  m_pPlaceholder->setParent(nullptr);
+  m_pPlaceholder->hide();
 }

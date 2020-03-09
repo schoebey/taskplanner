@@ -1,14 +1,16 @@
 #ifndef DRAGGABLE_H
 #define DRAGGABLE_H
 
+#include "flowlayout.h"
+
 #include <QMouseEvent>
 #include <QApplication>
-#include <set>
-
-#include <cmath>
-#include <cassert>
 #include <QWidget>
 #include <QFrame>
+
+#include <set>
+#include <cmath>
+#include <cassert>
 
 template<typename T>
 class DraggableContainer : public QFrame
@@ -53,10 +55,26 @@ public:
     return false;
   }
 
-  static DraggableContainer<T>* containerUnderMouse()
+  virtual bool showPlaceholderAt(const QPoint&, const QSize&) {}
+
+  virtual void hidePlaceholder() {}
+
+  static DraggableContainer<T>* containerUnderMouse(const QPoint& globalPos)
   {
-    return m_pContainerUnderMouse;
+    for (DraggableContainer<T>* pContainer : m_visibleContainers)
+    {
+      if (pContainer->rect().contains(pContainer->mapFromGlobal(globalPos)))
+      {
+        return pContainer;
+      }
+    }
+
     return nullptr;
+  }
+
+  static std::set<DraggableContainer<T>*> visibleContainers()
+  {
+    return m_visibleContainers;
   }
 
 private:
@@ -82,14 +100,29 @@ private:
 
   void enterEvent(QEvent* pEvent) override
   {
-    m_pContainerUnderMouse = this;
+//    m_pContainerUnderMouse = this;
   }
   void leaveEvent(QEvent* pEvent) override
   {
-    m_pContainerUnderMouse = nullptr;
+//    m_pContainerUnderMouse = nullptr;
   }
 
-  static DraggableContainer<T>* m_pContainerUnderMouse;
+  void showEvent(QShowEvent* pEvent) override
+  {
+    m_visibleContainers.insert(this);
+  }
+
+  void hideEvent(QHideEvent* pEvent) override
+  {
+    auto it = m_visibleContainers.find(this);
+    if (it != m_visibleContainers.end())
+    {
+      m_visibleContainers.erase(it);
+    }
+  }
+
+//  static DraggableContainer<T>* m_pContainerUnderMouse;
+  static std::set<DraggableContainer<T>*> m_visibleContainers;
 };
 
 template<typename T>
@@ -183,19 +216,43 @@ public:
       {
         QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
         T::move(T::parentWidget()->mapFromGlobal(pMouseEvent->globalPos() - m_mouseDownPoint));
+
+        for (auto pContainer : DraggableContainer<Draggable>::visibleContainers())
+        {
+          pContainer->hidePlaceholder();
+        }
+
+        DraggableContainer<Draggable>* pContainer = DraggableContainer<Draggable>::containerUnderMouse(pMouseEvent->globalPos());
+        if (nullptr != pContainer)
+        {
+          QPoint pt = pMouseEvent->globalPos();
+          pt = pContainer->mapFromGlobal(pt);
+          pContainer->showPlaceholderAt(pt, T::size());
+        }
       }
       else if (QEvent::MouseButtonRelease == pEvent->type())
       {
+        QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
         m_bMouseDown = false;
-        if (nullptr != DraggableContainer<Draggable>::containerUnderMouse())
+        DraggableContainer<Draggable>* pContainer = DraggableContainer<Draggable>::containerUnderMouse(pMouseEvent->globalPos());
+        if (nullptr != pContainer)
         {
           QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
-          QWidget* pWidget = dynamic_cast<QWidget*>(this);
           QPoint pt = pMouseEvent->globalPos();
-          if (nullptr != pWidget) {
-            pt = pWidget->mapFromGlobal(pt);
+          pt = pContainer->mapFromGlobal(pt);
+
+          if (pContainer->insertItemAt(this, pt))
+          {
+            setDraggingInstance(nullptr);
           }
-          DraggableContainer<Draggable>::containerUnderMouse()->insertItemAt(this, pt);
+          else
+          {
+            if (nullptr != m_pContainer)
+            {
+              setDraggingInstance(nullptr);
+              m_pContainer->addItem(this);
+            }
+          }
         }
         else if (nullptr != m_pContainer)
         {
