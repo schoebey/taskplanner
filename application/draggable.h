@@ -18,7 +18,8 @@ class DraggableContainer : public QFrame
 public:
   DraggableContainer(QWidget* pParent)
     : QFrame(pParent)
-  {}
+  {
+  }
 
   ~DraggableContainer()
   {}
@@ -82,37 +83,12 @@ private:
   virtual bool removeItem_impl(T* pT) = 0;
   virtual bool insertItem_impl(T* pT, QPoint pt) = 0;
 
-  void mouseMoveEvent(QMouseEvent* pMouseEvent) override
-  {
-//    if (m_pThis->rect().contains(pMouseEvent->pos()))
-//    {
-//      m_containersUnderMouse.insert(this);
-//    }
-//    else
-//    {
-//      auto it = m_containersUnderMouse.find(this);
-//      if (it != m_containersUnderMouse.end())
-//      {
-//        m_containersUnderMouse.erase(it);
-//      }
-//    }
-  }
-
-  void enterEvent(QEvent* pEvent) override
-  {
-//    m_pContainerUnderMouse = this;
-  }
-  void leaveEvent(QEvent* pEvent) override
-  {
-//    m_pContainerUnderMouse = nullptr;
-  }
-
-  void showEvent(QShowEvent* pEvent) override
+  void showEvent(QShowEvent* /*pEvent*/) override
   {
     m_visibleContainers.insert(this);
   }
 
-  void hideEvent(QHideEvent* pEvent) override
+  void hideEvent(QHideEvent* /*pEvent*/) override
   {
     auto it = m_visibleContainers.find(this);
     if (it != m_visibleContainers.end())
@@ -121,7 +97,6 @@ private:
     }
   }
 
-//  static DraggableContainer<T>* m_pContainerUnderMouse;
   static std::set<DraggableContainer<T>*> m_visibleContainers;
 };
 
@@ -129,9 +104,33 @@ template<typename T>
 class Draggable : public T
 {
 public:
-  template<typename... Args>
+  template<typename... Args, class C = T, typename std::enable_if<!std::is_copy_constructible<C>::value>::type* = nullptr>
   Draggable(Args... args)
     : T(args...)
+  {
+    m_fnCallCopyCtor = std::bind([](Args... args) -> Draggable<T>*
+    {
+      return new Draggable<T>(args...);
+    }, args...);
+  }
+
+  template<typename... Args, class C = T, typename std::enable_if<std::is_copy_constructible<C>::value>::type* = nullptr>
+  Draggable(Args... args)
+    : T(args...)
+  {
+    m_fnCallCopyCtor = [this]() -> Draggable<T>*
+    {
+      return new Draggable<T>(*this);
+    };
+  }
+
+  template<class C = T, typename std::enable_if<std::is_copy_constructible<C>::value>::type>
+  Draggable(const Draggable<T>& other)
+    : T(other),
+      m_bMouseDown(other.m_bMouseDown),
+      m_mouseDownPoint(other.m_mouseDownPoint),
+      m_pContainer(other.m_pContainer),
+      m_fnCallCopyCtor(other.m_fnCallCopyCtor)
   {}
 
   ~Draggable()
@@ -141,26 +140,6 @@ public:
   {
     m_bMouseDown = bMouseDown;
     m_mouseDownPoint = pt;
-  }
-
-  bool mouseDown() const
-  {
-    return m_bMouseDown;
-  }
-
-  QPoint mouseDownPoint() const
-  {
-    return m_mouseDownPoint;
-  }
-
-  void setDraggingInstance(Draggable* pT)
-  {
-    m_pDraggingInstance = pT;
-  }
-
-  Draggable* draggingInstance() const
-  {
-    return m_pDraggingInstance;
   }
 
   void setContainer(DraggableContainer<Draggable>* pContainer)
@@ -173,6 +152,27 @@ public:
     return m_pContainer;
   }
 
+protected:
+  bool mouseDown() const
+  {
+    return m_bMouseDown;
+  }
+
+  QPoint mouseDownPoint() const
+  {
+    return m_mouseDownPoint;
+  }
+
+  void setDraggingInstance(Draggable<T>* pT)
+  {
+    m_pDraggingInstance = pT;
+  }
+
+  Draggable<T>* draggingInstance() const
+  {
+    return m_pDraggingInstance;
+  }
+
   void mouseMoveEvent(QMouseEvent* pMouseEvent) override
   {
     if (mouseDown() && nullptr == draggingInstance())
@@ -180,19 +180,28 @@ public:
       QPoint ptDist = pMouseEvent->pos() - mouseDownPoint();
       if (20 < std::sqrt(ptDist.x() * ptDist.x() + ptDist.y() * ptDist.y()))
       {
-        setDraggingInstance(this);
+        // we have to differentiate between two cases:
+        // 1. normal drag & drop operation
+        // 2. dragging from a 'copy' container, creating a copy of the Draggable
+        Draggable<T>* pDraggable = this;
+        bool bCopyMode = true;
+        if (bCopyMode)
+        {
+          pDraggable = m_fnCallCopyCtor();
+        }
+        setDraggingInstance(pDraggable);
 
         if (nullptr != m_pContainer)
         {
-          m_pContainer->removeItem(this);
+          m_pContainer->removeItem(pDraggable);
         }
 
-        T::setParent(T::window());
-        T::setFocus();
-        T::move(pMouseEvent->globalPos() - mouseDownPoint());
-        T::show();
-        T::raise();
-        qApp->installEventFilter(this);
+        pDraggable->T::setParent(T::window());
+        pDraggable->T::setFocus();
+        pDraggable->T::move(pMouseEvent->globalPos() - mouseDownPoint());
+        pDraggable->T::show();
+        pDraggable->T::raise();
+        qApp->installEventFilter(pDraggable);
         pMouseEvent->accept();
       }
     }
@@ -208,7 +217,7 @@ public:
     setMouseDown(false);
   }
 
-  bool eventFilter(QObject* pObj, QEvent* pEvent) override
+  bool eventFilter(QObject* /*pObj*/, QEvent* pEvent) override
   {
     if (this == m_pDraggingInstance)
     {
@@ -264,6 +273,11 @@ public:
           assert(false);
         }
 
+        for (auto pContainer : DraggableContainer<Draggable>::visibleContainers())
+        {
+          pContainer->hidePlaceholder();
+        }
+
         qApp->removeEventFilter(this);
       }
     }
@@ -276,6 +290,7 @@ private:
   QPoint m_mouseDownPoint;
   static Draggable<T>* m_pDraggingInstance;
   DraggableContainer<Draggable<T>>* m_pContainer = nullptr;
+  std::function<Draggable<T>*()> m_fnCallCopyCtor;
 };
 
 #endif // DRAGGABLE_H

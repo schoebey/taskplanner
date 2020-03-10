@@ -21,6 +21,13 @@ TagWidget::TagWidget(const QString& sText, QWidget* pParent)
 {
 }
 
+TagWidget::TagWidget(const TagWidget& other)
+  : QLabel(other.parentWidget())
+{
+  setText(other.text());
+  resize(other.size());
+}
+
 QSize TagWidget::sizeHint() const
 {
   int iHeaderSize = style()->pixelMetric(customPixelMetrics::PM_TagHeader);

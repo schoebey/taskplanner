@@ -25,6 +25,8 @@ class TagWidget : public QLabel
 public:
   TagWidget(const QString& sText, QWidget* pParent);
 
+  TagWidget(const TagWidget& other);
+
 private:
   void paintEvent(QPaintEvent* pEvent) override;
   QSize sizeHint() const override;
