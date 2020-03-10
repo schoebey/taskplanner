@@ -11,7 +11,7 @@ TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
   : DraggableContainer<DraggableTagWidget>(pParent),
     m_pPlaceholder(new QFrame())
 {
-  QLayout* pLayout = new FlowLayout(this);
+  QLayout* pLayout = new FlowLayout(this, 0, 0, 0);
   setLayout(pLayout);
   m_pPlaceholder->setStyleSheet("border: 1px dashed red; background: green;");
 }

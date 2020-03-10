@@ -12,6 +12,18 @@
 #include <cmath>
 #include <cassert>
 
+enum class EDragMode
+{
+  eMove,
+  eCopy
+};
+
+enum class EDropMode
+{
+  eMoveBackToPreviousContainer,
+  eDelete
+};
+
 template<typename T>
 class DraggableContainer : public QFrame
 {
@@ -33,6 +45,26 @@ public:
       return true;
     }
     return false;
+  }
+
+  EDragMode dragMode() const
+  {
+    return m_dragMode;
+  }
+
+  void setDragMode(EDragMode mode)
+  {
+    m_dragMode = mode;
+  }
+
+  EDropMode dropMode() const
+  {
+    return m_dropMode;
+  }
+
+  void setDropMode(EDropMode mode)
+  {
+    m_dropMode = mode;
   }
 
   bool removeItem(T* pT)
@@ -98,6 +130,9 @@ private:
   }
 
   static std::set<DraggableContainer<T>*> m_visibleContainers;
+
+  EDragMode m_dragMode = EDragMode::eMove;
+  EDropMode m_dropMode = EDropMode::eMoveBackToPreviousContainer;
 };
 
 template<typename T>
@@ -184,8 +219,8 @@ protected:
         // 1. normal drag & drop operation
         // 2. dragging from a 'copy' container, creating a copy of the Draggable
         Draggable<T>* pDraggable = this;
-        bool bCopyMode = true;
-        if (bCopyMode)
+        if (nullptr != m_pContainer &&
+            EDragMode::eCopy == m_pContainer->dragMode())
         {
           pDraggable = m_fnCallCopyCtor();
         }
@@ -266,7 +301,16 @@ protected:
         else if (nullptr != m_pContainer)
         {
           setDraggingInstance(nullptr);
-          m_pContainer->addItem(this);
+          switch (m_pContainer->dropMode())
+          {
+          case EDropMode::eDelete:
+            T::deleteLater();
+            break;
+          case EDropMode::eMoveBackToPreviousContainer:
+          default:
+            m_pContainer->addItem(this);
+            break;
+          }
         }
         else
         {

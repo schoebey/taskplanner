@@ -60,8 +60,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
 
-  pFlowLayout = new FlowLayout(ui->pTags, 0, 0, 0);
-  ui->pTags->setLayout(pFlowLayout);
+  ui->pTags->setDropMode(EDropMode::eDelete);
 
   connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
