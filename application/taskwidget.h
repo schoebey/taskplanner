@@ -5,6 +5,8 @@
 #include "highlightmethod.h"
 #include "propertyproviderinterface.h"
 #include "itaskcontainerwidget.h"
+#include "draggable.h"
+#include "tagwidget.h"
 
 #include <QFrame>
 #include <QUrl>
@@ -22,7 +24,10 @@ class TaskWidgetOverlay;
 class QMenu;
 class LinkWidget;
 class QLabel;
-class TaskWidget : public QFrame, public IPropertyProvider, public ITaskContainerWidget
+class TaskWidget :
+    public DraggableContainer<DraggableTagWidget>,
+    public IPropertyProvider,
+    public ITaskContainerWidget
 {
   Q_OBJECT
 
@@ -140,6 +145,7 @@ private:
 
   bool eventFilter(QObject* pObj, QEvent* pEvent) override;
   void mousePressEvent(QMouseEvent* pMouseEvent) override;
+  void mouseReleaseEvent(QMouseEvent* pEvent) override;
   void mouseMoveEvent(QMouseEvent* pMouseEvent) override;
   void resizeEvent(QResizeEvent* pEvent) override;
   void focusInEvent(QFocusEvent* pEvent) override;
@@ -150,6 +156,9 @@ private:
   void showEvent(QShowEvent* pEvent) override;
   void dragEnterEvent(QDragEnterEvent* pEvent) override;
   void dropEvent(QDropEvent* pEvent) override;
+  bool addItem_impl(DraggableTagWidget* pT) override;
+  bool removeItem_impl(DraggableTagWidget* pT) override;
+  bool insertItem_impl(DraggableTagWidget* pT, QPoint pt) override;
 
   Ui::TaskWidget *ui;
 

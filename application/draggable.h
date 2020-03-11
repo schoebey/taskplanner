@@ -12,6 +12,9 @@
 #include <cmath>
 #include <cassert>
 
+//TODO: on drag, set widget to 'transparent for mouse events' and implement normal enter/leave events for widget
+//to circumvent increasing processing time with large amounts of draggable containers
+
 enum class EDragMode
 {
   eMove,
@@ -92,6 +95,20 @@ public:
 
   virtual void hidePlaceholder() {}
 
+  void showEvent(QShowEvent* /*pEvent*/) override
+  {
+    m_visibleContainers.insert(this);
+  }
+
+  void hideEvent(QHideEvent* /*pEvent*/) override
+  {
+    auto it = m_visibleContainers.find(this);
+    if (it != m_visibleContainers.end())
+    {
+      m_visibleContainers.erase(it);
+    }
+  }
+
   static DraggableContainer<T>* containerUnderMouse(const QPoint& globalPos)
   {
     for (DraggableContainer<T>* pContainer : m_visibleContainers)
@@ -114,20 +131,6 @@ private:
   virtual bool addItem_impl(T* pT) = 0;
   virtual bool removeItem_impl(T* pT) = 0;
   virtual bool insertItem_impl(T* pT, QPoint pt) = 0;
-
-  void showEvent(QShowEvent* /*pEvent*/) override
-  {
-    m_visibleContainers.insert(this);
-  }
-
-  void hideEvent(QHideEvent* /*pEvent*/) override
-  {
-    auto it = m_visibleContainers.find(this);
-    if (it != m_visibleContainers.end())
-    {
-      m_visibleContainers.erase(it);
-    }
-  }
 
   static std::set<DraggableContainer<T>*> m_visibleContainers;
 
@@ -187,6 +190,11 @@ public:
     return m_pContainer;
   }
 
+  static Draggable<T>* draggingInstance()
+  {
+    return m_pDraggingInstance;
+  }
+
 protected:
   bool mouseDown() const
   {
@@ -198,14 +206,9 @@ protected:
     return m_mouseDownPoint;
   }
 
-  void setDraggingInstance(Draggable<T>* pT)
+  static void setDraggingInstance(Draggable<T>* pT)
   {
     m_pDraggingInstance = pT;
-  }
-
-  Draggable<T>* draggingInstance() const
-  {
-    return m_pDraggingInstance;
   }
 
   void mouseMoveEvent(QMouseEvent* pMouseEvent) override

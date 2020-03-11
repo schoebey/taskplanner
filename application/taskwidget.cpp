@@ -44,7 +44,7 @@ TaskWidget* TaskWidget::m_pDraggingTaskWidget = nullptr;
 TaskWidget* TaskWidget::m_pTaskWidgetUnderMouse = nullptr;
 
 TaskWidget::TaskWidget(task_id id, QWidget *parent) :
-  QFrame(parent),
+  DraggableContainer<DraggableTagWidget>(parent),
   ui(new Ui::TaskWidget),
   m_taskId(id)
 {
@@ -824,6 +824,17 @@ void TaskWidget::mousePressEvent(QMouseEvent* pMouseEvent)
   }
 }
 
+void TaskWidget::mouseReleaseEvent(QMouseEvent* pEvent)
+{
+  QFrame::mouseReleaseEvent(pEvent);
+
+  auto pTag = DraggableTagWidget::draggingInstance();
+  if (nullptr != pTag)
+  {
+    ui->pTags->addItem(pTag);
+  }
+}
+
 void TaskWidget::mouseMoveEvent(QMouseEvent* pMouseEvent)
 {
   QFrame::mouseMoveEvent(pMouseEvent);
@@ -1044,8 +1055,9 @@ void TaskWidget::onLinkPasted()
   }
 }
 
-void TaskWidget::showEvent(QShowEvent* /*pEvent*/)
+void TaskWidget::showEvent(QShowEvent* pEvent)
 {
+  DraggableContainer<DraggableTagWidget>::showEvent(pEvent);
   updateSize();
 }
 
@@ -1089,4 +1101,19 @@ void TaskWidget::emphasise()
 void TaskWidget::reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets)
 {
   ui->pTaskListWidget->reorderTasks(vpTaskWidgets);
+}
+
+bool TaskWidget::addItem_impl(DraggableTagWidget* pT)
+{
+  return ui->pTags->addItem(pT);
+}
+
+bool TaskWidget::removeItem_impl(DraggableTagWidget* pT)
+{
+  return ui->pTags->removeItem(pT);
+}
+
+bool TaskWidget::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
+{
+  return ui->pTags->insertItemAt(pT, pt);
 }
