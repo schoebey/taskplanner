@@ -12,6 +12,12 @@
 #include <cmath>
 #include <cassert>
 
+namespace detail
+{
+  void sendEnterMoveLeaveEvents(QMouseEvent* pMouseEvent,
+                                QWidget*& pPreviouslyEntered);
+}
+
 //TODO: on drag, set widget to 'transparent for mouse events' and implement normal enter/leave events for widget
 //to circumvent increasing processing time with large amounts of draggable containers
 
@@ -95,19 +101,37 @@ public:
 
   virtual void hidePlaceholder() {}
 
-  void showEvent(QShowEvent* /*pEvent*/) override
+  void enterEvent(QEvent* pEvent) override
   {
+    QFrame::enterEvent(pEvent);
     m_visibleContainers.insert(this);
+    setStyleSheet("border: 1px solid red;");
   }
 
-  void hideEvent(QHideEvent* /*pEvent*/) override
+  void leaveEvent(QEvent* pEvent) override
   {
+    QFrame::leaveEvent(pEvent);
     auto it = m_visibleContainers.find(this);
     if (it != m_visibleContainers.end())
     {
       m_visibleContainers.erase(it);
     }
+    setStyleSheet("");
   }
+
+//  void showEvent(QShowEvent* /*pEvent*/) override
+//  {
+//    m_visibleContainers.insert(this);
+//  }
+
+//  void hideEvent(QHideEvent* /*pEvent*/) override
+//  {
+//    auto it = m_visibleContainers.find(this);
+//    if (it != m_visibleContainers.end())
+//    {
+//      m_visibleContainers.erase(it);
+//    }
+//  }
 
   static DraggableContainer<T>* containerUnderMouse(const QPoint& globalPos)
   {
@@ -169,7 +193,9 @@ public:
       m_mouseDownPoint(other.m_mouseDownPoint),
       m_pContainer(other.m_pContainer),
       m_fnCallCopyCtor(other.m_fnCallCopyCtor)
-  {}
+  {
+    T::setMouseTracking(true);
+  }
 
   ~Draggable()
   {}
@@ -216,7 +242,7 @@ protected:
     if (mouseDown() && nullptr == draggingInstance())
     {
       QPoint ptDist = pMouseEvent->pos() - mouseDownPoint();
-      if (20 < std::sqrt(ptDist.x() * ptDist.x() + ptDist.y() * ptDist.y()))
+      if (10 < std::sqrt(ptDist.x() * ptDist.x() + ptDist.y() * ptDist.y()))
       {
         // we have to differentiate between two cases:
         // 1. normal drag & drop operation
@@ -248,11 +274,13 @@ protected:
   void mousePressEvent(QMouseEvent* pMouseEvent) override
   {
     setMouseDown(true, pMouseEvent->pos());
+    T::mousePressEvent(pMouseEvent);
   }
 
-  void mouseReleaseEvent(QMouseEvent* /*pMouseEvent*/) override
+  void mouseReleaseEvent(QMouseEvent* pMouseEvent) override
   {
     setMouseDown(false);
+    T::mouseReleaseEvent(pMouseEvent);
   }
 
   bool eventFilter(QObject* /*pObj*/, QEvent* pEvent) override
@@ -263,19 +291,29 @@ protected:
       {
         QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
         T::move(T::parentWidget()->mapFromGlobal(pMouseEvent->globalPos() - m_mouseDownPoint));
+        if (nullptr != QWidget::mouseGrabber())
+        {
+          // probably not necessary - mouse events aren't detected
+          // by other widgets either way
+          QWidget::mouseGrabber()->releaseMouse();
+        }
+        T::setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
         for (auto pContainer : DraggableContainer<Draggable>::visibleContainers())
         {
           pContainer->hidePlaceholder();
         }
 
+
+        QPoint pt = pMouseEvent->globalPos();
         DraggableContainer<Draggable>* pContainer = DraggableContainer<Draggable>::containerUnderMouse(pMouseEvent->globalPos());
         if (nullptr != pContainer)
         {
-          QPoint pt = pMouseEvent->globalPos();
           pt = pContainer->mapFromGlobal(pt);
           pContainer->showPlaceholderAt(pt, T::size());
         }
+
+        detail::sendEnterMoveLeaveEvents(pMouseEvent, m_pPreviouslyEnteredWidget);
       }
       else if (QEvent::MouseButtonRelease == pEvent->type())
       {
@@ -325,6 +363,8 @@ protected:
           pContainer->hidePlaceholder();
         }
 
+        T::setAttribute(Qt::WA_TransparentForMouseEvents, false);
+
         qApp->removeEventFilter(this);
       }
     }
@@ -338,6 +378,7 @@ private:
   static Draggable<T>* m_pDraggingInstance;
   DraggableContainer<Draggable<T>>* m_pContainer = nullptr;
   std::function<Draggable<T>*()> m_fnCallCopyCtor;
+  QWidget* m_pPreviouslyEnteredWidget = nullptr;
 };
 
 #endif // DRAGGABLE_H

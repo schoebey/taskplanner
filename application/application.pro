@@ -54,7 +54,8 @@ SOURCES += \
     $$PWD/search/searchcontroller.cpp \
     tagwidget.cpp \
     tagwidgetcontainer.cpp \
-    layoututils.cpp
+    layoututils.cpp \
+    draggable.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
