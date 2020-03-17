@@ -83,7 +83,7 @@ namespace {
     }
   }
 
-  void find(const QString& sTerm,
+  void findRx(const QString& sTerm,
             const QWidget* pWidget,
             SearchController::tMatches& matches)
   {
@@ -100,6 +100,28 @@ namespace {
         matchType.pWidget = pLabel;
         matchType.iStart = match.capturedStart(0);
         matchType.iSize = match.capturedLength(0);
+        matches.push_back(matchType);
+      }
+    }
+  }
+
+  void find(const QString& sTerm,
+            const QWidget* pWidget,
+            SearchController::tMatches& matches)
+  {
+    auto labels = pWidget->findChildren<QLabel*>();
+    std::sort(labels.begin(), labels.end(), [pWidget](const QLabel* pLhs, const QLabel* pRhs)
+    { return pLhs->mapTo(pWidget, pLhs->pos()).y() < pRhs->mapTo(pWidget, pRhs->pos()).y(); });
+    for (const auto pLabel : labels)
+    {
+      QString sText = pLabel->text();
+      int iIndex = 0;
+      while (-1 != (iIndex = sText.indexOf(sTerm, iIndex, Qt::CaseInsensitive)))
+      {
+        SMatchInfo matchType;
+        matchType.pWidget = pLabel;
+        matchType.iStart = iIndex;
+        matchType.iSize = sTerm.size();
         matches.push_back(matchType);
       }
     }
