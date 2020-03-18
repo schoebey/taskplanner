@@ -2,6 +2,7 @@
 #define SEARCHCONTROLLER_H
 
 #include "matchinfo.h"
+#include "searchoptions.h"
 
 #include <QObject>
 #include <QString>
@@ -26,9 +27,16 @@ public:
 
   void onSearchTermChanged(const QString&);
 
+
   void onNext();
 
   void onPrev();
+
+  void onSearchOptionsChanged(const SearchOptions&);
+
+  void setOptions(const SearchOptions& options);
+
+  SearchOptions options() const;
 
 signals:
   void positionChanged(size_t currentPos, size_t totalHitCount);
@@ -39,8 +47,10 @@ private:
 private:
   Manager* m_pTaskManager = nullptr;
   WidgetManager* m_pWidgetManager = nullptr;
+  QString m_sSearchTerm;
   tMatches m_hits;
   tMatches::iterator m_hitIter;
+  SearchOptions m_options;
 };
 
 #endif // SEARCHCONTROLLER_H

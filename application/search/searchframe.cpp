@@ -17,12 +17,26 @@ SearchFrame::SearchFrame(QWidget* pParent)
   connect(ui->pFindNext, &QPushButton::clicked, this, &SearchFrame::findNext);
   connect(ui->pFindPrev, &QPushButton::clicked, this, &SearchFrame::findPrevious);
   connect(ui->pText, &QLineEdit::returnPressed, this, &SearchFrame::findNext);
+  connect(ui->pCaseSensitive, &QCheckBox::toggled, this, &SearchFrame::onCaseSensitivityChanged);
+  connect(ui->pRegExp, &QCheckBox::toggled, this, &SearchFrame::onUseRegularExpressionChanged);
 
   auto pEsc = new QAction("close");
   pEsc->setShortcut(Qt::Key_Escape);
   pEsc->setShortcutContext(Qt::WindowShortcut);
   connect(pEsc, &QAction::triggered, [&](){ onExit(); });
   addAction(pEsc);
+}
+
+void SearchFrame::onCaseSensitivityChanged(bool bOn)
+{
+  m_options.bCaseSensitive = bOn;
+  emit searchOptionsChanged(m_options);
+}
+
+void SearchFrame::onUseRegularExpressionChanged(bool bOn)
+{
+  m_options.bRegularExpression = bOn;
+  emit searchOptionsChanged(m_options);
 }
 
 void SearchFrame::onTextChanged(const QString& sText)
@@ -68,9 +82,5 @@ void SearchFrame::onExit()
 
 void SearchFrame::showSearchInfo(const QString& sInfo)
 {
-  auto* pMainWindow = static_cast<QMainWindow*>(window());
-  if (nullptr != pMainWindow && nullptr != pMainWindow->statusBar())
-  {
-    pMainWindow->statusBar()->showMessage(sInfo);
-  }
+  ui->pNofMatches->setText(sInfo);
 }

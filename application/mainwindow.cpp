@@ -97,6 +97,8 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   m_pSearchFrame->hide();
   connect(m_pSearchFrame, &SearchFrame::searchTermChanged,
           m_spSearchController.get(), &SearchController::onSearchTermChanged);
+  connect(m_pSearchFrame, &SearchFrame::searchOptionsChanged,
+          m_spSearchController.get(), &SearchController::onSearchOptionsChanged);
   connect(m_pSearchFrame, &SearchFrame::findNext,
           m_spSearchController.get(), &SearchController::onNext);
   connect(m_pSearchFrame, &SearchFrame::findPrevious,
