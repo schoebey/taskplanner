@@ -85,7 +85,8 @@ HEADERS += \
     decoratedlabel.h \
     $$PWD/search/searchframe.h \
     $$PWD/search/searchcontroller.h \
-    search/matchinfo.h
+    search/matchinfo.h \
+    search/searchoptions.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
