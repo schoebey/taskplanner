@@ -31,11 +31,6 @@ int main(int argc, char *argv[])
 //    QString s3 = relativeToNow.cap(3);
 //  }
 
-  QString sFortyTwo = conversion::fancy::toString(42);
-  QString s7FortyTwo = conversion::fancy::toString(742);
-  QString sTest = conversion::fancy::toString(4711);
-  QString sTest2 = conversion::fancy::toString(4711002);
-
 //  bool bIsInt = false;
 //  int iTest = conversion::stringToInt("ninehundredfiftytwo", &bIsInt);
 //  assert(bIsInt && iTest == 952);

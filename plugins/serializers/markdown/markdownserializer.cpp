@@ -287,7 +287,6 @@ namespace
 
   std::map<QString, std::vector<QString>> valuesFromStream(QTextStream& stream)
   {
-    qint64 iLastValidPos = 0;
     QString sLine;
     QString sData;
     std::map<QString, std::vector<QString>> values;
@@ -318,7 +317,7 @@ namespace
         {
           // remember this position to be later able to jump back to it
           // if content has been read that doesn't belong to the current section.
-          iLastValidPos = stream.pos();
+          qint64 iLastValidPos = stream.pos();
 
           sLine = stream.readLine();
           if (sLine.startsWith(sChildStartTag) ||
@@ -396,8 +395,8 @@ EDeserializingError MarkdownSerializer::initDeserialization()
       m_pStream->setDevice(&m_file);
       m_pStream->setCodec("UTF-8");
 
-      QString sHeader = m_pStream->readLine();
-      QString sWriteTimestamp = m_pStream->readLine();
+      /*QString sHeader = */m_pStream->readLine();
+      /*QString sWriteTimestamp = */m_pStream->readLine();
 
       return EDeserializingError::eOk;
     }

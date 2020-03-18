@@ -67,8 +67,8 @@ EDeserializingError TextSerializer::initDeserialization()
       m_stream.setDevice(&m_file);
       m_stream.setCodec("UTF-8");
 
-      QString sHeader = m_stream.readLine();
-      QString sWriteTimestamp = m_stream.readLine();
+      /*QString sHeader = */m_stream.readLine();
+      /*QString sWriteTimestamp = */m_stream.readLine();
 
       return EDeserializingError::eOk;
     }
