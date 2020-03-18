@@ -83,48 +83,47 @@ namespace {
     }
   }
 
+  void addMatch(SearchController::tMatches& matches,
+                QLabel* pLabel,
+                int iIndex,
+                int iSize)
+  {
+
+    SMatchInfo matchType;
+    matchType.pWidget = pLabel;
+    matchType.iStart = iIndex;
+    matchType.iSize = iSize;
+    matches.push_back(matchType);
+  }
+
   void findRx(const QString& sTerm,
-            const QWidget* pWidget,
+              const QList<QLabel*>& labels,
             Qt::CaseSensitivity cs,
             SearchController::tMatches& matches)
   {
     QRegExp rx(sTerm, cs);
-    auto labels = pWidget->findChildren<QLabel*>();
-    std::sort(labels.begin(), labels.end(), [pWidget](const QLabel* pLhs, const QLabel* pRhs)
-    { return pLhs->mapTo(pWidget, pLhs->pos()).y() < pRhs->mapTo(pWidget, pRhs->pos()).y(); });
     for (const auto pLabel : labels)
     {
       int iIndex = -1;
       while (-1 != (iIndex = rx.indexIn(pLabel->text(), iIndex + 1)))
       {
-        SMatchInfo matchType;
-        matchType.pWidget = pLabel;
-        matchType.iStart = iIndex;
-        matchType.iSize = rx.cap().size();
-        matches.push_back(matchType);
+        addMatch(matches, pLabel, iIndex, rx.cap().size());
       }
     }
   }
 
   void find(const QString& sTerm,
-            const QWidget* pWidget,
+            const QList<QLabel*>& labels,
             Qt::CaseSensitivity cs,
             SearchController::tMatches& matches)
   {
-    auto labels = pWidget->findChildren<QLabel*>();
-    std::sort(labels.begin(), labels.end(), [pWidget](const QLabel* pLhs, const QLabel* pRhs)
-    { return pLhs->mapTo(pWidget, pLhs->pos()).y() < pRhs->mapTo(pWidget, pRhs->pos()).y(); });
     for (const auto pLabel : labels)
     {
       QString sText = pLabel->text();
       int iIndex = -1;
       while (-1 != (iIndex = sText.indexOf(sTerm, iIndex + 1, cs)))
       {
-        SMatchInfo matchType;
-        matchType.pWidget = pLabel;
-        matchType.iStart = iIndex;
-        matchType.iSize = sTerm.size();
-        matches.push_back(matchType);
+        addMatch(matches, pLabel, iIndex, sTerm.size());
       }
     }
   }
@@ -133,14 +132,18 @@ namespace {
             bool bCaseSensitive, bool bRegExp,
             SearchController::tMatches& matches)
   {
+    auto labels = pWidget->findChildren<QLabel*>();
+    std::sort(labels.begin(), labels.end(), [pWidget](const QLabel* pLhs, const QLabel* pRhs)
+    { return pLhs->mapTo(pWidget, pLhs->pos()).y() < pRhs->mapTo(pWidget, pRhs->pos()).y(); });
+
     Qt::CaseSensitivity cs = bCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
     if (bRegExp)
     {
-      findRx(sTerm, pWidget, cs, matches);
+      findRx(sTerm, labels, cs, matches);
     }
     else
     {
-      find(sTerm, pWidget, cs, matches);
+      find(sTerm, labels, cs, matches);
     }
   }
 }
