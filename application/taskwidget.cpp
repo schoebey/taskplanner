@@ -934,14 +934,16 @@ void TaskWidget::focusOutEvent(QFocusEvent* pEvent)
   m_pOverlay->setHighlight(m_pOverlay->highlight() & ~EHighlightMethod::eFocus);
 }
 
-void TaskWidget::enterEvent(QEvent* /*pEvent*/)
+void TaskWidget::enterEvent(QEvent* pEvent)
 {
   setHighlight(highlight() | EHighlightMethod::eHover);
+  DraggableContainer<DraggableTagWidget>::enterEvent(pEvent);
 }
 
-void TaskWidget::leaveEvent(QEvent* /*pEvent*/)
+void TaskWidget::leaveEvent(QEvent* pEvent)
 {
   setHighlight(highlight() & ~EHighlightMethod::eHover);
+  DraggableContainer<DraggableTagWidget>::leaveEvent(pEvent);
 }
 
 void TaskWidget::contextMenuEvent(QContextMenuEvent* pEvent)

@@ -8,7 +8,7 @@
 #include <QWidget>
 #include <QFrame>
 
-#include <set>
+#include <vector>
 #include <cmath>
 #include <cassert>
 
@@ -104,51 +104,45 @@ public:
   void enterEvent(QEvent* pEvent) override
   {
     QFrame::enterEvent(pEvent);
-    m_visibleContainers.insert(this);
+    m_vpMouseOverContainers.push_back(this);
     setStyleSheet("border: 1px solid red;");
   }
 
   void leaveEvent(QEvent* pEvent) override
   {
     QFrame::leaveEvent(pEvent);
-    auto it = m_visibleContainers.find(this);
-    if (it != m_visibleContainers.end())
+    auto it = std::find(m_vpMouseOverContainers.begin(),
+                        m_vpMouseOverContainers.end(),
+                        this);
+    if (it != m_vpMouseOverContainers.end())
     {
-      m_visibleContainers.erase(it);
+      m_vpMouseOverContainers.erase(it);
+      setStyleSheet("");
     }
-    setStyleSheet("");
   }
-
-//  void showEvent(QShowEvent* /*pEvent*/) override
-//  {
-//    m_visibleContainers.insert(this);
-//  }
-
-//  void hideEvent(QHideEvent* /*pEvent*/) override
-//  {
-//    auto it = m_visibleContainers.find(this);
-//    if (it != m_visibleContainers.end())
-//    {
-//      m_visibleContainers.erase(it);
-//    }
-//  }
 
   static DraggableContainer<T>* containerUnderMouse(const QPoint& globalPos)
   {
-    for (DraggableContainer<T>* pContainer : m_visibleContainers)
+    // since the vector is filled from front to back with the newest entered
+    // widget at the back, traverse it backwards to get the most restricting
+    // container widget first.
+    auto it = m_vpMouseOverContainers.rbegin();
+    while (it != m_vpMouseOverContainers.rend())
     {
+      auto pContainer = *it;
       if (pContainer->rect().contains(pContainer->mapFromGlobal(globalPos)))
       {
         return pContainer;
       }
+      ++it;
     }
 
     return nullptr;
   }
 
-  static std::set<DraggableContainer<T>*> visibleContainers()
+  static std::vector<DraggableContainer<T>*> mouseOverContainers()
   {
-    return m_visibleContainers;
+    return m_vpMouseOverContainers;
   }
 
 private:
@@ -156,7 +150,7 @@ private:
   virtual bool removeItem_impl(T* pT) = 0;
   virtual bool insertItem_impl(T* pT, QPoint pt) = 0;
 
-  static std::set<DraggableContainer<T>*> m_visibleContainers;
+  static std::vector<DraggableContainer<T>*> m_vpMouseOverContainers;
 
   EDragMode m_dragMode = EDragMode::eMove;
   EDropMode m_dropMode = EDropMode::eMoveBackToPreviousContainer;
@@ -242,7 +236,7 @@ protected:
     if (mouseDown() && nullptr == draggingInstance())
     {
       QPoint ptDist = pMouseEvent->pos() - mouseDownPoint();
-      if (10 < std::sqrt(ptDist.x() * ptDist.x() + ptDist.y() * ptDist.y()))
+      if (20 < std::sqrt(ptDist.x() * ptDist.x() + ptDist.y() * ptDist.y()))
       {
         // we have to differentiate between two cases:
         // 1. normal drag & drop operation
@@ -262,7 +256,7 @@ protected:
 
         pDraggable->T::setParent(T::window());
         pDraggable->T::setFocus();
-        pDraggable->T::move(pMouseEvent->globalPos() - mouseDownPoint());
+        pDraggable->T::move(T::window()->mapFromGlobal(pMouseEvent->globalPos() - mouseDownPoint()));
         pDraggable->T::show();
         pDraggable->T::raise();
         qApp->installEventFilter(pDraggable);
@@ -299,7 +293,7 @@ protected:
         }
         T::setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-        for (auto pContainer : DraggableContainer<Draggable>::visibleContainers())
+        for (auto pContainer : DraggableContainer<Draggable>::mouseOverContainers())
         {
           pContainer->hidePlaceholder();
         }
@@ -358,7 +352,7 @@ protected:
           assert(false);
         }
 
-        for (auto pContainer : DraggableContainer<Draggable>::visibleContainers())
+        for (auto pContainer : DraggableContainer<Draggable>::mouseOverContainers())
         {
           pContainer->hidePlaceholder();
         }

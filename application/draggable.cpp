@@ -6,9 +6,6 @@ namespace detail
   void sendEnterMoveLeaveEvents(QMouseEvent* pMouseEvent,
                                 QWidget*& pPreviouslyEntered)
   {
-    // TODO: maybe emulate event dispatching since Qt won't do it?
-    // e.g. dispatch enter/move/leave events
-    // in order to do that, the origin of mouse events has to be analyzed...
     /* upon entering a new widget, store the previous recipient of the enter event
      * when entering a new widget, check the previously entered widget:
      * is the mouse pos still within the widget? do nothing
@@ -20,6 +17,9 @@ namespace detail
      *
      */
     QPoint pt = pMouseEvent->globalPos();
+
+    // TODO: is there a better way to get the widget at the current mouse position?
+    // According to Qt documentation, this method is expensive.
     QWidget* pCurr = qApp->widgetAt(pMouseEvent->globalPos());
     if (pPreviouslyEntered != pCurr)
     {

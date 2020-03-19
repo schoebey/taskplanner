@@ -4,8 +4,8 @@
 
 #include <QLayout>
 
-template<> std::set<DraggableContainer<DraggableTagWidget>*>
-DraggableContainer<DraggableTagWidget>::m_visibleContainers = std::set<DraggableContainer<DraggableTagWidget>*>();
+template<> std::vector<DraggableContainer<DraggableTagWidget>*>
+DraggableContainer<DraggableTagWidget>::m_vpMouseOverContainers = std::vector<DraggableContainer<DraggableTagWidget>*>();
 
 TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
   : DraggableContainer<DraggableTagWidget>(pParent),
