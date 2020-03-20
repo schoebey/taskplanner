@@ -25,16 +25,16 @@ void onContainerElementAdded(Manager* pManager,
   if (nullptr != pTask)
   {
     bool bOk(false);
-    auto links = conversion::fromString<std::vector<QUrl>>(pTask->propertyValue(sContainerName), bOk);
+    auto elements = conversion::fromString<std::vector<T>>(pTask->propertyValue(sContainerName), bOk);
     if (bOk)
     {
-      auto it = std::find(links.begin(), links.end(), el);
-      if (it == links.end())
+      auto it = std::find(elements.begin(), elements.end(), el);
+      if (it == elements.end())
       {
-        links.push_back(el);
+        elements.push_back(el);
         QUndoCommand* pCommand = new ChangeTaskPropertyCommand(taskId, sContainerName,
                                                                pTask->propertyValue(sContainerName),
-                                                               conversion::toString(links),
+                                                               conversion::toString(elements),
                                                                pManager, pWidgetManager);
         undoStack.push(pCommand);
       }
@@ -66,16 +66,16 @@ void onContainerElementRemoved(Manager* pManager,
   if (nullptr != pTask)
   {
     bool bOk(false);
-    auto links = conversion::fromString<std::vector<QUrl>>(pTask->propertyValue(sContainerName), bOk);
+    auto elements = conversion::fromString<std::vector<T>>(pTask->propertyValue(sContainerName), bOk);
     if (bOk)
     {
-      auto it = std::find(links.begin(), links.end(), el);
-      if (it != links.end())
+      auto it = std::find(elements.begin(), elements.end(), el);
+      if (it != elements.end())
       {
-        links.erase(it);
+        elements.erase(it);
         QUndoCommand* pCommand = new ChangeTaskPropertyCommand(taskId, sContainerName,
                                                                pTask->propertyValue(sContainerName),
-                                                               conversion::toString(links),
+                                                               conversion::toString(elements),
                                                                pManager, pWidgetManager);
         undoStack.push(pCommand);
       }

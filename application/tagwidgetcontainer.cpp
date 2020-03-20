@@ -13,7 +13,6 @@ TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
 {
   QLayout* pLayout = new FlowLayout(this, 0, 0, 0);
   setLayout(pLayout);
-  m_pPlaceholder->setStyleSheet("border: 1px dashed red; background: green;");
 }
 
 bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
@@ -22,6 +21,7 @@ bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
   if (nullptr != pLayout)
   {
     pLayout->addWidget(pT);
+    emit tagAdded(pT);
     return true;
   }
 
@@ -30,6 +30,7 @@ bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
 
 bool TagWidgetContainer::removeItem_impl(DraggableTagWidget* pT)
 {
+  emit tagRemoved(pT);
   return true;
 }
 
@@ -38,7 +39,13 @@ bool TagWidgetContainer::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
   m_pPlaceholder->setParent(nullptr);
   m_pPlaceholder->hide();
   FlowLayout* pLayout = dynamic_cast<FlowLayout*>(layout());
-  return tools::addToFlowLayout(pT, pLayout, pt);
+  if (tools::addToFlowLayout(pT, pLayout, pt))
+  {
+    emit tagAdded(pT);
+    return true;
+  }
+
+  return false;
 }
 
 bool TagWidgetContainer::showPlaceholderAt(const QPoint& pt, const QSize& s)

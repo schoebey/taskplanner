@@ -135,6 +135,8 @@ private slots:
   void onAddSubtaskTriggered();
   void onTaskInserted(TaskWidget* pTaskWidget, int iPos = -1);
   void onTaskRemoved(TaskWidget *pTaskWidget);
+  void onTagAdded(DraggableTagWidget* pT);
+  void onTagRemoved(DraggableTagWidget* pT);
 
 private:
   void emphasise();

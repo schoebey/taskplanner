@@ -105,7 +105,6 @@ public:
   {
     QFrame::enterEvent(pEvent);
     m_vpMouseOverContainers.push_back(this);
-    setStyleSheet("border: 1px solid red;");
   }
 
   void leaveEvent(QEvent* pEvent) override
@@ -117,7 +116,6 @@ public:
     if (it != m_vpMouseOverContainers.end())
     {
       m_vpMouseOverContainers.erase(it);
-      setStyleSheet("");
     }
   }
 
@@ -153,7 +151,7 @@ private:
   static std::vector<DraggableContainer<T>*> m_vpMouseOverContainers;
 
   EDragMode m_dragMode = EDragMode::eMove;
-  EDropMode m_dropMode = EDropMode::eMoveBackToPreviousContainer;
+  EDropMode m_dropMode = EDropMode::eDelete;
 };
 
 template<typename T>

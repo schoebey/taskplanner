@@ -70,6 +70,8 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(ui->pTaskListWidget, &TaskListWidget::taskInserted, this, &TaskWidget::onTaskInserted);
   connect(ui->pTaskListWidget, &TaskListWidget::taskRemoved, this, &TaskWidget::onTaskRemoved);
   connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::updateSize, Qt::QueuedConnection);
+  connect(ui->pTags, &TagWidgetContainer::tagAdded, this, &TaskWidget::onTagAdded);
+  connect(ui->pTags, &TagWidgetContainer::tagRemoved, this, &TaskWidget::onTagRemoved);
   connect(this, &TaskWidget::attentionNeeded, this, &TaskWidget::emphasise);
 
   setUpContextMenu();
@@ -1118,4 +1120,14 @@ bool TaskWidget::removeItem_impl(DraggableTagWidget* pT)
 bool TaskWidget::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
 {
   return ui->pTags->insertItemAt(pT, pt);
+}
+
+void TaskWidget::onTagAdded(DraggableTagWidget* pT)
+{
+  emit tagAdded(m_taskId, pT->text());
+}
+
+void TaskWidget::onTagRemoved(DraggableTagWidget* pT)
+{
+  emit tagRemoved(m_taskId, pT->text());
 }

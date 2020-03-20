@@ -8,9 +8,14 @@
 
 class TagWidgetContainer : public DraggableContainer<DraggableTagWidget>
 {
+  Q_OBJECT
 public:
   TagWidgetContainer(QWidget* pParent);
   ~TagWidgetContainer() = default;
+
+signals:
+  void tagAdded(DraggableTagWidget*);
+  void tagRemoved(DraggableTagWidget*);
 
 private:
   bool addItem_impl(DraggableTagWidget* pT) override;
