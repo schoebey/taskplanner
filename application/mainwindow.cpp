@@ -212,9 +212,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
 //  startTimer(3000);
 
-  QMenu* pMenuOptions = new QMenu(tr("Options"), ui->menuTools);
-  ui->menuTools->addMenu(pMenuOptions);
-
 
   auto pDetector = new HibernationDetector(this);
   bOk = connect(pDetector, SIGNAL(wokeUpFromHibernation(QDateTime, QDateTime)),
@@ -226,16 +223,16 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   m_pEnableHibernationDetection = new QAction(tr("hibernation detection"), this);
   m_pEnableHibernationDetection->setCheckable(true);
   connect(m_pEnableHibernationDetection, &QAction::toggled, pDetector, &HibernationDetector::setEnabled);
-  pMenuOptions->addAction(m_pEnableHibernationDetection);
+  ui->menuTools->addAction(m_pEnableHibernationDetection);
 
 
   QAction* pChooseStyleSheet = new QAction(tr("Stylesheet..."), this);
   connect(pChooseStyleSheet, &QAction::triggered, this, &MainWindow::onChooseStylesheet);
-  pMenuOptions->addAction(pChooseStyleSheet);
+  ui->menuTools->addAction(pChooseStyleSheet);
 
   QAction* pChooseScript = new QAction(tr("Info display script..."), this);
   connect(pChooseScript, &QAction::triggered, this, &MainWindow::onChooseScript);
-  pMenuOptions->addAction(pChooseScript);
+  ui->menuTools->addAction(pChooseScript);
 
 
   loadSettings();
