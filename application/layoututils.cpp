@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QGridLayout>
 #include <QPoint>
+#include <QDebug>
 
 #include <cmath>
 
@@ -65,6 +66,7 @@ bool addToFlowLayout(QWidget* pT, FlowLayout* pLayout, QPoint pt)
       auto pItem = pLayout->itemAt(i);
       if (nullptr != pItem) {
         QWidget* pWidget = pItem->widget();
+
         vpWidgets.push_back(pWidget);
         QPoint ptCenter = pWidget->mapTo(pWidget->parentWidget(),
                                          pWidget->rect().center());
@@ -89,6 +91,8 @@ bool addToFlowLayout(QWidget* pT, FlowLayout* pLayout, QPoint pt)
     for (const auto& el : vpWidgets)
     {
       pLayout->addWidget(el);
+
+      el->setVisible(true);
     }
 
 

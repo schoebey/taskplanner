@@ -11,6 +11,7 @@ TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
   : DraggableContainer<DraggableTagWidget>(pParent),
     m_pPlaceholder(new QFrame())
 {
+  m_pPlaceholder->setObjectName("tag_placeholder");
   QLayout* pLayout = new FlowLayout(this, 0, 0, 0);
   setLayout(pLayout);
 }

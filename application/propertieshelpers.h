@@ -14,12 +14,13 @@
 namespace properties
 {
 template<typename T>
-void onContainerElementAdded(Manager* pManager,
-                             WidgetManager* pWidgetManager,
-                             QUndoStack& undoStack,
-                             task_id taskId,
-                             const T& el,
-                             const QString& sContainerName)
+void onContainerElementInserted(Manager* pManager,
+                                WidgetManager* pWidgetManager,
+                                QUndoStack& undoStack,
+                                task_id taskId,
+                                const T& el,
+                                const QString& sContainerName,
+                                int iPosition)
 {
   ITask* pTask = pManager->task(taskId);
   if (nullptr != pTask)
@@ -29,8 +30,18 @@ void onContainerElementAdded(Manager* pManager,
     if (bOk)
     {
       auto it = std::find(elements.begin(), elements.end(), el);
-      if (it == elements.end())
+      if (it == elements.end() && iPosition < elements.size() && iPosition >= -1)
       {
+        typename std::vector<T>::iterator itPosition;
+        if (-1 == iPosition)
+        {
+          itPosition = elements.end();
+        }
+        else
+        {
+          itPosition = elements.begin() + iPosition;
+        }
+        //elements.insert(el, itPosition);
         elements.push_back(el);
         QUndoCommand* pCommand = new ChangeTaskPropertyCommand(taskId, sContainerName,
                                                                pTask->propertyValue(sContainerName),
@@ -52,6 +63,17 @@ void onContainerElementAdded(Manager* pManager,
   {
     assert(false);
   }
+}
+
+template<typename T>
+void onContainerElementAdded(Manager* pManager,
+                             WidgetManager* pWidgetManager,
+                             QUndoStack& undoStack,
+                             task_id taskId,
+                             const T& el,
+                             const QString& sContainerName)
+{
+  onContainerElementInserted(pManager, pWidgetManager, undoStack, taskId, el, sContainerName, -1);
 }
 
 template<typename T>

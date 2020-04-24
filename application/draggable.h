@@ -7,6 +7,8 @@
 #include <QApplication>
 #include <QWidget>
 #include <QFrame>
+#include <QPointer>
+#include <QDebug>
 
 #include <vector>
 #include <cmath>
@@ -45,17 +47,6 @@ public:
   ~DraggableContainer()
   {}
 
-  bool addItem(T* pT)
-  {
-    if (nullptr == pT) { return false; }
-    if (addItem_impl(pT))
-    {
-      pT->setContainer(this);
-      return true;
-    }
-    return false;
-  }
-
   EDragMode dragMode() const
   {
     return m_dragMode;
@@ -76,11 +67,16 @@ public:
     m_dropMode = mode;
   }
 
-  bool removeItem(T* pT)
+  bool addItem(T* pT)
   {
     if (nullptr == pT) { return false; }
-    if (removeItem_impl(pT))
+    if (addItem_impl(pT))
     {
+      pT->setContainer(this);
+      if (m_vpItems.end() == std::find(m_vpItems.begin(), m_vpItems.end(), pT))
+      {
+        m_vpItems.push_back(pT);
+      }
       return true;
     }
     return false;
@@ -92,6 +88,22 @@ public:
     if (insertItem_impl(pT, pt))
     {
       pT->setContainer(this);
+      if (m_vpItems.end() == std::find(m_vpItems.begin(), m_vpItems.end(), pT))
+      {
+        m_vpItems.push_back(pT);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  bool removeItem(T* pT)
+  {
+    if (nullptr == pT) { return false; }
+    if (removeItem_impl(pT))
+    {
+      auto it = std::find(m_vpItems.begin(), m_vpItems.end(), pT);
+      if (it != m_vpItems.end())  { m_vpItems.erase(it); }
       return true;
     }
     return false;
@@ -104,6 +116,16 @@ public:
   void enterEvent(QEvent* pEvent) override
   {
     QFrame::enterEvent(pEvent);
+    for (auto it = m_vpMouseOverContainers.begin();
+         it != m_vpMouseOverContainers.end(); ++it)
+    {
+      if (isAncestorOf(*it))
+      {
+        m_vpMouseOverContainers.insert(it, this);
+        return;
+      }
+    }
+
     m_vpMouseOverContainers.push_back(this);
   }
 
@@ -121,9 +143,8 @@ public:
 
   static DraggableContainer<T>* containerUnderMouse(const QPoint& globalPos)
   {
-    // since the vector is filled from front to back with the newest entered
-    // widget at the back, traverse it backwards to get the most restricting
-    // container widget first.
+    // the vector is filled so that parents are located in front of their children,
+    // meaning the innermost child is situated at the back of the vector
     auto it = m_vpMouseOverContainers.rbegin();
     while (it != m_vpMouseOverContainers.rend())
     {
@@ -143,12 +164,19 @@ public:
     return m_vpMouseOverContainers;
   }
 
+  const std::vector<QPointer<T>>& items() const
+  {
+    return m_vpItems;
+  }
+
 private:
   virtual bool addItem_impl(T* pT) = 0;
   virtual bool removeItem_impl(T* pT) = 0;
   virtual bool insertItem_impl(T* pT, QPoint pt) = 0;
 
   static std::vector<DraggableContainer<T>*> m_vpMouseOverContainers;
+
+  std::vector<QPointer<T>> m_vpItems;
 
   EDragMode m_dragMode = EDragMode::eMove;
   EDropMode m_dropMode = EDropMode::eDelete;
@@ -282,30 +310,35 @@ protected:
       if (QEvent::MouseMove == pEvent->type())
       {
         QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
-        T::move(T::parentWidget()->mapFromGlobal(pMouseEvent->globalPos() - m_mouseDownPoint));
-        if (nullptr != QWidget::mouseGrabber())
+        if (m_lastMousePos != pMouseEvent->globalPos())
         {
-          // probably not necessary - mouse events aren't detected
-          // by other widgets either way
-          QWidget::mouseGrabber()->releaseMouse();
+          m_lastMousePos = pMouseEvent->globalPos();
+          T::move(T::parentWidget()->mapFromGlobal(pMouseEvent->globalPos() - m_mouseDownPoint));
+          if (nullptr != QWidget::mouseGrabber())
+          {
+            // probably not necessary - mouse events aren't detected
+            // by other widgets either way
+            QWidget::mouseGrabber()->releaseMouse();
+          }
+          T::setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+          for (auto pContainer : DraggableContainer<Draggable>::mouseOverContainers())
+          {
+            pContainer->hidePlaceholder();
+          }
+
+
+          QPoint pt = pMouseEvent->globalPos();
+          DraggableContainer<Draggable>* pContainer = DraggableContainer<Draggable>::containerUnderMouse(pMouseEvent->globalPos());
+          if (nullptr != pContainer)
+          {
+            pt = pContainer->mapFromGlobal(pt);
+
+            pContainer->showPlaceholderAt(pt, T::size());
+          }
+
+          detail::sendEnterMoveLeaveEvents(pMouseEvent, m_pPreviouslyEnteredWidget);
         }
-        T::setAttribute(Qt::WA_TransparentForMouseEvents, true);
-
-        for (auto pContainer : DraggableContainer<Draggable>::mouseOverContainers())
-        {
-          pContainer->hidePlaceholder();
-        }
-
-
-        QPoint pt = pMouseEvent->globalPos();
-        DraggableContainer<Draggable>* pContainer = DraggableContainer<Draggable>::containerUnderMouse(pMouseEvent->globalPos());
-        if (nullptr != pContainer)
-        {
-          pt = pContainer->mapFromGlobal(pt);
-          pContainer->showPlaceholderAt(pt, T::size());
-        }
-
-        detail::sendEnterMoveLeaveEvents(pMouseEvent, m_pPreviouslyEnteredWidget);
       }
       else if (QEvent::MouseButtonRelease == pEvent->type())
       {
@@ -367,6 +400,7 @@ protected:
 private:
   bool m_bMouseDown = false;
   QPoint m_mouseDownPoint;
+  QPoint m_lastMousePos;
   static Draggable<T>* m_pDraggingInstance;
   DraggableContainer<Draggable<T>>* m_pContainer = nullptr;
   std::function<Draggable<T>*()> m_fnCallCopyCtor;

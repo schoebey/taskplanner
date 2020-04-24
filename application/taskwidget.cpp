@@ -578,6 +578,41 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
       for (const auto& url : toRemove)  { removeLink(url); }
     }
   }
+  else if ("tags" == sName)
+  {
+    bool bOk(false);
+    auto tags = conversion::fromString<std::vector<QString>>(sValue, bOk);
+    if (bOk)
+    {
+      // all tags that are not yet present have to be added
+      const auto& tagWidgets = ui->pTags->items();
+      for (const auto& tag : tags)
+      {
+        auto it = std::find_if(tagWidgets.begin(), tagWidgets.end(), [tag](const TagWidget* p) { return tag == p->text(); });
+
+        if (it == tagWidgets.end())
+        {
+          ui->pTags->addItem(new DraggableTagWidget(tag, this));
+        }
+      }
+
+      // all tags that are present but not represented in sValue have to be removed
+      std::set<DraggableTagWidget*> toRemove;
+      for (const auto& tag : tags)
+      {
+        auto itProp = std::find_if(tagWidgets.begin(), tagWidgets.end(),
+                                   [tag](QPointer<DraggableTagWidget> p)
+        { return nullptr != p &&
+            tag == p->text();});
+        if (itProp == tagWidgets.end())
+        {
+          toRemove.insert(itProp->data());
+        }
+      }
+
+      for (auto pTagWidget : toRemove)  { ui->pTags->removeItem(pTagWidget); }
+    }
+  }
   else
   {
     if (Properties<Task>::visible(sName))
