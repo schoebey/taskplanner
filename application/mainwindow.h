@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "draggable.h"
 #include "id_types.h"
 #include <QMainWindow>
 #include <QPointer>
@@ -25,6 +26,8 @@ class SearchFrame;
 class SearchController;
 class QFileSystemWatcher;
 class ToolBarInfoDisplay;
+class TagWidget;
+using DraggableTagWidget = Draggable<TagWidget>;
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -42,6 +45,7 @@ public:
 
   void restoreDefaultLayout();
 
+
 private slots:
   void createNewTask(group_id groupId);
   void renameGroup(group_id id, const QString& sNewName);
@@ -52,6 +56,7 @@ private slots:
   void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
   void onPropertyRemoved(task_id taskId, const QString& sPropertyName);
   void onTagAdded(task_id taskId, const QString& sTag);
+  void onTagMoved(task_id taskId, const QString& sTag, task_id sourceTaskId);
   void onTagRemoved(task_id taskId, const QString& sTag);
   void onLinkAdded(task_id taskId, QUrl url);
   void onLinkRemoved(task_id taskId, QUrl url);

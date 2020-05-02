@@ -110,6 +110,7 @@ signals:
   void taskRemoved(task_id parentId, task_id childId);
   void taskDeleted(task_id id);
   void tagAdded(task_id id, const QString& sTag);
+  void tagMoved(task_id id, const QString& sTag, task_id sourceTaskId);
   void tagRemoved(task_id id, const QString& sTag);
   void linkAdded(task_id id, QUrl url);
   void linkRemoved(task_id id, QUrl url);
@@ -136,6 +137,7 @@ private slots:
   void onTaskInserted(TaskWidget* pTaskWidget, int iPos = -1);
   void onTaskRemoved(TaskWidget *pTaskWidget);
   void onTagAdded(DraggableTagWidget* pT);
+  void onTagMoved(DraggableTagWidget* pT, DraggableContainer<DraggableTagWidget>* pSource);
   void onTagRemoved(DraggableTagWidget* pT);
 
 private:
@@ -161,6 +163,7 @@ private:
   bool addItem_impl(DraggableTagWidget* pT) override;
   bool removeItem_impl(DraggableTagWidget* pT) override;
   bool insertItem_impl(DraggableTagWidget* pT, QPoint pt) override;
+  bool moveItemFrom_impl(DraggableContainer<DraggableTagWidget>* pSource, DraggableTagWidget* pT, QPoint pt) override;
 
   Ui::TaskWidget *ui;
 

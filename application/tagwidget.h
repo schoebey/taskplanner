@@ -27,6 +27,10 @@ public:
 
   TagWidget(const TagWidget& other);
 
+  ~TagWidget();
+
+  void showEvent(QShowEvent* pEvent);
+  void hideEvent(QHideEvent* pEvent);
 private:
   void paintEvent(QPaintEvent* pEvent) override;
   QSize sizeHint() const override;

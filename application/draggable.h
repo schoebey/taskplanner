@@ -17,7 +17,7 @@
 namespace detail
 {
   void sendEnterMoveLeaveEvents(QMouseEvent* pMouseEvent,
-                                QWidget*& pPreviouslyEntered);
+                                QPointer<QWidget>& pPreviouslyEntered);
 }
 
 //TODO: on drag, set widget to 'transparent for mouse events' and implement normal enter/leave events for widget
@@ -27,12 +27,6 @@ enum class EDragMode
 {
   eMove,
   eCopy
-};
-
-enum class EDropMode
-{
-  eMoveBackToPreviousContainer,
-  eDelete
 };
 
 template<typename T>
@@ -55,16 +49,6 @@ public:
   void setDragMode(EDragMode mode)
   {
     m_dragMode = mode;
-  }
-
-  EDropMode dropMode() const
-  {
-    return m_dropMode;
-  }
-
-  void setDropMode(EDropMode mode)
-  {
-    m_dropMode = mode;
   }
 
   bool addItem(T* pT)
@@ -104,6 +88,24 @@ public:
     {
       auto it = std::find(m_vpItems.begin(), m_vpItems.end(), pT);
       if (it != m_vpItems.end())  { m_vpItems.erase(it); }
+      return true;
+    }
+    return false;
+  }
+
+  bool moveItemFrom(DraggableContainer<T>* pSource, T* pT, QPoint pt)
+  {
+    if (nullptr == pT || nullptr == pSource) { return false; }
+    if (moveItemFrom_impl(pSource, pT, pt))
+    {
+      auto it = std::find(pSource->m_vpItems.begin(), pSource->m_vpItems.end(), pT);
+      if (it != pSource->m_vpItems.end())  { pSource->m_vpItems.erase(it); }
+
+      pT->setContainer(this);
+      if (m_vpItems.end() == std::find(m_vpItems.begin(), m_vpItems.end(), pT))
+      {
+        m_vpItems.push_back(pT);
+      }
       return true;
     }
     return false;
@@ -173,13 +175,13 @@ private:
   virtual bool addItem_impl(T* pT) = 0;
   virtual bool removeItem_impl(T* pT) = 0;
   virtual bool insertItem_impl(T* pT, QPoint pt) = 0;
+  virtual bool moveItemFrom_impl(DraggableContainer<T>* pSource, T* pT, QPoint pt) = 0;
 
   static std::vector<DraggableContainer<T>*> m_vpMouseOverContainers;
 
   std::vector<QPointer<T>> m_vpItems;
 
   EDragMode m_dragMode = EDragMode::eMove;
-  EDropMode m_dropMode = EDropMode::eDelete;
 };
 
 template<typename T>
@@ -190,19 +192,19 @@ public:
   Draggable(Args... args)
     : T(args...)
   {
-    m_fnCallCopyCtor = std::bind([](Args... args) -> Draggable<T>*
+    m_fnCallCopyCtor = std::bind([](Args... args, const Draggable<T>*) -> Draggable<T>*
     {
       return new Draggable<T>(args...);
-    }, args...);
+    }, args..., std::placeholders::_1);
   }
 
   template<typename... Args, class C = T, typename std::enable_if<std::is_copy_constructible<C>::value>::type* = nullptr>
   Draggable(Args... args)
     : T(args...)
   {
-    m_fnCallCopyCtor = [this]() -> Draggable<T>*
+    m_fnCallCopyCtor = [](const Draggable<T>* pOther) -> Draggable<T>*
     {
-      return new Draggable<T>(*this);
+      return new Draggable<T>(*pOther);
     };
   }
 
@@ -211,14 +213,28 @@ public:
     : T(other),
       m_bMouseDown(other.m_bMouseDown),
       m_mouseDownPoint(other.m_mouseDownPoint),
-      m_pContainer(other.m_pContainer),
-      m_fnCallCopyCtor(other.m_fnCallCopyCtor)
+      m_pContainer(other.m_pContainer)
   {
+    m_fnCallCopyCtor = [](const Draggable<T>* pOther) -> Draggable<T>*
+    {
+      return new Draggable<T>(*pOther);
+    };
+
     T::setMouseTracking(true);
   }
 
   ~Draggable()
   {}
+
+  EDragMode dragMode() const
+  {
+    return m_dragMode;
+  }
+
+  void setDragMode(EDragMode mode)
+  {
+    m_dragMode = mode;
+  }
 
   void setMouseDown(bool bMouseDown, QPoint pt = QPoint())
   {
@@ -268,17 +284,14 @@ protected:
         // 1. normal drag & drop operation
         // 2. dragging from a 'copy' container, creating a copy of the Draggable
         Draggable<T>* pDraggable = this;
-        if (nullptr != m_pContainer &&
-            EDragMode::eCopy == m_pContainer->dragMode())
-        {
-          pDraggable = m_fnCallCopyCtor();
-        }
+
+        pDraggable = m_fnCallCopyCtor(this);
+        pDraggable->setProperty("reference", QVariant::fromValue(static_cast<void*>(this)));
         setDraggingInstance(pDraggable);
 
-        if (nullptr != m_pContainer)
-        {
-          m_pContainer->removeItem(pDraggable);
-        }
+        bool bMove = !pMouseEvent->modifiers().testFlag(Qt::ControlModifier);
+        setDragMode(bMove ? EDragMode::eMove : EDragMode::eCopy);
+        T::setVisible(EDragMode::eCopy == dragMode());
 
         pDraggable->T::setParent(T::window());
         pDraggable->T::setFocus();
@@ -345,13 +358,31 @@ protected:
         QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
         m_bMouseDown = false;
         DraggableContainer<Draggable>* pContainer = DraggableContainer<Draggable>::containerUnderMouse(pMouseEvent->globalPos());
+        QVariant prop = T::property("reference");
+        Draggable<T>* pOriginal = static_cast<Draggable<T>*>(prop.value<void*>());
         if (nullptr != pContainer)
         {
           QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
           QPoint pt = pMouseEvent->globalPos();
           pt = pContainer->mapFromGlobal(pt);
 
-          if (pContainer->insertItemAt(this, pt))
+          // Differentiate between moving a tag or copying it to a new container.
+          // Why? copying needs to be undoable by just removing the new tag from the destination container.
+          // Moving a tag needs to undo two steps: adding to the new container and removing it from the old one.
+          bool bActionSucceeded(false);
+          switch (pOriginal->dragMode())
+          {
+          case EDragMode::eCopy:
+            bActionSucceeded = pContainer->insertItemAt(this, pt);
+            break;
+          case EDragMode::eMove:
+            bActionSucceeded = pContainer->moveItemFrom(pOriginal->container(), this, pt);
+            if (bActionSucceeded) { delete pOriginal; }
+          default:
+            break;
+          }
+
+          if (bActionSucceeded)
           {
             setDraggingInstance(nullptr);
           }
@@ -360,23 +391,23 @@ protected:
             if (nullptr != m_pContainer)
             {
               setDraggingInstance(nullptr);
-              m_pContainer->addItem(this);
+
+              if (nullptr != pOriginal )
+              {
+                pOriginal->setVisible(true);
+              }
+              T::deleteLater();
             }
           }
         }
         else if (nullptr != m_pContainer)
         {
           setDraggingInstance(nullptr);
-          switch (m_pContainer->dropMode())
+          if (nullptr != pOriginal)
           {
-          case EDropMode::eDelete:
-            T::deleteLater();
-            break;
-          case EDropMode::eMoveBackToPreviousContainer:
-          default:
-            m_pContainer->addItem(this);
-            break;
+            pOriginal->setVisible(true);
           }
+          T::deleteLater();
         }
         else
         {
@@ -403,8 +434,9 @@ private:
   QPoint m_lastMousePos;
   static Draggable<T>* m_pDraggingInstance;
   DraggableContainer<Draggable<T>>* m_pContainer = nullptr;
-  std::function<Draggable<T>*()> m_fnCallCopyCtor;
-  QWidget* m_pPreviouslyEnteredWidget = nullptr;
+  std::function<Draggable<T>*(const Draggable<T>*)> m_fnCallCopyCtor;
+  QPointer<QWidget> m_pPreviouslyEnteredWidget = nullptr;
+  EDragMode m_dragMode = EDragMode::eMove;
 };
 
 #endif // DRAGGABLE_H

@@ -59,7 +59,7 @@ bool addToFlowLayout(QWidget* pT, FlowLayout* pLayout, QPoint pt)
   if (nullptr != pLayout)
   {
     int iPos = 0;
-    std::vector<QWidget*> vpWidgets;
+    std::vector<std::pair<QWidget*, bool>> vpWidgets;
     double dMinDist = std::numeric_limits<double>::max();
     for (int i = 0; i < pLayout->count(); ++i)
     {
@@ -67,15 +67,19 @@ bool addToFlowLayout(QWidget* pT, FlowLayout* pLayout, QPoint pt)
       if (nullptr != pItem) {
         QWidget* pWidget = pItem->widget();
 
-        vpWidgets.push_back(pWidget);
-        QPoint ptCenter = pWidget->mapTo(pWidget->parentWidget(),
-                                         pWidget->rect().center());
-
-        double dDist = dist(pt, ptCenter);
-        if (dDist < dMinDist)
+        vpWidgets.push_back(std::make_pair(pWidget, pWidget->isVisibleTo(pWidget->parentWidget())));
+        if (nullptr != pWidget &&
+            pWidget->isVisibleTo(pWidget->parentWidget()))
         {
-          dMinDist = dDist;
-          iPos = pt.x() < ptCenter.x() ? i : i + 1;
+          QPoint ptCenter = pWidget->mapTo(pWidget->parentWidget(),
+                                           pWidget->rect().center());
+
+          double dDist = dist(pt, ptCenter);
+          if (dDist < dMinDist)
+          {
+            dMinDist = dDist;
+            iPos = pt.x() < ptCenter.x() ? i : i + 1;
+          }
         }
       }
     }
@@ -86,13 +90,13 @@ bool addToFlowLayout(QWidget* pT, FlowLayout* pLayout, QPoint pt)
       pItem->widget()->setParent(nullptr);
       delete pItem;
     }
-    vpWidgets.insert(vpWidgets.begin() + iPos, pT);
+    vpWidgets.insert(vpWidgets.begin() + iPos, std::make_pair(pT, true));
 
     for (const auto& el : vpWidgets)
     {
-      pLayout->addWidget(el);
+      pLayout->addWidget(el.first);
 
-      el->setVisible(true);
+      el.first->setVisible(el.second);
     }
 
 

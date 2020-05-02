@@ -4,7 +4,7 @@
 namespace detail
 {
   void sendEnterMoveLeaveEvents(QMouseEvent* pMouseEvent,
-                                QWidget*& pPreviouslyEntered)
+                                QPointer<QWidget>& pPreviouslyEntered)
   {
     /* upon entering a new widget, store the previous recipient of the enter event
      * when entering a new widget, check the previously entered widget:
@@ -51,7 +51,7 @@ namespace detail
         mappedPt = pPrev->mapFromGlobal(pt);
       }
     }
-    else
+    else if (nullptr != pCurr)
     {
       QPoint mappedPt = pCurr->mapFromGlobal(pt);
       QMouseEvent e(QEvent::Move, mappedPt, pMouseEvent->button(), pMouseEvent->buttons(), pMouseEvent->modifiers());

@@ -1187,6 +1187,19 @@ void MainWindow::onTagAdded(task_id taskId, const QString& sTag)
                           m_undoStack, taskId, sTag, "tags");
 }
 
+
+void MainWindow::onTagMoved(task_id taskId, const QString& sTag,
+                            task_id sourceTaskId)
+{
+  properties::
+  onContainerElementMovedFrom(m_pManager,
+                              m_pWidgetManager,
+                              m_undoStack, taskId, sTag, "tags",
+                              sourceTaskId);
+}
+
+
+
 void MainWindow::onTagRemoved(task_id taskId, const QString& sTag)
 {
   properties::

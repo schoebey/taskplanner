@@ -60,8 +60,6 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
 
-  ui->pTags->setDropMode(EDropMode::eDelete);
-
   connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
   connect(ui->pDescription, SIGNAL(editingFinished()), this, SLOT(onDescriptionEdited()));
@@ -71,6 +69,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(ui->pTaskListWidget, &TaskListWidget::taskRemoved, this, &TaskWidget::onTaskRemoved);
   connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::updateSize, Qt::QueuedConnection);
   connect(ui->pTags, &TagWidgetContainer::tagAdded, this, &TaskWidget::onTagAdded);
+  connect(ui->pTags, &TagWidgetContainer::tagMoved, this, &TaskWidget::onTagMoved);
   connect(ui->pTags, &TagWidgetContainer::tagRemoved, this, &TaskWidget::onTagRemoved);
   connect(this, &TaskWidget::attentionNeeded, this, &TaskWidget::emphasise);
 
@@ -466,6 +465,7 @@ QString TaskWidget::propertyValue(const QString& sName) const
   else if ("description" == sName)  { return description(); }
   else
   {
+    // TODO: Tags?
     auto it = m_propertyLineEdits.find(sName);
     if (it != m_propertyLineEdits.end())
     {
@@ -1157,9 +1157,41 @@ bool TaskWidget::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
   return ui->pTags->insertItemAt(pT, pt);
 }
 
+bool TaskWidget::moveItemFrom_impl(DraggableContainer<DraggableTagWidget>* pSource, DraggableTagWidget* pT, QPoint pt)
+{
+  return ui->pTags->moveItemFrom(pSource, pT, pt);
+}
+
 void TaskWidget::onTagAdded(DraggableTagWidget* pT)
 {
   emit tagAdded(m_taskId, pT->text());
+}
+
+void TaskWidget::onTagMoved(DraggableTagWidget* pT,
+                            DraggableContainer<DraggableTagWidget>* pSource)
+{
+  // find the task widget that contains the draggable container
+  auto fnFindTaskWidget = [](DraggableContainer<DraggableTagWidget>* pContainer)
+      -> task_id
+  {
+    TaskWidget* pTaskWidget = nullptr;
+    QWidget* pParent = pContainer->parentWidget();
+    while (nullptr != pParent)
+    {
+      pTaskWidget = dynamic_cast<TaskWidget*>(pParent);
+
+      if (nullptr != pTaskWidget)  { break; }
+      pParent = pParent->parentWidget();
+    }
+
+    if (nullptr != pTaskWidget) return pTaskWidget->id();
+    return -1;
+  };
+
+
+  task_id sourceTaskId = fnFindTaskWidget(pSource);
+
+  emit tagMoved(m_taskId, pT->text(), sourceTaskId);
 }
 
 void TaskWidget::onTagRemoved(DraggableTagWidget* pT)

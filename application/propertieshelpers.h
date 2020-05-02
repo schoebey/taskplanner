@@ -7,9 +7,11 @@
 #include "taskwidget.h"
 
 #include "commands/changetaskpropertycommand.h"
+#include "commands/combinedundocommand.h"
 
 #include <QString>
 #include <QUndoStack>
+
 
 namespace properties
 {
@@ -53,6 +55,81 @@ void onContainerElementInserted(Manager* pManager,
       {
         // link already present - do nothing
       }
+    }
+    else
+    {
+      assert(false);
+    }
+  }
+  else
+  {
+    assert(false);
+  }
+}
+
+template<typename T>
+void onContainerElementMovedFrom(Manager* pManager,
+                                 WidgetManager* pWidgetManager,
+                                 QUndoStack& undoStack,
+                                 task_id taskId,
+                                 const T& el,
+                                 const QString& sContainerName,
+                                 task_id sourceTaskId)
+{
+  ITask* pTask = pManager->task(taskId);
+  TaskWidget* pTaskWidget = pWidgetManager->taskWidget(taskId);
+  if (nullptr != pTask && nullptr != pTaskWidget)
+  {
+    bool bOk(false);
+    auto elements = conversion::fromString<std::vector<T>>(pTask->propertyValue(sContainerName), bOk);
+    if (bOk)
+    {
+      QUndoCommand* pCommand1;
+      QUndoCommand* pCommand2;
+      auto it = std::find(elements.begin(), elements.end(), el);
+      if (it == elements.end())
+      {
+        // TODO: insert at appropriate position
+        elements.push_back(el);
+        pCommand1 = new ChangeTaskPropertyCommand(taskId, sContainerName,
+                                                  pTask->propertyValue(sContainerName),
+                                                  conversion::toString(elements),
+                                                  pManager, pWidgetManager);
+      }
+      else
+      {
+        // do nothing
+      }
+
+
+
+
+      bool bOk(false);
+      ITask* pSource = pManager->task(sourceTaskId);
+      if (nullptr != pSource)
+      {
+        auto elements = conversion::fromString<std::vector<T>>(pSource->propertyValue(sContainerName), bOk);
+        if (bOk)
+        {
+          auto it = std::find(elements.begin(), elements.end(), el);
+          if (it != elements.end())
+          {
+            elements.erase(it);
+            pCommand2 = new ChangeTaskPropertyCommand(taskId, sContainerName,
+                                                      pTask->propertyValue(sContainerName),
+                                                      conversion::toString(elements),
+                                                      pManager, pWidgetManager);
+          }
+          else
+          {
+            // link not present - do nothing
+          }
+        }
+      }
+
+
+      QUndoCommand* pCommand = new CombinedUndoCommand(pCommand1, pCommand2);
+      undoStack.push(pCommand);
     }
     else
     {

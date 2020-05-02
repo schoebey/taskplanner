@@ -49,6 +49,21 @@ bool TagWidgetContainer::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
   return false;
 }
 
+bool TagWidgetContainer::moveItemFrom_impl(DraggableContainer<DraggableTagWidget>* pSource,
+                                           DraggableTagWidget* pT, QPoint pt)
+{
+  m_pPlaceholder->setParent(nullptr);
+  m_pPlaceholder->hide();
+  FlowLayout* pLayout = dynamic_cast<FlowLayout*>(layout());
+  if (tools::addToFlowLayout(pT, pLayout, pt))
+  {
+    emit tagMoved(pT, pSource);
+    return true;
+  }
+
+  return false;
+}
+
 bool TagWidgetContainer::showPlaceholderAt(const QPoint& pt, const QSize& s)
 {
   m_pPlaceholder->setParent(nullptr);

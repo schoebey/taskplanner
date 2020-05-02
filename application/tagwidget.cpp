@@ -28,6 +28,21 @@ TagWidget::TagWidget(const TagWidget& other)
   resize(other.size());
 }
 
+TagWidget::~TagWidget()
+{
+
+}
+
+void TagWidget::showEvent(QShowEvent* pEvent)
+{
+
+}
+
+void TagWidget::hideEvent(QHideEvent* pEvent)
+{
+
+}
+
 QSize TagWidget::sizeHint() const
 {
   int iHeaderSize = style()->pixelMetric(customPixelMetrics::PM_TagHeader);
