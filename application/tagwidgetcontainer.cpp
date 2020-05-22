@@ -22,7 +22,6 @@ bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
   if (nullptr != pLayout)
   {
     pLayout->addWidget(pT);
-    emit tagAdded(pT);
     return true;
   }
 
@@ -31,8 +30,14 @@ bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
 
 bool TagWidgetContainer::removeItem_impl(DraggableTagWidget* pT)
 {
-  emit tagRemoved(pT);
-  return true;
+  QLayout* pLayout = layout();
+  if (nullptr != pLayout)
+  {
+    pLayout->removeWidget(pT);
+    return true;
+  }
+
+  return false;
 }
 
 bool TagWidgetContainer::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
@@ -42,7 +47,6 @@ bool TagWidgetContainer::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
   FlowLayout* pLayout = dynamic_cast<FlowLayout*>(layout());
   if (tools::addToFlowLayout(pT, pLayout, pt))
   {
-    emit tagAdded(pT);
     return true;
   }
 
@@ -57,7 +61,6 @@ bool TagWidgetContainer::moveItemFrom_impl(DraggableContainer<DraggableTagWidget
   FlowLayout* pLayout = dynamic_cast<FlowLayout*>(layout());
   if (tools::addToFlowLayout(pT, pLayout, pt))
   {
-    emit tagMoved(pT, pSource);
     return true;
   }
 
@@ -84,4 +87,25 @@ void TagWidgetContainer::hidePlaceholder()
 {
   m_pPlaceholder->setParent(nullptr);
   m_pPlaceholder->hide();
+}
+
+void TagWidgetContainer::emitItemAdded(DraggableTagWidget* pT)
+{
+  emit tagAdded(pT);
+}
+
+void TagWidgetContainer::emitItemInserted(DraggableTagWidget* pT, QPoint)
+{
+  emit tagAdded(pT);
+}
+
+void TagWidgetContainer::emitItemRemoved(DraggableTagWidget* pT)
+{
+  emit tagRemoved(pT);
+}
+
+void TagWidgetContainer::emitItemMovedFrom(DraggableTagWidget* pT,
+                                       DraggableContainer<DraggableTagWidget>* pSource)
+{
+  emit tagMoved(pT, pSource);
 }

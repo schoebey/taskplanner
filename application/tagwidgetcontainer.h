@@ -18,6 +18,12 @@ signals:
   void tagRemoved(DraggableTagWidget*);
   void tagMoved(DraggableTagWidget*, DraggableContainer<DraggableTagWidget>*);
 
+protected:
+  void emitItemAdded(DraggableTagWidget*) override;
+  void emitItemInserted(DraggableTagWidget* pT, QPoint) override;
+  void emitItemRemoved(DraggableTagWidget*) override;
+  void emitItemMovedFrom(DraggableTagWidget*, DraggableContainer<DraggableTagWidget>*) override;
+
 private:
   bool addItem_impl(DraggableTagWidget* pT) override;
   bool removeItem_impl(DraggableTagWidget* pT) override;

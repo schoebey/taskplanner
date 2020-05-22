@@ -51,6 +51,12 @@ public:
     m_dragMode = mode;
   }
 
+  bool contains(T* pT) const
+  {
+    auto it = std::find(m_vpItems.begin(), m_vpItems.end(), pT);
+    return it != m_vpItems.end();
+  }
+
   bool addItem(T* pT)
   {
     if (nullptr == pT) { return false; }
@@ -61,6 +67,7 @@ public:
       {
         m_vpItems.push_back(pT);
       }
+      emitItemAdded(pT);
       return true;
     }
     return false;
@@ -76,6 +83,7 @@ public:
       {
         m_vpItems.push_back(pT);
       }
+      emitItemInserted(pT, pt);
       return true;
     }
     return false;
@@ -88,6 +96,8 @@ public:
     {
       auto it = std::find(m_vpItems.begin(), m_vpItems.end(), pT);
       if (it != m_vpItems.end())  { m_vpItems.erase(it); }
+
+      emitItemRemoved(pT);
       return true;
     }
     return false;
@@ -96,7 +106,9 @@ public:
   bool moveItemFrom(DraggableContainer<T>* pSource, T* pT, QPoint pt)
   {
     if (nullptr == pT || nullptr == pSource) { return false; }
-    if (moveItemFrom_impl(pSource, pT, pt))
+
+    QPointer<T> pGuard(pT);
+    if (moveItemFrom_impl(pSource, pT, pt) && nullptr != pGuard)
     {
       auto it = std::find(pSource->m_vpItems.begin(), pSource->m_vpItems.end(), pT);
       if (it != pSource->m_vpItems.end())  { pSource->m_vpItems.erase(it); }
@@ -104,8 +116,9 @@ public:
       pT->setContainer(this);
       if (m_vpItems.end() == std::find(m_vpItems.begin(), m_vpItems.end(), pT))
       {
-        m_vpItems.push_back(pT);
+        m_vpItems.push_back(pGuard);
       }
+      emitItemMovedFrom(pT, pSource);
       return true;
     }
     return false;
@@ -170,6 +183,16 @@ public:
   {
     return m_vpItems;
   }
+
+
+private:
+  // in order to overcome Qt's MOC limitation with templates, the three
+  // potential signals 'added', 'removed', 'moved' are wrapped in (optional)
+  // virtual functions that can be implemented if so desired.
+  virtual void emitItemAdded(T*) {}
+  virtual void emitItemInserted(T*, QPoint) {}
+  virtual void emitItemRemoved(T*) {}
+  virtual void emitItemMovedFrom(T*, DraggableContainer<T>*) {}
 
 private:
   virtual bool addItem_impl(T* pT) = 0;
@@ -359,7 +382,7 @@ protected:
         m_bMouseDown = false;
         DraggableContainer<Draggable>* pContainer = DraggableContainer<Draggable>::containerUnderMouse(pMouseEvent->globalPos());
         QVariant prop = T::property("reference");
-        Draggable<T>* pOriginal = static_cast<Draggable<T>*>(prop.value<void*>());
+        QPointer<Draggable<T>> pOriginal = static_cast<Draggable<T>*>(prop.value<void*>());
         if (nullptr != pContainer)
         {
           QMouseEvent* pMouseEvent = dynamic_cast<QMouseEvent*>(pEvent);
@@ -377,7 +400,6 @@ protected:
             break;
           case EDragMode::eMove:
             bActionSucceeded = pContainer->moveItemFrom(pOriginal->container(), this, pt);
-            if (bActionSucceeded) { delete pOriginal; }
           default:
             break;
           }

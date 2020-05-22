@@ -32,7 +32,7 @@ void onContainerElementInserted(Manager* pManager,
     if (bOk)
     {
       auto it = std::find(elements.begin(), elements.end(), el);
-      if (it == elements.end() && iPosition < elements.size() && iPosition >= -1)
+      if (it == elements.end() && iPosition < static_cast<int>(elements.size()) && iPosition >= -1)
       {
         typename std::vector<T>::iterator itPosition;
         if (-1 == iPosition)
@@ -76,70 +76,61 @@ void onContainerElementMovedFrom(Manager* pManager,
                                  const QString& sContainerName,
                                  task_id sourceTaskId)
 {
+  // for now, since we don't support reordering, do nothing
+  // if task ids are identical
+  if (taskId == sourceTaskId)  { return; }
+
+  QUndoCommand* pCommand1 = nullptr;
+  QUndoCommand* pCommand2 = nullptr;
+
+  // target task
   ITask* pTask = pManager->task(taskId);
-  TaskWidget* pTaskWidget = pWidgetManager->taskWidget(taskId);
-  if (nullptr != pTask && nullptr != pTaskWidget)
+  if (nullptr != pTask)
   {
+
     bool bOk(false);
     auto elements = conversion::fromString<std::vector<T>>(pTask->propertyValue(sContainerName), bOk);
     if (bOk)
     {
-      QUndoCommand* pCommand1;
-      QUndoCommand* pCommand2;
+      elements.push_back(el);
+
+      // TODO: insert at appropriate position
+      pCommand1 = new ChangeTaskPropertyCommand(taskId, sContainerName,
+                                                pTask->propertyValue(sContainerName),
+                                                conversion::toString(elements),
+                                                pManager, pWidgetManager);
+    }
+  }
+
+
+  // source task
+  ITask* pSource = pManager->task(sourceTaskId);
+  if (nullptr != pSource)
+  {
+    bool bOk(false);
+    auto elements = conversion::fromString<std::vector<T>>(pSource->propertyValue(sContainerName), bOk);
+    if (bOk)
+    {
       auto it = std::find(elements.begin(), elements.end(), el);
-      if (it == elements.end())
+      if (it != elements.end())
       {
-        // TODO: insert at appropriate position
-        elements.push_back(el);
-        pCommand1 = new ChangeTaskPropertyCommand(taskId, sContainerName,
-                                                  pTask->propertyValue(sContainerName),
+        elements.erase(it);
+        pCommand2 = new ChangeTaskPropertyCommand(sourceTaskId, sContainerName,
+                                                  pSource->propertyValue(sContainerName),
                                                   conversion::toString(elements),
                                                   pManager, pWidgetManager);
       }
       else
       {
-        // do nothing
+        // link not present - should not happen since the element was moved from this task
+        assert(false && "source does not contain element");
       }
-
-
-
-
-      bool bOk(false);
-      ITask* pSource = pManager->task(sourceTaskId);
-      if (nullptr != pSource)
-      {
-        auto elements = conversion::fromString<std::vector<T>>(pSource->propertyValue(sContainerName), bOk);
-        if (bOk)
-        {
-          auto it = std::find(elements.begin(), elements.end(), el);
-          if (it != elements.end())
-          {
-            elements.erase(it);
-            pCommand2 = new ChangeTaskPropertyCommand(taskId, sContainerName,
-                                                      pTask->propertyValue(sContainerName),
-                                                      conversion::toString(elements),
-                                                      pManager, pWidgetManager);
-          }
-          else
-          {
-            // link not present - do nothing
-          }
-        }
-      }
-
-
-      QUndoCommand* pCommand = new CombinedUndoCommand(pCommand1, pCommand2);
-      undoStack.push(pCommand);
-    }
-    else
-    {
-      assert(false);
     }
   }
-  else
-  {
-    assert(false);
-  }
+
+
+  QUndoCommand* pCommand = new CombinedUndoCommand(pCommand1, pCommand2);
+  undoStack.push(pCommand);
 }
 
 template<typename T>

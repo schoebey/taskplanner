@@ -478,6 +478,8 @@ QString TaskWidget::propertyValue(const QString& sName) const
 
 bool TaskWidget::removeProperty(const QString& sName)
 {
+  onPropertyValueChanged(sName, QString());
+
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {
@@ -588,7 +590,10 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
       const auto& tagWidgets = ui->pTags->items();
       for (const auto& tag : tags)
       {
-        auto it = std::find_if(tagWidgets.begin(), tagWidgets.end(), [tag](const TagWidget* p) { return tag == p->text(); });
+        auto it = std::find_if(tagWidgets.begin(), tagWidgets.end(), [tag](const TagWidget* p)
+        {
+          return nullptr != p && tag == p->text();
+        });
 
         if (it == tagWidgets.end())
         {
@@ -598,19 +603,22 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
 
       // all tags that are present but not represented in sValue have to be removed
       std::set<DraggableTagWidget*> toRemove;
-      for (const auto& tag : tags)
+      for (const auto& pTagWidget : tagWidgets)
       {
-        auto itProp = std::find_if(tagWidgets.begin(), tagWidgets.end(),
-                                   [tag](QPointer<DraggableTagWidget> p)
-        { return nullptr != p &&
-            tag == p->text();});
-        if (itProp == tagWidgets.end())
+        auto itProp = std::find_if(tags.begin(), tags.end(),
+                                   [pTagWidget](const QString& sTag)
+        { return sTag == pTagWidget->text();});
+        if (itProp == tags.end())
         {
-          toRemove.insert(itProp->data());
+          toRemove.insert(pTagWidget);
         }
       }
 
-      for (auto pTagWidget : toRemove)  { ui->pTags->removeItem(pTagWidget); }
+      for (auto pTagWidget : toRemove)
+      {
+        ui->pTags->removeItem(pTagWidget);
+        delete pTagWidget;
+      }
     }
   }
   else
@@ -1164,7 +1172,10 @@ bool TaskWidget::moveItemFrom_impl(DraggableContainer<DraggableTagWidget>* pSour
 
 void TaskWidget::onTagAdded(DraggableTagWidget* pT)
 {
-  emit tagAdded(m_taskId, pT->text());
+//  if (!ui->pTags->contains(pT))
+  {
+    emit tagAdded(m_taskId, pT->text());
+  }
 }
 
 void TaskWidget::onTagMoved(DraggableTagWidget* pT,
@@ -1174,7 +1185,8 @@ void TaskWidget::onTagMoved(DraggableTagWidget* pT,
   auto fnFindTaskWidget = [](DraggableContainer<DraggableTagWidget>* pContainer)
       -> task_id
   {
-    TaskWidget* pTaskWidget = nullptr;
+    TaskWidget* pTaskWidget = dynamic_cast<TaskWidget*>(pContainer);
+    if (nullptr != pTaskWidget)  { return pTaskWidget->id(); }
     QWidget* pParent = pContainer->parentWidget();
     while (nullptr != pParent)
     {
