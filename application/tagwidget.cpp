@@ -18,7 +18,8 @@ template<> Draggable<TagWidget>* Draggable<TagWidget>::m_pDraggingInstance = nul
 
 TagWidget::TagWidget(const QString& sText, QWidget* pParent)
   : QWidget(pParent),
-    m_sText(sText)
+    m_sText(sText),
+    m_color(QColor(255, 210, 20))
 {
   setAttribute(Qt::WA_StyledBackground, true);
 }
@@ -27,6 +28,7 @@ TagWidget::TagWidget(const TagWidget& other)
   : QWidget(other.parentWidget())
 {
   setText(other.text());
+  setColor(other.color());
   resize(other.size());
 }
 
@@ -37,12 +39,30 @@ TagWidget::~TagWidget()
 
 void TagWidget::setText(const QString& sText)
 {
-  m_sText = sText;
+  if (m_sText != sText)
+  {
+    m_sText = sText;
+    emit textChanged(m_sText);
+  }
 }
 
 QString TagWidget::text() const
 {
   return m_sText;
+}
+
+void TagWidget::setColor(const QColor& c)
+{
+  if (c != m_color)
+  {
+    m_color = c;
+    emit colorChanged(m_color);
+  }
+}
+
+QColor TagWidget::color() const
+{
+  return m_color;
 }
 
 void TagWidget::showEvent(QShowEvent* pEvent)
@@ -73,7 +93,7 @@ void TagWidget::paintEvent(QPaintEvent* /*pEvent*/)
   opt.init(this);
 
   opt.sText = text();
-  opt.color = QColor(255, 210, 20);
+  opt.color = m_color;
 
   QPainter painter(this);
   style()->drawControl(customControlElements::CE_TagWidget, &opt, &painter, this);
