@@ -1,5 +1,6 @@
 #include "tagwidget.h"
 #include "styleExtension.h"
+#include "draggable.h"
 
 #include <QMouseEvent>
 #include <QPainter>

@@ -6,7 +6,6 @@
 #include "propertyproviderinterface.h"
 #include "itaskcontainerwidget.h"
 #include "draggable.h"
-#include "tagwidget.h"
 
 #include <QFrame>
 #include <QUrl>
@@ -24,6 +23,8 @@ class TaskWidgetOverlay;
 class QMenu;
 class LinkWidget;
 class QLabel;
+using DraggableTagWidget = Draggable<class TagWidget>;
+
 class TaskWidget :
     public DraggableContainer<DraggableTagWidget>,
     public IPropertyProvider,

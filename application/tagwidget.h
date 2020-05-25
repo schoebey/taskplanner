@@ -1,8 +1,6 @@
 #ifndef TAGWIDGET_H
 #define TAGWIDGET_H
 
-#include "draggable.h"
-
 #include <QLabel>
 #include <QFrame>
 
@@ -52,7 +50,5 @@ private:
   QString m_sText;
   QColor m_color;
 };
-
-using DraggableTagWidget = Draggable<TagWidget>;
 
 #endif // TAGWIDGET_H

@@ -1,6 +1,7 @@
 #include "tagwidgetcontainer.h"
 #include "flowlayout.h"
 #include "layoututils.h"
+#include "tagwidget.h"
 
 #include <QLayout>
 

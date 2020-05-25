@@ -6,6 +6,8 @@
 
 #include <QFrame>
 
+using DraggableTagWidget = Draggable<TagWidget>;
+
 class TagWidgetContainer : public DraggableContainer<DraggableTagWidget>
 {
   Q_OBJECT
