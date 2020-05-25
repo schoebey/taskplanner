@@ -491,19 +491,45 @@ void Style::drawControl(ControlElement element,
     const QStyleOptionTagWidget* pTagOption = qstyleoption_cast<const QStyleOptionTagWidget*>(pOption);
     if (nullptr != pTagOption)
     {
-      QRectF r = pTagOption->rect;
+      int iHeaderSize = pixelMetric(customPixelMetrics::PM_TagHeader);
+      int iBorderSize = pixelMetric(customPixelMetrics::PM_TagBorder);
+
+      QRectF r = QRectF(pTagOption->rect).adjusted(0.5, 0.5, -0.5, -0.5);
+      QPolygonF topContour;
+      topContour << QPointF(r.topLeft() + QPointF(2, r.height() / 2 - 1));
       QPolygonF poly;
-      poly << QPointF(r.topLeft() + QPointF(10, 0));
+      poly << QPointF(r.topLeft() + QPointF(r.height()/2, 0));
+      topContour << QPointF(r.topLeft() + QPointF(r.height()/2, 1));
       poly << QPointF(r.topRight());
+      topContour << QPointF(r.topRight() + QPointF(-1, 1));
       poly << QPointF(r.bottomRight());
-      poly << QPointF(r.bottomLeft() + QPointF(10, 0));
+
+      QPolygonF bottomContour;
+      bottomContour << QPointF(r.bottomRight() - QPointF(1, 1));
+      poly << QPointF(r.bottomLeft() + QPointF(r.height()/2, 0));
+      bottomContour << QPointF(r.bottomLeft() + QPointF(r.height()/2, - 1));
       poly << QPointF(r.bottomLeft() + QPointF(0, -r.height() / 2));
+      bottomContour << QPointF(r.bottomLeft() + QPointF(2, -r.height() / 2 + 1));
+
       pPainter->save();
-      pPainter->setRenderHint(QPainter::Antialiasing, true);
-      pPainter->setPen(pOption->palette.color(QPalette::Text));
+      pPainter->setRenderHint(QPainter::Antialiasing, false);
+      pPainter->setPen(QColor(0,0,0,100));
       pPainter->setBrush(pTagOption->color);
       pPainter->drawPolygon(poly);
-      pPainter->drawText(pTagOption->rect, pTagOption->sText);
+
+      pPainter->setPen(pTagOption->color.lighter(180));
+      pPainter->setBrush(Qt::NoBrush);
+      pPainter->drawPolyline(topContour);
+
+      pPainter->setPen(pTagOption->color.darker(180));
+      pPainter->setBrush(Qt::NoBrush);
+      pPainter->drawPolyline(bottomContour);
+
+      QTextOption opt(Qt::AlignHCenter | Qt::AlignVCenter);
+
+      pPainter->setPen(pOption->palette.color(QPalette::Text));
+      pPainter->drawText(pTagOption->rect.adjusted(iHeaderSize, iBorderSize, -iBorderSize, -iBorderSize),
+                         pTagOption->sText, opt);
       pPainter->restore();
     }
   } break;

@@ -496,3 +496,7 @@ SearchFrame #pClose {
   border-bottom-right-radius: 10px;
 }
 
+TagWidget {
+  font-size: 9pt;
+}
+

@@ -20,8 +20,10 @@ public:
   QColor color;
 };
 
-class TagWidget : public QLabel
+class TagWidget : public QWidget
 {
+  Q_OBJECT
+
 public:
   TagWidget(const QString& sText, QWidget* pParent);
 
@@ -29,11 +31,17 @@ public:
 
   ~TagWidget();
 
+  void setText(const QString& sText);
+  QString text() const;
+
   void showEvent(QShowEvent* pEvent);
   void hideEvent(QHideEvent* pEvent);
 private:
   void paintEvent(QPaintEvent* pEvent) override;
   QSize sizeHint() const override;
+
+private:
+  QString m_sText;
 };
 
 using DraggableTagWidget = Draggable<TagWidget>;
