@@ -105,12 +105,12 @@ bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos, bool bAnimate
     auto bHasFocus = pTaskWidget->hasFocus();
     pTaskWidget->setParent(this);
     pTaskWidget->setTaskListWidget(this);
-    pTaskWidget->resize(width(), pTaskWidget->sizeHint().height());
+    pTaskWidget->resize(width(), pTaskWidget->height());
     pTaskWidget->move(mapFromGlobal(currentPos));
     if (bHasFocus)  { pTaskWidget->setFocus(); }
     pTaskWidget->show();
 
-    connect(pTaskWidget, &TaskWidget::sizeChanged, this, &TaskListWidget::updateTaskPositions, Qt::QueuedConnection);
+    connect(pTaskWidget, &TaskWidget::sizeChanged, this, &TaskListWidget::updateTaskPositions);
 
 
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
@@ -317,9 +317,9 @@ void TaskListWidget::updatePositions(int iSpace, int iGhostPos, bool bAnimateMov
   // group widget lists have to have maximum height at all times...
   if (m_bAutoResize)
   {
+    m_minimumSize = QSize(width(), origin.y());
     setMinimumHeight(origin.y());
     setMaximumHeight(origin.y());
-    m_minimumSize = QSize(width(), origin.y());
     updateGeometry();
   }
   else

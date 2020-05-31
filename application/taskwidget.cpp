@@ -14,14 +14,15 @@
 #include <QMouseEvent>
 #include <QPixmapCache>
 #include <QPainter>
-#include <QDebug>
 #include <QTimer>
 #include <QMenu>
 #include <QMimeData>
 #include <QClipboard>
 #include <QPointer>
-
+#include <QDesktopWidget>
 #include <QPropertyAnimation>
+#include <QDebug>
+
 #include <cassert>
 #include <cmath>
 
@@ -37,6 +38,45 @@ namespace {
     pWidget->style()->polish(pWidget);
     pWidget->update();
   }
+
+  QSize adjustedSize(const QWidget* pWidget)
+  {
+      QSize s = pWidget->sizeHint();
+      if (pWidget->isWindow()) {
+          Qt::Orientations exp;
+          QLayout* pLayout = pWidget->layout();
+          if (pLayout) {
+              if (pLayout->hasHeightForWidth())
+                  s.setHeight(pLayout->totalHeightForWidth(s.width()));
+              exp = pLayout->expandingDirections();
+          } else
+          {
+              if (pWidget->sizePolicy().hasHeightForWidth())
+                  s.setHeight(pWidget->heightForWidth(s.width()));
+              exp = pWidget->sizePolicy().expandingDirections();
+          }
+          if (exp & Qt::Horizontal)
+              s.setWidth(qMax(s.width(), 200));
+          if (exp & Qt::Vertical)
+              s.setHeight(qMax(s.height(), 100));
+          QRect screen = QApplication::desktop()->screenGeometry(pWidget->pos());
+          s.setWidth(qMin(s.width(), screen.width()*2/3));
+          s.setHeight(qMin(s.height(), screen.height()*2/3));
+      }
+      if (!s.isValid()) {
+          QRect r = pWidget->childrenRect(); // get children rectangle
+          if (r.isNull())
+              return s;
+          s = r.size() + QSize(2 * r.x(), 2 * r.y());
+      }
+      return s;
+  }
+
+  void adjustHeight(QWidget* pWidget)
+  {
+    QSize s = adjustedSize(pWidget);
+    pWidget->resize(pWidget->width(), s.height());
+  }
 }
 
 
@@ -49,6 +89,10 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   m_taskId(id)
 {
   ui->setupUi(this);
+  ui->pDynamicProperties->installEventFilter(this);
+  ui->pTaskListWidget->installEventFilter(this);
+  ui->pBackdrop->installEventFilter(this);
+
   ui->pTaskListWidget->setAutoResize(true);
   m_pOverlay = new TaskWidgetOverlay(ui->pFrame);
   m_pOverlay->stackUnder(ui->pProperties);
@@ -60,14 +104,11 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
 
-  connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
   connect(ui->pDescription, SIGNAL(editingFinished()), this, SLOT(onDescriptionEdited()));
-  connect(ui->pDescription, SIGNAL(sizeChanged()), this, SLOT(updateSize()));
   connect(ui->pShowDetails, SIGNAL(toggled(bool)), this, SLOT(setExpanded(bool)));
   connect(ui->pTaskListWidget, &TaskListWidget::taskInserted, this, &TaskWidget::onTaskInserted);
   connect(ui->pTaskListWidget, &TaskListWidget::taskRemoved, this, &TaskWidget::onTaskRemoved);
-  connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::updateSize, Qt::QueuedConnection);
   connect(ui->pTags, &TagWidgetContainer::tagAdded, this, &TaskWidget::onTagAdded);
   connect(ui->pTags, &TagWidgetContainer::tagMoved, this, &TaskWidget::onTagMoved);
   connect(ui->pTags, &TagWidgetContainer::tagRemoved, this, &TaskWidget::onTagRemoved);
@@ -274,6 +315,16 @@ QBrush TaskWidget::overlayBackground() const
 void TaskWidget::setOverlayBackground(const QBrush& b)
 {
   m_pOverlay->setBackground(b);
+}
+
+int TaskWidget::collapsedHeight() const
+{
+  return m_iCollapsedHeight;
+}
+
+void TaskWidget::setCollapsedHeight(int iHeight)
+{
+  m_iCollapsedHeight = iHeight;
 }
 
 void TaskWidget::edit()
@@ -800,23 +851,24 @@ void TaskWidget::setHighlight(HighlightingMethod method)
 
 void TaskWidget::updateSize()
 {
-  int iWidth = ui->pProperties->width();
-  ui->pDescription->suggestWidth(iWidth);
-
   QMetaObject::invokeMethod(this, "updateSize2", Qt::QueuedConnection);
 }
 
+
 void TaskWidget::updateSize2()
 {
-  layout()->invalidate();
-  layout()->update();
+  updateGeometry();
 
+  adjustHeight(ui->pProperties);
+  adjustHeight(ui->pFrame);
+  adjustHeight(ui->pBackdrop);
+  adjustHeight(this);
 
-  int iSuggestedHeight = ui->pBackdrop->sizeHint().height();
-  resize(width(), iSuggestedHeight);
+  int iWidth = ui->pProperties->width();
+  ui->pDescription->suggestWidth(iWidth);
 }
 
-bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
+bool TaskWidget::eventFilter(QObject* pObj, QEvent* pEvent)
 {
   if (this == m_pDraggingTaskWidget)
   {
@@ -852,6 +904,19 @@ bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
       }
 
       qApp->removeEventFilter(this);
+    }
+  }
+  else if (ui->pDynamicProperties == pObj ||
+           ui->pTaskListWidget == pObj ||
+           ui->pBackdrop == pObj)
+  {
+    switch (pEvent->type())
+    {
+    case QEvent::Resize:
+      updateSize();
+      break;
+    default:
+      break;
     }
   }
 
@@ -1015,22 +1080,36 @@ void TaskWidget::setExpanded(bool bExpanded)
 
     setPropertyValue("expanded", bExpanded ? "true" : "false");
 
-    if (bExpanded)
-    {
-      resize(m_expandedSize);
-    }
-    else
-    {
-      m_expandedSize = size();
-      resize(width(), 1);
-    }
-
-
     ui->pStartStop->style()->unpolish(ui->pStartStop);
     ui->pStartStop->style()->polish(ui->pStartStop);
 
     updateSize();
   }
+}
+
+QSize TaskWidget::sizeHint() const
+{
+  return minimumSizeHint();
+}
+
+QSize TaskWidget::minimumSizeHint() const
+{
+  QSize s;
+  if (ui->pProperties->isVisibleTo(this))
+  {
+    int iSuggestedHeight = QFrame::sizeHint().height();
+    s = QSize(minimumWidth(), iSuggestedHeight);
+  }
+  else
+  {
+    // the size hint / minimum size hint is not updated
+    // right after hiding a child widget.
+    // Therefore we need to return a custom size when
+    // the widget is in 'collapsed' state.
+    s = QSize(1, m_iCollapsedHeight);
+  }
+
+  return s;
 }
 
 void TaskWidget::requestInsert(TaskWidget *pTaskWidget, int iPos)
@@ -1175,6 +1254,8 @@ void TaskWidget::onTagAdded(DraggableTagWidget* pT)
 //  if (!ui->pTags->contains(pT))
   {
     emit tagAdded(m_taskId, pT->text());
+
+    updateSize();
   }
 }
 
@@ -1204,9 +1285,13 @@ void TaskWidget::onTagMoved(DraggableTagWidget* pT,
   task_id sourceTaskId = fnFindTaskWidget(pSource);
 
   emit tagMoved(m_taskId, pT->text(), sourceTaskId);
+
+  updateSize();
 }
 
 void TaskWidget::onTagRemoved(DraggableTagWidget* pT)
 {
   emit tagRemoved(m_taskId, pT->text());
+
+  updateSize();
 }

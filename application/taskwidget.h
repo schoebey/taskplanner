@@ -72,6 +72,10 @@ public:
   QBrush overlayBackground() const;
   void setOverlayBackground(const QBrush& b);
 
+  Q_PROPERTY(int collapsedHeight READ collapsedHeight WRITE setCollapsedHeight)
+  int collapsedHeight() const;
+  void setCollapsedHeight(int iHeight);
+
   void edit();
 
   bool onMouseMoved(const QPoint &pt);
@@ -79,6 +83,10 @@ public:
   void ensureVisible();
 
   bool onPropertyValueChanged(const QString& sName, const QString& sValue);
+
+  QSize sizeHint() const;
+
+  QSize minimumSizeHint() const override;
 public slots:
   void setExpanded(bool bExpanded);
 
@@ -139,8 +147,7 @@ private slots:
   void onTaskRemoved(TaskWidget *pTaskWidget);
   void onTagAdded(DraggableTagWidget* pT);
   void onTagMoved(DraggableTagWidget* pT, DraggableContainer<DraggableTagWidget>* pSource);
-  void onTagRemoved(DraggableTagWidget* pT);
-
+  void onTagRemoved(DraggableTagWidget* pT);  
 private:
   void emphasise();
   void setUpContextMenu();
@@ -195,7 +202,7 @@ private:
 
   std::map<QUrl, LinkWidget*> m_linkWidgets;
 
-  QSize m_expandedSize;
+  int m_iCollapsedHeight = 35;
 
   static TaskWidget* m_pDraggingTaskWidget;
   static TaskWidget* m_pTaskWidgetUnderMouse;
