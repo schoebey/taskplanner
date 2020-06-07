@@ -312,13 +312,22 @@ protected:
         pDraggable->setProperty("reference", QVariant::fromValue(static_cast<void*>(this)));
         setDraggingInstance(pDraggable);
 
-        bool bMove = !pMouseEvent->modifiers().testFlag(Qt::ControlModifier);
-        setDragMode(bMove ? EDragMode::eMove : EDragMode::eCopy);
+        bool bControlPressed = pMouseEvent->modifiers().testFlag(Qt::ControlModifier);
+
+        EDragMode mode(pDraggable->container()->dragMode());
+        if (bControlPressed) {
+          mode = EDragMode::eCopy;
+        }
+
+        setDragMode(mode);
         T::setVisible(EDragMode::eCopy == dragMode());
 
-        pDraggable->T::setParent(T::window());
+        pDraggable->T::setParent(nullptr);
+        pDraggable->T::setWindowFlags(Qt::FramelessWindowHint |
+                                      Qt::NoDropShadowWindowHint);
+        pDraggable->T::setAttribute(Qt::WA_TranslucentBackground, true);
         pDraggable->T::setFocus();
-        pDraggable->T::move(T::window()->mapFromGlobal(pMouseEvent->globalPos() - mouseDownPoint()));
+        pDraggable->T::move(pMouseEvent->globalPos() - mouseDownPoint());
         pDraggable->T::show();
         pDraggable->T::raise();
         qApp->installEventFilter(pDraggable);
