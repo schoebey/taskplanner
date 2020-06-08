@@ -17,6 +17,7 @@
 #include "toolbarinfodisplay.h"
 #include "plugininterface.h"
 #include "propertieshelpers.h"
+#include "tagwidgetcontainer.h"
 
 #include "search/searchframe.h"
 #include "search/searchcontroller.h"
@@ -47,6 +48,7 @@
 #include <QDialogButtonBox>
 #include <QLineEdit>
 #include <QScrollArea>
+#include <QWidgetAction>
 
 #include <array>
 #include <future>
@@ -263,6 +265,19 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   {
     m_pWatcher->addPath("stylesheet.css");
   }
+
+  auto pContainer = new TagWidgetContainer(this);
+  pContainer->setAutoFillBackground(true);
+  pContainer->setMinimumSize(300, 10);
+  pContainer->setDragMode(EDragMode::eCopy);
+  pContainer->setAcceptDrops(false);
+  pContainer->addItem(new DraggableTagWidget("hello world", this));
+  pContainer->addItem(new DraggableTagWidget("hello world2", this));
+  pContainer->addItem(new DraggableTagWidget("hello world3", this));
+
+  QWidgetAction* pWA = new QWidgetAction(ui->pMainToolBar);
+  pWA->setDefaultWidget(pContainer);
+  ui->pMainToolBar->addAction(pWA);
 }
 
 MainWindow::~MainWindow()
@@ -499,7 +514,7 @@ void MainWindow::reloadStylesheet(const QString& sPath)
   QFile f(sPath);
   if (f.open(QIODevice::ReadOnly))
   {
-    setStyleSheet(QString::fromUtf8(f.readAll()));
+    qApp->setStyleSheet(QString::fromUtf8(f.readAll()));
   }
 }
 

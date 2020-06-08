@@ -31,7 +31,7 @@ private:
   bool removeItem_impl(DraggableTagWidget* pT) override;
   bool insertItem_impl(DraggableTagWidget* pT, QPoint pt) override;
   bool moveItemFrom_impl(DraggableContainer<DraggableTagWidget>* pSource, DraggableTagWidget* pT, QPoint pt) override;
-  bool showPlaceholderAt(const QPoint& pt, const QSize& s) override;
+  bool showPlaceholderAt_impl(const QPoint& pt, const QSize& s) override;
   void hidePlaceholder() override;
 
   QFrame* m_pPlaceholder;

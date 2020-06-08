@@ -36,6 +36,7 @@ public:
   DraggableContainer(QWidget* pParent)
     : QFrame(pParent)
   {
+    setAcceptDrops(true);
   }
 
   ~DraggableContainer()
@@ -124,24 +125,38 @@ public:
     return false;
   }
 
-  virtual bool showPlaceholderAt(const QPoint&, const QSize&) {}
+  bool showPlaceholderAt(const QPoint& pt, const QSize& s)
+  {
+    if (acceptDrops())
+    {
+      return showPlaceholderAt_impl(pt, s);
+    }
+
+    return false;
+  }
+
+  virtual bool showPlaceholderAt_impl(const QPoint&, const QSize&) {}
 
   virtual void hidePlaceholder() {}
 
   void enterEvent(QEvent* pEvent) override
   {
     QFrame::enterEvent(pEvent);
-    for (auto it = m_vpMouseOverContainers.begin();
-         it != m_vpMouseOverContainers.end(); ++it)
-    {
-      if (isAncestorOf(*it))
-      {
-        m_vpMouseOverContainers.insert(it, this);
-        return;
-      }
-    }
 
-    m_vpMouseOverContainers.push_back(this);
+    if (acceptDrops())
+    {
+      for (auto it = m_vpMouseOverContainers.begin();
+           it != m_vpMouseOverContainers.end(); ++it)
+      {
+        if (isAncestorOf(*it))
+        {
+          m_vpMouseOverContainers.insert(it, this);
+          return;
+        }
+      }
+
+      m_vpMouseOverContainers.push_back(this);
+    }
   }
 
   void leaveEvent(QEvent* pEvent) override

@@ -68,7 +68,7 @@ bool TagWidgetContainer::moveItemFrom_impl(DraggableContainer<DraggableTagWidget
   return false;
 }
 
-bool TagWidgetContainer::showPlaceholderAt(const QPoint& pt, const QSize& s)
+bool TagWidgetContainer::showPlaceholderAt_impl(const QPoint& pt, const QSize& s)
 {
   m_pPlaceholder->setParent(nullptr);
   m_pPlaceholder->setMinimumSize(s);

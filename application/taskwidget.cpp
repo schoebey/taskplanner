@@ -939,7 +939,7 @@ void TaskWidget::mouseReleaseEvent(QMouseEvent* pEvent)
   QFrame::mouseReleaseEvent(pEvent);
 
   auto pTag = DraggableTagWidget::draggingInstance();
-  if (nullptr != pTag)
+  if (nullptr != pTag && ui->pTags->acceptDrops())
   {
     ui->pTags->addItem(pTag);
   }

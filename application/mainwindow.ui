@@ -103,6 +103,7 @@
    <addaction name="actionDisplayReport"/>
    <addaction name="actionReport"/>
    <addaction name="separator"/>
+   <addaction name="separator"/>
    <addaction name="actionAbout"/>
   </widget>
   <widget class="QToolBar" name="pInfoToolBar">
