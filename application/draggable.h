@@ -363,6 +363,12 @@ protected:
     T::mouseReleaseEvent(pMouseEvent);
   }
 
+  void resizeEvent(QResizeEvent* pEvent) override
+  {
+    m_mouseDownPoint = T::rect().center();
+    T::resizeEvent(pEvent);
+  }
+
   bool eventFilter(QObject* /*pObj*/, QEvent* pEvent) override
   {
     if (this == m_pDraggingInstance)
@@ -373,6 +379,11 @@ protected:
         if (m_lastMousePos != pMouseEvent->globalPos())
         {
           m_lastMousePos = pMouseEvent->globalPos();
+
+          QPoint mappedPt = T::mapFromGlobal(pMouseEvent->globalPos());
+          QMouseEvent e(QEvent::Move, mappedPt, pMouseEvent->button(), pMouseEvent->buttons(), pMouseEvent->modifiers());
+          T::mouseMoveEvent(&e);
+
           T::move(T::parentWidget()->mapFromGlobal(pMouseEvent->globalPos() - m_mouseDownPoint));
           if (nullptr != QWidget::mouseGrabber())
           {
@@ -381,6 +392,7 @@ protected:
             QWidget::mouseGrabber()->releaseMouse();
           }
           T::setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
 
           for (auto pContainer : DraggableContainer<Draggable>::mouseOverContainers())
           {

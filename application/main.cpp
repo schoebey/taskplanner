@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
   MainWindow window(&manager);
 
-  window.setStyle(new Style());
+  qApp->setStyle(new Style());
   window.show();
 
   bool bLoadedFileFromArgs = false;

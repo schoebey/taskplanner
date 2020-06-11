@@ -3,6 +3,7 @@
 
 #include <QLabel>
 #include <QFrame>
+#include <chrono>
 
 #include <cmath>
 #include <cassert>
@@ -37,18 +38,48 @@ public:
   void setColor(const QColor& c);
   QColor color() const;
 
+  Q_PROPERTY(double angle READ angle WRITE setAngle NOTIFY angleChanged)
+  void setAngle(double dAngle);
+  double angle() const;
+
+  Q_PROPERTY(QPoint origin READ origin WRITE setOrigin NOTIFY originChanged)
+  void setOrigin(QPoint pt);
+  QPoint origin() const;
+
 signals:
   void textChanged(const QString&);
   void colorChanged(const QColor&);
-private:
+  void angleChanged(double);
+  void originChanged(const QPoint&);
+
+protected:
+  bool event(QEvent* pEvent);
   void paintEvent(QPaintEvent* pEvent) override;
-  void showEvent(QShowEvent* pEvent);
-  void hideEvent(QHideEvent* pEvent);
+  void showEvent(QShowEvent* pEvent) override;
+  void hideEvent(QHideEvent* pEvent) override;
+  void mousePressEvent(QMouseEvent* pEvent) override;
+  void mouseMoveEvent(QMouseEvent* pEvent) override;
+  void resizeEvent(QResizeEvent* pEvent) override;
+  void timerEvent(QTimerEvent* event) override;
   QSize sizeHint() const override;
+
+private:
+  QImage renderToImage();
+  void startSimulation();
+  void stopSimulation();
+  void stepSimulation();
 
 private:
   QString m_sText;
   QColor m_color;
+  double m_dAngleRad = 0;
+  QPoint m_origin;
+  QSize m_size;
+  QSize m_expandedSize;
+  int m_iTimerId = -1;
+  QImage m_image;
+  std::chrono::steady_clock::time_point m_startTime;
+  double m_dSimulationStartAngleRad = 0;
 };
 
 #endif // TAGWIDGET_H

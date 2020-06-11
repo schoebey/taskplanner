@@ -2,6 +2,7 @@ CONFIG += c++11
 QT += core gui
 TEMPLATE = subdirs
 
+# -fno-limit-debug-info
 
 equals(QT_MAJOR_VERSION, 5) {
   QT += widgets
