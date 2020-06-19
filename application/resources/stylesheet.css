@@ -475,6 +475,7 @@ SearchFrame #pClose {
 
 TagWidget {
   font-size: 9pt;
+  background: transparent;
 }
 
 

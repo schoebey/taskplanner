@@ -406,7 +406,7 @@ protected:
           {
             pt = pContainer->mapFromGlobal(pt);
 
-            pContainer->showPlaceholderAt(pt, T::size());
+            pContainer->showPlaceholderAt(pt, T::sizeHint());
           }
 
           detail::sendEnterMoveLeaveEvents(pMouseEvent, m_pPreviouslyEnteredWidget);

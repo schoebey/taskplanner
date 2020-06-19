@@ -191,7 +191,6 @@ bool TagWidget::event(QEvent* pEevent)
         resize(m_expandedSize);
 
         // start simulation
-        m_image = renderToImage();
         startSimulation();
       }
     }
@@ -211,14 +210,6 @@ bool TagWidget::event(QEvent* pEevent)
   return QWidget::event(pEevent);
 }
 
-void TagWidget::showEvent(QShowEvent* pEvent)
-{
-}
-
-void TagWidget::hideEvent(QHideEvent* pEvent)
-{
-}
-
 void TagWidget::mousePressEvent(QMouseEvent* pEvent)
 {
   setOrigin(pEvent->pos());
@@ -229,6 +220,14 @@ void TagWidget::mouseMoveEvent(QMouseEvent* pEvent)
   if (nullptr == parentWidget())
   {
     stopSimulation();
+
+    if (m_image.isNull())
+    {
+      QWidget* pRef = static_cast<QWidget*>(property("reference").value<void*>());
+      if (nullptr != pRef) {
+        m_image = pRef->grab().toImage();
+      }
+    }
 
     QPointF motionVector = rect().center() - pEvent->pos();
     qDebug() << "motion:" << motionVector;
@@ -266,22 +265,6 @@ QSize TagWidget::sizeHint() const
   return QSize(iWidth, iHeight) + QSize(iHeaderSize, 0) + QSize(2 * iBorderSize, 2 * iBorderSize);
 }
 
-QImage TagWidget::renderToImage()
-{
-  QStyleOptionTagWidget opt;
-  opt.init(this);
-  opt.rect = QRect(QPoint(0, 0), m_size);
-  opt.sText = text();
-  opt.color = m_color;
-
-
-  QImage img(m_size, QImage::Format_ARGB32);
-  img.fill(Qt::red);
-  QPainter p(&img);
-  style()->drawControl(customControlElements::CE_TagWidget, &opt, &p, this);
-  return img;
-}
-
 void TagWidget::paintEvent(QPaintEvent* /*pEvent*/)
 {
   if (nullptr != parentWidget())
@@ -306,9 +289,8 @@ void TagWidget::paintEvent(QPaintEvent* /*pEvent*/)
     // rotate the painter based on the simulation
     // paint the buffer to the widget
     QPainter painter(this);
-    painter.drawRect(rect().adjusted(0,0,-1,-1));
     painter.translate(rect().center());
-    painter.rotate((m_dAngleRad + dNullphaseAngleRad) * 180 / c_dPi);
+    painter.rotate((m_dAngleRad - dNullphaseAngleRad) * 180 / c_dPi);
     painter.drawImage(-m_origin, m_image);
   }
 }

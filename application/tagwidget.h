@@ -55,8 +55,6 @@ signals:
 protected:
   bool event(QEvent* pEvent);
   void paintEvent(QPaintEvent* pEvent) override;
-  void showEvent(QShowEvent* pEvent) override;
-  void hideEvent(QHideEvent* pEvent) override;
   void mousePressEvent(QMouseEvent* pEvent) override;
   void mouseMoveEvent(QMouseEvent* pEvent) override;
   void resizeEvent(QResizeEvent* pEvent) override;
@@ -64,7 +62,6 @@ protected:
   QSize sizeHint() const override;
 
 private:
-  QImage renderToImage();
   void startSimulation();
   void stopSimulation();
   void stepSimulation();
