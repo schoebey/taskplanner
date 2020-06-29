@@ -33,6 +33,7 @@ public slots:
 signals:
   void editingFinished();
   void sizeChanged();
+  void textChanged(const QString&);
 
 private slots:
   void onEditingFinished();

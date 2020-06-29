@@ -331,12 +331,6 @@ TaskWidget #pTags {
   padding: 1 3 1 3;
   margin: 3px;
 }
-TaskWidget #pTags QLabel {
-  border: 1px solid red;
-  border-radius: 2px;
-  padding: 1 3 1 3;
-  margin: 3px;
-}
 
 #tag_placeholder {
   border: 1px solid green;
@@ -474,8 +468,15 @@ SearchFrame #pClose {
 }
 
 TagWidget {
+  border: 1px solid blue;
   font-size: 9pt;
   background: transparent;
+  padding: 0 0 0 5;
+}
+
+TagWidget EditableLabel {
+  border: 1px solid green;
+  font-size: 8pt;
 }
 
 

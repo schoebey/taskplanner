@@ -525,11 +525,6 @@ void Style::drawControl(ControlElement element,
       pPainter->setBrush(Qt::NoBrush);
       pPainter->drawPolyline(bottomContour);
 
-      QTextOption opt(Qt::AlignHCenter | Qt::AlignVCenter);
-
-      pPainter->setPen(pOption->palette.color(QPalette::Text));
-      pPainter->drawText(pTagOption->rect.adjusted(iHeaderSize, iBorderSize, -iBorderSize, -iBorderSize),
-                         pTagOption->sText, opt);
       pPainter->restore();
     }
   } break;

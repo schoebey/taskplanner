@@ -1,6 +1,7 @@
 #include "tagwidget.h"
 #include "styleExtension.h"
 #include "draggable.h"
+#include "editablelabel.h"
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -42,19 +43,39 @@ QStyleOptionTagWidget::QStyleOptionTagWidget()
 template<> Draggable<TagWidget>* Draggable<TagWidget>::m_pDraggingInstance = nullptr;
 
 TagWidget::TagWidget(const QString& sText, QWidget* pParent)
-  : QWidget(pParent),
-    m_sText(sText),
+  : QFrame(pParent),
     m_color(QColor(255, 210, 20))
 {
   setAttribute(Qt::WA_StyledBackground, true);
+  QGridLayout* pLayout = new QGridLayout();
+  pLayout->setSpacing(0);
+  pLayout->setMargin(0);
+  setLayout(pLayout);
+  EditableLabel* pLabel = new EditableLabel(this);
+  pLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+  pLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+  m_pLabel = pLabel;
+  pLayout->addWidget(pLabel);
+  connect(pLabel, &EditableLabel::textChanged, this, &TagWidget::setText);
+  setText(sText);
 }
 
 TagWidget::TagWidget(const TagWidget& other)
-  : QWidget(other.parentWidget()),
+  : QFrame(other.parentWidget()),
     m_origin(other.m_origin),
     m_size(other.m_size),
     m_expandedSize(other.m_expandedSize)
 {
+  QGridLayout* pLayout = new QGridLayout();
+  pLayout->setSpacing(0);
+  pLayout->setMargin(0);
+  setLayout(pLayout);
+  EditableLabel* pLabel = new EditableLabel(this);
+  pLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+  pLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+  m_pLabel = pLabel;
+  pLayout->addWidget(pLabel);
+  connect(pLabel, &EditableLabel::textChanged, this, &TagWidget::setText);
   setText(other.text());
   setColor(other.color());
   resize(other.size());
@@ -67,16 +88,16 @@ TagWidget::~TagWidget()
 
 void TagWidget::setText(const QString& sText)
 {
-  if (m_sText != sText)
+  if (m_pLabel->text() != sText)
   {
-    m_sText = sText;
-    emit textChanged(m_sText);
+    m_pLabel->setText(sText);
+    emit textChanged(sText);
   }
 }
 
 QString TagWidget::text() const
 {
-  return m_sText;
+  return m_pLabel->text();
 }
 
 void TagWidget::setColor(const QColor& c)
@@ -116,7 +137,7 @@ QPoint TagWidget::origin() const
 
 void TagWidget::resizeEvent(QResizeEvent* pEvent)
 {
-  QWidget::resizeEvent(pEvent);
+  QFrame::resizeEvent(pEvent);
 
 
   if (nullptr != parentWidget())
@@ -193,6 +214,8 @@ bool TagWidget::event(QEvent* pEevent)
         // start simulation
         startSimulation();
       }
+
+      m_pLabel->setVisible(false);
     }
     else
     {
@@ -202,12 +225,14 @@ bool TagWidget::event(QEvent* pEevent)
         resize(m_size);
       }
 
+      m_pLabel->setVisible(true);
+
       stopSimulation();
     }
     break;
   }
 
-  return QWidget::event(pEevent);
+  return QFrame::event(pEevent);
 }
 
 void TagWidget::mousePressEvent(QMouseEvent* pEvent)
@@ -272,7 +297,6 @@ void TagWidget::paintEvent(QPaintEvent* /*pEvent*/)
     QStyleOptionTagWidget opt;
     opt.init(this);
     opt.rect = QRect(QPoint(0, 0), m_size);
-    opt.sText = text();
     opt.color = m_color;
 
     QPainter painter(this);

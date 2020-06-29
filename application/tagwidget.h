@@ -15,11 +15,10 @@ class QStyleOptionTagWidget : public QStyleOption
 public:
   QStyleOptionTagWidget();
 
-  QString sText;
   QColor color;
 };
 
-class TagWidget : public QWidget
+class TagWidget : public QFrame
 {
   Q_OBJECT
 
@@ -67,7 +66,7 @@ private:
   void stepSimulation();
 
 private:
-  QString m_sText;
+  QLabel* m_pLabel;
   QColor m_color;
   double m_dAngleRad = 0;
   QPoint m_origin;

@@ -34,6 +34,7 @@ void EditableLabel::edit()
   m_pLineEdit->resize(size());
   m_pLineEdit->show();
   connect(m_pLineEdit, SIGNAL(textChanged(QString)), this, SLOT(setEditText(QString)), Qt::UniqueConnection);
+  connect(m_pLineEdit, SIGNAL(textChanged(QString)), this, SIGNAL(textChanged(QString)), Qt::UniqueConnection);
   connect(m_pLineEdit, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()), Qt::UniqueConnection);
   connect(m_pLineEdit, SIGNAL(editingFinished()), m_pLineEdit, SLOT(hide()), Qt::UniqueConnection);
 
