@@ -25,22 +25,25 @@ void EditableLabel::mouseDoubleClickEvent(QMouseEvent* pMouseEvent)
 
 void EditableLabel::edit()
 {
-  m_iMinWidth = sizeHint().width();
-  setMinimumWidth(150);
+  if (m_bEditable)
+  {
+    m_iMinWidth = sizeHint().width();
+    setMinimumWidth(150);
 
-  m_pLineEdit->setText(m_sEditText.isEmpty() ? text() : m_sEditText);
-  m_pLineEdit->selectAll();
-  m_pLineEdit->setFocus();
-  m_pLineEdit->resize(size());
-  m_pLineEdit->show();
-  connect(m_pLineEdit, SIGNAL(textChanged(QString)), this, SLOT(setEditText(QString)), Qt::UniqueConnection);
-  connect(m_pLineEdit, SIGNAL(textChanged(QString)), this, SIGNAL(textChanged(QString)), Qt::UniqueConnection);
-  connect(m_pLineEdit, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()), Qt::UniqueConnection);
-  connect(m_pLineEdit, SIGNAL(editingFinished()), m_pLineEdit, SLOT(hide()), Qt::UniqueConnection);
+    m_pLineEdit->setText(m_sEditText.isEmpty() ? text() : m_sEditText);
+    m_pLineEdit->selectAll();
+    m_pLineEdit->setFocus();
+    m_pLineEdit->resize(size());
+    m_pLineEdit->show();
+    connect(m_pLineEdit, SIGNAL(textChanged(QString)), this, SLOT(setEditText(QString)), Qt::UniqueConnection);
+    connect(m_pLineEdit, SIGNAL(textChanged(QString)), this, SIGNAL(textChanged(QString)), Qt::UniqueConnection);
+    connect(m_pLineEdit, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()), Qt::UniqueConnection);
+    connect(m_pLineEdit, SIGNAL(editingFinished()), m_pLineEdit, SLOT(hide()), Qt::UniqueConnection);
 
-  std::function<void(const QString&)> fn = std::bind(&EditableLabel::setText,
-                                                     this, std::bind(m_fnToDisplay, std::placeholders::_1));
-  connect(m_pLineEdit, &QLineEdit::textChanged, this, fn);
+    std::function<void(const QString&)> fn = std::bind(&EditableLabel::setText,
+                                                       this, std::bind(m_fnToDisplay, std::placeholders::_1));
+    connect(m_pLineEdit, &QLineEdit::textChanged, this, fn);
+  }
 }
 
 void EditableLabel::suggestWidth(int iWidth)
@@ -113,3 +116,12 @@ void EditableLabel::onEditingFinished()
   emit editingFinished();
 }
 
+void EditableLabel::setEditable(bool bEditable)
+{
+  m_bEditable = bEditable;
+}
+
+bool EditableLabel::editable() const
+{
+  return m_bEditable;
+}

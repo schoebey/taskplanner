@@ -23,6 +23,7 @@ bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
   if (nullptr != pLayout)
   {
     pLayout->addWidget(pT);
+    pT->setEditable(false);
     return true;
   }
 

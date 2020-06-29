@@ -10,6 +10,7 @@
 #include <QStyleOption>
 
 
+class EditableLabel;
 class QStyleOptionTagWidget : public QStyleOption
 {
 public:
@@ -45,6 +46,10 @@ public:
   void setOrigin(QPoint pt);
   QPoint origin() const;
 
+  Q_PROPERTY(bool editable READ editable WRITE setEditable NOTIFY editableChanged)
+  void setEditable(bool bEditable);
+  bool editable() const;
+
 signals:
   void textChanged(const QString&);
   void colorChanged(const QColor&);
@@ -66,7 +71,7 @@ private:
   void stepSimulation();
 
 private:
-  QLabel* m_pLabel;
+  EditableLabel* m_pLabel;
   QColor m_color;
   double m_dAngleRad = 0;
   QPoint m_origin;

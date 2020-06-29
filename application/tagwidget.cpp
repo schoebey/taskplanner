@@ -135,6 +135,16 @@ QPoint TagWidget::origin() const
   return m_origin;
 }
 
+void TagWidget::setEditable(bool bEditable)
+{
+  m_pLabel->setEditable(bEditable);
+}
+
+bool TagWidget::editable() const
+{
+  return m_pLabel->editable();
+}
+
 void TagWidget::resizeEvent(QResizeEvent* pEvent)
 {
   QFrame::resizeEvent(pEvent);

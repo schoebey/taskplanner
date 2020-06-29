@@ -22,6 +22,10 @@ public:
 
   void setDisplayFunction(const std::function<QString(const QString&)> fnDisplay);
 
+  Q_PROPERTY(bool editable READ editable WRITE setEditable NOTIFY editableChanged)
+  void setEditable(bool bEditable);
+  bool editable() const;
+
 public slots:
   void edit();
 
@@ -44,6 +48,7 @@ private:
   QString m_sEditText;
   std::function<QString(const QString&)> m_fnToDisplay;
   int m_iMinWidth;
+  bool m_bEditable = true;
 };
 
 #endif // EDITABLELABEL_H
