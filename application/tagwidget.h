@@ -46,7 +46,7 @@ public:
   void setOrigin(QPoint pt);
   QPoint origin() const;
 
-  Q_PROPERTY(bool editable READ editable WRITE setEditable NOTIFY editableChanged)
+  Q_PROPERTY(bool editable READ editable WRITE setEditable NOTIFY editabilityChanged)
   void setEditable(bool bEditable);
   bool editable() const;
 
@@ -55,6 +55,7 @@ signals:
   void colorChanged(const QColor&);
   void angleChanged(double);
   void originChanged(const QPoint&);
+  void editabilityChanged();
 
 protected:
   bool event(QEvent* pEvent);

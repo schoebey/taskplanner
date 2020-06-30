@@ -17,13 +17,18 @@ TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
   setLayout(pLayout);
 }
 
+void TagWidgetContainer::setEditable(bool bEditable)
+{
+  m_bEditable = bEditable;
+}
+
 bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
 {
   QLayout* pLayout = layout();
   if (nullptr != pLayout)
   {
     pLayout->addWidget(pT);
-    pT->setEditable(false);
+    pT->setEditable(m_bEditable);
     return true;
   }
 
@@ -49,6 +54,7 @@ bool TagWidgetContainer::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
   FlowLayout* pLayout = dynamic_cast<FlowLayout*>(layout());
   if (tools::addToFlowLayout(pT, pLayout, pt))
   {
+    pT->setEditable(m_bEditable);
     return true;
   }
 
@@ -63,6 +69,7 @@ bool TagWidgetContainer::moveItemFrom_impl(DraggableContainer<DraggableTagWidget
   FlowLayout* pLayout = dynamic_cast<FlowLayout*>(layout());
   if (tools::addToFlowLayout(pT, pLayout, pt))
   {
+    pT->setEditable(m_bEditable);
     return true;
   }
 

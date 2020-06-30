@@ -118,7 +118,11 @@ void EditableLabel::onEditingFinished()
 
 void EditableLabel::setEditable(bool bEditable)
 {
-  m_bEditable = bEditable;
+  if (m_bEditable ^ bEditable)
+  {
+    m_bEditable = bEditable;
+    emit editabilityChanged();
+  }
 }
 
 bool EditableLabel::editable() const

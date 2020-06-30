@@ -22,7 +22,7 @@ public:
 
   void setDisplayFunction(const std::function<QString(const QString&)> fnDisplay);
 
-  Q_PROPERTY(bool editable READ editable WRITE setEditable NOTIFY editableChanged)
+  Q_PROPERTY(bool editable READ editable WRITE setEditable NOTIFY editabilityChanged)
   void setEditable(bool bEditable);
   bool editable() const;
 
@@ -38,6 +38,7 @@ signals:
   void editingFinished();
   void sizeChanged();
   void textChanged(const QString&);
+  void editabilityChanged();
 
 private slots:
   void onEditingFinished();

@@ -15,6 +15,8 @@ public:
   TagWidgetContainer(QWidget* pParent);
   ~TagWidgetContainer() = default;
 
+  void setEditable(bool);
+
 signals:
   void tagAdded(DraggableTagWidget*);
   void tagRemoved(DraggableTagWidget*);
@@ -35,6 +37,7 @@ private:
   void hidePlaceholder() override;
 
   QFrame* m_pPlaceholder;
+  bool m_bEditable = false;
 };
 
 #endif // TAGWIDGETCONTAINER_H

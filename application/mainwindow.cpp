@@ -267,6 +267,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   }
 
   auto pContainer = new TagWidgetContainer(this);
+  pContainer->setEditable(true);
   pContainer->setAutoFillBackground(true);
   pContainer->setMinimumSize(300, 10);
   pContainer->setDragMode(EDragMode::eCopy);

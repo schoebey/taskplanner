@@ -137,7 +137,11 @@ QPoint TagWidget::origin() const
 
 void TagWidget::setEditable(bool bEditable)
 {
-  m_pLabel->setEditable(bEditable);
+  if (bEditable ^ editable())
+  {
+    m_pLabel->setEditable(bEditable);
+    emit editabilityChanged();
+  }
 }
 
 bool TagWidget::editable() const
