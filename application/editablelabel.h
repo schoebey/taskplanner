@@ -28,6 +28,8 @@ public:
 
 public slots:
   void edit();
+  void cancel();
+  void closeEditor();
 
   void setEditText(const QString& sText);
   QString editText() const;
@@ -39,6 +41,9 @@ signals:
   void sizeChanged();
   void textChanged(const QString&);
   void editabilityChanged();
+
+protected:
+  bool eventFilter(QObject* pWatched, QEvent* pEvent);
 
 private slots:
   void onEditingFinished();

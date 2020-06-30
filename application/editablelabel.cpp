@@ -5,6 +5,7 @@
 #include <QStyle>
 #include <QPainter>
 #include <QStyleOption>
+#include <QKeyEvent>
 
 
 EditableLabel::EditableLabel(QWidget* pParent)
@@ -35,14 +36,10 @@ void EditableLabel::edit()
     m_pLineEdit->setFocus();
     m_pLineEdit->resize(size());
     m_pLineEdit->show();
-    connect(m_pLineEdit, SIGNAL(textChanged(QString)), this, SLOT(setEditText(QString)), Qt::UniqueConnection);
-    connect(m_pLineEdit, SIGNAL(textChanged(QString)), this, SIGNAL(textChanged(QString)), Qt::UniqueConnection);
     connect(m_pLineEdit, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()), Qt::UniqueConnection);
-    connect(m_pLineEdit, SIGNAL(editingFinished()), m_pLineEdit, SLOT(hide()), Qt::UniqueConnection);
 
-    std::function<void(const QString&)> fn = std::bind(&EditableLabel::setText,
-                                                       this, std::bind(m_fnToDisplay, std::placeholders::_1));
-    connect(m_pLineEdit, &QLineEdit::textChanged, this, fn);
+
+    m_pLineEdit->installEventFilter(this);
   }
 }
 
@@ -112,6 +109,24 @@ void EditableLabel::resizeEvent(QResizeEvent* pEvent)
 
 void EditableLabel::onEditingFinished()
 {
+  setEditText(m_pLineEdit->text());
+  emit textChanged(m_pLineEdit->text());
+
+  setText(m_fnToDisplay(m_pLineEdit->text()));
+
+  closeEditor();
+}
+
+void EditableLabel::cancel()
+{
+  m_pLineEdit->setText(m_sEditText.isEmpty() ? text() : m_sEditText);
+  closeEditor();
+}
+
+void EditableLabel::closeEditor()
+{
+  m_pLineEdit->hide();
+  m_pLineEdit->removeEventFilter(this);
   setMinimumWidth(m_iMinWidth);
   emit editingFinished();
 }
@@ -128,4 +143,27 @@ void EditableLabel::setEditable(bool bEditable)
 bool EditableLabel::editable() const
 {
   return m_bEditable;
+}
+
+bool EditableLabel::eventFilter(QObject* pWatched, QEvent* pEvent)
+{
+  if (m_pLineEdit == pWatched)
+  {
+    switch (pEvent->type())
+    {
+    case QEvent::KeyPress:
+    {
+      QKeyEvent* pKeyEvent = dynamic_cast<QKeyEvent*>(pEvent);
+      if (nullptr != pKeyEvent &&
+          Qt::Key_Escape == pKeyEvent->key())
+      {
+        cancel();
+      }
+    }break;
+    default:
+      break;
+    }
+  }
+
+  return false;
 }
