@@ -56,7 +56,8 @@ SOURCES += \
     tagwidgetcontainer.cpp \
     layoututils.cpp \
     draggable.cpp \
-    commands/combinedundocommand.cpp
+    commands/combinedundocommand.cpp \
+    colorspacewidget.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -98,7 +99,8 @@ HEADERS += \
     tagwidgetcontainer.h \
     draggable.h \
     layoututils.h \
-    commands/combinedundocommand.h
+    commands/combinedundocommand.h \
+    colorspacewidget.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
