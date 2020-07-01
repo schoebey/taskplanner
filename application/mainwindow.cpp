@@ -18,6 +18,7 @@
 #include "plugininterface.h"
 #include "propertieshelpers.h"
 #include "tagwidgetcontainer.h"
+#include "colorspacewidget.h"
 
 #include "search/searchframe.h"
 #include "search/searchcontroller.h"
@@ -272,13 +273,22 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   pContainer->setMinimumSize(300, 10);
   pContainer->setDragMode(EDragMode::eCopy);
   pContainer->setAcceptDrops(false);
-  pContainer->addItem(new DraggableTagWidget("hello world", this));
+  auto pTagWidget = new DraggableTagWidget("hello world", this);
+  pContainer->addItem(pTagWidget);
   pContainer->addItem(new DraggableTagWidget("hello world2", this));
   pContainer->addItem(new DraggableTagWidget("hello world3", this));
 
   QWidgetAction* pWA = new QWidgetAction(ui->pMainToolBar);
   pWA->setDefaultWidget(pContainer);
   ui->pMainToolBar->addAction(pWA);
+
+  QWidgetAction* pWA2 = new QWidgetAction(ui->pMainToolBar);
+  ColorSpaceWidget* pCSW = new ColorSpaceWidget();
+  pCSW->setMinimumSize(100, 100);
+  pWA2->setDefaultWidget(pCSW);
+  ui->pMainToolBar->addAction(pWA2);
+
+  connect(pCSW, &ColorSpaceWidget::colorChanged, pTagWidget, &TagWidget::setColor);
 }
 
 MainWindow::~MainWindow()

@@ -4,6 +4,8 @@
 #include "tagwidget.h"
 
 #include <QLayout>
+#include <QPushButton>
+#include <QWidgetAction>
 
 template<> std::vector<DraggableContainer<DraggableTagWidget>*>
 DraggableContainer<DraggableTagWidget>::m_vpMouseOverContainers = std::vector<DraggableContainer<DraggableTagWidget>*>();
@@ -20,6 +22,14 @@ TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
 void TagWidgetContainer::setEditable(bool bEditable)
 {
   m_bEditable = bEditable;
+
+  if (m_bEditable)
+  {
+    QWidgetAction* pAction = new QWidgetAction(this);
+    pAction->setDefaultWidget(new QPushButton("hello world"));
+    addAction(pAction);
+    setContextMenuPolicy(Qt::ActionsContextMenu);
+  }
 }
 
 bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)

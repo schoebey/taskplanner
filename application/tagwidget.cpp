@@ -62,6 +62,7 @@ TagWidget::TagWidget(const QString& sText, QWidget* pParent)
 
 TagWidget::TagWidget(const TagWidget& other)
   : QFrame(other.parentWidget()),
+    m_color(other.m_color),
     m_origin(other.m_origin),
     m_size(other.m_size),
     m_expandedSize(other.m_expandedSize)
@@ -106,6 +107,7 @@ void TagWidget::setColor(const QColor& c)
   {
     m_color = c;
     emit colorChanged(m_color);
+    update();
   }
 }
 
