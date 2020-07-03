@@ -9,15 +9,15 @@ class ColorSpaceWidget : public QWidget
   Q_OBJECT
 
 public:
-  ColorSpaceWidget();
+  ColorSpaceWidget(QWidget* pParent = nullptr);
 
   Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
   QColor color() const;
   void setColor(const QColor& c);
 
   Q_PROPERTY(double saturation READ saturation WRITE setSaturation NOTIFY saturationChanged)
-  double saturation() const;
-  void setSaturation(double dSaturation);
+  unsigned char saturation() const;
+  void setSaturation(int sat);
 
   void paintEvent(QPaintEvent* pEvent) override;
   void resizeEvent(QResizeEvent* pEvent) override;
@@ -26,12 +26,15 @@ public:
 
 signals:
   void colorChanged(const QColor&);
-  void saturationChanged(double);
+  void saturationChanged(int);
+
+private:
+  void reCreateBuffer(QSize s);
 
 private:
   QImage m_buffer;
   QColor m_currentCol;
-  double m_dSaturation = 1;
+  int m_saturation = 255;
 };
 
 #endif // COLORSPACEWIDGET_H

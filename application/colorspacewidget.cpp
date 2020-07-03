@@ -3,7 +3,6 @@
 #include <QResizeEvent>
 #include <QPaintEvent>
 #include <QPainter>
-#include <QRadialGradient>
 
 #include <cmath>
 
@@ -33,7 +32,7 @@ namespace
 
   QColor colorFromCoords(const QPointF& pt,
                          const QRect& rect,
-                         double dSat = 1.)
+                         int sat = 255)
   {
     QColor c;
     QPointF ptCenter(rect.width() / 2., rect.height() / 2.);
@@ -45,30 +44,34 @@ namespace
     {
       double h = atan2(vec.y(), vec.x()) / c_dTau + 0.5;
       h = std::max<double>(std::min<double>(h, 1), 0);
-      c = QColor::fromHslF(h, dSat, 0.5 + (1 - dLen) / 2);
+      c = QColor::fromHsl(h * 359, sat, (0.5 + (1 - dLen) / 2) * 255);
     }
 
     return c;
   }
 }
 
-ColorSpaceWidget::ColorSpaceWidget()
+ColorSpaceWidget::ColorSpaceWidget(QWidget* pParent)
+  : QWidget(pParent)
 {
+  setMouseTracking(true);
   setColor(Qt::yellow);
 }
 
-
-void ColorSpaceWidget::resizeEvent(QResizeEvent* pEvent)
+void ColorSpaceWidget::reCreateBuffer(QSize s)
 {
-  m_buffer = QImage(pEvent->size(), QImage::Format_ARGB32);
+  if (m_buffer.size() != s)
+  {
+    m_buffer = QImage(s, QImage::Format_ARGB32);
+  }
+  m_buffer.fill(Qt::transparent);
   QPainter painter(&m_buffer);
-  painter.fillRect(m_buffer.rect(), Qt::transparent);
 
   for (int y = 0; y < m_buffer.height(); ++y)
   {
     for (int x = 0; x < m_buffer.width(); ++x)
     {
-      QColor c = colorFromCoords(QPointF(x, y), m_buffer.rect(), m_dSaturation);
+      QColor c = colorFromCoords(QPointF(x, y), m_buffer.rect(), m_saturation);
       if (c.isValid())
       {
         m_buffer.setPixel(x, y, c.rgba());
@@ -77,17 +80,22 @@ void ColorSpaceWidget::resizeEvent(QResizeEvent* pEvent)
   }
 }
 
+void ColorSpaceWidget::resizeEvent(QResizeEvent* pEvent)
+{
+  reCreateBuffer(pEvent->size());
+}
+
 void ColorSpaceWidget::mousePressEvent(QMouseEvent* pEvent)
 {
-  QColor c = colorFromCoords(pEvent->pos(), m_buffer.rect());
+  QColor c = colorFromCoords(pEvent->pos(), m_buffer.rect(), m_saturation);
   setColor(c);
 }
 
 void ColorSpaceWidget::mouseMoveEvent(QMouseEvent* pEvent)
 {
-  if (pEvent->button() == Qt::LeftButton)
+  if (pEvent->buttons().testFlag(Qt::LeftButton))
   {
-    QColor c = colorFromCoords(pEvent->pos(), m_buffer.rect());
+    QColor c = colorFromCoords(pEvent->pos(), m_buffer.rect(), m_saturation);
     setColor(c);
   }
 }
@@ -124,17 +132,23 @@ void ColorSpaceWidget::setColor(const QColor& c)
   }
 }
 
-double ColorSpaceWidget::saturation() const
+unsigned char ColorSpaceWidget::saturation() const
 {
-  return m_dSaturation;
+  return m_saturation;
 }
 
-void ColorSpaceWidget::setSaturation(double dSaturation)
+void ColorSpaceWidget::setSaturation(int sat)
 {
-  if (qFuzzyIsNull(dSaturation) ^ qFuzzyIsNull(m_dSaturation) ||
-      !qFuzzyCompare(dSaturation, m_dSaturation))
+  if (sat != m_saturation)
   {
-    m_dSaturation = dSaturation;
-    emit saturationChanged(m_dSaturation);
+    m_saturation = sat;
+    emit saturationChanged(m_saturation);
+
+    reCreateBuffer(size());
+    update();
+
+    QColor c(color());
+    c.setHsl(c.hslHue(), m_saturation, c.lightness());
+    setColor(c);
   }
 }
