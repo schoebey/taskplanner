@@ -412,6 +412,16 @@ void Task::setTimeFragments(const std::vector<STimeFragment>& vFragments)
   m_vTimingInfo = vFragments;
 }
 
+std::vector<QString> Task::tags() const
+{
+  return property<std::vector<QString>>("tags");
+}
+
+bool Task::setTags(const std::vector<QString>& vsTagNames)
+{
+  return setProperty("tags", vsTagNames);
+}
+
 group_id Task::group() const
 {
   return m_groupId;

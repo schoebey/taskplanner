@@ -68,6 +68,9 @@ public:
   std::vector<STimeFragment> timeFragments() const override;
   void setTimeFragments(const std::vector<STimeFragment>& vFragments);
 
+  std::vector<QString> tags() const override;
+  bool setTags(const std::vector<QString>& vsTagNames) override;
+
   group_id group() const override;
   void setGroup(group_id groupId) override;
 
