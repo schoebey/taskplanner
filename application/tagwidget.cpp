@@ -2,12 +2,14 @@
 #include "styleExtension.h"
 #include "draggable.h"
 #include "editablelabel.h"
+#include "colorpicker.h"
 
 #include <QMouseEvent>
 #include <QPainter>
 #include <QStyleOption>
 #include <QApplication>
 #include <QVector3D>
+#include <QWidgetAction>
 
 #include <cmath>
 
@@ -58,6 +60,7 @@ TagWidget::TagWidget(const QString& sText, QWidget* pParent)
   pLayout->addWidget(pLabel);
   connect(pLabel, &EditableLabel::textChanged, this, &TagWidget::setText);
   setText(sText);
+  setEditable(false);
 }
 
 TagWidget::TagWidget(const TagWidget& other)
@@ -80,6 +83,7 @@ TagWidget::TagWidget(const TagWidget& other)
   setText(other.text());
   setColor(other.color());
   resize(other.size());
+  setEditable(false);
 }
 
 TagWidget::~TagWidget()
@@ -143,6 +147,23 @@ void TagWidget::setEditable(bool bEditable)
   {
     m_pLabel->setEditable(bEditable);
     emit editabilityChanged();
+
+    if (bEditable && nullptr == m_pColorPickerAction)
+    {
+      QWidgetAction* pAction = new QWidgetAction(this);
+      auto pColorWidget = new ColorPicker();
+      pColorWidget->setMinimumSize(130, 100);
+      pColorWidget->setColor(color());
+      connect(pColorWidget, &ColorPicker::colorChanged, this, &TagWidget::setColor);
+      connect(this, &TagWidget::colorChanged, pColorWidget, &ColorPicker::setColor);
+      pAction->setDefaultWidget(pColorWidget);
+      addAction(new QAction("blub"));
+      addAction(pAction);
+      addAction(new QAction("blub bli"));
+      addAction(new QAction("blub bla"));
+      setContextMenuPolicy(Qt::ActionsContextMenu);
+      m_pColorPickerAction = pAction;
+    }
   }
 }
 

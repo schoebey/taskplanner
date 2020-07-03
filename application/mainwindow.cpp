@@ -281,14 +281,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QWidgetAction* pWA = new QWidgetAction(ui->pMainToolBar);
   pWA->setDefaultWidget(pContainer);
   ui->pMainToolBar->addAction(pWA);
-
-  QWidgetAction* pWA2 = new QWidgetAction(ui->pMainToolBar);
-  ColorSpaceWidget* pCSW = new ColorSpaceWidget();
-  pCSW->setMinimumSize(100, 100);
-  pWA2->setDefaultWidget(pCSW);
-  ui->pMainToolBar->addAction(pWA2);
-
-  connect(pCSW, &ColorSpaceWidget::colorChanged, pTagWidget, &TagWidget::setColor);
 }
 
 MainWindow::~MainWindow()

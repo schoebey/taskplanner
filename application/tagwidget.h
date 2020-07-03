@@ -82,6 +82,7 @@ private:
   QImage m_image;
   std::chrono::steady_clock::time_point m_startTime;
   double m_dSimulationStartAngleRad = 0;
+  QAction* m_pColorPickerAction = nullptr;
 };
 
 #endif // TAGWIDGET_H
