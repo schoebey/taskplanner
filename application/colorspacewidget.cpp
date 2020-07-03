@@ -65,7 +65,6 @@ void ColorSpaceWidget::reCreateBuffer(QSize s)
     m_buffer = QImage(s, QImage::Format_ARGB32);
   }
   m_buffer.fill(Qt::transparent);
-  QPainter painter(&m_buffer);
 
   for (int y = 0; y < m_buffer.height(); ++y)
   {
@@ -88,7 +87,10 @@ void ColorSpaceWidget::resizeEvent(QResizeEvent* pEvent)
 void ColorSpaceWidget::mousePressEvent(QMouseEvent* pEvent)
 {
   QColor c = colorFromCoords(pEvent->pos(), m_buffer.rect(), m_saturation);
-  setColor(c);
+  if (c.isValid())
+  {
+    setColor(c);
+  }
 }
 
 void ColorSpaceWidget::mouseMoveEvent(QMouseEvent* pEvent)
@@ -96,7 +98,10 @@ void ColorSpaceWidget::mouseMoveEvent(QMouseEvent* pEvent)
   if (pEvent->buttons().testFlag(Qt::LeftButton))
   {
     QColor c = colorFromCoords(pEvent->pos(), m_buffer.rect(), m_saturation);
-    setColor(c);
+    if (c.isValid())
+    {
+      setColor(c);
+    }
   }
 }
 
