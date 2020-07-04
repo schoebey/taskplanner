@@ -33,6 +33,16 @@ TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
   m_pPlaceholder->setObjectName("tag_placeholder");
   QLayout* pLayout = new FlowLayout(this, 0, 1, 1);
   setLayout(pLayout);
+
+  // contextmenu to add new tags
+  QAction* pAction = new QAction(tr("add tag"), this);
+  addAction(pAction);
+  connect(pAction, &QAction::triggered, this, [this]()
+  {
+    this->addItem(new DraggableTagWidget("new tag", this));
+  });
+
+  setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
 void TagWidgetContainer::setEditable(bool bEditable)
