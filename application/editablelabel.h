@@ -26,6 +26,8 @@ public:
   void setEditable(bool bEditable);
   bool editable() const;
 
+  QString previousText() const;
+
 public slots:
   void edit();
   void cancel();
@@ -55,6 +57,7 @@ private:
   std::function<QString(const QString&)> m_fnToDisplay;
   int m_iMinWidth;
   bool m_bEditable = true;
+  QString m_sPrevText;
 };
 
 #endif // EDITABLELABEL_H

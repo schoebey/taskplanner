@@ -93,8 +93,9 @@ TagWidget::~TagWidget()
 
 void TagWidget::setText(const QString& sText)
 {
-  if (m_pLabel->text() != sText)
+  if (m_pLabel->previousText() != sText)
   {
+    emit textAboutToChange(m_pLabel->previousText(), sText);
     m_pLabel->setText(sText);
     emit textChanged(sText);
   }

@@ -705,6 +705,11 @@ void TaskWidget::removeTag(const QString& sTag)
   }
 }
 
+bool TaskWidget::modifyTag(const QString& sOldName, const QString& sNewName, const QColor& col)
+{
+  return ui->pTags->modifyTag(sOldName, sNewName, col);
+}
+
 void TaskWidget::addLink(const QUrl& link)
 {
   QLayout* pLayout = ui->pLinks->layout();

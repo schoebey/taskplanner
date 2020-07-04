@@ -99,6 +99,7 @@ public slots:
 
   void addTag(const QString& sTag);
   void removeTag(const QString& sTag);
+  bool modifyTag(const QString& sOldName, const QString& sNewName, const QColor& col);
 
   void addLink(const QUrl& link);
   void removeLink(const QUrl& link);

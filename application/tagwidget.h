@@ -51,6 +51,7 @@ public:
   bool editable() const;
 
 signals:
+  void textAboutToChange(const QString&, const QString&);
   void textChanged(const QString&);
   void colorChanged(const QColor&);
   void angleChanged(double);

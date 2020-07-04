@@ -93,7 +93,8 @@ private slots:
   void on_actionFind_triggered();
   void onPriorityUpdateRequested(task_id);
   void onAddTimeToTaskRequested(task_id);
-  void onRemoveTimeFromTaskRequested(task_id);
+  void onRemoveTimeFromTaskRequested(task_id);  
+  void onTagEdited(const QString& sOldName, const QString& sNewName, const QColor& col);
 
 signals:
   void timeTrackingStopped(task_id taskId);

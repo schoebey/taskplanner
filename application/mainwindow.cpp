@@ -277,6 +277,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   pContainer->addItem(pTagWidget);
   pContainer->addItem(new DraggableTagWidget("hello world2", this));
   pContainer->addItem(new DraggableTagWidget("hello world3", this));
+  connect(pContainer, &TagWidgetContainer::tagChanged, this, &MainWindow::onTagEdited);
 
   QWidgetAction* pWA = new QWidgetAction(ui->pMainToolBar);
   pWA->setDefaultWidget(pContainer);
@@ -1721,6 +1722,47 @@ void MainWindow::onRemoveTimeFromTaskRequested(task_id id)
     {
       pTask->removeTimeFragment(start, stop);
       emit documentModified();
+    }
+  }
+}
+
+void MainWindow::onTagEdited(const QString& sOldName,
+                             const QString& sNewName,
+                             const QColor& col)
+{
+  // TODO: change tags in Task first
+  // TODO: how dow we store color? probably not per tag but in a 'available tags' section?
+  // TODO: identify all the task widgets with identical tags and signal them to change
+  // their instances accordingly.
+
+
+  // does the change have to be undoable? probably....
+  // that would mean the 'edit' action needs to be run through an undo command
+  // commandrenametag and commandchangetagcolor
+  // or squash them -> commandedittag
+  // but for now, implement it here
+
+
+  // replace the changed tag in every task
+  for (const auto& id : m_pManager->taskIds())
+  {
+    auto pTask = m_pManager->task(id);
+    if (nullptr != pTask)
+    {
+      std::vector<QString> vsTags = pTask->tags();
+      for (QString& sTag : vsTags) {
+        if (sTag == sOldName) {
+          sTag = sNewName;
+        }
+      }
+      pTask->setTags(vsTags);
+    }
+
+    // update the widget to reflect the changes
+    auto pWidget = m_pWidgetManager->taskWidget(id);
+    if (nullptr != pWidget)
+    {
+      pWidget->modifyTag(sOldName, sNewName, col);
     }
   }
 }

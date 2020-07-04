@@ -10,6 +10,22 @@
 template<> std::vector<DraggableContainer<DraggableTagWidget>*>
 DraggableContainer<DraggableTagWidget>::m_vpMouseOverContainers = std::vector<DraggableContainer<DraggableTagWidget>*>();
 
+namespace {
+  void wireTag(TagWidgetContainer* pContainer, TagWidget* pTagWidget)
+  {
+    QObject::connect(pTagWidget, &TagWidget::textAboutToChange, pContainer,
+                     [pTagWidget, pContainer](const QString& sOld, const QString& sNew)
+    {
+      emit pContainer->tagChanged(sOld, sNew, pTagWidget->color());
+    });
+    QObject::connect(pTagWidget, &TagWidget::colorChanged, pContainer,
+                     [pTagWidget, pContainer]()
+    {
+      emit pContainer->tagChanged(pTagWidget->text(), pTagWidget->text(), pTagWidget->color());
+    });
+  }
+}
+
 TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
   : DraggableContainer<DraggableTagWidget>(pParent),
     m_pPlaceholder(new QFrame())
@@ -24,6 +40,20 @@ void TagWidgetContainer::setEditable(bool bEditable)
   m_bEditable = bEditable;
 }
 
+bool TagWidgetContainer::modifyTag(const QString& sOldName, const QString& sNewName, const QColor& col)
+{
+  for (auto& pWidget : items())
+  {
+    if (pWidget->text() == sOldName)
+    {
+      pWidget->setText(sNewName);
+      pWidget->setColor(col);
+      return true;
+    }
+  }
+  return false;
+}
+
 bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
 {
   QLayout* pLayout = layout();
@@ -31,6 +61,7 @@ bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
   {
     pLayout->addWidget(pT);
     pT->setEditable(m_bEditable);
+    if (m_bEditable) { wireTag(this, pT); }
     return true;
   }
 
@@ -57,6 +88,7 @@ bool TagWidgetContainer::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
   if (tools::addToFlowLayout(pT, pLayout, pt))
   {
     pT->setEditable(m_bEditable);
+    if (m_bEditable) { wireTag(this, pT); }
     return true;
   }
 
@@ -72,6 +104,7 @@ bool TagWidgetContainer::moveItemFrom_impl(DraggableContainer<DraggableTagWidget
   if (tools::addToFlowLayout(pT, pLayout, pt))
   {
     pT->setEditable(m_bEditable);
+    if (m_bEditable) { wireTag(this, pT); }
     return true;
   }
 

@@ -31,6 +31,8 @@ void EditableLabel::edit()
     m_iMinWidth = sizeHint().width();
     setMinimumWidth(150);
 
+    m_sPrevText = text();
+
     m_pLineEdit->setText(m_sEditText.isEmpty() ? text() : m_sEditText);
     m_pLineEdit->selectAll();
     m_pLineEdit->setFocus();
@@ -143,6 +145,11 @@ void EditableLabel::setEditable(bool bEditable)
 bool EditableLabel::editable() const
 {
   return m_bEditable;
+}
+
+QString EditableLabel::previousText() const
+{
+  return m_sPrevText;
 }
 
 bool EditableLabel::eventFilter(QObject* pWatched, QEvent* pEvent)
