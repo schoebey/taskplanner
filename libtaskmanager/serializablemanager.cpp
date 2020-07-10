@@ -2,6 +2,7 @@
 #include "serializerinterface.h"
 #include "task.h"
 #include "group.h"
+#include "tag.h"
 
 SerializableManager::SerializableManager(Manager* pManager)
   : m_pManager(pManager)
@@ -144,6 +145,58 @@ bool SerializableManager::changeGroupId(group_id oldId, group_id newId)
     m_groups.erase(it);
     spGroup->setId(newId);
     m_groups[newId] = spGroup;
+  }
+
+  return false;
+}
+
+ITag* SerializableManager::addTag(tag_id tagId)
+{
+  tspTag spTag = std::make_shared<Tag>(tagId);
+  m_tags[spTag->id()] = spTag;
+  return spTag.get();
+}
+
+ITag* SerializableManager::tag(tag_id id) const
+{
+  auto it = m_tags.find(id);
+  if (it != m_tags.end())
+  {
+    return it->second.get();
+  }
+
+  return nullptr;
+}
+
+std::set<tag_id> SerializableManager::tagIds() const
+{
+  std::set<tag_id> tagIds;
+  for (const auto& el : m_tags)
+  {
+    tagIds.insert(el.second->id());
+  }
+  return tagIds;
+}
+
+bool SerializableManager::modifyTag(tag_id tagId, const QString& sNewName, const QColor& col)
+{
+  auto pTag = tag(tagId);
+  if (nullptr != pTag)
+  {
+    pTag->setName(sNewName);
+    pTag->setColor(col);
+    return true;
+  }
+  return false;
+}
+
+bool SerializableManager::removeTag(tag_id tagId)
+{
+  auto it = m_tags.find(tagId);
+  if (it != m_tags.end())
+  {
+    m_tags.erase(it);
+    return true;
   }
 
   return false;

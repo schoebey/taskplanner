@@ -54,8 +54,9 @@ public:
   virtual bool isTrackingTime() const = 0;
   virtual std::vector<STimeFragment> timeFragments() const = 0;
 
-  virtual std::vector<QString> tags() const = 0;
-  virtual bool setTags(const std::vector<QString>& vsTagNames) = 0;
+  virtual std::set<tag_id> tagIds() const = 0;
+  virtual bool addTag(tag_id id) = 0;
+  virtual bool removeTag(tag_id id) = 0;
 
   virtual group_id group() const = 0;
   virtual void setGroup(group_id groupId) = 0;

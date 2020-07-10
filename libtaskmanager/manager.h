@@ -18,6 +18,11 @@ class IGroup;
 class Group;
 typedef std::shared_ptr<Group> tspGroup;
 
+class ITag;
+class Tag;
+typedef std::shared_ptr<Tag> tspTag;
+
+class QColor;
 
 class SerializableManager;
 class LIBTASKMANAGER Manager
@@ -41,6 +46,11 @@ public:
   std::set<group_id> groupIds() const;
   bool removeGroup(group_id id);
 
+  ITag* addTag(tag_id tagId = -1);
+  ITag* tag(tag_id id) const;
+  std::set<tag_id> tagIds() const;
+  bool modifyTag(tag_id tagId, const QString& sNewName, const QColor& col);
+  bool removeTag(tag_id tagId);
 
 private:
   std::shared_ptr<SerializableManager> m_spPrivate;

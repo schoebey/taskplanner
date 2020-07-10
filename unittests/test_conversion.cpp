@@ -1,8 +1,10 @@
 #include "gtest/gtest.h"
 #include "gtest_helpers.h"
 #include "libtaskmanager/conversion.h"
+#include "libtaskmanager/id_types.h"
 
 #include <QDateTime>
+#include <type_traits>
 
 std::ostream& operator<<(std::ostream& o, const QString& s)
 {
@@ -215,6 +217,25 @@ TEST(Conversion, vector_string_fromString)
 TEST(Conversion, vector_string_toString)
 {
   QString sResult = conversion::toString(std::vector<QString>{"1", "2", "3"});
+  EXPECT_EQ(sResult, "1|2|3");
+}
+
+TEST(Conversion, vector_id_fromString)
+{
+  using myIdType = ID<struct tag_struct, int>;
+  bool bConversionStatus(false);
+  auto vNominal = std::vector<myIdType>{1,2,3};
+  auto vId = conversion::fromString<std::vector<myIdType>>("1 | 2 | 3", bConversionStatus);
+  EXPECT_TRUE(bConversionStatus);
+  EXPECT_EQ(vId, vNominal);
+}
+
+TEST(Conversion, vector_id_toString)
+{
+  using myIdType = ID<struct tag_struct, int>;
+  myIdType t(1);
+//  test(t);
+  QString sResult = conversion::toString(std::vector<myIdType>{1,2,3});
   EXPECT_EQ(sResult, "1|2|3");
 }
 
