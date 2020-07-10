@@ -78,6 +78,7 @@ namespace conversion
 
   template<typename T>
   typename std::enable_if<!std::is_convertible<T, QString>::value &&
+                          !std::is_convertible<T, int>::value &&
                           !detail::has_toString<T>::value &&
                           !std::is_arithmetic<T>::value &&
                           !detail::has_begin<T>::value &&
@@ -89,6 +90,15 @@ namespace conversion
   toString(const T& num)
   {
     return QString::number(num);
+  }
+
+  template<typename T>
+  typename std::enable_if<std::is_convertible<T, int>::value &&
+                          !std::is_arithmetic<T>::value &&
+                          !std::is_convertible<T, QString>::value, QString>::type
+  toString(const T& id)
+  {
+    return QString::number((int)id);
   }
 
   template<typename T>
@@ -108,8 +118,30 @@ namespace conversion
   template<typename T>
   typename std::enable_if<!std::is_convertible<QString, T>::value &&
                           !std::is_arithmetic<T>::value &&
-                          !detail::has_push_back<T>::value, T>::type
+                          !detail::has_push_back<T>::value &&
+                          !std::is_constructible<T, int>::value, T>::type
   fromString(const QString& /*sVal*/, bool& /*bConversionStatus*/);
+
+  template<typename T>
+  typename std::enable_if<std::is_constructible<T, double>::value &&
+                          !std::is_constructible<T, QString>::value &&
+                          !detail::has_push_back<T>::value, T>::type
+  fromString(const QString& s, bool& bConversionStatus)
+  {
+    // try to convert to double first
+    double d = s.toDouble(&bConversionStatus);
+    if (bConversionStatus) {
+      return T(d);
+    }
+
+    // if that didn't work, try to convert 'fancy' value to int
+    int i = fancy::toInt(s, &bConversionStatus);
+    if (bConversionStatus) {
+      return T(i);
+    }
+
+    return T();
+  }
 
   template<typename T>
   typename std::enable_if<std::is_convertible<QString, T>::value, T>::type
@@ -118,17 +150,6 @@ namespace conversion
     bConversionStatus = true;
     return T(sVal);
   }
-  template<typename T>
-  typename std::enable_if<std::is_arithmetic<T>::value, T>::type
-  fromString(const QString& sVal, bool& bConversionStatus)
-  {
-    return T(sVal.toDouble(&bConversionStatus));
-  }
-  template<> int LIBTASKMANAGER
-  fromString<int>(const QString& sVal, bool& bConversionStatus);
-
-  //-- int
-  template<> int LIBTASKMANAGER fromString<int>(const QString& sVal, bool& bConversionStatus);
 
   //-- QDateTime
   QDateTime LIBTASKMANAGER dateTimeFromString(const QString& sVal, bool& bConversionStatus, const QDateTime& baseDateTime);

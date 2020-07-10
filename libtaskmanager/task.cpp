@@ -263,7 +263,10 @@ bool Task::addTaskId(task_id id)
 {
   if (id == this->id())  { return false; }
 
-  return m_subTaskIds.insert(id).second;
+  auto vTaskIds = property<std::vector<task_id>>("tasks");
+  vTaskIds.push_back(id);
+  setProperty("tasks", vTaskIds);
+  return true;
 }
 
 bool Task::removeTask(task_id id)
@@ -412,14 +415,32 @@ void Task::setTimeFragments(const std::vector<STimeFragment>& vFragments)
   m_vTimingInfo = vFragments;
 }
 
-std::vector<QString> Task::tags() const
+std::set<tag_id> Task::tagIds() const
 {
-  return property<std::vector<QString>>("tags");
+  return m_tagIds;
 }
 
-bool Task::setTags(const std::vector<QString>& vsTagNames)
+bool Task::addTag(tag_id tagId)
 {
-  return setProperty("tags", vsTagNames);
+  auto vTagIds = property<std::vector<tag_id>>("tags");
+  auto it = std::find(vTagIds.begin(), vTagIds.end(), tagId);
+  if (it == vTagIds.end())
+  {
+    vTagIds.push_back(tagId);
+    return true;
+  }
+  return false;
+}
+
+bool Task::removeTag(tag_id id)
+{
+  auto it = std::find(m_tagIds.begin(), m_tagIds.end(), id);
+  if (it != m_tagIds.end())
+  {
+    m_tagIds.erase(it);
+    return true;
+  }
+  return false;
 }
 
 group_id Task::group() const

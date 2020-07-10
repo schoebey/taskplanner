@@ -253,14 +253,6 @@ namespace conversion
     }
   }
 
-  template<> int fromString<int>(const QString& sVal, bool& bConversionStatus)
-  {
-    bConversionStatus = false;
-    int iVal = sVal.toInt(&bConversionStatus);
-    if (bConversionStatus)  { return iVal; }
-    return fancy::toInt(sVal, &bConversionStatus);
-  }
-
   bool setDayFromString(QDateTime& dt, const QString& s)
   {
     if (s.isEmpty())  { return true; }

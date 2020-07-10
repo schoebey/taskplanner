@@ -14,7 +14,8 @@ SOURCES += \
     $$PWD/constraint.cpp \
     $$PWD/conversion.cpp \
     $$PWD/constraintfactory.cpp \
-    $$PWD/parametrizable.cpp
+    $$PWD/parametrizable.cpp \
+    $$PWD/tag.cpp
 
 HEADERS += \
     $$PWD/group.h \
@@ -36,5 +37,7 @@ HEADERS += \
     $$PWD/parameter.h \
     $$PWD/parametrizableinterface.h \
     $$PWD/propertyproviderinterface.h \
-    $$PWD/libtaskmanager.h
+    $$PWD/libtaskmanager.h \
+    $$PWD/taginterface.h \
+    $$PWD/tag.h
 

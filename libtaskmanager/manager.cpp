@@ -64,3 +64,22 @@ bool Manager::removeGroup(group_id id)
   return m_spPrivate->removeGroup(id);
 }
 
+ITag* Manager::addTag(tag_id tagId)
+{
+  return m_spPrivate->addTag(tagId);
+}
+
+ITag* Manager::tag(tag_id id) const
+{
+  return m_spPrivate->tag(id);
+}
+
+bool Manager::modifyTag(tag_id tagId, const QString& sNewName, const QColor& col)
+{
+  return m_spPrivate->modifyTag(tagId, sNewName, col);
+}
+
+bool Manager::removeTag(tag_id tagId)
+{
+  return m_spPrivate->removeTag(tagId);
+}
