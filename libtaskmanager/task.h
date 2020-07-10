@@ -68,8 +68,9 @@ public:
   std::vector<STimeFragment> timeFragments() const override;
   void setTimeFragments(const std::vector<STimeFragment>& vFragments);
 
-  std::vector<QString> tags() const override;
-  bool setTags(const std::vector<QString>& vsTagNames) override;
+  std::set<tag_id> tagIds() const override;
+  bool addTag(tag_id id) override;
+  bool removeTag(tag_id id) override;
 
   group_id group() const override;
   void setGroup(group_id groupId) override;
@@ -95,6 +96,7 @@ private:
   std::set<task_id> m_subTaskIds;
   group_id m_groupId = -1;
   task_id m_parentTaskId = -1;
+  std::set<tag_id> m_tagIds;
 
   Properties<Task> m_properties;
 };
