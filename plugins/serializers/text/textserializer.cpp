@@ -3,6 +3,7 @@
 #include "serializablemanager.h"
 #include "group.h"
 #include "task.h"
+#include "tag.h"
 
 #include <QString>
 #include <QVariant>
@@ -14,6 +15,7 @@ namespace
 
   static const QString c_sPara_FileName = "fileName";
   static const QString c_sManagerHeader = "== manager ==";
+  static const QString c_sTagHeader = "== tag ==";
   static const QString c_sTaskHeader = "== task ==";
   static const QString c_sGroupHeader = "== group ==";
   static const QString c_sTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
@@ -277,6 +279,50 @@ EDeserializingError TextSerializer::deserialize(Task& t)
     }
 
     // TODO: deserialize generic properties
+
+    return EDeserializingError::eOk;
+  }
+
+  return EDeserializingError::eInternalError;
+}
+
+ESerializingError TextSerializer::serialize(const Tag& t)
+{
+  m_stream << c_sTagHeader << endl;
+  m_stream << t.version() << endl;
+  m_stream << int(t.id()) << endl;
+  m_stream << t.name() << endl;
+  m_stream << t.color().name() << endl;
+
+  return ESerializingError::eOk;
+}
+
+EDeserializingError TextSerializer::deserialize(Tag& t)
+{
+  QString sHeader = m_stream.readLine();
+  if (sHeader != c_sTagHeader)
+  {
+    return EDeserializingError::eInternalError;
+  }
+
+  int iVersion = 0;
+  m_stream >> iVersion;
+  m_stream.readLine();
+
+
+  if (0 == iVersion)
+  {
+    int iId;
+    m_stream >> iId;
+    m_stream.readLine();
+
+    t.setId(iId);
+
+    QString sName = m_stream.readLine();
+    t.setName(sName);
+
+    QString sColHex = m_stream.readLine();
+    t.setColor(QColor(sColHex));
 
     return EDeserializingError::eOk;
   }

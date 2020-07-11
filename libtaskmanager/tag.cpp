@@ -34,10 +34,10 @@ void Tag::setColor(const QColor& color)
 
 ESerializingError Tag::serialize(ISerializer* pSerializer) const
 {
-  return ESerializingError::eInternalError;
+  return pSerializer->serialize(*this);
 }
 
 EDeserializingError Tag::deserialize(ISerializer* pSerializer)
 {
-  return EDeserializingError::eInternalError;
+  return pSerializer->deserialize(*this);
 }
