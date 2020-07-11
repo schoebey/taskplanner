@@ -1,4 +1,5 @@
 #include "manager.h"
+#include "tag.h"
 #include "task.h"
 #include "group.h"
 #include "serializerinterface.h"

@@ -3,6 +3,7 @@
 #include "serializablemanager.h"
 #include "group.h"
 #include "task.h"
+#include "tag.h"
 
 #include <QString>
 #include <QVariant>
@@ -19,6 +20,7 @@ namespace
   static const QString c_sManagerHeader = "## manager";
   static const QString c_sTaskPropertiesHeader = "### task properties";
   static const QString c_sGroupPropertiesHeader = "### group properties";
+  static const QString c_sTagHeader = "### tag";
   static const QString c_sTaskHeader = "### task";
   static const QString c_sGroupHeader = "### group";
   static const QString c_sPropertyHeader = "#### property";
@@ -186,6 +188,11 @@ namespace
     return QString::number(int(id));
   }
 
+  template<> QString convertFrom(const tag_id& id)
+  {
+    return QString::number(int(id));
+  }
+
   template<typename T>
   QString convertFrom(const T& container)
   {
@@ -209,6 +216,11 @@ namespace
   }
 
   template<> task_id convertTo<task_id>(const QString& s)
+  {
+    return convertTo<int>(s);
+  }
+
+  template<> tag_id convertTo<tag_id>(const QString& s)
   {
     return convertTo<int>(s);
   }
@@ -430,12 +442,22 @@ ESerializingError MarkdownSerializer::serialize(const SerializableManager& m)
     }
   }
 
+
   {
     StreamWriter p(&m_pStream, c_sGroupPropertiesHeader);
     for (const QString& sName : Properties<Group>::registeredPropertyNames())
     {
       tspDescriptor spDescriptor = Properties<Group>::descriptor(sName);
       spDescriptor->serialize(this);
+    }
+  }
+
+  for (const auto& id : m.tagIds())
+  {
+    Tag* pTag = m.tag(id);
+    if (nullptr != pTag)
+    {
+      pTag->serialize(this);
     }
   }
 
@@ -702,6 +724,55 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
           t.setPropertyValue(name, sPropertyValue);
         }
       }
+    }
+
+    return EDeserializingError::eOk;
+  }
+
+  return EDeserializingError::eInternalError;
+}
+
+ESerializingError MarkdownSerializer::serialize(const Tag& t)
+{
+  StreamWriter s(&m_pStream, c_sTagHeader);
+
+  writeToStream(*m_pStream, t.version(), "version");
+  writeToStream(*m_pStream, t.id(), "id");
+  writeToStream(*m_pStream, t.name(), "name");
+  writeToStream(*m_pStream, t.color().name(), "color");
+
+  return ESerializingError::eOk;
+}
+
+EDeserializingError MarkdownSerializer::deserialize(Tag& t)
+{
+  std::map<QString, std::vector<QString>> values = valuesFromStream(*m_pStream);
+  int iVersion = 0;
+  if (!readFromMap(values, "version", iVersion))
+  {
+    assert(false && "couldn't read version from stream");
+    return EDeserializingError::eInternalError;
+  }
+
+
+  if (0 == iVersion)
+  {
+    tag_id id;
+    if (readFromMap(values, "id", id))
+    {
+      t.setId(id);
+    }
+
+    QString sName;
+    if (readFromMap(values, "name", sName))
+    {
+      t.setName(sName);
+    }
+
+    QString sColHex;
+    if (readFromMap(values, "color", sColHex))
+    {
+      t.setColor(QColor(sColHex));
     }
 
     return EDeserializingError::eOk;

@@ -34,6 +34,10 @@ public:
 
   EDeserializingError deserialize(Task&) override;
 
+  ESerializingError serialize(const Tag&) override;
+
+  EDeserializingError deserialize(Tag&) override;
+
   ESerializingError serialize(const Group&) override;
 
   EDeserializingError deserialize(Group&) override;

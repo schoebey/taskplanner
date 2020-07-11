@@ -10,6 +10,7 @@
 #include <map>
 #include <memory>
 
+class Tag;
 class Task;
 class Group;
 class SerializableManager;
@@ -42,6 +43,10 @@ public:
   virtual ESerializingError serialize(const Task&) = 0;
 
   virtual EDeserializingError deserialize(Task&) = 0;
+
+  virtual ESerializingError serialize(const Tag&) = 0;
+
+  virtual EDeserializingError deserialize(Tag&) = 0;
 
   virtual ESerializingError serialize(const Group&) = 0;
 

@@ -150,14 +150,14 @@ bool SerializableManager::changeGroupId(group_id oldId, group_id newId)
   return false;
 }
 
-ITag* SerializableManager::addTag(tag_id tagId)
+Tag* SerializableManager::addTag(tag_id tagId)
 {
   tspTag spTag = std::make_shared<Tag>(tagId);
   m_tags[spTag->id()] = spTag;
   return spTag.get();
 }
 
-ITag* SerializableManager::tag(tag_id id) const
+Tag* SerializableManager::tag(tag_id id) const
 {
   auto it = m_tags.find(id);
   if (it != m_tags.end())
