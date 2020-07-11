@@ -1,8 +1,10 @@
 #include "widgetmanager.h"
 #include "taskwidget.h"
+#include "tagwidget.h"
 #include "groupwidget.h"
 #include "manager.h"
 #include "taskinterface.h"
+#include "taginterface.h"
 #include "groupinterface.h"
 #include "conversion.h"
 #include "task.h"
@@ -94,9 +96,9 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
   QObject::connect(pTaskWidget, SIGNAL(newSubTaskRequested(task_id)),               m_pController, SLOT(createNewSubTask(task_id)));
   QObject::connect(pTaskWidget, SIGNAL(addTimeRequested(task_id)),                  m_pController, SLOT(onAddTimeToTaskRequested(task_id)));
   QObject::connect(pTaskWidget, SIGNAL(removeTimeRequested(task_id)),               m_pController, SLOT(onRemoveTimeFromTaskRequested(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(tagAdded(task_id, QString)),                 m_pController, SLOT(onTagAdded(task_id, QString)));
-  QObject::connect(pTaskWidget, SIGNAL(tagMoved(task_id, QString, task_id)),        m_pController, SLOT(onTagMoved(task_id, QString, task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(tagRemoved(task_id, QString)),               m_pController, SLOT(onTagRemoved(task_id, QString)));
+  QObject::connect(pTaskWidget, SIGNAL(tagAdded(task_id, tag_id)),                  m_pController, SLOT(onTagAdded(task_id, tag_id)));
+  QObject::connect(pTaskWidget, SIGNAL(tagMoved(task_id, tag_id, task_id)),         m_pController, SLOT(onTagMoved(task_id, tag_id, task_id)));
+  QObject::connect(pTaskWidget, SIGNAL(tagRemoved(task_id, tag_id)),                m_pController, SLOT(onTagRemoved(task_id, tag_id)));
   QObject::connect(pTaskWidget, SIGNAL(linkAdded(task_id, QUrl)),                   m_pController, SLOT(onLinkAdded(task_id, QUrl)));
   QObject::connect(pTaskWidget, SIGNAL(linkRemoved(task_id, QUrl)),                 m_pController, SLOT(onLinkRemoved(task_id, QUrl)));
   QObject::connect(pTaskWidget, SIGNAL(linkInserted(task_id, QUrl, int)),           m_pController, SLOT(onLinkInserted(task_id, QUrl, int)));
@@ -130,14 +132,19 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
     }
   }
 
-  auto tags = conversion::fromString<std::vector<QString>>(pTask->propertyValue("tags"), bOk);
-  if (bOk)
-  {
-    for (const auto& tag : tags)
-    {
-      pTaskWidget->addTag(tag);
-    }
-  }
+//  auto tags = conversion::fromString<std::vector<tag_id>>(pTask->propertyValue("tags"), bOk);
+//  if (bOk)
+//  {
+//    for (const auto& id : tags)
+//    {
+//      auto pTag = m_pManager->tag(id);
+//      if (nullptr != pTag)
+//      {
+//        DraggableTagWidget* pTagWidget = new DraggableTagWidget(id, pTag->name(), pTaskWidget);
+//        pTaskWidget->addTag(pTagWidget);
+//      }
+//    }
+//  }
 
   auto color = conversion::fromString<QColor>(pTask->propertyValue("color"), bOk);
   if (bOk)

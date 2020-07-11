@@ -97,9 +97,9 @@ public slots:
   void ensureVisible(QWidget* pWidget) override;
   void reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets) override;
 
-  void addTag(const QString& sTag);
-  void removeTag(const QString& sTag);
-  bool modifyTag(const QString& sOldName, const QString& sNewName, const QColor& col);
+  void addTag(DraggableTagWidget* pTag);
+  void removeTag(DraggableTagWidget* pTag);
+  bool modifyTag(tag_id id, const QString& sNewName, const QColor& col);
 
   void addLink(const QUrl& link);
   void removeLink(const QUrl& link);
@@ -119,9 +119,9 @@ signals:
   void taskMovedTo(task_id taskId, task_id newParentTaskId, int iPos);
   void taskRemoved(task_id parentId, task_id childId);
   void taskDeleted(task_id id);
-  void tagAdded(task_id id, const QString& sTag);
-  void tagMoved(task_id id, const QString& sTag, task_id sourceTaskId);
-  void tagRemoved(task_id id, const QString& sTag);
+  void tagAdded(task_id id, tag_id tagId);
+  void tagMoved(task_id id, tag_id tagId, task_id sourceTaskId);
+  void tagRemoved(task_id id, tag_id tagId);
   void linkAdded(task_id id, QUrl url);
   void linkRemoved(task_id id, QUrl url);
   void linkInserted(task_id id, QUrl url, int iPos);

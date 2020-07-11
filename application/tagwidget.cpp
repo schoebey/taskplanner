@@ -44,8 +44,9 @@ QStyleOptionTagWidget::QStyleOptionTagWidget()
 
 template<> Draggable<TagWidget>* Draggable<TagWidget>::m_pDraggingInstance = nullptr;
 
-TagWidget::TagWidget(const QString& sText, QWidget* pParent)
+TagWidget::TagWidget(tag_id id, const QString& sText, QWidget* pParent)
   : QFrame(pParent),
+    m_id(id),
     m_color(QColor(255, 210, 20))
 {
   setAttribute(Qt::WA_StyledBackground, true);
@@ -65,6 +66,7 @@ TagWidget::TagWidget(const QString& sText, QWidget* pParent)
 
 TagWidget::TagWidget(const TagWidget& other)
   : QFrame(other.parentWidget()),
+    m_id(other.m_id),
     m_color(other.m_color),
     m_origin(other.m_origin),
     m_size(other.m_size),
@@ -91,11 +93,15 @@ TagWidget::~TagWidget()
 
 }
 
+tag_id TagWidget::id() const
+{
+  return m_id;
+}
+
 void TagWidget::setText(const QString& sText)
 {
   if (m_pLabel->previousText() != sText)
   {
-    emit textAboutToChange(m_pLabel->previousText(), sText);
     m_pLabel->setText(sText);
     emit textChanged(sText);
   }

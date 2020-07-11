@@ -28,6 +28,7 @@ class QFileSystemWatcher;
 class ToolBarInfoDisplay;
 class TagWidget;
 using DraggableTagWidget = Draggable<TagWidget>;
+class TagWidgetContainer;
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -55,9 +56,9 @@ private slots:
   void onTaskMoved(task_id id, task_id newParentTaskId, int iPos);
   void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
   void onPropertyRemoved(task_id taskId, const QString& sPropertyName);
-  void onTagAdded(task_id taskId, const QString& sTag);
-  void onTagMoved(task_id taskId, const QString& sTag, task_id sourceTaskId);
-  void onTagRemoved(task_id taskId, const QString& sTag);
+  void onTagAdded(task_id taskId, tag_id tagId);
+  void onTagMoved(task_id taskId, tag_id tagId, task_id sourceTaskId);
+  void onTagRemoved(task_id taskId, tag_id tagId);
   void onLinkAdded(task_id taskId, QUrl url);
   void onLinkRemoved(task_id taskId, QUrl url);
   void onLinkInserted(task_id taskId, QUrl url, int iPos);
@@ -94,7 +95,8 @@ private slots:
   void onPriorityUpdateRequested(task_id);
   void onAddTimeToTaskRequested(task_id);
   void onRemoveTimeFromTaskRequested(task_id);  
-  void onTagEdited(const QString& sOldName, const QString& sNewName, const QColor& col);
+  void onTagEdited(tag_id tagId, const QString& sNewName, const QColor& col);
+  void onNewTagRequested(const QString& sName, TagWidgetContainer* pContainer);
 
 signals:
   void timeTrackingStopped(task_id taskId);

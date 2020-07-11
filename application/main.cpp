@@ -68,7 +68,6 @@ int main(int argc, char *argv[])
 
 //  tspConstraintTpl spResult = ONE_OF('a', 'b', 'c') OR (EVEN_NUMBER BUT MIN(0) AND MAX(100));
 
-
   // test code for properties
   REGISTER_PROPERTY(Task, "name", QString, false);
   REGISTER_PROPERTY(Task, "description", QString, false);
@@ -81,7 +80,7 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Task, "sort_priority", int, false);
   REGISTER_PROPERTY(Task, "priority", int, true);
   REGISTER_PROPERTY(Task, "color", QColor, false);
-  REGISTER_PROPERTY(Task, "tags", std::vector<QString>, false);
+  REGISTER_PROPERTY(Task, "tags", std::vector<tag_id>, false);
   Properties<Task>::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
   Properties<Task>::registerConstraint("duration (days)", MIN(0));
 

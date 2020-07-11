@@ -1,6 +1,8 @@
 #ifndef TAGWIDGET_H
 #define TAGWIDGET_H
 
+#include "id_types.h"
+
 #include <QLabel>
 #include <QFrame>
 #include <chrono>
@@ -24,11 +26,13 @@ class TagWidget : public QFrame
   Q_OBJECT
 
 public:
-  TagWidget(const QString& sText, QWidget* pParent);
+  TagWidget(tag_id id, const QString& sText, QWidget* pParent);
 
   TagWidget(const TagWidget& other);
 
   ~TagWidget();
+
+  tag_id id() const;
 
   Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
   void setText(const QString& sText);
@@ -51,7 +55,6 @@ public:
   bool editable() const;
 
 signals:
-  void textAboutToChange(const QString&, const QString&);
   void textChanged(const QString&);
   void colorChanged(const QColor&);
   void angleChanged(double);
@@ -73,6 +76,7 @@ private:
   void stepSimulation();
 
 private:
+  tag_id m_id;
   EditableLabel* m_pLabel;
   QColor m_color;
   double m_dAngleRad = 0;

@@ -7,6 +7,7 @@
 #include "manager.h"
 #include "groupinterface.h"
 #include "taskinterface.h"
+#include "taginterface.h"
 #include "serializerfactory.h"
 #include "reportfactory.h"
 #include "property.h"
@@ -273,11 +274,12 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   pContainer->setMinimumSize(300, 10);
   pContainer->setDragMode(EDragMode::eCopy);
   pContainer->setAcceptDrops(false);
-  auto pTagWidget = new DraggableTagWidget("hello world", this);
+  auto pTagWidget = new DraggableTagWidget(0, "hello world", this);
   pContainer->addItem(pTagWidget);
-  pContainer->addItem(new DraggableTagWidget("hello world2", this));
-  pContainer->addItem(new DraggableTagWidget("hello world3", this));
+  pContainer->addItem(new DraggableTagWidget(1, "hello world2", this));
+  pContainer->addItem(new DraggableTagWidget(2, "hello world3", this));
   connect(pContainer, &TagWidgetContainer::tagChanged, this, &MainWindow::onTagEdited);
+  connect(pContainer, &TagWidgetContainer::newTagRequested, this, &MainWindow::onNewTagRequested);
 
   QWidgetAction* pWA = new QWidgetAction(ui->pMainToolBar);
   pWA->setDefaultWidget(pContainer);
@@ -723,9 +725,9 @@ void MainWindow::onTaskMoved(task_id id, task_id newParentTaskId, int iPos)
 //      TODO: test moving tasks to subtasks or between subtasks or reordering of subtasks
       MoveTaskCommand* pCommand = new MoveTaskCommand(id,
                                                       pTask->group(),
-                                                      nullptr != pNewParentTask ? pNewParentTask->group() : -1,
+                                                      nullptr != pNewParentTask ? pNewParentTask->group() : group_id(-1),
                                                       pTask->parentTask(),
-                                                      nullptr != pNewParentTask ? pNewParentTask->id() : -1,
+                                                      nullptr != pNewParentTask ? pNewParentTask->id() : task_id(-1),
                                                       iOldPos, iPos,
                                                       m_pManager,m_pWidgetManager);
       m_undoStack.push(pCommand);
@@ -1198,33 +1200,33 @@ void MainWindow::onPropertyRemoved(task_id taskId, const QString& sPropertyName)
   }
 }
 
-void MainWindow::onTagAdded(task_id taskId, const QString& sTag)
+void MainWindow::onTagAdded(task_id taskId, tag_id tagId)
 {
   properties::
   onContainerElementAdded(m_pManager,
                           m_pWidgetManager,
-                          m_undoStack, taskId, sTag, "tags");
+                          m_undoStack, taskId, tagId, "tags");
 }
 
 
-void MainWindow::onTagMoved(task_id taskId, const QString& sTag,
+void MainWindow::onTagMoved(task_id taskId, tag_id tagId,
                             task_id sourceTaskId)
 {
   properties::
   onContainerElementMovedFrom(m_pManager,
                               m_pWidgetManager,
-                              m_undoStack, taskId, sTag, "tags",
+                              m_undoStack, taskId, tagId, "tags",
                               sourceTaskId);
 }
 
 
 
-void MainWindow::onTagRemoved(task_id taskId, const QString& sTag)
+void MainWindow::onTagRemoved(task_id taskId, tag_id tagId)
 {
   properties::
   onContainerElementRemoved(m_pManager,
                           m_pWidgetManager,
-                          m_undoStack, taskId, sTag, "tags");
+                          m_undoStack, taskId, tagId, "tags");
 }
 
 
@@ -1726,14 +1728,11 @@ void MainWindow::onRemoveTimeFromTaskRequested(task_id id)
   }
 }
 
-void MainWindow::onTagEdited(const QString& sOldName,
+void MainWindow::onTagEdited(tag_id tagId,
                              const QString& sNewName,
                              const QColor& col)
 {
-  // TODO: change tags in Task first
-  // TODO: how dow we store color? probably not per tag but in a 'available tags' section?
-  // TODO: identify all the task widgets with identical tags and signal them to change
-  // their instances accordingly.
+  m_pManager->modifyTag(tagId, sNewName, col);
 
 
   // does the change have to be undoable? probably....
@@ -1744,25 +1743,21 @@ void MainWindow::onTagEdited(const QString& sOldName,
 
 
   // replace the changed tag in every task
-  for (const auto& id : m_pManager->taskIds())
+  for (const auto& taskId : m_pManager->taskIds())
   {
-    auto pTask = m_pManager->task(id);
-    if (nullptr != pTask)
-    {
-      std::vector<QString> vsTags = pTask->tags();
-      for (QString& sTag : vsTags) {
-        if (sTag == sOldName) {
-          sTag = sNewName;
-        }
-      }
-      pTask->setTags(vsTags);
-    }
-
     // update the widget to reflect the changes
-    auto pWidget = m_pWidgetManager->taskWidget(id);
+    auto pWidget = m_pWidgetManager->taskWidget(taskId);
     if (nullptr != pWidget)
     {
-      pWidget->modifyTag(sOldName, sNewName, col);
+      pWidget->modifyTag(tagId, sNewName, col);
     }
   }
+}
+
+void MainWindow::onNewTagRequested(const QString& sName,
+                                   TagWidgetContainer* pContainer)
+{
+  ITag* pTag = m_pManager->addTag();
+  pTag->setName(sName);
+  pContainer->addItem(new DraggableTagWidget(pTag->id(), pTag->name(), pContainer));
 }

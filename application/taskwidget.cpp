@@ -631,47 +631,47 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
       for (const auto& url : toRemove)  { removeLink(url); }
     }
   }
-  else if ("tags" == sName)
-  {
-    bool bOk(false);
-    auto tags = conversion::fromString<std::vector<QString>>(sValue, bOk);
-    if (bOk)
-    {
-      // all tags that are not yet present have to be added
-      const auto& tagWidgets = ui->pTags->items();
-      for (const auto& tag : tags)
-      {
-        auto it = std::find_if(tagWidgets.begin(), tagWidgets.end(), [tag](const TagWidget* p)
-        {
-          return nullptr != p && tag == p->text();
-        });
+//  else if ("tags" == sName)
+//  {
+//    bool bOk(false);
+//    auto tags = conversion::fromString<std::vector<QString>>(sValue, bOk);
+//    if (bOk)
+//    {
+//      // all tags that are not yet present have to be added
+//      const auto& tagWidgets = ui->pTags->items();
+//      for (const auto& tag : tags)
+//      {
+//        auto it = std::find_if(tagWidgets.begin(), tagWidgets.end(), [tag](const TagWidget* p)
+//        {
+//          return nullptr != p && tag == p->text();
+//        });
 
-        if (it == tagWidgets.end())
-        {
-          ui->pTags->addItem(new DraggableTagWidget(tag, this));
-        }
-      }
+//        if (it == tagWidgets.end())
+//        {
+//          ui->pTags->addItem(new DraggableTagWidget(tag, this));
+//        }
+//      }
 
-      // all tags that are present but not represented in sValue have to be removed
-      std::set<DraggableTagWidget*> toRemove;
-      for (const auto& pTagWidget : tagWidgets)
-      {
-        auto itProp = std::find_if(tags.begin(), tags.end(),
-                                   [pTagWidget](const QString& sTag)
-        { return sTag == pTagWidget->text();});
-        if (itProp == tags.end())
-        {
-          toRemove.insert(pTagWidget);
-        }
-      }
+//      // all tags that are present but not represented in sValue have to be removed
+//      std::set<DraggableTagWidget*> toRemove;
+//      for (const auto& pTagWidget : tagWidgets)
+//      {
+//        auto itProp = std::find_if(tags.begin(), tags.end(),
+//                                   [pTagWidget](const QString& sTag)
+//        { return sTag == pTagWidget->text();});
+//        if (itProp == tags.end())
+//        {
+//          toRemove.insert(pTagWidget);
+//        }
+//      }
 
-      for (auto pTagWidget : toRemove)
-      {
-        ui->pTags->removeItem(pTagWidget);
-        delete pTagWidget;
-      }
-    }
-  }
+//      for (auto pTagWidget : toRemove)
+//      {
+//        ui->pTags->removeItem(pTagWidget);
+//        delete pTagWidget;
+//      }
+//    }
+//  }
   else
   {
     if (Properties<Task>::visible(sName))
@@ -687,27 +687,27 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
   return false;
 }
 
-void TaskWidget::addTag(const QString& sTag)
+void TaskWidget::addTag(DraggableTagWidget* pTag)
 {
-  ui->pTags->addItem(new DraggableTagWidget(sTag, this));
+  ui->pTags->addItem(pTag);
 
-  emit tagAdded(m_taskId, sTag);
+  emit tagAdded(m_taskId, pTag->id());
 }
 
-void TaskWidget::removeTag(const QString& sTag)
+void TaskWidget::removeTag(DraggableTagWidget* pTag)
 {
   QLayout* pLayout = ui->pTags->layout();
   if (nullptr != pLayout)
   {
-    // TODO: find & remove label
+    ui->pTags->removeItem(pTag);
 
-    emit tagRemoved(m_taskId, sTag);
+    emit tagRemoved(m_taskId, pTag->id());
   }
 }
 
-bool TaskWidget::modifyTag(const QString& sOldName, const QString& sNewName, const QColor& col)
+bool TaskWidget::modifyTag(tag_id id, const QString& sNewName, const QColor& col)
 {
-  return ui->pTags->modifyTag(sOldName, sNewName, col);
+  return ui->pTags->modifyTag(id, sNewName, col);
 }
 
 void TaskWidget::addLink(const QUrl& link)
@@ -1258,7 +1258,7 @@ void TaskWidget::onTagAdded(DraggableTagWidget* pT)
 {
 //  if (!ui->pTags->contains(pT))
   {
-    emit tagAdded(m_taskId, pT->text());
+    emit tagAdded(m_taskId, pT->id());
 
     updateSize();
   }
@@ -1289,14 +1289,14 @@ void TaskWidget::onTagMoved(DraggableTagWidget* pT,
 
   task_id sourceTaskId = fnFindTaskWidget(pSource);
 
-  emit tagMoved(m_taskId, pT->text(), sourceTaskId);
+  emit tagMoved(m_taskId, pT->id(), sourceTaskId);
 
   updateSize();
 }
 
 void TaskWidget::onTagRemoved(DraggableTagWidget* pT)
 {
-  emit tagRemoved(m_taskId, pT->text());
+  emit tagRemoved(m_taskId, pT->id());
 
   updateSize();
 }

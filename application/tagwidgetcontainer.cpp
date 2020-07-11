@@ -13,15 +13,15 @@ DraggableContainer<DraggableTagWidget>::m_vpMouseOverContainers = std::vector<Dr
 namespace {
   void wireTag(TagWidgetContainer* pContainer, TagWidget* pTagWidget)
   {
-    QObject::connect(pTagWidget, &TagWidget::textAboutToChange, pContainer,
-                     [pTagWidget, pContainer](const QString& sOld, const QString& sNew)
+    QObject::connect(pTagWidget, &TagWidget::textChanged, pContainer,
+                     [pTagWidget, pContainer](const QString& sNew)
     {
-      emit pContainer->tagChanged(sOld, sNew, pTagWidget->color());
+      emit pContainer->tagChanged(pTagWidget->id(), sNew, pTagWidget->color());
     });
     QObject::connect(pTagWidget, &TagWidget::colorChanged, pContainer,
                      [pTagWidget, pContainer]()
     {
-      emit pContainer->tagChanged(pTagWidget->text(), pTagWidget->text(), pTagWidget->color());
+      emit pContainer->tagChanged(pTagWidget->id(), pTagWidget->text(), pTagWidget->color());
     });
   }
 }
@@ -39,7 +39,7 @@ TagWidgetContainer::TagWidgetContainer(QWidget* pParent)
   addAction(pAction);
   connect(pAction, &QAction::triggered, this, [this]()
   {
-    this->addItem(new DraggableTagWidget("new tag", this));
+    emit newTagRequested("new tag", this);
   });
 
   setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -50,11 +50,11 @@ void TagWidgetContainer::setEditable(bool bEditable)
   m_bEditable = bEditable;
 }
 
-bool TagWidgetContainer::modifyTag(const QString& sOldName, const QString& sNewName, const QColor& col)
+bool TagWidgetContainer::modifyTag(tag_id id, const QString& sNewName, const QColor& col)
 {
   for (auto& pWidget : items())
   {
-    if (pWidget->text() == sOldName)
+    if (pWidget->id() == id)
     {
       pWidget->setText(sNewName);
       pWidget->setColor(col);

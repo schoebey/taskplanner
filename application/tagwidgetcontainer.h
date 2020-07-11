@@ -17,13 +17,14 @@ public:
 
   void setEditable(bool);
 
-  bool modifyTag(const QString& sOldName, const QString& sNewName, const QColor& col);
+  bool modifyTag(tag_id id, const QString& sNewName, const QColor& col);
 
 signals:
   void tagAdded(DraggableTagWidget*);
   void tagRemoved(DraggableTagWidget*);
   void tagMoved(DraggableTagWidget*, DraggableContainer<DraggableTagWidget>*);
-  void tagChanged(const QString& sOldName, const QString& sNewName, const QColor& col);
+  void tagChanged(tag_id tagId, const QString& sNewName, const QColor& col);
+  void newTagRequested(const QString& sTagName, TagWidgetContainer* pContainer);
 
 protected:
   void emitItemAdded(DraggableTagWidget*) override;
