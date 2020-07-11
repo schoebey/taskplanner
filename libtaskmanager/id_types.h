@@ -12,11 +12,11 @@ public:
     operator T() const { return m_val; }
 
 //    friend bool operator==(ID a, ID b) { return a.m_val == b.m_val; }
-    friend bool operator!=(ID a, ID b) { return a.m_val != b.m_val; }
-    friend bool operator>(ID a, ID b) { return a.m_val > b.m_val; }
-    friend bool operator>=(ID a, ID b) { return a.m_val >= b.m_val; }
-    friend bool operator<(ID a, ID b) { return a.m_val < b.m_val; }
-    friend bool operator<=(ID a, ID b) { return a.m_val <= b.m_val; }
+//    friend bool operator!=(ID a, ID b) { return a.m_val != b.m_val; }
+//    friend bool operator>(ID a, ID b) { return a.m_val > b.m_val; }
+//    friend bool operator>=(ID a, ID b) { return a.m_val >= b.m_val; }
+//    friend bool operator<(ID a, ID b) { return a.m_val < b.m_val; }
+//    friend bool operator<=(ID a, ID b) { return a.m_val <= b.m_val; }
     ID& operator++() { m_val++; return *this; }
     ID operator++(int) { ID ret = *this; this->operator++(); return ret; }
 

@@ -28,8 +28,8 @@ public:
   bool removeGroup(group_id id);
   bool changeGroupId(group_id oldId, group_id newId);
 
-  ITag* addTag(tag_id tagId = -1);
-  ITag* tag(tag_id id) const;
+  Tag* addTag(tag_id tagId = -1);
+  Tag* tag(tag_id id) const;
   std::set<tag_id> tagIds() const;
   bool modifyTag(tag_id tagId, const QString& sNewName, const QColor& col);
   bool removeTag(tag_id tagId);
