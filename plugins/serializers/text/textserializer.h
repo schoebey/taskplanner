@@ -45,6 +45,7 @@ public:
 private:
   QFile m_file;
   QTextStream m_stream;
+  int m_iFileVersion = 0;
 };
 
 #endif // TEXTSERIALIZER_H

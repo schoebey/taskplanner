@@ -33,6 +33,7 @@ public:
   std::set<tag_id> tagIds() const;
   bool modifyTag(tag_id tagId, const QString& sNewName, const QColor& col);
   bool removeTag(tag_id tagId);
+  bool changeTagId(tag_id oldId, tag_id newId);
 
   void clear();
 private:
