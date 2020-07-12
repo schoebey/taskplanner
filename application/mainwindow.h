@@ -123,6 +123,7 @@ private:
   ToolBarInfoDisplay* m_pInfoDisplay;
   SearchFrame* m_pSearchFrame;
   std::shared_ptr<SearchController> m_spSearchController;
+  void setCurrentFileName(const QString& sFileName);
 };
 
 #endif // MAINWINDOW_H

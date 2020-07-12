@@ -781,6 +781,13 @@ void MainWindow::restoreDefaultLayout()
   }
 }
 
+void MainWindow::setCurrentFileName(const QString& sFileName)
+{
+  m_sFileName = sFileName;
+
+  setWindowTitle(QString("%1[*] - %2").arg(m_sFileName).arg(QGuiApplication::applicationDisplayName()));
+}
+
 bool MainWindow::loadFile(const QString& sFileName, QString* psErrorMessage)
 {
   if (!sFileName.isEmpty())
@@ -812,9 +819,7 @@ bool MainWindow::loadFile(const QString& sFileName, QString* psErrorMessage)
 
       if (EDeserializingError::eOk == de)
       {
-        m_sFileName = sFileName;
-
-        setWindowTitle(QString("%1[*] - %2").arg(m_sFileName).arg(QGuiApplication::applicationDisplayName()));
+        setCurrentFileName(sFileName);
 
         initTaskUi();
 
@@ -1041,6 +1046,8 @@ void MainWindow::on_actionSaveAs_triggered()
   if (!saveFile(sFileName, &sErrorMessage))
   {
     QMessageBox::critical(this, tr("error writing file"), sErrorMessage);
+  } else {
+    setCurrentFileName(sFileName);
   }
 }
 
