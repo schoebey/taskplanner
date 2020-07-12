@@ -75,6 +75,11 @@ ITag* Manager::tag(tag_id id) const
   return m_spPrivate->tag(id);
 }
 
+std::set<tag_id> Manager::tagIds() const
+{
+  return m_spPrivate->tagIds();
+}
+
 bool Manager::modifyTag(tag_id tagId, const QString& sNewName, const QColor& col)
 {
   return m_spPrivate->modifyTag(tagId, sNewName, col);

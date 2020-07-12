@@ -14,6 +14,7 @@
 
 namespace
 {
+  static const int c_iFileFormatVerison = 1;
   RegisterSerializer<MarkdownSerializer> s("markdown", "md");
 
   static const QString c_sPara_FileName = "fileName";
@@ -373,6 +374,7 @@ ESerializingError MarkdownSerializer::initSerialization()
       m_pStream->setDevice(&m_file);
       m_pStream->setCodec("UTF-8");
       *m_pStream << QString("# task planner") << endl;
+      *m_pStream << "version:" << c_iFileFormatVerison << endl;
       *m_pStream << "change date: " << QDateTime::currentDateTime().toString(c_sTimeFormat) << endl;
       return ESerializingError::eOk;
     }
@@ -408,9 +410,22 @@ EDeserializingError MarkdownSerializer::initDeserialization()
       m_pStream->setCodec("UTF-8");
 
       /*QString sHeader = */m_pStream->readLine();
-      /*QString sWriteTimestamp = */m_pStream->readLine();
 
-      return EDeserializingError::eOk;
+      // try to interpret the next line as an integer (version number)
+      QString sVersion = m_pStream->readLine();
+      QStringList versionInfo = sVersion.split(":");
+      bool bOk(false);
+      if (versionInfo.size() >= 2)
+      {
+        m_iFileVersion = versionInfo[1].toInt(&bOk);
+        if (bOk) {
+          m_pStream->readLine();
+        } else {
+          m_iFileVersion = 0;
+        }
+        return EDeserializingError::eOk;
+      }
+
     }
 
     return EDeserializingError::eResourceError;
@@ -495,7 +510,7 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
     return EDeserializingError::eInternalError;
   }
 
-  if (0 == iVersion)
+  if (0 <= iVersion)
   {
     StreamReader r(&m_pStream, c_sTaskPropertiesHeader);
     // property descriptors
@@ -539,6 +554,18 @@ EDeserializingError MarkdownSerializer::deserialize(SerializableManager& m)
       }
     }
 
+    // tags
+    index = 0;
+    while (readFromMap(values, c_sTagHeader, sPayload, index++))
+    {
+      Tag* pTag = m.addTag();
+      tag_id oldId = pTag->id();
+
+      StreamReader g(&m_pStream, c_sTagHeader, sPayload);
+      EDeserializingError err = pTag->deserialize(this);
+      m.changeTagId(oldId, pTag->id());
+      if (EDeserializingError::eOk != err)  { return err; }
+    }
 
     // groups
     index = 0;
@@ -644,8 +671,8 @@ ESerializingError MarkdownSerializer::serialize(const Task& t)
   }
 
   writeToStream(*m_pStream, t.timeFragments(), "time_info");
-  writeToStream(*m_pStream, t.parentTask(), "parent");
-  writeToStream(*m_pStream, t.taskIds(), "children");
+//  writeToStream(*m_pStream, t.tagIds(), "tags");
+//  writeToStream(*m_pStream, t.taskIds(), "children");
 
   return ESerializingError::eOk;
 }
@@ -695,18 +722,17 @@ EDeserializingError MarkdownSerializer::deserialize(Task& t)
     }
 
 
-    task_id parentId;
-    if (readFromMap(values, "parent", parentId))
+    // version 0 of the markdown file format stored subtasks in a 'children' property
+    // version 1 upwards treats subtasks as normal properties
+    if (0 == m_iFileVersion)
     {
-      t.setParentTaskId(parentId);
-    }
-
-    std::set<task_id> children;
-    if (readFromMap(values, "children", children))
-    {
-      for (const auto& childId : children)
+      std::set<task_id> children;
+      if (readFromMap(values, "children", children))
       {
-        t.addTaskId(childId);
+        for (const auto& childId : children)
+        {
+          t.addTaskId(childId);
+        }
       }
     }
 

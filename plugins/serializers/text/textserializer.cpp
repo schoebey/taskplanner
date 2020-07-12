@@ -11,6 +11,7 @@
 
 namespace
 {
+  static const int c_iFileFormatVersion = 1;
   RegisterSerializer<TextSerializer> s("text", "txt");
 
   static const QString c_sPara_FileName = "fileName";
@@ -38,6 +39,7 @@ ESerializingError TextSerializer::initSerialization()
       m_stream.setDevice(&m_file);
       m_stream.setCodec("UTF-8");
       m_stream << QString("task planner") << endl;
+      m_stream << "version:" << c_iFileFormatVersion << endl;
       m_stream << QDateTime::currentDateTime().toString(c_sTimeFormat) << endl;
       return ESerializingError::eOk;
     }
@@ -70,9 +72,21 @@ EDeserializingError TextSerializer::initDeserialization()
       m_stream.setCodec("UTF-8");
 
       /*QString sHeader = */m_stream.readLine();
-      /*QString sWriteTimestamp = */m_stream.readLine();
 
-      return EDeserializingError::eOk;
+      // try to interpret the next line as an integer (version number)
+      QString sVersion = m_stream.readLine();
+      QStringList versionInfo = sVersion.split(":");
+      bool bOk(false);
+      if (versionInfo.size() >= 2)
+      {
+        m_iFileVersion = versionInfo[1].toInt(&bOk);
+        if (bOk) {
+          m_stream.readLine();
+        } else {
+          m_iFileVersion = 0;
+        }
+        return EDeserializingError::eOk;
+      }
     }
 
     return EDeserializingError::eResourceError;
@@ -131,8 +145,16 @@ EDeserializingError TextSerializer::deserialize(SerializableManager& m)
   m_stream >> iVersion;
   m_stream.readLine();
 
-  if (0 == iVersion)
+
+  if (0 <= iVersion)
   {
+    int iNofTags = 0;
+    if (1 <= iVersion)
+    {
+      m_stream >> iNofTags;
+      m_stream.readLine();
+    }
+
     int iNofGroups = 0;
     m_stream >> iNofGroups;
     m_stream.readLine();
@@ -140,6 +162,18 @@ EDeserializingError TextSerializer::deserialize(SerializableManager& m)
     int iNofTasks = 0;
     m_stream >> iNofTasks;
     m_stream.readLine();
+
+    if (1 <= iVersion)
+    {
+      for (int iTag = 0; iTag < iNofTags; ++iTag)
+      {
+        Tag* pTag = m.addTag();
+        tag_id oldId = pTag->id();
+        EDeserializingError err = pTag->deserialize(this);
+        m.changeTagId(oldId, pTag->id());
+        if (EDeserializingError::eOk != err)  { return err; }
+      }
+    }
 
     for (int iGroup = 0; iGroup < iNofGroups; ++iGroup)
     {
@@ -227,7 +261,7 @@ EDeserializingError TextSerializer::deserialize(Task& t)
   m_stream.readLine();
 
 
-  if (0 == iVersion)
+  if (0 <= iVersion)
   {
     int iId;
     m_stream >> iId;
@@ -265,17 +299,22 @@ EDeserializingError TextSerializer::deserialize(Task& t)
 
     t.setParentTaskId(iParentId);
 
-    int iNofSubTasks = 0;
-    m_stream >> iNofSubTasks;
-    m_stream.readLine();
-
-    for (int i = 0; i < iNofSubTasks; ++i)
+    // file format version 0 stored subtasks separately,
+    // version 1 upwards treats subtasks as properties
+    if (0 == m_iFileVersion)
     {
-      int iId;
-      m_stream >> iId;
+      int iNofSubTasks = 0;
+      m_stream >> iNofSubTasks;
       m_stream.readLine();
 
-      t.addTaskId(iId);
+      for (int i = 0; i < iNofSubTasks; ++i)
+      {
+        int iId;
+        m_stream >> iId;
+        m_stream.readLine();
+
+        t.addTaskId(iId);
+      }
     }
 
     // TODO: deserialize generic properties

@@ -45,6 +45,7 @@ public:
 private:
   QFile m_file;
   QTextStream* m_pStream = nullptr;
+  int m_iFileVersion = 0;
 };
 
 #endif // MARKDOWNSERIALIZER_H
