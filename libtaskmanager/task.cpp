@@ -17,7 +17,7 @@ Task::~Task()
 
 int Task::version() const
 {
-  return 1;
+  return 2;
 }
 
 ESerializingError Task::serialize(ISerializer* pSerializer) const
@@ -201,7 +201,7 @@ double Task::autoPriority() const
 
 
   // determine the maximum of all the child priorites
-  for (auto id : m_subTaskIds)
+  for (auto id : taskIds())
   {
     auto pSubTask = m_pManager->task(id);
     if (nullptr != pSubTask)
@@ -244,7 +244,13 @@ void Task::setParentTask(task_id parentTaskId)
 
 std::set<task_id> Task::taskIds() const
 {
-  return m_subTaskIds;
+  auto vTaskIds = property<std::vector<task_id>>("tasks");
+  std::set<task_id> ids;
+  for (const auto& id : vTaskIds)
+  {
+    ids.insert(id);
+  }
+  return ids;
 }
 
 bool Task::addTask(task_id taskId)
@@ -271,10 +277,12 @@ bool Task::addTaskId(task_id id)
 
 bool Task::removeTask(task_id id)
 {
-  auto it = m_subTaskIds.find(id);
-  if (it != m_subTaskIds.end())
+  auto vTaskIds = property<std::vector<task_id>>("tasks");
+  auto it = std::find(vTaskIds.begin(), vTaskIds.end(), id);
+  if (it != vTaskIds.end())
   {
-    m_subTaskIds.erase(it);
+    vTaskIds.erase(it);
+    setProperty("tasks", vTaskIds);
 
     ITask* pTask = m_pManager->task(id);
     if (nullptr != pTask)
@@ -417,7 +425,13 @@ void Task::setTimeFragments(const std::vector<STimeFragment>& vFragments)
 
 std::set<tag_id> Task::tagIds() const
 {
-  return m_tagIds;
+  auto vTagIds = property<std::vector<tag_id>>("tags");
+  std::set<tag_id> ids;
+  for (const auto& id : vTagIds)
+  {
+    ids.insert(id);
+  }
+  return ids;
 }
 
 bool Task::addTag(tag_id tagId)
@@ -434,10 +448,11 @@ bool Task::addTag(tag_id tagId)
 
 bool Task::removeTag(tag_id id)
 {
-  auto it = std::find(m_tagIds.begin(), m_tagIds.end(), id);
-  if (it != m_tagIds.end())
+  auto vTagIds = property<std::vector<tag_id>>("tags");
+  auto it = std::find(vTagIds.begin(), vTagIds.end(), id);
+  if (it != vTagIds.end())
   {
-    m_tagIds.erase(it);
+    vTagIds.erase(it);
     return true;
   }
   return false;
@@ -467,7 +482,7 @@ void Task::setGroup(group_id groupId)
     }
   }
 
-  for (const auto& subTaskId : m_subTaskIds)
+  for (const auto& subTaskId : taskIds())
   {
     ITask* pSubTask = m_pManager->task(subTaskId);
     if (nullptr != pSubTask)  { pSubTask->setGroup(groupId); }

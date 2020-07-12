@@ -12,7 +12,7 @@ SerializableManager::SerializableManager(Manager* pManager)
 
 int SerializableManager::version() const
 {
-  return 0;
+  return 1;
 }
 
 void SerializableManager::clear()
@@ -31,7 +31,7 @@ Task* SerializableManager::addTask(task_id taskId)
 
 Task* SerializableManager::task(task_id id) const
 {
-  auto it = m_tasks.find(id);
+ auto it = m_tasks.find(id);
   if (it != m_tasks.end())
   {
     return it->second.get();
@@ -202,6 +202,20 @@ bool SerializableManager::removeTag(tag_id tagId)
   return false;
 }
 
+bool SerializableManager::changeTagId(tag_id oldId, tag_id newId)
+{
+  auto it = m_tags.find(oldId);
+  if (it != m_tags.end())
+  {
+    tspTag spTag = it->second;
+    m_tags.erase(it);
+    spTag->setId(newId);
+    m_tags[newId] = spTag;
+  }
+
+  return false;
+}
+
 ESerializingError SerializableManager::serialize(ISerializer* pSerializer) const
 {
   ESerializingError err;
@@ -231,6 +245,22 @@ void SerializableManager::rebuildHierarchy()
         if (nullptr != pTask)
         {
           pTask->setGroup(pGroup->id());
+        }
+      }
+    }
+  }
+
+  for (const auto& taskId : taskIds())
+  {
+    auto pTask = task(taskId);
+    if (nullptr != pTask)
+    {
+      for (const auto& subTaskId : pTask->taskIds())
+      {
+        auto pSubTask = task(subTaskId);
+        if (nullptr != pSubTask)
+        {
+          pSubTask->setParentTaskId(taskId);
         }
       }
     }

@@ -93,10 +93,8 @@ private:
   Manager* m_pManager = nullptr;
   SPriority m_priority;
   std::vector<STimeFragment> m_vTimingInfo;
-  std::set<task_id> m_subTaskIds;
   group_id m_groupId = -1;
   task_id m_parentTaskId = -1;
-  std::set<tag_id> m_tagIds;
 
   Properties<Task> m_properties;
 };
