@@ -212,6 +212,21 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
     connect(pMapper, static_cast<void(QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &MainWindow::setPriority);
   }
 
+
+  m_pTagWidgetContainer = new TagWidgetContainer(this);
+  m_pTagWidgetContainer->setEditable(true);
+  m_pTagWidgetContainer->setAutoFillBackground(true);
+  m_pTagWidgetContainer->setMinimumSize(300, 10);
+  m_pTagWidgetContainer->setDragMode(EDragMode::eCopy);
+  m_pTagWidgetContainer->setAcceptDrops(false);
+  connect(m_pTagWidgetContainer, &TagWidgetContainer::tagChanged, this, &MainWindow::onTagEdited);
+  connect(m_pTagWidgetContainer, &TagWidgetContainer::newTagRequested, this, &MainWindow::onNewTagRequested);
+
+  QWidgetAction* pWA = new QWidgetAction(ui->pMainToolBar);
+  pWA->setDefaultWidget(m_pTagWidgetContainer);
+  ui->pMainToolBar->addAction(pWA);
+
+
   initTaskUi();
 
 //  startTimer(3000);
@@ -268,22 +283,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
     m_pWatcher->addPath("stylesheet.css");
   }
 
-  auto pContainer = new TagWidgetContainer(this);
-  pContainer->setEditable(true);
-  pContainer->setAutoFillBackground(true);
-  pContainer->setMinimumSize(300, 10);
-  pContainer->setDragMode(EDragMode::eCopy);
-  pContainer->setAcceptDrops(false);
-  auto pTagWidget = new DraggableTagWidget(0, "hello world", this);
-  pContainer->addItem(pTagWidget);
-  pContainer->addItem(new DraggableTagWidget(1, "hello world2", this));
-  pContainer->addItem(new DraggableTagWidget(2, "hello world3", this));
-  connect(pContainer, &TagWidgetContainer::tagChanged, this, &MainWindow::onTagEdited);
-  connect(pContainer, &TagWidgetContainer::newTagRequested, this, &MainWindow::onNewTagRequested);
-
-  QWidgetAction* pWA = new QWidgetAction(ui->pMainToolBar);
-  pWA->setDefaultWidget(pContainer);
-  ui->pMainToolBar->addAction(pWA);
 }
 
 MainWindow::~MainWindow()
@@ -367,6 +366,20 @@ void MainWindow::updateTaskUi()
 {
   bool bOk = disconnect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
   assert(bOk);
+
+
+  m_pTagWidgetContainer->clear();
+
+  for (const auto& tagId : m_pManager->tagIds())
+  {
+    ITag* pTag = m_pManager->tag(tagId);
+    if (nullptr != pTag)
+    {
+      auto pTagWidget = new DraggableTagWidget(pTag->id(), pTag->name(), m_pTagWidgetContainer);
+      pTagWidget->setColor(pTag->color());
+      m_pTagWidgetContainer->addItem(pTagWidget);
+    }
+  }
 
 
   for (const auto& groupId : m_pManager->groupIds())

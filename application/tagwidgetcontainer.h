@@ -18,6 +18,7 @@ public:
   void setEditable(bool);
 
   bool modifyTag(tag_id id, const QString& sNewName, const QColor& col);
+  void clear();
 
 signals:
   void tagAdded(DraggableTagWidget*);

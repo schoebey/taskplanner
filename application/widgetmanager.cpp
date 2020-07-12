@@ -121,6 +121,18 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
   pTaskWidget->setExpanded(!bOk || bExpanded);
 
 
+  for (const auto& id : pTask->tagIds())
+  {
+    auto pTag = m_pManager->tag(id);
+    if (nullptr != pTag)
+    {
+      DraggableTagWidget* pTagWidget = new DraggableTagWidget(id, pTag->name(), pTaskWidget);
+      pTagWidget->setColor(pTag->color());
+      pTaskWidget->addTag(pTagWidget);
+    }
+  }
+
+
   // TODO: hier die Links auslesen und via pTaskWidget->addLink() einzeln hinzufügen
   // TODO: im Taskwidget: addLink, removeLink, insertLink(pos, link)
   auto links = conversion::fromString<std::vector<QUrl>>(pTask->propertyValue("links"), bOk);
@@ -132,19 +144,6 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
     }
   }
 
-//  auto tags = conversion::fromString<std::vector<tag_id>>(pTask->propertyValue("tags"), bOk);
-//  if (bOk)
-//  {
-//    for (const auto& id : tags)
-//    {
-//      auto pTag = m_pManager->tag(id);
-//      if (nullptr != pTag)
-//      {
-//        DraggableTagWidget* pTagWidget = new DraggableTagWidget(id, pTag->name(), pTaskWidget);
-//        pTaskWidget->addTag(pTagWidget);
-//      }
-//    }
-//  }
 
   auto color = conversion::fromString<QColor>(pTask->propertyValue("color"), bOk);
   if (bOk)

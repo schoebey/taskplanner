@@ -64,6 +64,16 @@ bool TagWidgetContainer::modifyTag(tag_id id, const QString& sNewName, const QCo
   return false;
 }
 
+void TagWidgetContainer::clear()
+{
+  std::vector<QPointer<DraggableTagWidget>> vItems = items();
+  for (auto& el : vItems)
+  {
+    removeItem(el);
+    delete el;
+  }
+}
+
 bool TagWidgetContainer::addItem_impl(DraggableTagWidget* pT)
 {
   QLayout* pLayout = layout();

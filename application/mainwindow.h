@@ -115,6 +115,7 @@ private:
   void onChooseScript();
   void showError(const QString& sErrorMessage);
   QMessageBox::StandardButton askSave();
+  void setCurrentFileName(const QString& sFileName);
 
 private:
   Ui::MainWindow *ui;
@@ -133,7 +134,7 @@ private:
   ToolBarInfoDisplay* m_pInfoDisplay;
   SearchFrame* m_pSearchFrame;
   std::shared_ptr<SearchController> m_spSearchController;
-  void setCurrentFileName(const QString& sFileName);
+  TagWidgetContainer* m_pTagWidgetContainer;
 };
 
 #endif // MAINWINDOW_H
