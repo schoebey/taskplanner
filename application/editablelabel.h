@@ -45,7 +45,7 @@ signals:
   void editabilityChanged();
 
 protected:
-  bool eventFilter(QObject* pWatched, QEvent* pEvent);
+  bool eventFilter(QObject* pWatched, QEvent* pEvent) override;
 
 private slots:
   void onEditingFinished();

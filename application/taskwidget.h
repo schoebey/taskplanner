@@ -84,7 +84,7 @@ public:
 
   bool onPropertyValueChanged(const QString& sName, const QString& sValue);
 
-  QSize sizeHint() const;
+  QSize sizeHint() const override;
 
   QSize minimumSizeHint() const override;
 public slots:

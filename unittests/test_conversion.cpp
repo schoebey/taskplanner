@@ -313,7 +313,7 @@ TEST_F(DateTimeConversionTest, date_fromString_nextWeekDay)
   std::vector<QString> vsDayNames = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
   std::vector<QString> vsDayNamesShort = {"mon", "tue", "wed", "thu", "fri", "sat", "sun"};
 
-  for (int i = 0; i < vsDayNames.size(); ++i)
+  for (size_t i = 0; i < vsDayNames.size(); ++i)
   {
     bool bStatus(false);
     QDateTime dt = conversion::dateTimeFromString(QString("next %1").arg(vsDayNames[i]), bStatus, m_baseDateTime);
@@ -366,7 +366,7 @@ TEST_F(DateTimeConversionTest, date_fromString_nextMonthName)
   std::vector<QString> vsMonthNamesShort = {"jan", "feb", "mar", "apr", "may", "jun", "jul",
                                             "aug", "sep", "oct", "nov", "dec"};
 
-  for (int i = 0; i < vsMonthNames.size(); ++i)
+  for (size_t i = 0; i < vsMonthNames.size(); ++i)
   {
     bool bStatus(false);
     QDateTime dt = conversion::dateTimeFromString(QString("next %1").arg(vsMonthNames[i]), bStatus, m_baseDateTime);

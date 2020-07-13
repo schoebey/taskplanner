@@ -62,7 +62,7 @@ signals:
   void editabilityChanged();
 
 protected:
-  bool event(QEvent* pEvent);
+  bool event(QEvent* pEvent) override;
   void paintEvent(QPaintEvent* pEvent) override;
   void mousePressEvent(QMouseEvent* pEvent) override;
   void mouseMoveEvent(QMouseEvent* pEvent) override;

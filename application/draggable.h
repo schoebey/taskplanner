@@ -135,7 +135,7 @@ public:
     return false;
   }
 
-  virtual bool showPlaceholderAt_impl(const QPoint&, const QSize&) {}
+  virtual bool showPlaceholderAt_impl(const QPoint&, const QSize&) { return true; }
 
   virtual void hidePlaceholder() {}
 
@@ -148,7 +148,7 @@ public:
       for (auto it = m_vpMouseOverContainers.begin();
            it != m_vpMouseOverContainers.end(); ++it)
       {
-        if (isAncestorOf(*it))
+        if (!it->isNull() && isAncestorOf(*it))
         {
           m_vpMouseOverContainers.insert(it, this);
           return;
@@ -179,7 +179,8 @@ public:
     while (it != m_vpMouseOverContainers.rend())
     {
       auto pContainer = *it;
-      if (pContainer->rect().contains(pContainer->mapFromGlobal(globalPos)))
+      if (nullptr != pContainer &&
+          pContainer->rect().contains(pContainer->mapFromGlobal(globalPos)))
       {
         return pContainer;
       }
@@ -189,7 +190,7 @@ public:
     return nullptr;
   }
 
-  static std::vector<DraggableContainer<T>*> mouseOverContainers()
+  static std::vector<QPointer<DraggableContainer<T>>> mouseOverContainers()
   {
     return m_vpMouseOverContainers;
   }
@@ -215,7 +216,7 @@ private:
   virtual bool insertItem_impl(T* pT, QPoint pt) = 0;
   virtual bool moveItemFrom_impl(DraggableContainer<T>* pSource, T* pT, QPoint pt) = 0;
 
-  static std::vector<DraggableContainer<T>*> m_vpMouseOverContainers;
+  static std::vector<QPointer<DraggableContainer<T>>> m_vpMouseOverContainers;
 
   std::vector<QPointer<T>> m_vpItems;
 

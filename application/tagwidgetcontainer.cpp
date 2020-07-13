@@ -7,8 +7,8 @@
 #include <QPushButton>
 #include <QWidgetAction>
 
-template<> std::vector<DraggableContainer<DraggableTagWidget>*>
-DraggableContainer<DraggableTagWidget>::m_vpMouseOverContainers = std::vector<DraggableContainer<DraggableTagWidget>*>();
+template<> std::vector<QPointer<DraggableContainer<DraggableTagWidget>>>
+DraggableContainer<DraggableTagWidget>::m_vpMouseOverContainers = std::vector<QPointer<DraggableContainer<DraggableTagWidget>>>();
 
 namespace {
   void wireTag(TagWidgetContainer* pContainer, TagWidget* pTagWidget)
@@ -115,7 +115,7 @@ bool TagWidgetContainer::insertItem_impl(DraggableTagWidget* pT, QPoint pt)
   return false;
 }
 
-bool TagWidgetContainer::moveItemFrom_impl(DraggableContainer<DraggableTagWidget>* pSource,
+bool TagWidgetContainer::moveItemFrom_impl(DraggableContainer<DraggableTagWidget>* /*pSource*/,
                                            DraggableTagWidget* pT, QPoint pt)
 {
   m_pPlaceholder->setParent(nullptr);

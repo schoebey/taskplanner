@@ -491,9 +491,6 @@ void Style::drawControl(ControlElement element,
     const QStyleOptionTagWidget* pTagOption = qstyleoption_cast<const QStyleOptionTagWidget*>(pOption);
     if (nullptr != pTagOption)
     {
-      int iHeaderSize = pixelMetric(customPixelMetrics::PM_TagHeader);
-      int iBorderSize = pixelMetric(customPixelMetrics::PM_TagBorder);
-
       QRectF r = QRectF(pTagOption->rect).adjusted(0.5, 0.5, -0.5, -0.5);
       QPolygonF topContour;
       topContour << QPointF(r.topLeft() + QPointF(2, r.height() / 2 - 1));

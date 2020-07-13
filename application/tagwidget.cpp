@@ -193,7 +193,7 @@ void TagWidget::resizeEvent(QResizeEvent* pEvent)
   }
 }
 
-void TagWidget::timerEvent(QTimerEvent *event)
+void TagWidget::timerEvent(QTimerEvent* /*event*/)
 {
   stepSimulation();
 }
@@ -273,6 +273,8 @@ bool TagWidget::event(QEvent* pEevent)
 
       stopSimulation();
     }
+    break;
+  default:
     break;
   }
 
