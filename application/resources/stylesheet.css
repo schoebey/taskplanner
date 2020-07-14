@@ -497,6 +497,14 @@ TaskWidget #pProperties {
 TaskWidget #pTags {
   border: 1px solid red;
 }
+
+QToolBar {
+  border: 1px solid red;
+}
+
+QToolBar QWidget {
+  border: 1px solid blue;
+}
 /*DEBUG*/
 
 

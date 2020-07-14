@@ -164,9 +164,23 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   auto pInfoDisplayAction = ui->pInfoToolBar->addWidget(m_pInfoDisplay);
   connect(m_pInfoDisplay, &ToolBarInfoDisplay::showError, this, &MainWindow::showError);
 
-  QWidget* pSpacer = new QWidget();
-  pSpacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-  ui->pInfoToolBar->insertWidget(pInfoDisplayAction, pSpacer);
+//  QWidget* pSpacer = new QWidget();
+//  pSpacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+//  ui->pInfoToolBar->insertWidget(pInfoDisplayAction, pSpacer);
+
+  m_pTagWidgetContainer = new TagWidgetContainer(this);
+  m_pTagWidgetContainer->setEditable(true);
+  m_pTagWidgetContainer->setAutoFillBackground(true);
+  m_pTagWidgetContainer->setSizePolicy(QSizePolicy::Expanding,
+                                       QSizePolicy::Fixed);
+  m_pTagWidgetContainer->setMinimumSize(0, 10);
+  m_pTagWidgetContainer->setDragMode(EDragMode::eCopy);
+  m_pTagWidgetContainer->setAcceptDrops(false);
+  connect(m_pTagWidgetContainer, &TagWidgetContainer::tagChanged, this, &MainWindow::onTagEdited);
+  connect(m_pTagWidgetContainer, &TagWidgetContainer::newTagRequested, this, &MainWindow::onNewTagRequested);
+
+  ui->pInfoToolBar->insertWidget(pInfoDisplayAction, m_pTagWidgetContainer);
+
 
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
@@ -213,18 +227,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   }
 
 
-  m_pTagWidgetContainer = new TagWidgetContainer(this);
-  m_pTagWidgetContainer->setEditable(true);
-  m_pTagWidgetContainer->setAutoFillBackground(true);
-  m_pTagWidgetContainer->setMinimumSize(300, 10);
-  m_pTagWidgetContainer->setDragMode(EDragMode::eCopy);
-  m_pTagWidgetContainer->setAcceptDrops(false);
-  connect(m_pTagWidgetContainer, &TagWidgetContainer::tagChanged, this, &MainWindow::onTagEdited);
-  connect(m_pTagWidgetContainer, &TagWidgetContainer::newTagRequested, this, &MainWindow::onNewTagRequested);
 
-  QWidgetAction* pWA = new QWidgetAction(ui->pMainToolBar);
-  pWA->setDefaultWidget(m_pTagWidgetContainer);
-  ui->pMainToolBar->addAction(pWA);
 
 
   initTaskUi();
@@ -291,7 +294,7 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::closeEvent(QCloseEvent* pEvent)
-{  
+{
   auto button = askSave();
   if (QMessageBox::Yes == button)
   {
