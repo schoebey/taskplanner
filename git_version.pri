@@ -1,6 +1,6 @@
 # from https://www.everythingfrontend.com/posts/app-version-from-git-tag-in-qt-qml.html
 # If there is no version tag in git this one will be used
-VERSION = 0.6.1
+VERSION = 0.7.0
 
 # Need to discard STDERR so get path to NULL device
 win32 {
