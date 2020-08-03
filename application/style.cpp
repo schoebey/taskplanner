@@ -463,7 +463,8 @@ void Style::drawControl(ControlElement element,
         for (int i = 1; i < p.size(); ++i)
         {
           QVector2D v = QVector2D(p[i].x() - p[i-1].x(), p[i].y() - p[i-1].y());
-          v = pLinkOption->dBorderRadius * v.normalized();
+          double dBorderRadius = std::min<double>(pLinkOption->dBorderRadius, std::max<double>(fabs(v.x()), fabs(v.y())) / 2);
+          v = dBorderRadius * v.normalized();
           if (bStart)
           {
             path.moveTo(p[1] - v.toPointF());
