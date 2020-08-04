@@ -1,6 +1,7 @@
 #include "blendableimagewidget.h"
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QPropertyAnimation>
 
 BlendableImageWidget::BlendableImageWidget(QWidget* pParent)
