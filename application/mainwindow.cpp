@@ -489,6 +489,11 @@ void MainWindow::loadPlugins(const QString& sInitialSearchPath)
           m_vspPlugins.push_back(std::shared_ptr<QObject>(pPlugin));
         }
       }
+      else
+      {
+          const QString sError = loader.errorString();
+          qWarning() << sError;
+      }
     }
   }
 }
