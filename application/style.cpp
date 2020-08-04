@@ -7,6 +7,7 @@
 
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QPixmap>
 #include <QPixmapCache>
 #include <QTextLayout>

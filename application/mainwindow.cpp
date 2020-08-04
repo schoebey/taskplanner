@@ -46,6 +46,7 @@
 #include <QDialogButtonBox>
 #include <QLineEdit>
 #include <QScrollArea>
+#include <QSlider>
 
 #include <array>
 #include <future>
@@ -273,7 +274,7 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::closeEvent(QCloseEvent* pEvent)
-{  
+{
   auto button = askSave();
   if (QMessageBox::Yes == button)
   {
