@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.5)
 
 project(unittests VERSION 0.2.0)
 
+find_package(GTest)
+
+if(GTest_FOUND)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
@@ -33,7 +37,7 @@ target_include_directories(${PROJECT_NAME}
         ../libtaskmanager/serializers
 )
 
-find_package(GTest)
+
 find_package(Qt5 COMPONENTS Core Widgets)
 
 target_link_libraries(${PROJECT_NAME}
@@ -46,3 +50,5 @@ target_link_libraries(${PROJECT_NAME}
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
+
+endif(GTest_FOUND)
