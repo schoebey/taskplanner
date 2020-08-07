@@ -1,13 +1,21 @@
 #include "factory.h"
 
-namespace  {
-  std::map<size_t, std::map<size_t, detail::tspPrivBase>> factories;
+namespace {
+  static std::map<size_t, std::map<size_t, detail::tspPrivBase>>& FactoryMap()
+  {
+      static std::map<size_t, std::map<size_t, detail::tspPrivBase>> factories;
+
+      return factories;
+  }
 }
+
+
 
 namespace detail
 {
   tspPrivBase p_base(size_t objectHashCode, size_t metaInfoHashCode)
   {
+    auto& factories = FactoryMap();
     auto it = factories.find(objectHashCode);
     if (it == factories.end())
     {
@@ -29,6 +37,7 @@ namespace detail
 
   void reg_base(const detail::tspPrivBase& spPriv, size_t objectHashCode, size_t metaInfoHashCode)
   {
+    auto& factories = FactoryMap();
     factories[objectHashCode][metaInfoHashCode] = spPriv;
   }
 
