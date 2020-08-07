@@ -2,15 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(libtaskmanager VERSION 0.2.0)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+include(common)
 
 add_library(${PROJECT_NAME} SHARED
     constraint.cpp
@@ -61,7 +53,9 @@ add_library(${PROJECT_NAME} SHARED
 )
 
 target_include_directories(${PROJECT_NAME}
-    PRIVATE
+    PUBLIC
+        .
+        ..
         patterns
         reports
         serializers
@@ -70,7 +64,7 @@ target_include_directories(${PROJECT_NAME}
 find_package(Qt5 COMPONENTS Core Widgets)
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE
+    PUBLIC
         Qt5::Widgets
         Qt5::Core
 )
