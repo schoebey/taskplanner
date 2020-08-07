@@ -2,15 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 
 project(markdown-serializer VERSION 0.2.0)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
+include(common)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+include(common)
 
 add_library(${PROJECT_NAME} SHARED
     markdownserializer.cpp
@@ -20,21 +14,6 @@ add_library(${PROJECT_NAME} SHARED
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC libtaskmanager)
-
-target_include_directories(${PROJECT_NAME}
-    PRIVATE
-        ../../../libtaskmanager
-        ../../../libtaskmanager/reports
-        ../../../libtaskmanager/serializers
-)
-
-find_package(Qt5 COMPONENTS Core Widgets)
-
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-        Qt5::Widgets
-        Qt5::Core
-)
 
 include(GNUInstallDirs)
 

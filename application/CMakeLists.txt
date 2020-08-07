@@ -2,15 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(taskplanner VERSION 0.2.0)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+include(common)
 
 add_executable(${PROJECT_NAME}
     aboutdialog.cpp
@@ -86,24 +78,12 @@ add_executable(${PROJECT_NAME}
     windowtitlemenubar.h
 )
 
-
 target_link_libraries(${PROJECT_NAME} PUBLIC libtaskmanager)
 
-target_include_directories(${PROJECT_NAME}
-    PRIVATE
-        ..
-        ../libtaskmanager
-        ../libtaskmanager/patterns
-        ../libtaskmanager/reports
-        ../libtaskmanager/serializers
-)
-
-find_package(Qt5 COMPONENTS Core Widgets Qml Gui)
+find_package(Qt5 COMPONENTS Qml Gui)
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
-        Qt5::Widgets
-        Qt5::Core
         Qt5::Qml
         Qt5::Gui
 )
