@@ -113,7 +113,6 @@ if(UNIX)
  endif()
 
 
-
 include(GNUInstallDirs)
 
 install(TARGETS ${PROJECT_NAME}
@@ -125,15 +124,13 @@ install(TARGETS ${PROJECT_NAME}
 
 # TODO: Remove when version header is generated
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    ORGANIZATION_NAME="rschaub"
+    ORGANIZATION_NAME="ancor"
     APP_NAME="${PROJECT_NAME}"
     GIT_VERSION="1231efe"
     GIT_TIMESTAMP="2020-08-03"
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
