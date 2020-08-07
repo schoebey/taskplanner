@@ -84,20 +84,6 @@ install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-#include(CMakePackageConfigHelpers)
-
-#configure_package_config_file(
-#  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
-#  ${CMAKE_BINARY_DIR}/cmake/${PROJECT_NAME}Config.cmake
-#  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-#  )
-
-#write_basic_package_version_file(
-#  ${CMAKE_BINARY_DIR}/cmake/${PROJECT_NAME}Config-version.cmake
-#  VERSION ${PROJECT_VERSION}
-#  COMPATIBILITY AnyNewerVersion
-#)
-
 set_target_properties(${PROJECT_NAME} PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
