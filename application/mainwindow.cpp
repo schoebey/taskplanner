@@ -167,7 +167,8 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
   static const std::vector<QString> c_vsPluginFolders = { QCoreApplication::applicationDirPath() + "/plugins/serializers",
-                                                          QCoreApplication::applicationDirPath() + "/plugins/reports" };
+                                                          QCoreApplication::applicationDirPath() + "/plugins/reports",
+                                                          QCoreApplication::applicationDirPath() + "../lib"};
   for (const auto& sPath : c_vsPluginFolders)
   {
     loadPlugins(sPath);
