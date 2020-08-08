@@ -169,7 +169,8 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
   static const std::vector<QString> c_vsPluginFolders = { QCoreApplication::applicationDirPath() + "/plugins/serializers",
                                                           QCoreApplication::applicationDirPath() + "/plugins/reports",
-                                                          QCoreApplication::applicationDirPath() + "../lib"};
+                                                          QCoreApplication::applicationDirPath() + "../lib",
+                                                          QCoreApplication::applicationDirPath() + "../lib/" + taskplanner::project_name};
   for (const auto& sPath : c_vsPluginFolders)
   {
     loadPlugins(sPath);
