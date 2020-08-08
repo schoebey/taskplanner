@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(markdown-serializer VERSION 0.2.0)
+project(markdown-serializer VERSION 0.8.0)
 
 include(common)
 

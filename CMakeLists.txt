@@ -6,7 +6,7 @@ if(UNIX)
   SET(CMAKE_INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN/")
 endif()
 
-project(taskplanner VERSION 0.2.0)
+project(taskplanner VERSION 0.8.0)
 
 add_subdirectory(application)
 add_subdirectory(libtaskmanager)
