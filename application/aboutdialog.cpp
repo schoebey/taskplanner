@@ -1,5 +1,6 @@
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
+#include "version.h"
 
 #include <QDesktopServices>
 #include <QDateTime>
@@ -16,10 +17,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
 
   setTitle(tr("About %1").arg(qApp->applicationName()));
   ui->pAppName->setText(qApp->applicationName());
-  ui->pAppVersion->setText(QString("Version %1").arg(QString(GIT_VERSION)));
+  ui->pAppVersion->setText(QString("Version %1").arg(taskplanner::project_full_version));
 
   bool bOk(false);
-  uint timestamp = static_cast<uint>(QString(GIT_TIMESTAMP).toInt(&bOk));
+  uint timestamp = static_cast<uint>(QString(taskplanner::git_timestamp).toInt(&bOk));
   if (bOk)
   {
     QDateTime dt = QDateTime::fromTime_t(timestamp);
