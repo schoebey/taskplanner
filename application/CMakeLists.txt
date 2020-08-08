@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(taskplanner VERSION 0.8.0)
+project(taskplanner VERSION ${APP_VERSION})
 
 include(common)
 

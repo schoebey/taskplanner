@@ -7,9 +7,10 @@ if(UNIX)
 endif()
 
 set(APPLICATION_NAME taskplanner)
+set(APP_VERSION 0.8.0)
 set(ORGANIZATION_NAME ancor)
 
-project(taskplanner VERSION 0.8.0)
+project(taskplanner VERSION ${APP_VERSION})
 
 add_subdirectory(application)
 add_subdirectory(libtaskmanager)
