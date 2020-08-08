@@ -10,6 +10,7 @@
 #include "property.h"
 #include "constraint.h"
 #include "constraint_grammar.h"
+#include "version.h"
 
 #include <QDateTime>
 #include <QColor>
@@ -111,9 +112,10 @@ int main(int argc, char *argv[])
 
   QApplication app(argc, argv);
 
-  QString version(GIT_VERSION);
 //  QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
-  QGuiApplication::setApplicationDisplayName(QString("%1 (%2)").arg(APP_NAME).arg(version));
+  QGuiApplication::setApplicationDisplayName(QString("%1 (%2)")
+                                             .arg(taskplanner::project_name)
+                                             .arg(taskplanner::project_full_version));
 
 
   Manager manager;

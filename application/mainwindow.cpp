@@ -16,6 +16,7 @@
 #include "hibernationdetector.h"
 #include "toolbarinfodisplay.h"
 #include "plugininterface.h"
+#include "version.h"
 
 #include "search/searchframe.h"
 #include "search/searchcontroller.h"
@@ -295,7 +296,10 @@ void MainWindow::closeEvent(QCloseEvent* pEvent)
 void MainWindow::saveSettings()
 {
   // write window state, currently loaded file etc. to a settings file
-  QSettings settings(QSettings::IniFormat, QSettings::UserScope, ORGANIZATION_NAME, APP_NAME);
+  QSettings settings(QSettings::IniFormat,
+                     QSettings::UserScope,
+                     taskplanner::organization_name,
+                     taskplanner::project_name);
 
   settings.beginGroup("window");
   settings.setValue("state", saveState());
@@ -315,7 +319,10 @@ void MainWindow::saveSettings()
 
 void MainWindow::loadSettings()
 {
-  QSettings settings(QSettings::IniFormat, QSettings::UserScope, ORGANIZATION_NAME, APP_NAME);
+  QSettings settings(QSettings::IniFormat,
+                     QSettings::UserScope,
+                     taskplanner::organization_name,
+                     taskplanner::project_name);
 
   settings.beginGroup("window");
   restoreGeometry(settings.value("geometry").toByteArray());
