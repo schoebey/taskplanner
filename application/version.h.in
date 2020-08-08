@@ -1,0 +1,19 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+
+namespace taskplanner
+{
+  const char organization_name[] = "@ORGANIZATION_NAME@";
+
+  const char project_name[] = "@PROJECT_NAME@";
+  const char project_version[] = "@PROJECT_VERSION@";
+  const char project_full_version[] = "@PROJECT_VERSION@.@GIT_HASH@";
+
+  const char git_branch[] = "@GIT_BRANCH@";
+  const char git_hash[] = "@GIT_HASH@";
+  const char git_date[] = "@GIT_DATE@";
+  const char git_timestamp[] = "@GIT_TIMESTAMP@";
+}
+
+#endif
