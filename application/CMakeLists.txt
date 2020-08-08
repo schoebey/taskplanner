@@ -70,6 +70,7 @@ add_executable(${PROJECT_NAME}
     taskwidgetoverlay.h
     toolbarinfodisplay.cpp
     toolbarinfodisplay.h
+    version.h.in
     widgetmanager.cpp
     widgetmanager.h
     widgetresizer.cpp
@@ -77,6 +78,8 @@ add_executable(${PROJECT_NAME}
     windowtitlemenubar.cpp
     windowtitlemenubar.h
 )
+
+include(version)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC libtaskmanager)
 
@@ -97,17 +100,7 @@ include(GNUInstallDirs)
 
 install(TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}-targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-# TODO: Remove when version header is generated
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-    ORGANIZATION_NAME="ancor"
-    APP_NAME="${PROJECT_NAME}"
-    GIT_VERSION="1231efe"
-    GIT_TIMESTAMP="2020-08-03"
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
