@@ -29,20 +29,20 @@ QMenuBar {
 QMenuBar::item {
     padding: 1px 10px;
     background: transparent;
-	border: 1px solid transparent;
-	border-bottom: 0px;
+        border: 1px solid transparent;
+        border-bottom: 0px;
 }
 
 QMenuBar::item:selected { /* when selected using mouse or keyboard */
     background: #777;
-	border: 1px solid transparent;
-	border-bottom: 0px;
+        border: 1px solid transparent;
+        border-bottom: 0px;
 }
 
 QMenuBar::item:pressed {
     background: rgb(30, 30, 30);
-	border: 1px solid #555;
-	border-bottom: 0px;
+        border: 1px solid #555;
+        border-bottom: 0px;
 }
 
 QMenu {
@@ -92,7 +92,7 @@ QToolBar {
   min-width: 64px;
   min-height: 64px;
   margin-right: 10px;
-  background: url(:/icons/appicon_64.png);
+  background: url(:/icons/taskplanner_64.png);
   background-color: rgba(255,255,255,50);
 }
 
@@ -169,8 +169,8 @@ OverlayWidget > #pClose {
   border-top-right-radius: 5px;
 }
 
-#backlog { qproperty-backgroundImage: -1; } 
-#inprogress { qproperty-backgroundImage: -1; } 
+#backlog { qproperty-backgroundImage: -1; }
+#inprogress { qproperty-backgroundImage: -1; }
 #testing { qproperty-backgroundImage: -1; }
 #done { qproperty-backgroundImage: -1; }
 
@@ -297,7 +297,7 @@ TaskWidget #pStartStop {
 }
 
 TaskWidget[expanded=false] #pStartStop {
-  border-bottom-right-radius: 5px; 
+  border-bottom-right-radius: 5px;
 }
 
 TaskWidget #pStartStop:checked {
@@ -466,7 +466,7 @@ ToolBarInfoDisplay QLabel {
 }
 
 TaskListWidget {
-	background-color: transparent;
+        background-color: transparent;
 }
 
 SearchFrame {
