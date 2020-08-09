@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Comment=A offline task planner app
+Name=taskplanner
+Exec=taskplanner
+Icon=taskplanner
+Categories=Office;Utility;
