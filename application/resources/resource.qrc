@@ -26,9 +26,9 @@
         <file>link.png</file>
         <file>about.png</file>
         <file>Built_with_Qt_RGB_logo_white.png</file>
-        <file>appicon.png</file>
-        <file>appicon_32.png</file>
-        <file>appicon_64.png</file>
+        <file>taskplanner.png</file>
+        <file>taskplanner_32.png</file>
+        <file>taskplanner_64.png</file>
         <file>handle.png</file>
         <file>handle_urgent.png</file>
     </qresource>
