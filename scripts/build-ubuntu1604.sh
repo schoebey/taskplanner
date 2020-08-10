@@ -3,7 +3,7 @@
 mkdir build
 cd build
 
-env
+export PATH="/opt/cmake-3.18.1-Linux-x86_64/bin:/opt/ninja-1.10:$PATH"
 
 QT_ENV_SCRIPT=$(find /opt -name 'qt*-env.sh')
 source $QT_ENV_SCRIPT
@@ -13,8 +13,6 @@ cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr ..
 cmake --build . --target all -- -j$(nproc)
 
 DESTDIR=install cmake --build . --target install
-
-env
 
 wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
 chmod a+x linuxdeployqt-continuous-x86_64.AppImage
