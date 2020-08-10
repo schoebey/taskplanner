@@ -10,6 +10,16 @@ set(APPLICATION_NAME taskplanner)
 set(APP_VERSION 0.8.0)
 set(ORGANIZATION_NAME ancor)
 
+# Auto. CCACHE
+if(UNIX)
+    find_program(CCACHE_FOUND ccache)
+
+    if(CCACHE_FOUND)
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+    endif(CCACHE_FOUND)
+endif()
+
 project(taskplanner VERSION ${APP_VERSION})
 
 add_subdirectory(application)
