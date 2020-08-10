@@ -16,6 +16,6 @@ DESTDIR=install cmake --build . --target install
 
 wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
 chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-export LD_LIBRARY_PATH=$(pwd)/install/usr/lib
+export LD_LIBRARY_PATH=$(pwd)/install/usr/lib/x86_64-linux-gnu
 export VERSION="v0.8.0"
 ./linuxdeployqt-continuous-x86_64.AppImage install/usr/share/applications/*.desktop -appimage
