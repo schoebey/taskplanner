@@ -18,6 +18,11 @@ wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/contin
 chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 export LD_LIBRARY_PATH=$(pwd)/install/usr/lib/x86_64-linux-gnu
 export VERSION="v0.8.0"
-./linuxdeployqt-continuous-x86_64.AppImage install/usr/share/applications/*.desktop -appimage
+./linuxdeployqt-continuous-x86_64.AppImage \
+    install/usr/share/applications/*.desktop \
+    -executable=install/usr/lib/taskplanner/libmarkdown-serializer.so \
+    -executable=install/usr/lib/taskplanner/libtext-report.so \
+    -executable=install/usr/lib/taskplanner/libtext-serializer.so \
+    -appimage
 
 mv taskplanner-*.AppImage ../
