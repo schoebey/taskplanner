@@ -20,11 +20,9 @@ target_include_directories(${PROJECT_NAME}
         ../../../libtaskmanager/serializers
 )
 
-include(GNUInstallDirs)
-
 install(TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}-targets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${APPLICATION_NAME}
+    LIBRARY DESTINATION ${PLUGIN_INSTALL_DIR}/
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

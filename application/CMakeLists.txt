@@ -95,11 +95,8 @@ if(UNIX)
     target_link_libraries(${PROJECT_NAME} PUBLIC pthread)
  endif()
 
-
-include(GNUInstallDirs)
-
 install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT binaries
+    RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR} COMPONENT binaries
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
