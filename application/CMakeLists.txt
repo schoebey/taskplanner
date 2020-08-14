@@ -100,3 +100,9 @@ include(app-output-dir)
 
 add_subdirectory(resources)
 
+if(APPLE)
+    add_custom_command(TARGET ${PROJECT_NAME}
+        POST_BUILD COMMAND
+        ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/../Frameworks/"
+        $<TARGET_FILE:${PROJECT_NAME}>)
+endif()
