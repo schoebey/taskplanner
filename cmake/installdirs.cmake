@@ -1,5 +1,4 @@
 if(UNIX AND NOT APPLE)
-    message("UNIX NOT APPLE")
     set(RUNTIME_INSTALL_DIR bin
         CACHE PATH "Install dir for executables and dlls")
 
@@ -12,7 +11,6 @@ if(UNIX AND NOT APPLE)
     set(PLUGIN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib/${APPLICATION_NAME}
         CACHE PATH "Install dir for plugins")
 elseif(APPLE)
-    message("APPLE")
     set(prefix "${PROJECT_NAME}.app/Contents")
 
     set(RUNTIME_INSTALL_DIR ${prefix}/MacOS
