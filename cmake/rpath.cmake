@@ -1,0 +1,6 @@
+if(UNIX AND NOT APPLE)
+  set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN/")
+#elseif(APPLE)
+#  set(CMAKE_INSTALL_NAME_DIR @executable_path/../Frameworks)
+#  set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+endif()
