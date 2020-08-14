@@ -15,13 +15,5 @@ add_library(${PROJECT_NAME} SHARED
 
 target_link_libraries(${PROJECT_NAME} PUBLIC libtaskmanager)
 
-include(GNUInstallDirs)
-
-install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}-targets
-    LIBRARY DESTINATION ${PLUGIN_INSTALL_DIR}
-)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${APPLICATION_NAME}
-)
+include(plugin-install-target)
+include(plugin-output-dir)
