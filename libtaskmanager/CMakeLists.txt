@@ -69,14 +69,5 @@ target_link_libraries(${PROJECT_NAME}
         Qt5::Core
 )
 
-include(GNUInstallDirs)
-
-install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}-targets
-    ARCHIVE DESTINATION ${ARCHIVE_INSTALL_DIR}
-    LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
-)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-)
+include(lib-install-target)
+include(lib-output-dir)

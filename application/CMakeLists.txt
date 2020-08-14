@@ -93,15 +93,10 @@ target_link_libraries(${PROJECT_NAME}
 
 if(UNIX)
     target_link_libraries(${PROJECT_NAME} PUBLIC pthread)
- endif()
+endif()
 
-install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR} COMPONENT binaries
-)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-)
+include(app-install-target)
+include(app-output-dir)
 
 add_subdirectory(resources)
 
