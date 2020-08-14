@@ -16,7 +16,3 @@ add_subdirectory(application)
 add_subdirectory(libtaskmanager)
 add_subdirectory(plugins)
 add_subdirectory(unittests)
-
-#set(CPACK_GENERATOR "DragNDrop")
-#set(CPACK_BUNDLE_NAME ${APPLICATION_NAME})
-#include(CPack)
