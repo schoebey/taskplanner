@@ -13,13 +13,6 @@ add_library(${PROJECT_NAME} SHARED
 
 target_link_libraries(${PROJECT_NAME} PUBLIC libtaskmanager)
 
-target_include_directories(${PROJECT_NAME}
-    PRIVATE
-        ../../../libtaskmanager
-        ../../../libtaskmanager/reports
-        ../../../libtaskmanager/serializers
-)
-
 install(TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}-targets
     LIBRARY DESTINATION ${PLUGIN_INSTALL_DIR}/
