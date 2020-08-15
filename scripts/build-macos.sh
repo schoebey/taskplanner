@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+env
+
+export PATH="/usr/local/opt/qt/bin:/usr/local/bin:$PATH"
+
+env
+
 mkdir build
 cd build
 
