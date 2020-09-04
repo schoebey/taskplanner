@@ -704,9 +704,9 @@ void MainWindow::onTaskMoved(task_id id, task_id newParentTaskId, int iPos)
 //      TODO: test moving tasks to subtasks or between subtasks or reordering of subtasks
       MoveTaskCommand* pCommand = new MoveTaskCommand(id,
                                                       pTask->group(),
-                                                      nullptr != pNewParentTask ? pNewParentTask->group() : -1,
+                                                      nullptr != pNewParentTask ? pNewParentTask->group() : group_id(-1),
                                                       pTask->parentTask(),
-                                                      nullptr != pNewParentTask ? pNewParentTask->id() : -1,
+                                                      nullptr != pNewParentTask ? pNewParentTask->id() : task_id(-1),
                                                       iOldPos, iPos,
                                                       m_pManager,m_pWidgetManager);
       m_undoStack.push(pCommand);
