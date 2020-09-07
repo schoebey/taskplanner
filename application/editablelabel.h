@@ -22,8 +22,14 @@ public:
 
   void setDisplayFunction(const std::function<QString(const QString&)> fnDisplay);
 
+  Q_PROPERTY(bool editable READ editable WRITE setEditable NOTIFY editabilityChanged)
+  void setEditable(bool bEditable);
+  bool editable() const;
+
 public slots:
   void edit();
+  void cancel();
+  void closeEditor();
 
   void setEditText(const QString& sText);
   QString editText() const;
@@ -33,6 +39,11 @@ public slots:
 signals:
   void editingFinished();
   void sizeChanged();
+  void textChanged(const QString&);
+  void editabilityChanged();
+
+protected:
+  bool eventFilter(QObject* pWatched, QEvent* pEvent) override;
 
 private slots:
   void onEditingFinished();
@@ -43,6 +54,7 @@ private:
   QString m_sEditText;
   std::function<QString(const QString&)> m_fnToDisplay;
   int m_iMinWidth;
+  bool m_bEditable = true;
 };
 
 #endif // EDITABLELABEL_H
