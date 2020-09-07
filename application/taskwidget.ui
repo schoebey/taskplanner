@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>252</width>
-    <height>55</height>
+    <width>273</width>
+    <height>93</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -137,7 +137,17 @@
                <property name="spacing">
                 <number>0</number>
                </property>
-               <item row="0" column="0" colspan="2">
+               <item row="2" column="0" colspan="2">
+                <widget class="QFrame" name="pSeparator">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0" colspan="2">
                 <widget class="EditableLabel" name="pDescription">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -162,17 +172,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0" colspan="2">
-                <widget class="QFrame" name="pSeparator">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0" colspan="2">
+               <item row="4" column="0" colspan="2">
                 <widget class="QFrame" name="pLinks">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -180,6 +180,16 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="frameShape">
+                  <enum>QFrame::NoFrame</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="2">
+                <widget class="QFrame" name="pTags">
                  <property name="frameShape">
                   <enum>QFrame::NoFrame</enum>
                  </property>
