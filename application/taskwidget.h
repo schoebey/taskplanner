@@ -22,6 +22,7 @@ class TaskWidgetOverlay;
 class QMenu;
 class LinkWidget;
 class QLabel;
+class TagWidget;
 class TaskWidget : public QFrame, public IPropertyProvider, public ITaskContainerWidget
 {
   Q_OBJECT
@@ -87,6 +88,10 @@ public slots:
   void removeLink(const QUrl& link);
   void insertLink(const QUrl& link, int iPos);
 
+  void addTag(TagWidget* pTagWidget);
+  void removeTag(TagWidget* pTagWidget);
+  std::vector<TagWidget*> tags() const;
+
   void setAutoPriority(double dPriority);
 
 signals:
@@ -108,6 +113,8 @@ signals:
   void priorityUpdateRequested(task_id);
   void addTimeRequested(task_id);
   void removeTimeRequested(task_id);
+  void addTagRequested(tag_id);
+  void removeTagRequested(tag_id);
 
 private slots:
   void onTitleEdited();
