@@ -53,7 +53,8 @@ SOURCES += \
     $$PWD/search/searchframe.cpp \
     $$PWD/search/searchcontroller.cpp \
     colorspacewidget.cpp \
-    colorpicker.cpp
+    colorpicker.cpp \
+    tagwidget.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -92,7 +93,8 @@ HEADERS += \
     propertieshelpers.h \
     styleExtension.h \
     colorspacewidget.h \
-    colorpicker.h
+    colorpicker.h \
+    tagwidget.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
