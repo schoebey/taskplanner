@@ -623,6 +623,22 @@ void TaskWidget::insertLink(const QUrl& link, int iPos)
   emit linkInserted(m_taskId, link, iPos);
 }
 
+
+void TaskWidget::addTag(TagWidget* pTagWidget)
+{
+  // TODO: add tag to layout
+}
+
+void TaskWidget::removeTag(TagWidget* pTagWidget)
+{
+  // TODO: remove tag from layout
+}
+
+std::vector<TagWidget*> TaskWidget::tags() const
+{
+  return {};
+}
+
 void TaskWidget::setAutoPriority(double dPriority)
 {
   if (!qFuzzyCompare(m_dAutoPriority, dPriority))
