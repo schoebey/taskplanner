@@ -10,16 +10,6 @@ namespace Ui {
   class LinkWidget;
 }
 
-enum CustomStyleOptions
-{
-  eLinkWidget = QStyleOption::SO_CustomBase + 1
-};
-
-enum CustomControlElements
-{
-  CE_LinkWidget = QStyle::CE_CustomBase + 1
-};
-
 class QStyleOptionLinkWidget : public QStyleOption
 {
 public:

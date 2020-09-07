@@ -1,5 +1,6 @@
 #include "linkwidget.h"
 #include "ui_linkwidget.h"
+#include "styleExtension.h"
 
 #include <QPainter>
 #include <QContextMenuEvent>
@@ -10,7 +11,7 @@
 
 
 QStyleOptionLinkWidget::QStyleOptionLinkWidget()
-  : QStyleOption(1, eLinkWidget)
+  : QStyleOption(1, customStyleOptions::SO_LinkWidget)
 {
 }
 
@@ -207,7 +208,7 @@ void LinkWidget::paintEvent(QPaintEvent* /*pEvent*/)
   opt.bDrawFrame = m_bDrawFrame;
 
   QPainter painter(this);
-  style()->drawControl(static_cast<QStyle::ControlElement>(CE_LinkWidget), &opt, &painter, this);
+  style()->drawControl(customControlElements::CE_LinkWidget, &opt, &painter, this);
 }
 
 void LinkWidget::mousePressEvent(QMouseEvent*)
