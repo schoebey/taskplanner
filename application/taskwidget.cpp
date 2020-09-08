@@ -9,6 +9,7 @@
 #include "tasklistwidget.h"
 #include "decoratedlabel.h"
 #include "groupwidget.h"
+#include "tagwidget.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -58,6 +59,9 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
 
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
+
+  pFlowLayout = new FlowLayout(ui->pTags, 0, 0, 0);
+  ui->pTags->setLayout(pFlowLayout);
 
   connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
@@ -624,19 +628,44 @@ void TaskWidget::insertLink(const QUrl& link, int iPos)
 }
 
 
-void TaskWidget::addTag(TagWidget* pTagWidget)
+bool TaskWidget::addTag(TagWidget* pTagWidget)
 {
-  // TODO: add tag to layout
+  auto it = std::find(m_vpTagWidgets.begin(), m_vpTagWidgets.end(), pTagWidget);
+  if (it == m_vpTagWidgets.end())
+  {
+    m_vpTagWidgets.push_back(pTagWidget);
+
+    QLayout* pLayout = ui->pTags->layout();
+    if (nullptr != pLayout) {
+      pLayout->addWidget(pTagWidget);
+    }
+    return true;
+  }
+  return false;
 }
 
-void TaskWidget::removeTag(TagWidget* pTagWidget)
+bool TaskWidget::removeTag(TagWidget* pTagWidget)
 {
-  // TODO: remove tag from layout
+  auto it = std::find(m_vpTagWidgets.begin(), m_vpTagWidgets.end(), pTagWidget);
+  if (it != m_vpTagWidgets.end())
+  {
+    m_vpTagWidgets.erase(it);
+
+    QLayout* pLayout = ui->pTags->layout();
+    if (nullptr != pLayout) {
+      pLayout->removeWidget(pTagWidget);
+    }
+    return true;
+  }
+  return false;
 }
 
 std::vector<TagWidget*> TaskWidget::tags() const
 {
-  return {};
+  std::vector<TagWidget*> vpTagWidgets;
+  std::transform(m_vpTagWidgets.begin(), m_vpTagWidgets.end(), std::back_inserter(vpTagWidgets),
+                 [](QPointer<TagWidget> pTw) -> TagWidget* { return pTw; });
+  return vpTagWidgets;
 }
 
 void TaskWidget::setAutoPriority(double dPriority)
