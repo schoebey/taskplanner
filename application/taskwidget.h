@@ -88,8 +88,8 @@ public slots:
   void removeLink(const QUrl& link);
   void insertLink(const QUrl& link, int iPos);
 
-  void addTag(TagWidget* pTagWidget);
-  void removeTag(TagWidget* pTagWidget);
+  bool addTag(TagWidget* pTagWidget);
+  bool removeTag(TagWidget* pTagWidget);
   std::vector<TagWidget*> tags() const;
 
   void setAutoPriority(double dPriority);
@@ -174,6 +174,8 @@ private:
   };
   std::map<QString, SPropertyWidgets> m_propertyLineEdits;
   std::map<EditableLabel*, QPointer<QTimer>> m_updateTimers;
+
+  std::vector<QPointer<TagWidget>> m_vpTagWidgets;
 
   ITaskContainerWidget* m_pContainer = nullptr;
 
