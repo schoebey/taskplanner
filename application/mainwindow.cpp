@@ -1586,7 +1586,7 @@ bool MainWindow::eventFilter(QObject* /*pWatched*/, QEvent* pEvent)
 
 void MainWindow::onChooseStylesheet()
 {
-  QString sFileName = QFileDialog::getOpenFileName(this, tr("Choose stylesheet..."), QString(), "stylesheet (*.css)");
+  QString sFileName = QFileDialog::getOpenFileName(this, tr("Choose stylesheet..."), m_sStylesheetPath, "stylesheet (*.css)");
   if (sFileName.isEmpty())  { return; }
 
   m_sStylesheetPath = sFileName;
