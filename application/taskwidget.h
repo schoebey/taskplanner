@@ -135,7 +135,7 @@ private slots:
 
 private:
   void emphasise();
-  void setUpContextMenu();
+  void showContextMenu(QPoint pt);
 
 private:
   Q_DISABLE_COPY(TaskWidget)
@@ -178,9 +178,6 @@ private:
   std::vector<QPointer<TagWidget>> m_vpTagWidgets;
 
   ITaskContainerWidget* m_pContainer = nullptr;
-
-  QMenu* m_pContextMenu = nullptr;
-  QAction* m_pTrackAction = nullptr;
 
   std::map<QUrl, LinkWidget*> m_linkWidgets;
 

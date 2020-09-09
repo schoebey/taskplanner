@@ -73,8 +73,6 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::updateSize, Qt::QueuedConnection);
   connect(this, &TaskWidget::attentionNeeded, this, &TaskWidget::emphasise);
 
-  setUpContextMenu();
-
   setExpanded(true);
   setAcceptDrops(true);
 }
@@ -96,19 +94,9 @@ TaskWidget::~TaskWidget()
   delete ui;
 }
 
-void TaskWidget::setUpContextMenu()
+void TaskWidget::showContextMenu(QPoint pt)
 {
-  if (nullptr == m_pContextMenu)
-  {
-    m_pContextMenu = new QMenu();
-  }
-
-  setContextMenuPolicy(Qt::DefaultContextMenu);
-  for (const auto& pAction : m_pContextMenu->actions())
-  {
-    m_pContextMenu->removeAction(pAction);
-    delete pAction;
-  }
+  QMenu contextMenu;
 
 
   // TODO: shortcuts don't work in general. why? focus problem? can't be,
@@ -119,19 +107,19 @@ void TaskWidget::setUpContextMenu()
   pPasteLinkAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
   pPasteLinkAction->setShortcutContext(Qt::WidgetShortcut);
   addAction(pPasteLinkAction);
-  m_pContextMenu->addAction(pPasteLinkAction);
+  contextMenu.addAction(pPasteLinkAction);
   connect(pPasteLinkAction, SIGNAL(triggered()), this, SLOT(onLinkPasted()));
 
   QAction* pDeleteAction = new QAction(tr("Delete"), this);
   pDeleteAction->setShortcuts(QList<QKeySequence>() << Qt::Key_Delete << Qt::Key_Backspace);
   pDeleteAction->setShortcutContext(Qt::WidgetShortcut);
-  m_pContextMenu->addAction(pDeleteAction);
+  contextMenu.addAction(pDeleteAction);
   addAction(pDeleteAction);
   connect(pDeleteAction, SIGNAL(triggered()), this, SLOT(onDeleteTriggered()));
 
-  m_pContextMenu->addSeparator();
+  contextMenu.addSeparator();
 
-  QMenu* pPropertiesMenu = m_pContextMenu->addMenu(tr("Add properties"));
+  QMenu* pPropertiesMenu = contextMenu.addMenu(tr("Add properties"));
   for (const auto& sPropertyName : Properties<Task>::registeredPropertyNames())
   {
     if (m_propertyLineEdits.find(sPropertyName) == m_propertyLineEdits.end() &&
@@ -146,7 +134,7 @@ void TaskWidget::setUpContextMenu()
 
   if (!m_propertyLineEdits.empty())
   {
-    QMenu* pRemovePropertiesMenu = m_pContextMenu->addMenu(tr("Remove properties"));
+    QMenu* pRemovePropertiesMenu = contextMenu.addMenu(tr("Remove properties"));
     for (const auto& sPropertyName : Properties<Task>::registeredPropertyNames())
     {
       if (m_propertyLineEdits.find(sPropertyName) != m_propertyLineEdits.end() &&
@@ -160,24 +148,24 @@ void TaskWidget::setUpContextMenu()
     }
   }
 
-  m_pContextMenu->addSeparator();
+  contextMenu.addSeparator();
 
 
 
   QAction* pAction = new QAction(tr("Add subtask"), this);
   connect(pAction, SIGNAL(triggered()), this, SLOT(onAddSubtaskTriggered()));
-  m_pContextMenu->addAction(pAction);
+  contextMenu.addAction(pAction);
 
 
-  m_pContextMenu->addSeparator();
-  m_pTrackAction = new QAction(ui->pStartStop->isChecked() ?
+  contextMenu.addSeparator();
+  QAction* pTrackAction = new QAction(ui->pStartStop->isChecked() ?
                                                 tr("Stop tracking") :
                                                 tr("Start tracking"), this);
-  m_pTrackAction->setShortcut(Qt::Key_T);
-  m_pTrackAction->setShortcutContext(Qt::WidgetShortcut);
-  addAction(m_pTrackAction);
-  m_pContextMenu->addAction(m_pTrackAction);
-  connect(m_pTrackAction, &QAction::triggered, this, [&]()
+  pTrackAction->setShortcut(Qt::Key_T);
+  pTrackAction->setShortcutContext(Qt::WidgetShortcut);
+  addAction(pTrackAction);
+  contextMenu.addAction(pTrackAction);
+  connect(pTrackAction, &QAction::triggered, this, [&]()
   {
     setTimeTrackingEnabled(!ui->pStartStop->isChecked());
   }
@@ -185,11 +173,13 @@ void TaskWidget::setUpContextMenu()
 
   QAction* pAddTimeAction = new QAction(tr("Add time"), this);
   connect(pAddTimeAction, &QAction::triggered, this, [&](){ emit addTimeRequested(id()); });
-  m_pContextMenu->addAction(pAddTimeAction);
+  contextMenu.addAction(pAddTimeAction);
 
   QAction* pRemoveTimeAction = new QAction(tr("Remove time"), this);
   connect(pRemoveTimeAction, &QAction::triggered, this, [&](){ emit removeTimeRequested(id()); });
-  m_pContextMenu->addAction(pRemoveTimeAction);
+  contextMenu.addAction(pRemoveTimeAction);
+
+  contextMenu.exec(pt);
 }
 
 task_id TaskWidget::id() const
@@ -439,8 +429,6 @@ void TaskWidget::addProperty(const QString& sName,
       updateSize();
     }
   }
-
-  setUpContextMenu();
 }
 
 std::set<QString> TaskWidget::propertyNames() const
@@ -489,8 +477,6 @@ bool TaskWidget::removeProperty(const QString& sName)
     return true;
   }
 
-  setUpContextMenu();
-
   return false;
 }
 
@@ -513,8 +499,6 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
       it->second.pFrame->deleteLater();
       m_propertyLineEdits.erase(it);
       updateSize();
-
-      setUpContextMenu();
     }
     else
     {
@@ -896,12 +880,10 @@ void TaskWidget::setTimeTrackingEnabled(bool bEnabled)
   ui->pStartStop->setChecked(bEnabled);
 
   if (bEnabled) {
-    m_pTrackAction->setText(tr("Stop tracking"));
     emit timeTrackingStarted(m_taskId);
     setHighlight(highlight() | EHighlightMethod::eTimeTrackingActive);
   }
   else {
-    m_pTrackAction->setText(tr("Start tracking"));
     emit timeTrackingStopped(m_taskId);
     setHighlight(highlight() & ~EHighlightMethod::eTimeTrackingActive);
   }
@@ -959,15 +941,8 @@ void TaskWidget::leaveEvent(QEvent* /*pEvent*/)
 
 void TaskWidget::contextMenuEvent(QContextMenuEvent* pEvent)
 {
-  if (nullptr != m_pContextMenu)
-  {
-    pEvent->accept();
-    m_pContextMenu->exec(pEvent->globalPos());
-  }
-  else
-  {
-    pEvent->ignore();
-  }
+  pEvent->accept();
+  showContextMenu(pEvent->globalPos());
 }
 
 void TaskWidget::setExpanded(bool bExpanded)
