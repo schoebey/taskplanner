@@ -1,6 +1,8 @@
 #ifndef TAGWIDGET_H
 #define TAGWIDGET_H
 
+#include "id_types.h"
+
 #include <QLabel>
 #include <QFrame>
 
@@ -16,11 +18,13 @@ class TagWidget : public QFrame
   Q_OBJECT
 
 public:
-  TagWidget(const QString& sText, QWidget* pParent);
+  TagWidget(tag_id id, const QString& sText, QWidget* pParent);
 
-  TagWidget(const TagWidget& other);
+  TagWidget(const TagWidget& other) = delete;
 
   ~TagWidget();
+
+  tag_id id() const;
 
   Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
   void setText(const QString& sText);
@@ -40,6 +44,7 @@ signals:
   void editabilityChanged();
 
 private:
+  tag_id m_id;
   QString m_sText;
   QColor m_color;
   EditableLabel* m_pLabel = nullptr;
