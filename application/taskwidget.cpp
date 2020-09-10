@@ -20,11 +20,14 @@
 #include <QMimeData>
 #include <QClipboard>
 #include <QPointer>
+#include <QWidgetAction>
 
 #include <QPropertyAnimation>
 #include <cassert>
 #include <cmath>
 
+
+Q_DECLARE_METATYPE(tag_id)
 
 namespace widgetAnimation {
   void deleteWidgetAnimation(QWidget*);
@@ -147,6 +150,35 @@ void TaskWidget::showContextMenu(QPoint pt)
       }
     }
   }
+
+
+  // tags
+  QMenu* pTagsMenu = contextMenu.addMenu(tr("Tags"));
+  struct STag {QString s; QColor c; tag_id id;};
+  std::vector<STag> v = {{"a", QColor(Qt::yellow), 0}, {"b", QColor(Qt::red), 1}};
+  for (const auto& tag : v)
+  {
+    QPixmap pm(16, 16);
+    pm.fill(tag.c);
+    QIcon icon(pm);
+    QAction* pAction = new QAction(icon, tag.s, this);
+    pAction->setCheckable(true);
+    pAction->setData(QVariant::fromValue(tag.id));
+    bool bTagAlreadyPresent = false;
+    for (const auto& t : tags()) {
+      bTagAlreadyPresent |= t->id() == tag.id;
+    }
+    pAction->setChecked(bTagAlreadyPresent);
+    connect(pAction, &QAction::triggered, this, [&, pAction](bool bOn)
+    {
+      tag_id tagId = pAction->data().value<tag_id>();
+      if (bOn) emit addTagRequested(tagId);
+      else emit removeTagRequested(tagId);
+    });
+    pTagsMenu->addAction(pAction);
+  }
+  QAction* pEditTags = new QAction("Edit tags...", this);
+  pTagsMenu->addAction(pEditTags);
 
   contextMenu.addSeparator();
 
