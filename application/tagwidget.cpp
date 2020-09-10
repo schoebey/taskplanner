@@ -12,8 +12,9 @@
 #include <cmath>
 
 
-TagWidget::TagWidget(const QString& sText, QWidget* pParent)
+TagWidget::TagWidget(tag_id id, const QString& sText, QWidget* pParent)
   : QFrame(pParent),
+    m_id(id),
     m_color(QColor(255, 210, 20))
 {
   setAttribute(Qt::WA_StyledBackground, true);
@@ -31,28 +32,14 @@ TagWidget::TagWidget(const QString& sText, QWidget* pParent)
   setEditable(false);
 }
 
-TagWidget::TagWidget(const TagWidget& other)
-  : QFrame(other.parentWidget())
-{
-  QGridLayout* pLayout = new QGridLayout();
-  pLayout->setSpacing(0);
-  pLayout->setMargin(0);
-  setLayout(pLayout);
-  EditableLabel* pLabel = new EditableLabel(this);
-  pLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-  pLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-  m_pLabel = pLabel;
-  pLayout->addWidget(pLabel);
-  connect(pLabel, &EditableLabel::textChanged, this, &TagWidget::setText);
-  setText(other.text());
-  setColor(other.color());
-  resize(other.size());
-  setEditable(false);
-}
-
 TagWidget::~TagWidget()
 {
 
+}
+
+tag_id TagWidget::id() const
+{
+  return m_id;
 }
 
 void TagWidget::setText(const QString& sText)
@@ -73,8 +60,14 @@ void TagWidget::setColor(const QColor& c)
 {
   if (c != m_color)
   {
+//    todo: read color in stylesheet and set it as background color
+//        palette doesn't work, the application palette is used instead
+//        custom properties can only be written, but not read.
+//        what else is there to try?
     m_color = c;
     emit colorChanged(m_color);
+    style()->unpolish(this);
+    style()->polish(this);
   }
 }
 
