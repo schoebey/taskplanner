@@ -271,8 +271,7 @@ bool Task::addTaskId(task_id id)
 
   auto vTaskIds = property<std::vector<task_id>>("tasks");
   vTaskIds.push_back(id);
-  setProperty("tasks", vTaskIds);
-  return true;
+  return setProperty("tasks", vTaskIds);
 }
 
 bool Task::removeTask(task_id id)
@@ -282,14 +281,14 @@ bool Task::removeTask(task_id id)
   if (it != vTaskIds.end())
   {
     vTaskIds.erase(it);
-    setProperty("tasks", vTaskIds);
+    bool bSuccess = setProperty("tasks", vTaskIds);
 
     ITask* pTask = m_pManager->task(id);
     if (nullptr != pTask)
     {
       pTask->setParentTask(-1);
     }
-    return true;
+    return bSuccess;
   }
 
   return false;
@@ -441,7 +440,7 @@ bool Task::addTag(tag_id tagId)
   if (it == vTagIds.end())
   {
     vTagIds.push_back(tagId);
-    return true;
+    return setProperty("tags", vTagIds);
   }
   return false;
 }
@@ -453,7 +452,7 @@ bool Task::removeTag(tag_id id)
   if (it != vTagIds.end())
   {
     vTagIds.erase(it);
-    return true;
+    return setProperty("tags", vTagIds);
   }
   return false;
 }
