@@ -55,7 +55,9 @@ SOURCES += \
     colorspacewidget.cpp \
     colorpicker.cpp \
     tagwidget.cpp \
-    tagprovider.cpp
+    tagprovider.cpp \
+    commands/addtagcommand.cpp \
+    commands/removetagcommand.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -97,7 +99,9 @@ HEADERS += \
     colorpicker.h \
     tagwidget.h \
     tagproviderinterface.h \
-    tagprovider.h
+    tagprovider.h \
+    commands/addtagcommand.h \
+    commands/removetagcommand.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
