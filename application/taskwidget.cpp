@@ -175,8 +175,8 @@ void TaskWidget::showContextMenu(QPoint pt)
       connect(pAction, &QAction::triggered, this, [&, pAction](bool bOn)
       {
         tag_id tagId = pAction->data().value<tag_id>();
-        if (bOn) emit addTagRequested(tagId);
-        else emit removeTagRequested(tagId);
+        if (bOn) emit addTagRequested(id(), tagId);
+        else emit removeTagRequested(id(), tagId);
       });
       pTagsMenu->addAction(pAction);
     }
