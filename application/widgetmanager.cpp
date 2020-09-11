@@ -7,14 +7,19 @@
 #include "conversion.h"
 #include "task.h"
 #include "group.h"
+#include "tagwidget.h"
+#include "tagprovider.h"
+#include "property.h"
 
 #include <QHBoxLayout>
-#include <property.h>
+
+#include <memory>
 
 WidgetManager::WidgetManager(Manager* pManager,
                                QWidget* pController)
   : m_pManager(pManager),
-    m_pController(pController)
+    m_pController(pController),
+    m_spTagProvider(new TagProvider(pManager))
 {
 
 }
@@ -143,6 +148,10 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
       pTaskWidget->addProperty(sName, sPropertyValue);
     }
   }
+
+  // pass the tag provider to the task widget so that
+  // it can show available tags in its context menu
+  pTaskWidget->setTagProvider(&*m_spTagProvider);
 
   m_taskWidgets[id] = pTaskWidget;
 
