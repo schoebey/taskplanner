@@ -115,8 +115,8 @@ signals:
   void priorityUpdateRequested(task_id);
   void addTimeRequested(task_id);
   void removeTimeRequested(task_id);
-  void addTagRequested(tag_id);
-  void removeTagRequested(tag_id);
+  void addTagRequested(task_id, tag_id);
+  void removeTagRequested(task_id, tag_id);
 
 private slots:
   void onTitleEdited();
