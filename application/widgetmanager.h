@@ -7,6 +7,7 @@
 class TaskWidget;
 class GroupWidget;
 class Manager;
+class TagProvider;
 
 class WidgetManager
 {
@@ -27,6 +28,7 @@ private:
   QWidget* m_pController;
   std::map<group_id, QPointer<GroupWidget>> m_groupWidgets;
   std::map<task_id, QPointer<TaskWidget>> m_taskWidgets;
+  std::unique_ptr<TagProvider> m_spTagProvider;
 };
 
 #endif // WIDGETSMANAGER_H
