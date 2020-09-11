@@ -23,6 +23,7 @@ class QMenu;
 class LinkWidget;
 class QLabel;
 class TagWidget;
+class ITagProvider;
 class TaskWidget : public QFrame, public IPropertyProvider, public ITaskContainerWidget
 {
   Q_OBJECT
@@ -54,7 +55,6 @@ public:
   bool hasPropertyValue(const QString& sName) const override;
   QString propertyValue(const QString& sName) const override;
 
-
   void setHighlight(HighlightingMethod method);
   HighlightingMethod highlight() const;
 
@@ -74,6 +74,8 @@ public:
   void ensureVisible();
 
   bool onPropertyValueChanged(const QString& sName, const QString& sValue);
+
+  void setTagProvider(ITagProvider* pProvider);
 public slots:
   void setExpanded(bool bExpanded);
 
@@ -182,6 +184,8 @@ private:
   std::map<QUrl, LinkWidget*> m_linkWidgets;
 
   QSize m_expandedSize;
+
+  ITagProvider* m_pTagProvider = nullptr;
 
   static TaskWidget* m_pDraggingTaskWidget;
   static TaskWidget* m_pTaskWidgetUnderMouse;
