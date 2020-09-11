@@ -10,6 +10,7 @@
 #include "decoratedlabel.h"
 #include "groupwidget.h"
 #include "tagwidget.h"
+#include "tagproviderinterface.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -153,32 +154,35 @@ void TaskWidget::showContextMenu(QPoint pt)
 
 
   // tags
-  QMenu* pTagsMenu = contextMenu.addMenu(tr("Tags"));
-  struct STag {QString s; QColor c; tag_id id;};
-  std::vector<STag> v = {{"a", QColor(Qt::yellow), 0}, {"b", QColor(Qt::red), 1}};
-  for (const auto& tag : v)
+  if (nullptr != m_pTagProvider)
   {
-    QPixmap pm(16, 16);
-    pm.fill(tag.c);
-    QIcon icon(pm);
-    QAction* pAction = new QAction(icon, tag.s, this);
-    pAction->setCheckable(true);
-    pAction->setData(QVariant::fromValue(tag.id));
-    bool bTagAlreadyPresent = false;
-    for (const auto& t : tags()) {
-      bTagAlreadyPresent |= t->id() == tag.id;
-    }
-    pAction->setChecked(bTagAlreadyPresent);
-    connect(pAction, &QAction::triggered, this, [&, pAction](bool bOn)
+    QMenu* pTagsMenu = contextMenu.addMenu(tr("Tags"));
+
+    std::vector<STagData> v = m_pTagProvider->availableTags();
+    for (const auto& tag : v)
     {
-      tag_id tagId = pAction->data().value<tag_id>();
-      if (bOn) emit addTagRequested(tagId);
-      else emit removeTagRequested(tagId);
-    });
-    pTagsMenu->addAction(pAction);
+      QPixmap pm(16, 16);
+      pm.fill(tag.color);
+      QIcon icon(pm);
+      QAction* pAction = new QAction(icon, tag.sName, this);
+      pAction->setCheckable(true);
+      pAction->setData(QVariant::fromValue(tag.id));
+      bool bTagAlreadyPresent = false;
+      for (const auto& t : tags()) {
+        bTagAlreadyPresent |= t->id() == tag.id;
+      }
+      pAction->setChecked(bTagAlreadyPresent);
+      connect(pAction, &QAction::triggered, this, [&, pAction](bool bOn)
+      {
+        tag_id tagId = pAction->data().value<tag_id>();
+        if (bOn) emit addTagRequested(tagId);
+        else emit removeTagRequested(tagId);
+      });
+      pTagsMenu->addAction(pAction);
+    }
+    QAction* pEditTags = new QAction("Edit tags...", this);
+    pTagsMenu->addAction(pEditTags);
   }
-  QAction* pEditTags = new QAction("Edit tags...", this);
-  pTagsMenu->addAction(pEditTags);
 
   contextMenu.addSeparator();
 
@@ -606,6 +610,11 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
   }
 
   return false;
+}
+
+void TaskWidget::setTagProvider(ITagProvider* pProvider)
+{
+  m_pTagProvider = pProvider;
 }
 
 void TaskWidget::addLink(const QUrl& link)
