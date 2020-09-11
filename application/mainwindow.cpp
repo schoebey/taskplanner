@@ -27,6 +27,8 @@
 #include "commands/movetaskcommand.h"
 #include "commands/addtaskcommand.h"
 #include "commands/deletetaskcommand.h"
+#include "commands/addtagcommand.h"
+#include "commands/removetagcommand.h"
 
 #include <QFileSystemWatcher>
 #include <QDebug>
@@ -53,6 +55,7 @@
 #include <array>
 #include <future>
 #include <memory>
+
 
 
 namespace
@@ -1690,4 +1693,22 @@ void MainWindow::onRemoveTimeFromTaskRequested(task_id id)
       emit documentModified();
     }
   }
+}
+
+void MainWindow::onAddTagRequested(task_id taskId, tag_id tagId)
+{
+  QUndoCommand* pCommand = new AddTagCommand(taskId, tagId,
+                                             m_pManager, m_pWidgetManager);
+  m_undoStack.push(pCommand);
+
+  emit documentModified();
+}
+
+void MainWindow::onRemoveTagRequested(task_id taskId, tag_id tagId)
+{
+  QUndoCommand* pCommand = new RemoveTagCommand(taskId, tagId,
+                                                m_pManager, m_pWidgetManager);
+  m_undoStack.push(pCommand);
+
+  emit documentModified();
 }

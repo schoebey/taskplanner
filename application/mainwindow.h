@@ -87,6 +87,8 @@ private slots:
   void onPriorityUpdateRequested(task_id);
   void onAddTimeToTaskRequested(task_id);
   void onRemoveTimeFromTaskRequested(task_id);
+  void onAddTagRequested(task_id taskId, tag_id tagId);
+  void onRemoveTagRequested(task_id taskId, tag_id tagId);
 
 signals:
   void timeTrackingStopped(task_id taskId);
