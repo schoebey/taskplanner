@@ -6,6 +6,7 @@
 
 class TaskWidget;
 class GroupWidget;
+class TagWidget;
 class Manager;
 class TagProvider;
 
@@ -20,6 +21,7 @@ public:
   GroupWidget* groupWidget(group_id id) const;
   GroupWidget* createGroupWidget(group_id id);
   TaskWidget* createTaskWidget(task_id id);
+  TagWidget* createTagWidget(tag_id id);
   bool deleteTaskWidget(task_id id);
   bool deleteGroupWidget(group_id id);
 
