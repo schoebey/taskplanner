@@ -57,7 +57,8 @@ SOURCES += \
     tagwidget.cpp \
     tagprovider.cpp \
     commands/addtagcommand.cpp \
-    commands/removetagcommand.cpp
+    commands/removetagcommand.cpp \
+    tageditor.cpp
 
 HEADERS += \
     $$PWD/editablelabel.h \
@@ -101,7 +102,8 @@ HEADERS += \
     tagproviderinterface.h \
     tagprovider.h \
     commands/addtagcommand.h \
-    commands/removetagcommand.h
+    commands/removetagcommand.h \
+    tageditor.h
 
 FORMS += \
     $$PWD/groupwidget.ui \
