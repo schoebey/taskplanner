@@ -237,6 +237,22 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   connect(pChooseScript, &QAction::triggered, this, &MainWindow::onChooseScript);
   ui->menuTools->addAction(pChooseScript);
 
+  QAction* pOpenTagEditor = new QAction(tr("Edit tags..."), this);
+  connect(pOpenTagEditor, &QAction::triggered, this, [&]()
+  {
+    auto pEditor = m_pWidgetManager->createTagEditor();
+
+    OverlayWidget* pOverlay = new OverlayWidget(this);
+    pOverlay->setObjectName("TagEditor");
+    pOverlay->setAutoDeleteOnClose(true);
+    pOverlay->addWidget(pEditor);
+    pOverlay->setTitle(tr("Tags"));
+    pEditor->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    pOverlay->appear();
+  });
+  ui->menuTools->addAction(pOpenTagEditor);
+  pOpenTagEditor->setShortcut(Qt::CTRL + Qt::Key_T);
+
 
   loadSettings();
 
