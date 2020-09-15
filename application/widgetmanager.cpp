@@ -153,6 +153,16 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
     }
   }
 
+  for (const auto tagId : pTask->tagIds())
+  {
+    ITag* pTag = m_pManager->tag(tagId);
+    if (nullptr != pTag) {
+      TagWidget* pTagWidget = new TagWidget(tagId, pTag->name(), pTaskWidget);
+      pTagWidget->setColor(pTag->color());
+      pTaskWidget->addTag(pTagWidget);
+    }
+  }
+
   // pass the tag provider to the task widget so that
   // it can show available tags in its context menu
   pTaskWidget->setTagProvider(&*m_spTagProvider);
