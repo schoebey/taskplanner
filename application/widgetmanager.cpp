@@ -11,6 +11,7 @@
 #include "tagwidget.h"
 #include "tagprovider.h"
 #include "property.h"
+#include "tageditor.h"
 
 #include <QHBoxLayout>
 
@@ -161,7 +162,7 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
   return pTaskWidget;
 }
 
-TagWidget* WidgetManager::createTagWidget(tag_id id)
+TagWidget* WidgetManager::createTagWidget(tag_id id) const
 {
   ITag* pTag = m_pManager->tag(id);
   if (nullptr != pTag)
@@ -199,4 +200,9 @@ bool WidgetManager::deleteGroupWidget(group_id id)
   }
 
   return false;
+}
+
+QWidget* WidgetManager::createTagEditor() const
+{
+  return new TagEditor(&*m_spTagProvider);
 }

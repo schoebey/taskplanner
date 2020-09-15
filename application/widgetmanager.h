@@ -9,6 +9,7 @@ class GroupWidget;
 class TagWidget;
 class Manager;
 class TagProvider;
+class TagEditor;
 
 class WidgetManager
 {
@@ -18,12 +19,15 @@ public:
   void clear();
 
   TaskWidget* taskWidget(task_id id) const;
+  TaskWidget* createTaskWidget(task_id id);
+  bool deleteTaskWidget(task_id id);
+
   GroupWidget* groupWidget(group_id id) const;
   GroupWidget* createGroupWidget(group_id id);
-  TaskWidget* createTaskWidget(task_id id);
-  TagWidget* createTagWidget(tag_id id);
-  bool deleteTaskWidget(task_id id);
   bool deleteGroupWidget(group_id id);
+
+  TagWidget* createTagWidget(tag_id id) const;
+  QWidget* createTagEditor() const;
 
 private:
   Manager* m_pManager;
