@@ -12,6 +12,12 @@ public:
 
   std::vector<STagData> availableTags() const override;
 
+  tag_id addTag() override;
+
+  bool deleteTag(tag_id tagId) override;
+
+  bool modifyTag(tag_id tagId, const QString& sName, const QColor& color) override;
+
 private:
   Manager* m_pManager;
 };
