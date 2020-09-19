@@ -196,6 +196,9 @@ bool SerializableManager::removeTag(tag_id tagId)
   if (it != m_tags.end())
   {
     m_tags.erase(it);
+
+    // TODO: remove all occurrences of tagId from all tasks
+
     return true;
   }
 
