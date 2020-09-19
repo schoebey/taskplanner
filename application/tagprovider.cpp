@@ -26,3 +26,24 @@ std::vector<STagData> TagProvider::availableTags() const
 
   return vData;
 }
+
+tag_id TagProvider::addTag()
+{
+  auto pTag = m_pManager->addTag();
+  if (nullptr != pTag)
+  {
+    return pTag->id();
+  }
+
+  return tag_id{};
+}
+
+bool TagProvider::deleteTag(tag_id tagId)
+{
+  return m_pManager->removeTag(tagId);
+}
+
+bool TagProvider::modifyTag(tag_id tagId, const QString& sName, const QColor& color)
+{
+  return m_pManager->modifyTag(tagId, sName, color);
+}
