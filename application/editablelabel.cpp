@@ -31,11 +31,13 @@ void EditableLabel::edit()
     m_iMinWidth = sizeHint().width();
     setMinimumWidth(150);
 
+    m_sPrevText = text();
+
     m_pLineEdit->setText(m_sEditText.isEmpty() ? text() : m_sEditText);
     m_pLineEdit->selectAll();
-    m_pLineEdit->setFocus();
     m_pLineEdit->resize(size());
     m_pLineEdit->show();
+    m_pLineEdit->setFocus();
     connect(m_pLineEdit, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()), Qt::UniqueConnection);
 
 
@@ -109,10 +111,14 @@ void EditableLabel::resizeEvent(QResizeEvent* pEvent)
 
 void EditableLabel::onEditingFinished()
 {
-  setEditText(m_pLineEdit->text());
-  emit textChanged(m_pLineEdit->text());
+  if (m_sPrevText != m_pLineEdit->text())
+  {
+    m_sPrevText = m_pLineEdit->text();
+    setEditText(m_pLineEdit->text());
+    emit textChanged(m_pLineEdit->text());
 
-  setText(m_fnToDisplay(m_pLineEdit->text()));
+    setText(m_fnToDisplay(m_pLineEdit->text()));
+  }
 
   closeEditor();
 }
@@ -160,6 +166,9 @@ bool EditableLabel::eventFilter(QObject* pWatched, QEvent* pEvent)
         cancel();
       }
     }break;
+    case QEvent::FocusOut:
+      cancel();
+      break;
     default:
       break;
     }
