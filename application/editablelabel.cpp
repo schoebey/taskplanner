@@ -6,6 +6,7 @@
 #include <QPainter>
 #include <QStyleOption>
 #include <QKeyEvent>
+#include <QApplication>
 
 
 EditableLabel::EditableLabel(QWidget* pParent)
@@ -41,7 +42,7 @@ void EditableLabel::edit()
     connect(m_pLineEdit, SIGNAL(editingFinished()), this, SLOT(onEditingFinished()), Qt::UniqueConnection);
 
 
-    m_pLineEdit->installEventFilter(this);
+    qApp->installEventFilter(this);
   }
 }
 
@@ -132,7 +133,7 @@ void EditableLabel::cancel()
 void EditableLabel::closeEditor()
 {
   m_pLineEdit->hide();
-  m_pLineEdit->removeEventFilter(this);
+  qApp->removeEventFilter(this);
   setMinimumWidth(m_iMinWidth);
   emit editingFinished();
 }
@@ -164,6 +165,9 @@ bool EditableLabel::eventFilter(QObject* pWatched, QEvent* pEvent)
           Qt::Key_Escape == pKeyEvent->key())
       {
         cancel();
+
+        // prevent the event from being propagated any further
+        return true;
       }
     }break;
     case QEvent::FocusOut:
