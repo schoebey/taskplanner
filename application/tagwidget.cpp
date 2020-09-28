@@ -27,7 +27,7 @@ TagWidget::TagWidget(tag_id id, const QString& sText, QWidget* pParent)
   pLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   m_pLabel = pLabel;
   pLayout->addWidget(pLabel);
-  connect(pLabel, &EditableLabel::textChanged, this, &TagWidget::setText);
+  connect(pLabel, &EditableLabel::textChanged, this, &TagWidget::textChanged);
   setText(sText);
   setEditable(false);
 }
