@@ -17,6 +17,7 @@
 #include "toolbarinfodisplay.h"
 #include "plugininterface.h"
 #include "propertieshelpers.h"
+#include "tagwidget.h"
 
 #include "search/searchframe.h"
 #include "search/searchcontroller.h"
@@ -1712,4 +1713,24 @@ void MainWindow::onRemoveTagRequested(task_id taskId, tag_id tagId)
   m_undoStack.push(pCommand);
 
   emit documentModified();
+}
+
+void MainWindow::onTagEdited(tag_id tagId, const QString& sTagText, const QColor& tagColor)
+{
+  // find each instance of tagId and modify text and color accordingly
+  for (const auto& taskId : m_pManager->taskIds())
+  {
+    TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
+    if (nullptr != pTaskWidget)
+    {
+      for (TagWidget* pTagWidget : pTaskWidget->tags())
+      {
+        if (nullptr != pTagWidget && pTagWidget->id() == tagId)
+        {
+          pTagWidget->setText(sTagText);
+          pTagWidget->setColor(tagColor);
+        }
+      }
+    }
+  }
 }
