@@ -72,5 +72,6 @@ void TagEditor::editTag(tag_id tagId, const QString& sText, const QColor& color)
 {
   if (nullptr != m_pTagProvider) {
     m_pTagProvider->modifyTag(tagId, sText, color);
+    emit tagEdited(tagId, sText, color);
   }
 }
