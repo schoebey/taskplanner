@@ -7,6 +7,7 @@
 class ITagProvider;
 class TagEditor : public QWidget
 {
+  Q_OBJECT
 public:
   TagEditor(ITagProvider* pTagProvider);
 
