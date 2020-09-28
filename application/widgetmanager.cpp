@@ -214,5 +214,8 @@ bool WidgetManager::deleteGroupWidget(group_id id)
 
 QWidget* WidgetManager::createTagEditor() const
 {
-  return new TagEditor(&*m_spTagProvider);
+  QWidget* pTagEditor = new TagEditor(&*m_spTagProvider);
+  QObject::connect(pTagEditor, SIGNAL(tagEdited(tag_id, QString, QColor)), m_pController, SLOT(onTagEdited(tag_id, QString, QColor)));
+
+  return pTagEditor;
 }
