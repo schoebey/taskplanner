@@ -6,6 +6,7 @@
 #include <QStyle>
 #include <QPropertyAnimation>
 #include <QPaintEvent>
+#include <QAction>
 
 OverlayWidget::OverlayWidget(QWidget *parent)
   : QFrame(nullptr != parent ? parent->window() : nullptr),
@@ -76,20 +77,25 @@ void OverlayWidget::resizeEvent(QResizeEvent* pEvent)
 
 bool OverlayWidget::eventFilter(QObject* pObject, QEvent* pEvent)
 {
-  if (m_pParent == pObject && QEvent::Resize == pEvent->type())
+  if (m_pParent == pObject)
   {
-    resize(m_pParent->size());
+    switch (pEvent->type())
+    {
+    case QEvent::Resize:
+      resize(m_pParent->size());
+      break;
+    case QEvent::KeyPress:
+    {
+      QKeyEvent* pKeyEvent = dynamic_cast<QKeyEvent*>(pEvent);
+      if (nullptr != pKeyEvent &&
+          Qt::Key_Escape == pKeyEvent->key())
+      {
+        disappear();
+      }
+    } break;
+    default:
+      break;
+    }
   }
   return false;
-}
-
-void OverlayWidget::keyPressEvent(QKeyEvent* pEvent)
-{
-  switch (pEvent->key())
-  {
-  case Qt::Key_Escape:
-    disappear();
-  default:
-    break;
-  }
 }

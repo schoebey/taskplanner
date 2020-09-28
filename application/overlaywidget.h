@@ -16,8 +16,6 @@ public:
 
   void addWidget(QWidget* pWidget, Qt::Alignment alignment = 0);
 
-  void keyPressEvent(QKeyEvent* pEvent) override;
-
   void setTitle(const QString& sText);
 signals:
 
