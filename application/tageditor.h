@@ -4,6 +4,7 @@
 #include "id_types.h"
 #include <QWidget>
 
+class Ui_TagEditor;
 class ITagProvider;
 class TagEditor : public QWidget
 {
@@ -22,6 +23,7 @@ private:
   void editTag(tag_id tagId, const QString& sText, const QColor& color);
 
   ITagProvider* m_pTagProvider = nullptr;
+  Ui_TagEditor* m_pUi = nullptr;
 };
 
 #endif // TAGEDITOR_H

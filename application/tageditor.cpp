@@ -1,23 +1,26 @@
 #include "tageditor.h"
 #include "tagproviderinterface.h"
 #include "tagwidget.h"
+#include "ui_tageditor.h"
 
 #include <QGridLayout>
 #include <QPushButton>
 
 TagEditor::TagEditor(ITagProvider* pTagProvider)
-  : m_pTagProvider(pTagProvider)
+  : m_pTagProvider(pTagProvider),
+    m_pUi(new Ui_TagEditor())
 {
+  m_pUi->setupUi(this);
+
+  connect(m_pUi->pNewTag, &QPushButton::clicked, this, &TagEditor::addTag);
+
   setupUi();
 }
 
 void TagEditor::setupUi()
 {
-  QGridLayout* pLayout = dynamic_cast<QGridLayout*>(layout());
-  if (nullptr == pLayout) {
-    pLayout = new QGridLayout(this);
-    setLayout(pLayout);
-  } else {
+  QGridLayout* pLayout = dynamic_cast<QGridLayout*>(m_pUi->pTags->layout());
+  if (nullptr != pLayout) {
     QLayoutItem* pItem = nullptr;
     while (nullptr != (pItem = pLayout->takeAt(0))) {
       delete pItem->widget();
@@ -43,10 +46,6 @@ void TagEditor::setupUi()
       connect(pTagWidget, &TagWidget::colorChanged, this, onTagWidgetEdited);
       pLayout->addWidget(pTagWidget, iRow++, 0);
     }
-
-    QPushButton* pNewTag = new QPushButton("add new tag", this);
-    pLayout->addWidget(pNewTag, iRow, 0);
-    connect(pNewTag, &QPushButton::clicked, this, &TagEditor::addTag);
   }
 }
 
