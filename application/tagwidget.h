@@ -38,6 +38,8 @@ public:
   void setEditable(bool bEditable);
   bool editable() const;
 
+  void paintEvent(QPaintEvent*);
+
 signals:
   void textChanged(const QString&);
   void colorChanged(const QColor&);

@@ -8,14 +8,15 @@
 #include <QStyleOption>
 #include <QApplication>
 #include <QWidgetAction>
+#include <QStyleOptionFrameV3>
+#include <QDebug>
 
 #include <cmath>
 
 
 TagWidget::TagWidget(tag_id id, const QString& sText, QWidget* pParent)
   : QFrame(pParent),
-    m_id(id),
-    m_color(QColor(255, 210, 20))
+    m_id(id)
 {
   setAttribute(Qt::WA_StyledBackground, true);
   QGridLayout* pLayout = new QGridLayout();
@@ -30,6 +31,7 @@ TagWidget::TagWidget(tag_id id, const QString& sText, QWidget* pParent)
   connect(pLabel, &EditableLabel::textChanged, this, &TagWidget::textChanged);
   setText(sText);
   setEditable(false);
+  setColor(QColor(255, 210, 20));
 }
 
 TagWidget::~TagWidget()
@@ -60,14 +62,21 @@ void TagWidget::setColor(const QColor& c)
 {
   if (c != m_color)
   {
-//    todo: read color in stylesheet and set it as background color
-//        palette doesn't work, the application palette is used instead
-//        custom properties can only be written, but not read.
-//        what else is there to try?
     m_color = c;
-    emit colorChanged(m_color);
+
+    QPalette pal(m_pLabel->palette());
+    bool bBrightText = qGray(m_color.rgb()) <= 120;
+    pal.setColor(QPalette::Text, bBrightText ? Qt::white : Qt::black);
+    m_pLabel->setPalette(pal);
+    m_pLabel->setProperty("brightText", bBrightText);
+
+    style()->unpolish(m_pLabel);
+    style()->polish(m_pLabel);
+
     style()->unpolish(this);
     style()->polish(this);
+
+    emit colorChanged(m_color);
   }
 }
 
@@ -107,4 +116,22 @@ bool TagWidget::editable() const
   return m_pLabel->editable();
 }
 
+void TagWidget::paintEvent(QPaintEvent* pEvent)
+{
+  QPainter painter(this);
+  painter.setRenderHint(QPainter::Antialiasing);
+  painter.setPen(Qt::black);
+  painter.setBrush(m_color);
+  painter.drawRoundedRect(QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5), 4, 4);
 
+//  QStyleOptionFrame opt;
+//  opt.initFrom(this);
+//  for (int i = 0; i < QPalette::NColorRoles; ++i)
+//  {
+//    opt.palette.setColor(static_cast<QPalette::ColorRole>(i), Qt::yellow);
+//  }
+//  painter.setBrush(Qt::yellow);
+//  style()->drawPrimitive(QStyle::PE_Frame, &opt, &painter, this);
+
+//  QFrame::paintEvent(pEvent);
+}
