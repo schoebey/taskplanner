@@ -64,7 +64,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
 
-  pFlowLayout = new FlowLayout(ui->pTags, 0, 0, 0);
+  pFlowLayout = new FlowLayout(ui->pTags);
   ui->pTags->setLayout(pFlowLayout);
 
   connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
