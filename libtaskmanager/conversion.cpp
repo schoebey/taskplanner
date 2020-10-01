@@ -286,6 +286,128 @@ namespace conversion
                                                    "hh:mm",
                                                    "hh:mm AP",
                                                    "hh:mm ap"};
+
+  QTime timeFromString(const QString& sVal, bool& bConversionStatus, const QTime& baseTime)
+  {
+    for (const auto& format : c_sTimeFormats)
+    {
+      QTime t = QTime::fromString(sVal, format);
+      bConversionStatus = t.isValid();
+      if (bConversionStatus)
+      {
+        return t;
+      }
+    }
+
+    // first, try to match fixed time points
+    // e.g. at 7:45 AM
+    QRegExp rx(R"((^.*)( on | at |@)(.*))");
+    if (0 == rx.indexIn(sVal))
+    {
+      // we have an absolute time/date point. Parse it!
+      QString sFirstPart = rx.cap(1);
+      QString sSecondPart = rx.cap(3);
+
+      if (sFirstPart.isEmpty() ^ sSecondPart.isEmpty())
+      {
+        return timeFromString(sFirstPart.isEmpty() ? sSecondPart : sFirstPart, bConversionStatus, baseTime);
+      }
+    }
+    else
+    {
+      rx = QRegExp(R"(^(on |at |@)\s*(.*)$)");
+      if (0 == rx.indexIn(sVal))
+      {
+        QString sCap = rx.cap(2);
+        if (!sCap.isEmpty())
+        {
+          return timeFromString(sCap, bConversionStatus, baseTime);
+        }
+      }
+      else
+      {
+        QStringList parts = sVal.split(" ");
+        if (2 <= parts.size())
+        {
+          QTime t = timeFromString(parts[0], bConversionStatus, baseTime);
+          if (bConversionStatus)
+          {
+            return t;
+          }
+        }
+      }
+    }
+
+
+
+    // try to match natural language input
+    /*
+      in two seconds
+      in 20 s
+      in 10 secs
+      in 5 minutes
+      in 5 years
+      in 2 days
+      in 2 weeks
+      in 2h
+      in 17 hours
+      in two and a half weeks
+      in 5mins
+      in a hundred years
+    */
+    std::function<void(QDateTime&, const QTime&)> setToNextTime = [](QDateTime& dt, const QTime& t)
+    {
+      if (dt.time() > t)
+      {
+        dt = dt.addDays(1);
+      }
+      dt.setTime(t);
+    };
+    std::function<void(QTime&, int)> addSecs = [](QTime& t, int iOffset) { t = t.addSecs(iOffset); };
+    std::function<void(QTime&, int)> addMins = [](QTime& t, int iOffset) { t = t.addSecs(60 * iOffset); };
+    std::function<void(QTime&, int)> addHours = [](QTime& t, int iOffset) { t = t.addSecs(3600 * iOffset); };
+    std::vector<std::pair<QRegExp, std::function<void(QTime&, int)>>> addUnitQuantity;
+    addUnitQuantity.push_back(std::make_pair(QRegExp("s(?:ec(?:ond)?)?(?:s)?"), addSecs));
+    addUnitQuantity.push_back(std::make_pair(QRegExp("m(?:in(?:ute)?)?(?:s)?"), addMins));
+    addUnitQuantity.push_back(std::make_pair(QRegExp("h(?:our)?(?:s)?"), addHours));
+    QRegExp relativeToNow("^in ((?:\\S*\\s*)*)\\s+(\\S+){1}$");
+
+    if (0 == relativeToNow.indexIn(sVal))
+    {
+      QString sQuantity = relativeToNow.cap(1);
+      bool bIsInt(false);
+      int iQuantity = fromString<int>(sQuantity, bIsInt);
+      if (bIsInt)
+      {
+        QString sUnit = relativeToNow.cap(2);
+        for (const auto& el : addUnitQuantity)
+        {
+          if (el.first.exactMatch(sUnit))
+          {
+            QTime t = baseTime;
+            el.second(t, iQuantity);
+            bConversionStatus = true;
+            return t;
+          }
+        }
+      }
+    }
+
+
+    return QTime();
+  }
+
+  template<>
+  QTime fromString<QTime>(const QString& sVal, bool& bConversionStatus)
+  {
+    return timeFromString(sVal, bConversionStatus, QTime::currentTime());
+  }
+
+  QString toString(const QTime& t)
+  {
+    return t.toString(c_sTimeFormat);
+  }
+
   QDateTime dateTimeFromString(const QString& sVal, bool& bConversionStatus,
                                const QDateTime& baseDateTime)
   {
@@ -615,6 +737,4 @@ in a hundred years
   {
     return c.name(QColor::HexArgb);
   }
-
-
 }

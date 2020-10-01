@@ -63,6 +63,7 @@ struct can_convert_to_string<T,
 
 namespace conversion
 {
+  static const QString c_sTimeFormat = "hh:mm:ss.zzz";
   static const QString c_sDateTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
 
   namespace fancy
@@ -150,6 +151,11 @@ namespace conversion
     bConversionStatus = true;
     return T(sVal);
   }
+
+  //-- QTime
+  QTime LIBTASKMANAGER timeFromString(const QString& sVal, bool& bConversionStatus, const QTime& baseTime);
+  template<> QTime LIBTASKMANAGER fromString<QTime>(const QString& sVal, bool& bConversionStatus);
+  QString LIBTASKMANAGER toString(const QTime& dt);
 
   //-- QDateTime
   QDateTime LIBTASKMANAGER dateTimeFromString(const QString& sVal, bool& bConversionStatus, const QDateTime& baseDateTime);
