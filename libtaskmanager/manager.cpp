@@ -8,6 +8,15 @@
 Manager::Manager()
 {
   m_spPrivate = std::make_shared<SerializableManager>(this);
+
+
+  REGISTER_PROPERTY(Task, "name", QString, false);
+  REGISTER_PROPERTY(Task, "description", QString, false);
+  REGISTER_PROPERTY(Task, "tasks", std::vector<task_id>, false);
+  REGISTER_PROPERTY(Task, "tags", std::vector<tag_id>, false);
+
+  REGISTER_PROPERTY(Group, "name", QString, false);
+  REGISTER_PROPERTY(Group, "description", QString, false);
 }
 
 Manager::~Manager()
