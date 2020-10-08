@@ -63,6 +63,8 @@ struct can_convert_to_string<T,
 
 namespace conversion
 {
+  template<typename T> QString toDisplayString(const T& val);
+
   static const QString c_sTimeFormat = "hh:mm:ss.zzz";
   static const QString c_sDateTimeFormat = "yyyy-MM-dd hh:mm:ss.zzz";
 
@@ -116,11 +118,12 @@ namespace conversion
     return t.toString();
   }
 
+
   template<typename T>
-  typename std::enable_if<!std::is_convertible<QString, T>::value &&
-                          !std::is_arithmetic<T>::value &&
+  typename std::enable_if<!std::is_constructible<T, double>::value &&
+                          !std::is_constructible<T, QString>::value &&
                           !detail::has_push_back<T>::value &&
-                          !std::is_constructible<T, int>::value, T>::type
+                          !std::is_same<T, QString>::value, T>::type
   fromString(const QString& /*sVal*/, bool& /*bConversionStatus*/);
 
   template<typename T>
@@ -145,7 +148,7 @@ namespace conversion
   }
 
   template<typename T>
-  typename std::enable_if<std::is_convertible<QString, T>::value, T>::type
+  typename std::enable_if<std::is_constructible<T, QString>::value, T>::type
   fromString(const QString& sVal, bool& bConversionStatus)
   {
     bConversionStatus = true;

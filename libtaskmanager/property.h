@@ -17,6 +17,20 @@
 #include <iostream>
 #include <functional>
 
+namespace detail {
+  template<typename T> QString toDisplayStringHelper(const QString& sValue)
+  {
+    bool bStatus = false;
+    auto val = conversion::fromString<T>(sValue, bStatus);
+    if (bStatus)
+    {
+      return conversion::toDisplayString<T>(val);
+    }
+    return sValue;
+  }
+}
+
+using toDisplayFunction = std::function<QString(const QString&)>;
 class PropertyDescriptor : public ISerializable
 {
 public:
@@ -33,6 +47,8 @@ public:
 
   virtual void addConstraint(const QString& sName,
                              const QString& sConfiguration) = 0;
+
+  virtual toDisplayFunction displayFunction() const = 0;
 };
 typedef std::shared_ptr<PropertyDescriptor> tspDescriptor;
 
@@ -41,10 +57,12 @@ template<typename T> class PropertyDescriptorTpl : public PropertyDescriptor
 public:
   PropertyDescriptorTpl(const QString& sName,
                         const QString& sTypeName = QString(),
-                        bool bVisible = true)
+                        bool bVisible = true,
+                        toDisplayFunction fnToDisplay = toDisplayFunction())
    : m_sName(sName),
      m_sTypeName(sTypeName),
-     m_bVisible(bVisible)
+     m_bVisible(bVisible),
+     m_fnToDisplay(fnToDisplay)
   {
     // TODO: call all static register functions for all known constraints
     AndConstraint<T>::registerCreator();
@@ -103,11 +121,17 @@ public:
     return nullptr == m_spConstraint || m_spConstraint->accepts(value);
   }
 
+  toDisplayFunction displayFunction() const override
+  {
+    return m_fnToDisplay;
+  }
+
 private:
   QString m_sName;
   QString m_sTypeName;
   bool m_bVisible = false;
   tspConstraintTpl<T> m_spConstraint;
+  toDisplayFunction m_fnToDisplay;
 };
 template <typename T> using tspDescriptorTpl = std::shared_ptr<PropertyDescriptorTpl<T>>;
 
@@ -241,14 +265,19 @@ namespace factory
 }
 
 #define REGISTER_PROPERTY(scope, name, type, visible) Properties<scope>::registerProperty<type>(name, #type, visible);
+#define REGISTER_DISPLAY_PROPERTY(scope, name, type) Properties<scope>::registerProperty<type>(name, #type, true, &detail::toDisplayStringHelper<type>);
 
 template<typename SCOPE>
 class Properties
 {
 public:
-  template <typename T> static bool registerProperty(const QString& sName, const QString& sTypeName, bool bVisible)
+  template <typename T> static bool registerProperty(const QString& sName,
+                                                     const QString& sTypeName,
+                                                     bool bVisible,
+                                                     toDisplayFunction fnToDisplay = toDisplayFunction())
   {
-    tspDescriptorTpl<T> spDescriptor = std::make_shared<PropertyDescriptorTpl<T>>(sName, sTypeName, bVisible);
+    tspDescriptorTpl<T> spDescriptor =
+        std::make_shared<PropertyDescriptorTpl<T>>(sName, sTypeName, bVisible, fnToDisplay);
     if (nullptr == spDescriptor)
     {
       // typename was not found in known types - must be a custom typename
@@ -291,6 +320,11 @@ public:
       names.insert(el->name());
     }
     return names;
+  }
+
+  static std::set<tspDescriptor> registeredProperties()
+  {
+    return allDescriptors();
   }
 
   std::set<QString> availablePropertyNames() const
