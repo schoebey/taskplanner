@@ -366,7 +366,8 @@ void TaskWidget::onRemovePropertyTriggered()
 }
 
 void TaskWidget::addProperty(const QString& sName,
-                             const QString& sValue)
+                             const QString& sValue,
+                             const tDisplayFct& fnToDisplay)
 {
   QLayout* pLayout = ui->pDynamicProperties->layout();
   if (nullptr != pLayout)
@@ -392,6 +393,7 @@ void TaskWidget::addProperty(const QString& sName,
       pValue->setFocusPolicy(Qt::NoFocus);
       pValue->setProperty("name", sName);
       pValue->setAlignment(Qt::AlignCenter);
+      if (fnToDisplay) { pValue->setDisplayFunction(fnToDisplay); }
       if ("due date" == sName)
       {
         pValue->setDisplayFunction(conversion::fancy::dateToString);

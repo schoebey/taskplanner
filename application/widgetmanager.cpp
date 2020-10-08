@@ -142,14 +142,14 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
     pTaskWidget->setOverlayBackground(color);
   }
 
-  for (const QString& sName : Properties<Task>::registeredPropertyNames())
+  for (const tspDescriptor& property : Properties<Task>::registeredProperties())
   {
-    if (!Properties<Task>::visible(sName))  { continue; }
+    if (!property->visible())  { continue; }
 
-    if (pTask->hasPropertyValue(sName))
+    if (pTask->hasPropertyValue(property->name()))
     {
-      QString sPropertyValue = pTask->propertyValue(sName);
-      pTaskWidget->addProperty(sName, sPropertyValue);
+      QString sPropertyValue = pTask->propertyValue(property->name());
+      pTaskWidget->addProperty(property->name(), sPropertyValue, property->displayFunction());
     }
   }
 

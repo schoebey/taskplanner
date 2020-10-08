@@ -11,6 +11,7 @@
 
 #include <map>
 #include <set>
+#include <functional>
 
 namespace Ui {
   class TaskWidget;
@@ -48,7 +49,9 @@ public:
   static void SetTaskWidgetUnderMouse(TaskWidget* pTaskWidget);
   static TaskWidget* TaskWidgetUnderMoue();
 
-  void addProperty(const QString& sName, const QString& sValue);
+  using tDisplayFct = std::function<QString(const QString&)>;
+  void addProperty(const QString& sName, const QString& sValue,
+                   const tDisplayFct& fnToDisplay = tDisplayFct());
   bool setPropertyValue(const QString& sName, const QString& sValue) override;
   bool removeProperty(const QString& sName) override;
   std::set<QString> propertyNames() const override;
