@@ -28,6 +28,17 @@ namespace detail {
     }
     return sValue;
   }
+  template<typename T> QString
+  toCustomDisplayStringHelper(const QString& sValue, const std::function<QString(const T&)>& fn)
+  {
+    bool bStatus = false;
+    auto val = conversion::fromString<T>(sValue, bStatus);
+    if (bStatus)
+    {
+      return fn(val);
+    }
+    return sValue;
+  }
 }
 
 using toDisplayFunction = std::function<QString(const QString&)>;
@@ -266,6 +277,7 @@ namespace factory
 
 #define REGISTER_PROPERTY(scope, name, type, visible) Properties<scope>::registerProperty<type>(name, #type, visible);
 #define REGISTER_DISPLAY_PROPERTY(scope, name, type) Properties<scope>::registerProperty<type>(name, #type, true, &detail::toDisplayStringHelper<type>);
+#define REGISTER_CUSTOM_DISPLAY_PROPERTY(scope, name, type, fn) Properties<scope>::registerProperty<type>(name, #type, true, std::bind(detail::toCustomDisplayStringHelper<type>, std::placeholders::_1, fn));
 
 template<typename SCOPE>
 class Properties
