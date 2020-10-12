@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "gtest_helpers.h"
 #include "libtaskmanager/conversion.h"
+#include "libtaskmanager/conversion_bitset.h"
 #include "libtaskmanager/id_types.h"
 
 #include <QDateTime>
@@ -239,6 +240,20 @@ TEST(Conversion, vector_id_toString)
   EXPECT_EQ(sResult, "1|2|3");
 }
 
+TEST(Conversion, bitset_fromString)
+{
+  bool bConversionStatus(false);
+  auto bitsetNominal = std::bitset<8>{0b01101101};
+  auto bitset = conversion::fromString<std::bitset<8>>("01101101", bConversionStatus);
+  EXPECT_TRUE(bConversionStatus);
+  EXPECT_EQ(bitset, bitsetNominal);
+}
+
+TEST(Conversion, bitset_toString)
+{
+  QString sResult = conversion::toString(std::bitset<8>{0b01101101});
+  EXPECT_EQ(sResult, "01101101");
+}
 
 namespace
 {
