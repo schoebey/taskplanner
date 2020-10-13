@@ -11,6 +11,7 @@
 #include "constraint.h"
 #include "constraint_grammar.h"
 #include "conversion_bitset.h"
+#include "conversion_chrono.h"
 #include "version.h"
 
 #include <QDateTime>
@@ -20,63 +21,6 @@
 #include <cassert>
 
 
-namespace conversion {
-  QString bitsetToWeekDays(const std::bitset<7>& bs)
-  {
-    if (0b1100000 == bs.to_ulong()) {
-      return "every weekend";
-    }
-    else if (0b0011111 == bs.to_ulong()) {
-      return "every workday";
-    }
-
-    QStringList l;
-    for (int i = 0; i < 7; ++i)
-    {
-      if (bs[i]) { l.push_back(QDate::shortDayName(i+1)); }
-    }
-    return QString("every %1").arg(l.join(", "));
-  }
-
-  // minutes
-  template<> QString toString<std::chrono::minutes>(const std::chrono::minutes& d)
-  {
-    return QString::number(d.count());
-  }
-
-  template<> std::chrono::minutes fromString<std::chrono::minutes>(const QString& sVal, bool& bConversionStatus)
-  {
-    bConversionStatus = true;
-    int iCount = sVal.toInt(&bConversionStatus);
-    if (!bConversionStatus) {
-      iCount = fancy::toInt(sVal, &bConversionStatus);
-    }
-    if (bConversionStatus)
-    {
-      return std::chrono::minutes{iCount};
-    }
-    return std::chrono::minutes{};
-  }
-
-  template<> QString toDisplayString<std::chrono::minutes>(const std::chrono::minutes& val)
-  {
-    int iCount = val.count();
-
-    int iMins = iCount;
-    int iHours = iMins / 60;
-    int iDays = iHours / 24;
-
-    iMins %= 60;
-    iHours %= 24;
-
-    QStringList list;
-    if (iDays > 0) list.push_back(QString("%1 days").arg(iDays));
-    if (iHours > 0) list.push_back(QString("%1 hours").arg(iHours));
-    if (iMins > 0) list.push_back(QString("%1 minutes").arg(iMins));
-
-    return list.join(" ");
-  }
-}
 
 int main(int argc, char *argv[])
 {
@@ -139,7 +83,7 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Task, "color", QColor, false);
   REGISTER_CUSTOM_DISPLAY_PROPERTY(Task, "auto_repeat_every", std::bitset<7>, &conversion::bitsetToWeekDays);
 //  REGISTER_PROPERTY(Task, "auto_start_time", QTime, true);
-//  REGISTER_DISPLAY_PROPERTY(Task, "auto_duration", std::chrono::minutes);
+  REGISTER_CUSTOM_DISPLAY_PROPERTY(Task, "auto_duration", std::chrono::minutes, &conversion::chrono::toDisplayString<std::chrono::minutes>);
 
   Properties<Task>::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
   Properties<Task>::registerConstraint("duration (days)", MIN(0));
@@ -147,6 +91,7 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Group, "autoSorting", bool, false);
 
   std::chrono::minutes min(0);
+
 
 
 //  TODO: configure order of comparison for properties, e.g.:
