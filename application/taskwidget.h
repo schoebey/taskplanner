@@ -120,6 +120,7 @@ signals:
   void removeTimeRequested(task_id);
   void addTagRequested(task_id, tag_id);
   void removeTagRequested(task_id, tag_id);
+  void addPropertyRequested(task_id, const QString&);
 
 private slots:
   void onTitleEdited();

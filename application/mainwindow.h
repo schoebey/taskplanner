@@ -90,6 +90,7 @@ private slots:
   void onAddTagRequested(task_id taskId, tag_id tagId);
   void onRemoveTagRequested(task_id taskId, tag_id tagId);
   void onTagEdited(tag_id tagId, const QString& sTagText, const QColor& tagColor);
+  void onAddPropertyRequested(task_id taskId, const QString& sPropertyName);
 
 signals:
   void timeTrackingStopped(task_id taskId);

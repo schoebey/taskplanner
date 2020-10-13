@@ -107,6 +107,7 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
   QObject::connect(pTaskWidget, SIGNAL(priorityUpdateRequested(task_id)),           m_pController, SLOT(onPriorityUpdateRequested(task_id)));
   QObject::connect(pTaskWidget, SIGNAL(addTagRequested(task_id, tag_id)),           m_pController, SLOT(onAddTagRequested(task_id, tag_id)));
   QObject::connect(pTaskWidget, SIGNAL(removeTagRequested(task_id, tag_id)),        m_pController, SLOT(onRemoveTagRequested(task_id, tag_id)));
+  QObject::connect(pTaskWidget, SIGNAL(addPropertyRequested(task_id, QString)),     m_pController, SLOT(onAddPropertyRequested(task_id, QString)));
   QObject::connect(m_pController, SIGNAL(timeTrackingStopped(task_id)),             pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
 

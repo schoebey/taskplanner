@@ -348,8 +348,8 @@ void TaskWidget::onAddPropertyTriggered()
   if (nullptr != pSender)
   {
     QString sName = pSender->property("name").toString();
-    QString sValue;
-    addProperty(sName, sValue);
+
+    emit addPropertyRequested(id(), sName);
   }
 }
 

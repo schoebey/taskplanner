@@ -1749,3 +1749,20 @@ void MainWindow::onTagEdited(tag_id tagId, const QString& sTagText, const QColor
     }
   }
 }
+
+void MainWindow::onAddPropertyRequested(task_id taskId, const QString& sPropertyName)
+{
+  TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
+  if (nullptr != pTaskWidget) {
+    const auto& props = Properties<Task>::registeredProperties();
+    auto it = std::find_if(props.begin(), props.end(),
+                           [sPropertyName](const tspDescriptor& spDesc) {
+      return spDesc->name() == sPropertyName;
+    });
+
+    if (it != Properties<Task>::registeredProperties().end())
+    {
+      pTaskWidget->addProperty((*it)->name(), QString(), (*it)->displayFunction());
+    }
+  }
+}
