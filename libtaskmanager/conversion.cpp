@@ -496,3 +496,29 @@ in a hundred years
     return c.name(QColor::HexArgb);
   }
 }
+
+QStringList detail::toList(const QString& s, const QChar& startChar, const QChar& endChar)
+{
+  QStringList l;
+
+
+  // find the next start marker
+  int iNofOpenTags = 0;
+  int iStartOfElement = 0;
+  int iEndOfElement = 0;
+
+  for (int i = 0; i < s.size(); ++i)
+  {
+    const QChar& ch = s.at(i);
+    if (ch == startChar && iNofOpenTags == 0)  { iStartOfElement = i; }
+    else if (ch == endChar && iNofOpenTags == 0)  { iEndOfElement = i; }
+    else { iEndOfElement = iStartOfElement; }
+
+    if (iEndOfElement != iStartOfElement)
+    {
+      l.push_back(s.mid(iStartOfElement + 1, iEndOfElement - iStartOfElement - 1));
+    }
+  }
+
+  return l;
+}

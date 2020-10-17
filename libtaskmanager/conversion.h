@@ -22,6 +22,9 @@ namespace conversion {
 
 namespace detail
 {
+  QStringList toList(const QString& s, const QChar& startChar, const QChar& endChar);
+
+
   template<typename T>
   using void_t = void;
 
@@ -112,10 +115,10 @@ namespace detail
       QStringList list;
       for (const auto& el : t)
       {
-        list.append(conversion::toString(el));
+        list.append(QString("{%1}").arg(conversion::toString(el)));
       }
 
-      return list.join("|");
+      return list.join(",");
     }
   };
 
@@ -162,7 +165,15 @@ namespace detail
     {
       T container;
 
-      auto list = sVal.split("|");
+      // extract all top level elements {}
+      QStringList list;
+      if (sVal.contains("{") && sVal.contains("}")) {
+        list = toList(sVal, '{', '}');
+      }
+      else {
+        // legacy mode
+        list = sVal.split("|");
+      }
       for (const auto& el : list)
       {
         if (!el.isEmpty())
