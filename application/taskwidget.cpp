@@ -35,6 +35,19 @@ namespace widgetAnimation {
 }
 
 namespace {
+  using FnPropertyChange = std::function<void(TaskWidget*, const QString&)>;
+  static std::map<QString, FnPropertyChange> propertyChangeReactions =
+  {
+    {"auto_recurrence", [](TaskWidget* pTaskWidget, const QString& sValue) {
+       // TODO: make the recurrence a struct of day, time, duration
+       // -> serialize it to <day short name>, <time>, <duration in minutes>
+       // make the property a set of those structs
+       //pTaskWidget->setAutoRecurrence(conversion::fromString<WeekDays>(sValue), m_recurringStartTime, m_duration);
+     }
+    },
+    {"", [](TaskWidget*, const QString&){}}
+  };
+
   void forceUpdate(QWidget* pWidget)
   {
     pWidget->style()->unpolish(pWidget);
@@ -527,6 +540,13 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
 
 bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sValue)
 {
+
+  auto itReaction = propertyChangeReactions.find(sName);
+  if (itReaction != propertyChangeReactions.end())
+  {
+    itReaction->second(this, sValue);
+  }
+
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {

@@ -12,6 +12,7 @@
 #include "constraint_grammar.h"
 #include "conversion_bitset.h"
 #include "conversion_chrono.h"
+#include "recurrence.h"
 #include "version.h"
 
 #include <QDateTime>
@@ -81,9 +82,18 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Task, "sort_priority", int, false);
   REGISTER_PROPERTY(Task, "priority", int, true);
   REGISTER_PROPERTY(Task, "color", QColor, false);
+
+
   REGISTER_CUSTOM_DISPLAY_PROPERTY(Task, "auto_repeat_every", std::bitset<7>, &conversion::bitsetToWeekDays);
-//  REGISTER_PROPERTY(Task, "auto_start_time", QTime, true);
+  REGISTER_PROPERTY(Task, "auto_start_time", QTime, true);
   REGISTER_CUSTOM_DISPLAY_PROPERTY(Task, "auto_duration", std::chrono::minutes, &conversion::chrono::toDisplayString<std::chrono::minutes>);
+
+
+
+//  REGISTER_PROPERTY(Task, "auto_recurrence", std::vector<SRecurrence>, false);
+  REGISTER_CUSTOM_DISPLAY_PROPERTY(Task, "auto_recurrence", std::vector<SRecurrence>, &conversion::recurrenceVectorToDisplayString);
+
+
 
   Properties<Task>::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
   Properties<Task>::registerConstraint("duration (days)", MIN(0));
