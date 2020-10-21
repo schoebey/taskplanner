@@ -59,7 +59,7 @@ namespace conversion {
   }
 
   QString recurrenceToDisplayString(const SRecurrence& r) {
-    return QString("every %1 at %2, for %3").arg(toString(r.wd)).arg(r.startTime.toString("hh:mm")).arg(conversion::toString(r.duration));
+    return QString("every %1 at %2, for %3").arg(toString(r.wd)).arg(r.startTime.toString("hh:mm")).arg(conversion::chrono::toDisplayString(r.duration));
   }
 
   QString recurrenceVectorToDisplayString(const std::vector<SRecurrence>& vR) {

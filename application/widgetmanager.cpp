@@ -89,26 +89,49 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
 
   TaskWidget* pTaskWidget = new TaskWidget(id, m_pController);
 
-  QObject::connect(pTaskWidget, SIGNAL(renamed(task_id, QString)),                  m_pController, SLOT(renameTask(task_id, QString)));
-  QObject::connect(pTaskWidget, SIGNAL(descriptionChanged(task_id, QString)),       m_pController, SLOT(changeTaskDescription(task_id, QString)));
-  QObject::connect(pTaskWidget, SIGNAL(timeTrackingStarted(task_id)),               m_pController, SLOT(startTimeTracking(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(timeTrackingStopped(task_id)),               m_pController, SLOT(stopTimeTracking(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(propertyChanged(task_id, QString, QString)), m_pController, SLOT(onPropertyChanged(task_id, QString, QString)));
-  QObject::connect(pTaskWidget, SIGNAL(propertyRemoved(task_id, QString)),          m_pController, SLOT(onPropertyRemoved(task_id, QString)));
-  QObject::connect(pTaskWidget, SIGNAL(taskMovedTo(task_id, task_id, int)),         m_pController, SLOT(onTaskMoved(task_id, task_id, int)));
-  QObject::connect(pTaskWidget, SIGNAL(taskRemoved(task_id, task_id)),              m_pController, SLOT(onTaskRemoved(task_id, task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(taskDeleted(task_id)),                       m_pController, SLOT(onTaskDeleted(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(newSubTaskRequested(task_id)),               m_pController, SLOT(createNewSubTask(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(addTimeRequested(task_id)),                  m_pController, SLOT(onAddTimeToTaskRequested(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(removeTimeRequested(task_id)),               m_pController, SLOT(onRemoveTimeFromTaskRequested(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(linkAdded(task_id, QUrl)),                   m_pController, SLOT(onLinkAdded(task_id, QUrl)));
-  QObject::connect(pTaskWidget, SIGNAL(linkRemoved(task_id, QUrl)),                 m_pController, SLOT(onLinkRemoved(task_id, QUrl)));
-  QObject::connect(pTaskWidget, SIGNAL(linkInserted(task_id, QUrl, int)),           m_pController, SLOT(onLinkInserted(task_id, QUrl, int)));
-  QObject::connect(pTaskWidget, SIGNAL(priorityUpdateRequested(task_id)),           m_pController, SLOT(onPriorityUpdateRequested(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(addTagRequested(task_id, tag_id)),           m_pController, SLOT(onAddTagRequested(task_id, tag_id)));
-  QObject::connect(pTaskWidget, SIGNAL(removeTagRequested(task_id, tag_id)),        m_pController, SLOT(onRemoveTagRequested(task_id, tag_id)));
-  QObject::connect(pTaskWidget, SIGNAL(addPropertyRequested(task_id, QString)),     m_pController, SLOT(onAddPropertyRequested(task_id, QString)));
-  QObject::connect(m_pController, SIGNAL(timeTrackingStopped(task_id)),             pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
+  bool bOk(false);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(renamed(task_id, QString)),                  m_pController, SLOT(renameTask(task_id, QString)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(descriptionChanged(task_id, QString)),       m_pController, SLOT(changeTaskDescription(task_id, QString)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(timeTrackingStarted(task_id)),               m_pController, SLOT(startTimeTracking(task_id)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(timeTrackingStopped(task_id)),               m_pController, SLOT(stopTimeTracking(task_id)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(propertyChanged(task_id, QString, QString)), m_pController, SLOT(onPropertyChanged(task_id, QString, QString)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(propertyRemoved(task_id, QString)),          m_pController, SLOT(onPropertyRemoved(task_id, QString)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(taskMovedTo(task_id, task_id, int)),         m_pController, SLOT(onTaskMoved(task_id, task_id, int)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(taskRemoved(task_id, task_id)),              m_pController, SLOT(onTaskRemoved(task_id, task_id)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(taskDeleted(task_id)),                       m_pController, SLOT(onTaskDeleted(task_id)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(newSubTaskRequested(task_id)),               m_pController, SLOT(createNewSubTask(task_id)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(addTimeRequested(task_id)),                  m_pController, SLOT(onAddTimeToTaskRequested(task_id)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(addTimeRequested(task_id, QDateTime, QDateTime)),    m_pController, SLOT(onAddTimeToTaskRequested(task_id, QDateTime, QDateTime)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(removeTimeRequested(task_id)),               m_pController, SLOT(onRemoveTimeFromTaskRequested(task_id)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(linkAdded(task_id, QUrl)),                   m_pController, SLOT(onLinkAdded(task_id, QUrl)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(linkRemoved(task_id, QUrl)),                 m_pController, SLOT(onLinkRemoved(task_id, QUrl)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(linkInserted(task_id, QUrl, int)),           m_pController, SLOT(onLinkInserted(task_id, QUrl, int)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(priorityUpdateRequested(task_id)),           m_pController, SLOT(onPriorityUpdateRequested(task_id)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(addTagRequested(task_id, tag_id)),           m_pController, SLOT(onAddTagRequested(task_id, tag_id)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(removeTagRequested(task_id, tag_id)),        m_pController, SLOT(onRemoveTagRequested(task_id, tag_id)));
+  assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(addPropertyRequested(task_id, QString)),     m_pController, SLOT(onAddPropertyRequested(task_id, QString)));
+  assert(bOk);
+  bOk = QObject::connect(m_pController, SIGNAL(timeTrackingStopped(task_id)),             pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
+  assert(bOk);
 
 
   auto pTask = m_pManager->task(id);
@@ -118,7 +141,7 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
     pTaskWidget->setDescription(pTask->description());
   }
 
-  bool bOk = false;
+  bOk = false;
   bool bExpanded = conversion::fromString<bool>(pTask->propertyValue("expanded"), bOk);
 
   // konnte die Property ausgelesen werden, soll der expanded-State wiederhergestellt werden,

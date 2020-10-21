@@ -11,6 +11,7 @@
 #include "groupwidget.h"
 #include "tagwidget.h"
 #include "tagproviderinterface.h"
+#include "recurrence.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -43,6 +44,11 @@ namespace {
        // -> serialize it to <day short name>, <time>, <duration in minutes>
        // make the property a set of those structs
        //pTaskWidget->setAutoRecurrence(conversion::fromString<WeekDays>(sValue), m_recurringStartTime, m_duration);
+       bool bOk = false;
+       auto vR = conversion::fromString<std::vector<SRecurrence>>(sValue, bOk);
+       if (bOk) {
+         pTaskWidget->setAutoRecurrences(vR);
+       }
      }
     },
     {"", [](TaskWidget*, const QString&){}}
@@ -516,6 +522,12 @@ QString TaskWidget::propertyValue(const QString& sName) const
 
 bool TaskWidget::removeProperty(const QString& sName)
 {
+  auto itReaction = propertyChangeReactions.find(sName);
+  if (itReaction != propertyChangeReactions.end())
+  {
+    itReaction->second(this, QString());
+  }
+
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {
@@ -540,7 +552,6 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
 
 bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sValue)
 {
-
   auto itReaction = propertyChangeReactions.find(sName);
   if (itReaction != propertyChangeReactions.end())
   {
@@ -1151,4 +1162,69 @@ void TaskWidget::emphasise()
 void TaskWidget::reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets)
 {
   ui->pTaskListWidget->reorderTasks(vpTaskWidgets);
+}
+
+void TaskWidget::setAutoRecurrences(const std::vector<SRecurrence>& vRecurrences)
+{
+  /*
+for each recurrence, a timer has to be started that triggers at the precise
+moment of the recurrence.
+what about multiple recurrences with non-isochronic repetitions?
+e.g. mondays & tuesdays
+so from the current time point, find the next occurrence in vRecurrences
+start the timer and a timer that will automatically stop the tracking and start the timer for the next one
+*/
+  m_vAutoRecurrences = vRecurrences;
+
+
+  // find the closest occurrence
+  struct cmp {
+    bool operator()(const SRecurrence& lhs, const SRecurrence& rhs) const {
+      return lhs.startTime < rhs.startTime;
+    }
+  };
+  std::map<int, std::set<SRecurrence, cmp>> sortedOcurrencesByWeekday;
+
+  for (const auto& el : m_vAutoRecurrences) {
+    for (int i = 0; i < 7; ++i) {
+      if (el.wd.testFlag(static_cast<EWeekDay>(1 << i))) {
+        sortedOcurrencesByWeekday[i + 1].insert(el);
+      }
+    }
+  }
+
+  int iDay = QDate::currentDate().dayOfWeek();
+  auto it = sortedOcurrencesByWeekday.find(iDay);
+  if (it != sortedOcurrencesByWeekday.end()) {
+    // there is an occurrence on this day. find out which one.
+    QDateTime now = QDateTime::currentDateTime();
+    for (const auto& el : it->second) {
+      if (el.startTime >= now.time()) {
+        if (nullptr == m_pRecurringStopTimer) {
+          m_pRecurringStopTimer = new QTimer(this);
+          m_pRecurringStopTimer->setSingleShot(true);
+        }
+
+        // determine start and stop times
+        QDateTime dtStart = QDateTime::currentDateTime();
+        dtStart.setTime(el.startTime);
+        QDateTime dtStop = dtStart;
+        dtStop = dtStop.addSecs(60 * el.duration.count());
+        disconnect(m_recurringTimerConnection);
+        m_recurringTimerConnection = connect(m_pRecurringStopTimer, &QTimer::timeout,
+                [this, dtStart, dtStop](){
+          emit addTimeRequested(id(), dtStart, dtStop);
+        });
+
+        int iSecsToTimeout = now.secsTo(dtStop);
+        m_pRecurringStopTimer->start(iSecsToTimeout * 1000);
+        break;
+      }
+    }
+  }
+
+
+  style()->unpolish(this);
+  setProperty("recurringTask", !m_vAutoRecurrences.empty());
+  style()->polish(this);
 }

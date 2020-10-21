@@ -86,6 +86,7 @@ private slots:
   void on_actionFind_triggered();
   void onPriorityUpdateRequested(task_id);
   void onAddTimeToTaskRequested(task_id);
+  void onAddTimeToTaskRequested(task_id id, const QDateTime& start, const QDateTime& end);
   void onRemoveTimeFromTaskRequested(task_id);
   void onAddTagRequested(task_id taskId, tag_id tagId);
   void onRemoveTagRequested(task_id taskId, tag_id tagId);

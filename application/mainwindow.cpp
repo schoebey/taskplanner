@@ -1665,13 +1665,8 @@ std::tuple<QDateTime, QDateTime> getRangeFromDialog(const QString& sTitle,
   }
 }
 
-void MainWindow::onAddTimeToTaskRequested(task_id id)
+void MainWindow::onAddTimeToTaskRequested(task_id id, const QDateTime& start, const QDateTime& stop)
 {
-  auto range = getRangeFromDialog(tr("Add time to task"),
-                                  tr("Enter start and end time to be added to the task:"));
-
-  auto start = std::get<0>(range);
-  auto stop = std::get<1>(range);
   if (start.isValid() && stop.isValid())
   {
     // first, free the time fragment from any other task to create a gap
@@ -1692,6 +1687,17 @@ void MainWindow::onAddTimeToTaskRequested(task_id id)
       emit documentModified();
     }
   }
+}
+
+void MainWindow::onAddTimeToTaskRequested(task_id id)
+{
+  auto range = getRangeFromDialog(tr("Add time to task"),
+                                  tr("Enter start and end time to be added to the task:"));
+
+  auto start = std::get<0>(range);
+  auto stop = std::get<1>(range);
+
+  onAddTimeToTaskRequested(id, start, stop);
 }
 
 void MainWindow::onRemoveTimeFromTaskRequested(task_id id)

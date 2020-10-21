@@ -25,6 +25,7 @@ class LinkWidget;
 class QLabel;
 class TagWidget;
 class ITagProvider;
+struct SRecurrence;
 class TaskWidget : public QFrame, public IPropertyProvider, public ITaskContainerWidget
 {
   Q_OBJECT
@@ -79,6 +80,8 @@ public:
   bool onPropertyValueChanged(const QString& sName, const QString& sValue);
 
   void setTagProvider(ITagProvider* pProvider);
+
+  void setAutoRecurrences(const std::vector<SRecurrence>& vRecurrences);
 public slots:
   void setExpanded(bool bExpanded);
 
@@ -117,6 +120,7 @@ signals:
   void attentionNeeded();
   void priorityUpdateRequested(task_id);
   void addTimeRequested(task_id);
+  void addTimeRequested(task_id, const QDateTime& start, const QDateTime& stop);
   void removeTimeRequested(task_id);
   void addTagRequested(task_id, tag_id);
   void removeTagRequested(task_id, tag_id);
@@ -190,6 +194,10 @@ private:
   QSize m_expandedSize;
 
   ITagProvider* m_pTagProvider = nullptr;
+
+  std::vector<SRecurrence> m_vAutoRecurrences;
+  QTimer* m_pRecurringStopTimer = nullptr;
+  QMetaObject::Connection m_recurringTimerConnection;
 
   static TaskWidget* m_pDraggingTaskWidget;
   static TaskWidget* m_pTaskWidgetUnderMouse;
