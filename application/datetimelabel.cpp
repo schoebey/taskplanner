@@ -173,13 +173,24 @@ void DateTimeLabel::onEditingFinishedImpl()
   m_updateTimer.start(1000);
   m_pEditor->hide();
 
-  bool bStatus(false);
-  QDateTime dt = conversion::fromString<QDateTime>(editText(), bStatus);
-  if (bStatus)
-  {
-    QDate d = m_pCalendarWidget->selectedDate();
-    dt.setDate(d);
+  QDate d = m_pCalendarWidget->selectedDate();
 
-    setEditText(conversion::toString(dt));
+  bool bStatus(false);
+  QString sEditText = m_pDateTimeLineEdit->text();
+
+  QDateTime dt = QDateTime::currentDateTime();
+  if (!sEditText.isEmpty())
+  {
+    dt = conversion::fromString<QDateTime>(sEditText, bStatus);
+    if (bStatus)
+    {
+      dt.setDate(d);
+    }
   }
+  else
+  {
+    dt.setTime(QTime::currentTime());
+  }
+
+  setEditText(conversion::toString(dt));
 }
