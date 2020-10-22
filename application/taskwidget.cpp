@@ -466,8 +466,10 @@ bool TaskWidget::setPropertyValue(const QString& sName, const QString& sValue)
 
 bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sValue)
 {
-  auto it = m_propertyLineEdits.find(sName);
-  if (it != m_propertyLineEdits.end())
+  emit propertyChanged(m_taskId, sName, sValue);
+
+  auto it = m_propertyEditors.find(sName);
+  if (it != m_propertyEditors.end())
   {
     if (sValue.isEmpty())
     {
@@ -843,12 +845,6 @@ void TaskWidget::onPropertyEdited()
     QString sPropertyName = pSender->property("name").toString();
     setPropertyValue(sPropertyName, pSender->editText());
   }
-}
-
-void TaskWidget::onPropertyValueChanged(const QString& sPropertyName,
-                                        const QString& sValue)
-{
-  emit propertyChanged(m_taskId, sPropertyName, sValue);
 }
 
 void TaskWidget::resizeEvent(QResizeEvent* pEvent)

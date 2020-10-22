@@ -72,7 +72,7 @@ public:
 
   void ensureVisible();
 
-  void onPropertyValueChanged(const QString& sPropertyName, const QString& sValue);
+  bool onPropertyValueChanged(const QString& sPropertyName, const QString& sValue);
 public slots:
   void setExpanded(bool bExpanded);
 
