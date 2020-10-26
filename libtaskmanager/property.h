@@ -16,6 +16,7 @@
 #include <cassert>
 #include <iostream>
 #include <functional>
+#include <experimental/optional>
 
 class PropertyDescriptor : public ISerializable
 {
@@ -82,6 +83,21 @@ public:
     return m_bVisible;
   }
 
+  void setDefault(const T& t)
+  {
+    m_default = t;
+  }
+
+  void setDefaultFunction(const std::function<T(void)> fnDefault)
+  {
+    m_defaultFct = fnDefault;
+  }
+
+  std::experimental::optional<T> defaultValue() const
+  {
+    return m_defaultFct ? m_defaultFct() : m_default;
+  }
+
   void setConstraint(const tspConstraintTpl<T>& spConstraint)
   {
     m_spConstraint = spConstraint;
@@ -107,6 +123,8 @@ private:
   QString m_sName;
   QString m_sTypeName;
   bool m_bVisible = false;
+  std::experimental::optional<T> m_default;
+  std::function<T(void)> m_defaultFct;
   tspConstraintTpl<T> m_spConstraint;
 };
 template <typename T> using tspDescriptorTpl = std::shared_ptr<PropertyDescriptorTpl<T>>;
@@ -241,7 +259,7 @@ namespace factory
 }
 
 #define REGISTER_PROPERTY(scope, name, type, visible) \
-  Properties<scope>::registerProperty<type>(name, #type, visible);
+  Properties<scope>::registerProperty<type>(name, #type, visible)
 
 /*
  the user has to be able to register new properties and assign them
