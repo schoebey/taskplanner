@@ -280,14 +280,14 @@ template<typename SCOPE>
 class Properties
 {
 public:
-  template <typename T> static bool registerProperty(const QString& sName, const QString& sTypeName, bool bVisible)
+  template <typename T> static tspDescriptorTpl<T> registerProperty(const QString& sName, const QString& sTypeName, bool bVisible)
   {
     tspDescriptorTpl<T> spDescriptor = std::make_shared<PropertyDescriptorTpl<T>>(sName, sTypeName, bVisible);
     if (nullptr == spDescriptor)
     {
       // typename was not found in known types - must be a custom typename
       assert(false && "unknown type");
-      return false;
+      return nullptr;
     }
 
     // register the creator function for the new property
@@ -298,7 +298,11 @@ public:
     };
     factory()[sName] = creatorFct;
 
-    return allDescriptors().insert(spDescriptor).second;
+    if (allDescriptors().insert(spDescriptor).second) {
+      return spDescriptor;
+    }
+
+    return nullptr;
   }
 
   template<typename T> static bool registerConstraint(const QString& sName,
