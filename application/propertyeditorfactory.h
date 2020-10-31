@@ -70,7 +70,7 @@ namespace detail {
       });
 
       auto fnSet = m_fnSet;
-      QObject::connect(pReceiver, &T::propertyValueChanged,
+      QObject::connect(pReceiver, &T::propertyValueChanged, pEditor,
                        [pEditor, sPropertyName, fnSet](const QString& sName,
                                                        const QString& sValue)
       {
