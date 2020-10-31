@@ -320,6 +320,12 @@ void TaskWidget::onAddPropertyTriggered()
   {
     QString sName = pSender->property("name").toString();
     QString sValue;
+
+    auto spDescriptor = Properties<Task>::descriptor(sName);
+    if (nullptr != spDescriptor) {
+      sValue = spDescriptor->defaultValue();
+    }
+
     addProperty(sName, sValue);
   }
 }
