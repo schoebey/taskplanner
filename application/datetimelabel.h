@@ -21,7 +21,7 @@ signals:
 
 private:
   void onEditingFinishedImpl() override;
-  bool eventFilter(QObject* pObj, QEvent* pEvent);
+  bool eventFilter(QObject* pObj, QEvent* pEvent) override;
   void rejectAndCloseEditor();
   void onTextChanged(const QString& sText);
 
