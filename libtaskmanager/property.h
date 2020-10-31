@@ -16,7 +16,6 @@
 #include <cassert>
 #include <iostream>
 #include <functional>
-#include <experimental/optional>
 
 class PropertyDescriptor : public ISerializable
 {
@@ -27,6 +26,8 @@ public:
   virtual QString name() const = 0;
 
   virtual QString typeName() const = 0;
+
+  virtual QString defaultValue() const = 0;
 
   virtual bool visible() const = 0;
 
@@ -85,17 +86,32 @@ public:
 
   void setDefault(const T& t)
   {
-    m_default = t;
+    m_defaultFct = [t](){ return t; };
   }
 
-  void setDefaultFunction(const std::function<T(void)> fnDefault)
+  void setDefault(const std::function<T(void)> fnDefault)
   {
     m_defaultFct = fnDefault;
   }
 
-  std::experimental::optional<T> defaultValue() const
+  QString defaultValue() const override
   {
-    return m_defaultFct ? m_defaultFct() : m_default;
+    if (hasDefault())
+    {
+      return conversion::toString(defaultValueT());
+    }
+
+    return QString();
+  }
+
+  bool hasDefault() const
+  {
+    return static_cast<bool>(m_defaultFct);
+  }
+
+  T defaultValueT() const
+  {
+    return m_defaultFct ? m_defaultFct() : T();
   }
 
   void setConstraint(const tspConstraintTpl<T>& spConstraint)
@@ -123,7 +139,6 @@ private:
   QString m_sName;
   QString m_sTypeName;
   bool m_bVisible = false;
-  std::experimental::optional<T> m_default;
   std::function<T(void)> m_defaultFct;
   tspConstraintTpl<T> m_spConstraint;
 };
