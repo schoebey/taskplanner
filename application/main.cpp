@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Task, "description", QString, false);
   REGISTER_PROPERTY(Task, "expanded", bool, false);
   REGISTER_PROPERTY(Task, "added date", QDateTime, false);
-  REGISTER_PROPERTY(Task, "due date", QDateTime, true);
+  REGISTER_PROPERTY(Task, "due date", QDateTime, true)->setDefault([](){ return QDateTime::currentDateTime(); });
   REGISTER_PROPERTY(Task, "duration (days)", int, true);
   REGISTER_PROPERTY(Task, "category", QString, true);
   REGISTER_PROPERTY(Task, "links", std::vector<QUrl>, false);
