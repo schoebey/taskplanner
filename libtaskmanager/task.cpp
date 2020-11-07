@@ -349,14 +349,38 @@ void Task::removeTimeFragment(const QDateTime& start, const QDateTime& end)
   auto it = m_vTimingInfo.begin();
   while (it != m_vTimingInfo.end())
   {
-    if (it->startTime >= end || it->stopTime <= start)
+    if (it->startTime >= end || (it->stopTime.isValid() && it->stopTime <= start))
     {
       // common case: no collision with [start, end]
       ++it;
     }
     else
     {
-      if (it->startTime>= start && it->stopTime <= end)
+      // if the current task is being tracked and [start, end] intersects
+      // with it, adjust the start time accordingly
+      if (!it->stopTime.isValid())
+      {
+        if (it->startTime <= end)
+        {
+          if (it->startTime >= start)
+          {
+            // start time of the fragment being tracked lies after [start, end]
+            // so we just have to move the start time
+            it->startTime = end;
+          }
+          else if (it->startTime < start)
+          {
+            // start time of the fragment being tracked lies before [start, end]
+            // so we have to create a new segment
+            STimeFragment newFragment;
+            newFragment.startTime = it->startTime;
+            newFragment.stopTime = start;
+            it->startTime = end;
+            it = m_vTimingInfo.insert(it, newFragment);
+          }
+        }
+      }
+      else if (it->startTime >= start && it->stopTime <= end)
       {
         // the current time fragment lies completely within [start, end]
         // -> remove the fragment
