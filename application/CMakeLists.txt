@@ -20,6 +20,8 @@ add_executable(${PROJECT_NAME}
     commands/deletetaskcommand.h
     commands/movetaskcommand.cpp
     commands/movetaskcommand.h
+    datetimelabel.cpp
+    datetimelabel.h
     decoratedlabel.cpp
     decoratedlabel.h
     editablelabel.cpp
@@ -48,6 +50,8 @@ add_executable(${PROJECT_NAME}
     mousehandlingframe.h
     overlaywidget.cpp
     overlaywidget.h
+    propertyeditorfactory.cpp
+    propertyeditorfactory.h
     resources/resource.qrc
     search/matchinfo.h
     search/searchcontroller.cpp
