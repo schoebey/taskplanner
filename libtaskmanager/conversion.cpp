@@ -113,7 +113,7 @@ namespace conversion
       {
         sText = QString("at %1").arg(dt.time().toString("hh:mm"));
       }
-      else if (0 > iDaysTo)
+      else if (0 > iMsecsTo)
       {
         // in the past
         sText = "in the past";
