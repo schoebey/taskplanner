@@ -27,8 +27,8 @@ The tasks are yours. No account, no login, no cloud, no internet.
 
 ## Requirements
 
-* Qt 5 (built using Qt 5.4.2, might work with older versions)
-* QtCreator IDE (pro-file supplied, project files for other IDEs might come at a later date)
+* Qt 5 (built using Qt 5.9.8, might work with older versions)
+* IDE with CMake-Support (big thanks to ballessay for porting the whole thing to CMake)
 * C++11 compliant compiler
 
 ## CSS documentation
