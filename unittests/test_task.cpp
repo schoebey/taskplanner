@@ -405,6 +405,49 @@ TEST_F(TimedTaskTest, removeimeFragment_splitIfFullyContained)
 }
 
 
+TEST_F(TimedTaskTest, removeTimeFragment_shrinkTrackingFragmentIfOverlapOnLeft)
+{
+  ITask* pTask = m_manager.addTask(4711); pTask->setName("d");
+
+  QDateTime startDateTime = QDateTime(QDate(2020, 1, 1), QTime(12, 12));
+  pTask->startWork(startDateTime);
+
+  // remove a possible time fragment that overlaps the currently tracking one
+  QDateTime stopTime = startDateTime.addSecs(300);
+  pTask->removeTimeFragment(startDateTime.addSecs(-300), stopTime);
+
+
+  std::vector<STimeFragment> vFragments = pTask->timeFragments();
+  ASSERT_EQ(1u, vFragments.size());
+
+  EXPECT_EQ(vFragments[0].startTime, stopTime);
+  EXPECT_FALSE(vFragments[0].stopTime.isValid());
+}
+
+TEST_F(TimedTaskTest, removeTimeFragment_splitTrackingFragmentIfContained)
+{
+  ITask* pTask = m_manager.addTask(4711); pTask->setName("d");
+
+  QDateTime startDateTime = QDateTime(QDate(2020, 1, 1), QTime(12, 12));
+  pTask->startWork(startDateTime);
+
+  // remove a possible time fragment that overlaps the currently tracking one
+  QDateTime startTime = startDateTime.addSecs(100);
+  QDateTime stopTime = startDateTime.addSecs(300);
+  pTask->removeTimeFragment(startTime, stopTime);
+
+
+  std::vector<STimeFragment> vFragments = pTask->timeFragments();
+  ASSERT_EQ(2u, vFragments.size());
+
+  EXPECT_EQ(vFragments[0].startTime, startDateTime);
+  EXPECT_EQ(vFragments[0].stopTime, startTime);
+
+  EXPECT_EQ(vFragments[1].startTime, stopTime);
+  EXPECT_FALSE(vFragments[1].stopTime.isValid());
+}
+
+
 
 
 
