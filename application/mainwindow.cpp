@@ -513,7 +513,7 @@ void MainWindow::reloadStylesheet(const QString& sPath)
   QFile f(sPath);
   if (f.open(QIODevice::ReadOnly))
   {
-    setStyleSheet(QString::fromUtf8(f.readAll()));
+    qApp->setStyleSheet(QString::fromUtf8(f.readAll()));
   }
 }
 
