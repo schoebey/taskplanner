@@ -10,7 +10,7 @@
 
 DateTimeLabel::DateTimeLabel(QWidget* pParent)
   : EditableLabel(pParent),
-    m_pEditor(new QFrame(this)),
+    m_pEditor(new QFrame()),
     m_pDateTimeLineEdit(new QLineEdit(this)),
     m_pCalendarWidget(new QCalendarWidget(this))
 {
@@ -18,6 +18,8 @@ DateTimeLabel::DateTimeLabel(QWidget* pParent)
   pLayout->addWidget(m_pDateTimeLineEdit);
   pLayout->addWidget(m_pCalendarWidget);
   pLayout->setSpacing(3);
+  pLayout->setContentsMargins(3, 3, 3, 3);
+  m_pEditor->setWindowFlag(Qt::Popup);
   m_pEditor->setObjectName("pDateTimeEditor");
   m_pEditor->setLayout(pLayout);
   m_pEditor->hide();
@@ -85,6 +87,11 @@ DateTimeLabel::DateTimeLabel(QWidget* pParent)
   m_updateTimer.start(1000);
 }
 
+DateTimeLabel::~DateTimeLabel()
+{
+  delete m_pEditor;
+}
+
 bool DateTimeLabel::eventFilter(QObject* pObj, QEvent* pEvent)
 {
   if (!m_pEditor->isVisible())
@@ -144,9 +151,8 @@ void DateTimeLabel::edit()
   m_pDateTimeLineEdit->selectAll();
   m_pDateTimeLineEdit->setFocus();
 
-  m_pEditor->setParent(window());
   m_pEditor->resize(m_pEditor->minimumSizeHint());
-  m_pEditor->move(mapTo(window(), QPoint(0, height())));
+  m_pEditor->move(mapToGlobal(QPoint(0, height())));
   m_pEditor->show();
 }
 

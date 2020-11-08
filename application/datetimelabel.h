@@ -13,6 +13,7 @@ public:
   using EditableLabel::valueChanged;
 
   DateTimeLabel(QWidget* pParent);
+  ~DateTimeLabel();
 
   void edit() override;
 
