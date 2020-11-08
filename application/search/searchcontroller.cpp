@@ -238,6 +238,39 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
   m_hits.clear();
   if (!sTerm.isEmpty())
   {
+    for (const auto& taskId : m_pTaskManager->taskIds())
+    {
+      ITask* pTask = m_pTaskManager->task(taskId);
+      if (containsMatch(sTerm, pTask, m_options.bCaseSensitive, m_options.bRegularExpression))
+      {
+        // ensure the corresponding widget exists by expanding all of the parent widgets
+        auto id = taskId;
+        TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
+        std::deque<task_id> vWidgetsToReconstruct;
+        while (nullptr == pTaskWidget)
+        {
+          vWidgetsToReconstruct.push_front(id);
+          id = pTask->parentTask();
+          if (-1 == id) { break; }
+          pTaskWidget = m_pWidgetManager->taskWidget(id);
+        }
+
+        if (nullptr != pTaskWidget)
+        {
+          // consecutively expand the widget until the target widget becomes accessible
+          detail::ensureVisible(pTaskWidget);
+
+          while (!vWidgetsToReconstruct.empty())
+          {
+            task_id childId = vWidgetsToReconstruct.front();
+            vWidgetsToReconstruct.pop_front();
+            TaskWidget* pChildWidget = m_pWidgetManager->taskWidget(childId);
+            detail::ensureVisible(pChildWidget);
+          }
+        }
+      }
+    }
+
     for (const auto& groupId : m_pTaskManager->groupIds())
     {
       auto pGroupWidget = m_pWidgetManager->groupWidget(groupId);
