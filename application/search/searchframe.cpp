@@ -47,6 +47,7 @@ void SearchFrame::onTextChanged(const QString& sText)
 void SearchFrame::setFocusOnLineEdit()
 {
   ui->pText->setFocus();
+  ui->pText->selectAll();
 }
 
 void SearchFrame::onOpen()
