@@ -3,9 +3,13 @@
 #include "widgetmanager.h"
 #include "groupwidget.h"
 #include "taskwidget.h"
+#include "taskinterface.h"
+
 
 #include <QRegularExpression>
 #include <QLabel>
+
+#include <deque>
 
 /*
 
@@ -43,7 +47,8 @@
   }
 */
 
-namespace {
+namespace detail
+{
   void ensureVisible(QWidget* pWidget, QWidget* pOriginal)
   {
     if (nullptr == pWidget)  { return; }
@@ -96,38 +101,58 @@ namespace {
     matches.push_back(matchType);
   }
 
-  void findRx(const QString& sTerm,
-              const QList<QLabel*>& labels,
-            Qt::CaseSensitivity cs,
-            SearchController::tMatches& matches)
+  struct SSearchResult
+  {
+    int iIndex = -1;
+    int iSize = -1;
+  };
+
+  SSearchResult findRx(const QString& sTerm,
+                       const QString& s,
+                       Qt::CaseSensitivity cs,
+                       int iIndex)
   {
     QRegExp rx(sTerm, cs);
-    for (const auto pLabel : labels)
+    if (-1 != (iIndex = rx.indexIn(s, iIndex + 1)))
     {
-      int iIndex = -1;
-      while (-1 != (iIndex = rx.indexIn(pLabel->text(), iIndex + 1)))
-      {
-        addMatch(matches, pLabel, iIndex, rx.cap().size());
-      }
+      return SSearchResult{iIndex, rx.cap().size()};
     }
+
+    return SSearchResult{};
+  }
+
+  SSearchResult findStr(const QString& sTerm,
+                        const QString& s,
+                        Qt::CaseSensitivity cs,
+                        int iIndex)
+  {
+    if (-1 != (iIndex = s.indexOf(sTerm, iIndex + 1, cs)))
+    {
+      return SSearchResult{iIndex, sTerm.size()};
+    }
+
+    return SSearchResult{};
   }
 
   void find(const QString& sTerm,
             const QList<QLabel*>& labels,
             Qt::CaseSensitivity cs,
-            SearchController::tMatches& matches)
+            SearchController::tMatches& matches,
+            std::function<SSearchResult(const QString&, const QString&, Qt::CaseSensitivity, int)> fnMatch)
   {
     for (const auto pLabel : labels)
     {
-      QString sText = pLabel->text();
-      int iIndex = -1;
-      while (-1 != (iIndex = sText.indexOf(sTerm, iIndex + 1, cs)))
+      SSearchResult sr = fnMatch(sTerm, pLabel->text(), cs, -1);
+      while (sr.iIndex != -1)
       {
-        addMatch(matches, pLabel, iIndex, sTerm.size());
+        addMatch(matches, pLabel, sr.iIndex, sr.iSize);
+        sr = fnMatch(sTerm, pLabel->text(), cs, sr.iIndex + 1);
       }
     }
   }
+}
 
+namespace {
   void find(const QString& sTerm, const QWidget* pWidget,
             bool bCaseSensitive, bool bRegExp,
             SearchController::tMatches& matches)
@@ -139,12 +164,32 @@ namespace {
     Qt::CaseSensitivity cs = bCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
     if (bRegExp)
     {
-      findRx(sTerm, labels, cs, matches);
+      detail::find(sTerm, labels, cs, matches, detail::findRx);
     }
     else
     {
-      find(sTerm, labels, cs, matches);
+      detail::find(sTerm, labels, cs, matches, detail::findStr);
     }
+  }
+
+  bool containsMatch(const QString& sTerm, const ITask* pTask,
+                     bool bCaseSensitive, bool bRegExp)
+  {
+
+    Qt::CaseSensitivity cs = bCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
+    pTask->name();
+    pTask->description();
+
+    std::function<detail::SSearchResult(const QString&, const QString&, Qt::CaseSensitivity, int)> fnFind
+        = bRegExp ? detail::findStr : detail::findRx;
+
+    detail::SSearchResult sr;
+    sr = fnFind(pTask->name(), sTerm, cs, -1);
+    if (sr.iIndex != -1)  { return true; }
+    sr = fnFind(pTask->description(), sTerm, cs, -1);
+    if (sr.iIndex != -1)  { return true; }
+
+    return false;
   }
 }
 
@@ -186,8 +231,8 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
 
   for (const auto& el : matchesByWidget)
   {
-    highlight(el.first, tvMatchInfo{}, eActiveSearchResult);
-    highlight(el.first, tvMatchInfo{}, eSearchResult);
+    detail::highlight(el.first, tvMatchInfo{}, eActiveSearchResult);
+    detail::highlight(el.first, tvMatchInfo{}, eSearchResult);
   }
 
   m_hits.clear();
@@ -218,7 +263,7 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
 
   for (const auto& el : matchesByWidget)
   {
-    highlight(el.first, el.second, eSearchResult);
+    detail::highlight(el.first, el.second, eSearchResult);
   }
 
   m_hitIter = m_hits.end();
@@ -243,15 +288,15 @@ void SearchController::setCurrent(tMatches::iterator it)
   if (m_hitIter != m_hits.end())
   {
     // clear the active highlight
-    highlight(m_hitIter->pWidget, tvMatchInfo{}, eActiveSearchResult);
+    detail::highlight(m_hitIter->pWidget, tvMatchInfo{}, eActiveSearchResult);
   }
 
   m_hitIter = it;
   if (m_hitIter != m_hits.end())
   {
     QWidget* pCurrent = m_hitIter->pWidget;
-    ensureVisible(pCurrent);
-    highlight(m_hitIter->pWidget, tvMatchInfo{*m_hitIter}, eActiveSearchResult);
+    detail::ensureVisible(pCurrent);
+    detail::highlight(m_hitIter->pWidget, tvMatchInfo{*m_hitIter}, eActiveSearchResult);
     emit positionChanged(static_cast<size_t>(m_hitIter - m_hits.begin()), hitCount());
   }
   else
