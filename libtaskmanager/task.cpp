@@ -165,23 +165,22 @@ double Task::autoPriority() const
 
 //    int iNofDays = property<int>("duration (days)");
 //    QDateTime startDate = dueDate.addDays(-iNofDays);
-//   
+//
 //    int iNofDaysToStart = QDateTime::currentDateTime().daysTo(startDate);
 //    if (0 >= iNofDaysToStart)
 //    {
 //      int iNofDaysToDue = QDateTime::currentDateTime().daysTo(dueDate);
 //        int iNofDaysTaskShouldBeInProgress = iNofDays - iNofDaysToDue;
-//   
+//
 //        dDueTimeWeight += something;
 //    }
   }
 
 
   int iNofDaysInSystem = 0;
-  QDateTime addedDate = property<QDateTime>("added date");
-  if (addedDate.isValid())
+  if (m_addedDate.isValid())
   {
-    iNofDaysInSystem = addedDate.daysTo(QDateTime::currentDateTime());
+    iNofDaysInSystem = m_addedDate.daysTo(QDateTime::currentDateTime());
   }
 
 
@@ -484,7 +483,13 @@ QString Task::propertyValue(const QString& sName) const
 
 bool Task::setPropertyValue(const QString& sName, const QString& sValue)
 {
-  return m_properties.set(sName, sValue);
+  bool bRet = m_properties.set(sName, sValue);
+
+  if (sName == "added date") {
+    m_addedDate = property<QDateTime>("added date");
+  }
+
+  return bRet;
 }
 
 bool Task::removeProperty(const QString& sName)

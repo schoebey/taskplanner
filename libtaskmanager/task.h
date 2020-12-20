@@ -94,6 +94,8 @@ private:
   task_id m_parentTaskId = -1;
 
   Properties<Task> m_properties;
+
+  QDateTime m_addedDate;  ///< performance optimization to prevent conversion from string
 };
 
 #endif // TASK_H
