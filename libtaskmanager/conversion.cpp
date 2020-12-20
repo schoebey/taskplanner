@@ -280,20 +280,20 @@ namespace conversion
     return false;
   }
 
-  static const std::set<QString> c_sDateFormats = {c_sDateTimeFormat,
-                                                   "yyyy-MM-dd",
-                                                   "yy-MM-dd",
-                                                   "yyyy MM dd",
-                                                   "yy MM dd",
-                                                   "dd.MM.yyyy",
-                                                   "dd.MM.yy"};
+  static const std::vector<QString> c_sDateFormats = {c_sDateTimeFormat,
+                                                      "yyyy-MM-dd",
+                                                      "yy-MM-dd",
+                                                      "yyyy MM dd",
+                                                      "yy MM dd",
+                                                      "dd.MM.yyyy",
+                                                      "dd.MM.yy"};
 
-  static const std::set<QString> c_sTimeFormats = {"hh:mm:ss",
-                                                   "hh:mm:ss AP",
-                                                   "hh:mm:ss ap",
-                                                   "hh:mm",
-                                                   "hh:mm AP",
-                                                   "hh:mm ap"};
+  static const std::vector<QString> c_sTimeFormats = {"hh:mm:ss",
+                                                      "hh:mm:ss AP",
+                                                      "hh:mm:ss ap",
+                                                      "hh:mm",
+                                                      "hh:mm AP",
+                                                      "hh:mm ap"};
   QDateTime dateTimeFromString(const QString& sVal, bool& bConversionStatus,
                                const QDateTime& baseDateTime)
   {
