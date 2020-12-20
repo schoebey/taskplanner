@@ -52,6 +52,8 @@ add_library(${PROJECT_NAME} SHARED
     timefragment.h
 )
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE BUILD_TASKMANAGER_LIB)
+
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         .
