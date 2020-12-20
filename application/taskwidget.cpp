@@ -32,9 +32,12 @@ namespace widgetAnimation {
 namespace {
   void forceUpdate(QWidget* pWidget)
   {
-    pWidget->style()->unpolish(pWidget);
-    pWidget->style()->polish(pWidget);
-    pWidget->update();
+    if (pWidget->updatesEnabled())
+    {
+      pWidget->style()->unpolish(pWidget);
+      pWidget->style()->polish(pWidget);
+      pWidget->update();
+    }
   }
 }
 
@@ -71,7 +74,6 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
 
   setUpContextMenu();
 
-  setExpanded(true);
   setAcceptDrops(true);
 }
 
@@ -635,10 +637,16 @@ void TaskWidget::setAutoPriority(double dPriority)
     int iPrioCategory = static_cast<int>(dPriority);
     if (iPrioCategory != m_pOverlay->property("autoPriority").toInt())
     {
-      m_pOverlay->style()->unpolish(m_pOverlay);
+      if (updatesEnabled())
+      {
+        m_pOverlay->style()->unpolish(m_pOverlay);
+      }
       m_pOverlay->setProperty("autoPriority", iPrioCategory);
-      m_pOverlay->style()->polish(m_pOverlay);
-      m_pOverlay->update();
+      if (updatesEnabled())
+      {
+        m_pOverlay->style()->polish(m_pOverlay);
+        m_pOverlay->update();
+      }
 
 
       setProperty("autoPriority", iPrioCategory);
@@ -708,10 +716,13 @@ void TaskWidget::setHighlight(HighlightingMethod method)
 
   setProperty("highlight", static_cast<int>(method));
 
-  for (QWidget* pChildWidget : std::vector<QWidget*>{this, ui->pTitle, ui->pDescription})
+  if (updatesEnabled())
   {
-    pChildWidget->style()->unpolish(pChildWidget);
-    pChildWidget->style()->polish(pChildWidget);
+    for (QWidget* pChildWidget : std::vector<QWidget*>{this, ui->pTitle, ui->pDescription})
+    {
+      pChildWidget->style()->unpolish(pChildWidget);
+      pChildWidget->style()->polish(pChildWidget);
+    }
   }
 
   if (method.testFlag(EHighlightMethod::eValueRejected))
@@ -946,9 +957,11 @@ void TaskWidget::setExpanded(bool bExpanded)
       resize(width(), 1);
     }
 
-
-    ui->pStartStop->style()->unpolish(ui->pStartStop);
-    ui->pStartStop->style()->polish(ui->pStartStop);
+    if (updatesEnabled())
+    {
+      ui->pStartStop->style()->unpolish(ui->pStartStop);
+      ui->pStartStop->style()->polish(ui->pStartStop);
+    }
 
     updateSize();
   }

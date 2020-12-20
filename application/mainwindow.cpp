@@ -355,6 +355,7 @@ void MainWindow::initTaskUi()
 
 void MainWindow::updateTaskUi()
 {
+  setUpdatesEnabled(false);
   bool bOk = disconnect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
   assert(bOk);
 
@@ -410,7 +411,7 @@ void MainWindow::updateTaskUi()
             auto pParentTask = m_pManager->task(pTask->parentTask());
             if (nullptr == pParentTask)
             {
-              pGroupWidget->insertTask(pTaskWidget);
+              pGroupWidget->insertTask(pTaskWidget, -1, false);
             }
           }
         }
@@ -431,7 +432,7 @@ void MainWindow::updateTaskUi()
         TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(pTask->parentTask());
         if (nullptr != pParentTaskWidget)
         {
-          pParentTaskWidget->insertTask(pTaskWidget);
+          pParentTaskWidget->insertTask(pTaskWidget, -1, false);
         }
       }
     }
@@ -461,6 +462,7 @@ void MainWindow::updateTaskUi()
 
   // update the auto priority in all widgets (old and new)
   updateAutoPrioritiesInTaskWidgets();
+  setUpdatesEnabled(true);
 }
 
 void MainWindow::loadPlugins(const QString& sInitialSearchPath)
@@ -1466,6 +1468,15 @@ namespace {
     std::sort(vTaskIds.begin(), vTaskIds.end(), greaterThan);
   }
 
+  void fnSort(std::vector<ITask*>& vpTasks)
+  {
+    auto greaterThan = [](ITask* pLhs, ITask* pRhs)
+    {
+      return nullptr != pLhs && nullptr != pRhs && pLhs->autoPriority() > pRhs->autoPriority();
+    };
+    std::sort(vpTasks.begin(), vpTasks.end(), greaterThan);
+  }
+
   void sortTask(Manager* pManager, WidgetManager* pWidgetManager, task_id taskId)
   {
     auto pTask = pManager->task(taskId);
@@ -1499,7 +1510,17 @@ void MainWindow::sortGroup(group_id groupId)
   {
     std::vector<task_id> vIds;
     for (auto taskId : pGroup->taskIds())  { vIds.push_back(taskId); }
-    fnSort(m_pManager, vIds);
+
+
+    std::vector<ITask*> vpTasks;
+    std::transform(vIds.begin(), vIds.end(), std::back_inserter(vpTasks),
+          [&](task_id id){ return m_pManager->task(id); });
+
+    fnSort(vpTasks);
+    vIds.clear();
+    std::transform(vpTasks.begin(), vpTasks.end(), std::back_inserter(vIds),
+          [&](ITask* p){ return nullptr == p ? -1 : p->id(); });
+
     pGroupWidget->reorderTasks(vIds);
 
     for (auto taskId : vIds)

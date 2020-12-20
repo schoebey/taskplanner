@@ -61,9 +61,11 @@ void GroupWidget::setName(const QString& sName)
 {
   ui->pTitle->setText(sName);
   setObjectName(QString(sName).remove(" "));
-
-  style()->unpolish(this);
-  style()->polish(this);
+  if (updatesEnabled())
+  {
+    style()->unpolish(this);
+    style()->polish(this);
+  }
 }
 
 bool GroupWidget::setPropertyValue(const QString& sName, const QString& sValue)

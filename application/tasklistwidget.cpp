@@ -105,19 +105,19 @@ bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos, bool bAnimate
     auto bHasFocus = pTaskWidget->hasFocus();
     pTaskWidget->setParent(this);
     pTaskWidget->setTaskListWidget(this);
-    pTaskWidget->resize(width(), pTaskWidget->sizeHint().height());
     pTaskWidget->move(mapFromGlobal(currentPos));
     if (bHasFocus)  { pTaskWidget->setFocus(); }
-    pTaskWidget->show();
 
     connect(pTaskWidget, &TaskWidget::sizeChanged, this, &TaskListWidget::updateTaskPositions, Qt::QueuedConnection);
 
-
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
 
-    pTaskWidget->show();
-    pTaskWidget->style()->unpolish(pTaskWidget);
-    pTaskWidget->style()->polish(pTaskWidget);
+    if (updatesEnabled())
+    {
+      pTaskWidget->style()->unpolish(pTaskWidget);
+      pTaskWidget->style()->polish(pTaskWidget);
+      pTaskWidget->show();
+    }
 
     if (bAnimateInsert)
     {
