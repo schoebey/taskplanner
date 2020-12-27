@@ -4,7 +4,7 @@ project(taskplanner VERSION ${APP_VERSION})
 
 include(common)
 
-add_executable(${PROJECT_NAME}
+add_executable(${PROJECT_NAME} WIN32
     aboutdialog.cpp
     aboutdialog.h
     aboutdialog.ui
