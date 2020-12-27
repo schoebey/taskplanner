@@ -221,10 +221,12 @@ TaskWidget *TaskListWidget::taskWidgetAt(QPoint pt)
   for (size_t iIdx = 0; iIdx < m_vpTaskWidgets.size(); ++iIdx)
   {
     TaskWidget* pWidget = m_vpTaskWidgets[iIdx];
-    QRect widgetRect(pWidget->rect());
-    if (widgetRect.contains(pWidget->mapFrom(this, pt)))
-    {
-      return pWidget;
+    if (nullptr != pWidget) {
+      QRect widgetRect(pWidget->rect());
+      if (widgetRect.contains(pWidget->mapFrom(this, pt)))
+      {
+        return pWidget;
+      }
     }
   }
 
