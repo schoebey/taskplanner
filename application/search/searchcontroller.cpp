@@ -277,25 +277,26 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
         // ensure the corresponding widget exists by expanding all of the parent widgets
         auto id = taskId;
         TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
-        std::deque<task_id> vWidgetsToReconstruct;
+        std::deque<task_id> vWidgetsToExpand;
         while (nullptr == pTaskWidget)
         {
-          vWidgetsToReconstruct.push_front(id);
           id = pTask->parentTask();
           pTask = m_pTaskManager->task(id);
           if (-1 == id) { break; }
           pTaskWidget = m_pWidgetManager->taskWidget(id);
           pTask = m_pTaskManager->task(id);
+          vWidgetsToExpand.push_front(id);
         }
 
         // instead of expanding the tasks right away, store
         // the ids in the results container
         // This way, a delayed expansion can take place
         // when the iterator hits an unexpanded result.
-        if (!vWidgetsToReconstruct.empty()) {
+        if (!vWidgetsToExpand.empty()) {
           SMatchInfo hit;
           hit.pClosestParentTaskWidget = pTaskWidget;
-          hit.vToExpand = vWidgetsToReconstruct;
+          vWidgetsToExpand.push_front(pTaskWidget->id());
+          hit.vToExpand = vWidgetsToExpand;
           vMatchInfo.push_back(hit);
         }
       }
@@ -322,8 +323,33 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
       std::sort(vMatchInfo.begin(), vMatchInfo.end(),
                 [pGroupWidget](const SMatchInfo& lhs, const SMatchInfo& rhs)
       {
-        QWidget* pLhs = nullptr != lhs.pWidget ? lhs.pWidget : lhs.pClosestParentTaskWidget->taskListWidget();
-        QWidget* pRhs = nullptr != rhs.pWidget ? rhs.pWidget : rhs.pClosestParentTaskWidget->taskListWidget();
+        QWidget* pLhs = nullptr;
+        QWidget* pRhs = nullptr;
+
+        if (nullptr != lhs.pWidget && nullptr != rhs.pWidget) {
+          pLhs = lhs.pWidget;
+          pRhs = rhs.pWidget;
+        }
+        else if (nullptr != lhs.pWidget && nullptr != rhs.pClosestParentTaskWidget)
+        {
+          if (rhs.pClosestParentTaskWidget->isAncestorOf(lhs.pWidget)) { return true; }
+
+          pLhs = lhs.pWidget;
+          pRhs = rhs.pClosestParentTaskWidget;
+        }
+        else if (nullptr != lhs.pClosestParentTaskWidget && nullptr != rhs.pWidget)
+        {
+          if (lhs.pClosestParentTaskWidget->isAncestorOf(rhs.pWidget)) { return false; }
+
+          pLhs = lhs.pClosestParentTaskWidget;
+          pRhs = rhs.pWidget;
+        }
+        else if (nullptr != lhs.pClosestParentTaskWidget && nullptr != rhs.pClosestParentTaskWidget)
+        {
+          pLhs = lhs.pClosestParentTaskWidget;
+          pRhs = rhs.pClosestParentTaskWidget;
+        }
+
 
         if (nullptr != pLhs && nullptr != pRhs){
           return pLhs->mapTo(pGroupWidget, pLhs->pos()).y() < pRhs->mapTo(pGroupWidget, pRhs->pos()).y();
@@ -358,6 +384,11 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
     });
   }
 
+  // if the widget with the currently highlighted search result
+  // doesn't have any more hits after the search term has changed,
+  // start iteration from the beginning.
+  if (it == m_hits.end())  { it = m_hits.begin(); }
+
   setCurrent(it);
 }
 
@@ -372,35 +403,37 @@ void SearchController::setCurrent(tMatches::iterator it)
   // determine if the new position falls on a not yet expanded widget
   if (it != m_hits.end() &&
       !it->vToExpand.empty()) {
-    detail::ensureVisible(it->pClosestParentTaskWidget);
 
     while (!it->vToExpand.empty())
     {
       task_id childId = it->vToExpand.front();
       it->vToExpand.pop_front();
       TaskWidget* pChildWidget = m_pWidgetManager->taskWidget(childId);
-      detail::ensureVisible(pChildWidget);
+      if (nullptr != pChildWidget) {
+          pChildWidget->setExpanded(true);
+      }
     }
 
     // this call invalidates 'it', so we try to save its position in the vector
     // and reconstruct it afterwards
     int iPos = it - m_hits.begin();
     onSearchTermChanged(m_sSearchTerm);
-    it = m_hits.begin() + iPos;
-  }
-
-
-  m_hitIter = it;
-  if (m_hitIter != m_hits.end())
-  {
-    QWidget* pCurrent = m_hitIter->pWidget;
-    detail::ensureVisible(pCurrent);
-    detail::highlight(m_hitIter->pWidget, tvMatchInfo{*m_hitIter}, eActiveSearchResult);
-    emit positionChanged(static_cast<size_t>(m_hitIter - m_hits.begin()), hitCount());
+    setCurrent(m_hits.begin() + iPos);
   }
   else
   {
-    emit positionChanged(0, hitCount());
+    m_hitIter = it;
+    if (m_hitIter != m_hits.end())
+    {
+      QWidget* pCurrent = m_hitIter->pWidget;
+      detail::ensureVisible(pCurrent);
+      detail::highlight(m_hitIter->pWidget, tvMatchInfo{*m_hitIter}, eActiveSearchResult);
+      emit positionChanged(static_cast<size_t>(m_hitIter - m_hits.begin()), hitCount());
+    }
+    else
+    {
+      emit positionChanged(0, hitCount());
+    }
   }
 }
 

@@ -991,7 +991,7 @@ std::vector<TaskWidget*> TaskWidget::tasks() const
 
 void TaskWidget::ensureVisible(QWidget* pWidget)
 {
-  if (isAncestorOf(pWidget))
+  if (isAncestorOf(pWidget) && !pWidget->isVisible())
   {
     setExpanded(true);
     m_pContainer->ensureVisible(pWidget);
