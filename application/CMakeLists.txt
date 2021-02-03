@@ -10,6 +10,10 @@ add_executable(${PROJECT_NAME}
     aboutdialog.ui
     blendableimagewidget.cpp
     blendableimagewidget.h
+    commands/addtagcommand.cpp
+    commands/addtagcommand.h
+    commands/removetagcommand.cpp
+    commands/removetagcommand.h
     commands/addtaskcommand.cpp
     commands/addtaskcommand.h
     commands/changegrouppropertycommand.cpp
@@ -20,8 +24,10 @@ add_executable(${PROJECT_NAME}
     commands/deletetaskcommand.h
     commands/movetaskcommand.cpp
     commands/movetaskcommand.h
-    datetimelabel.cpp
-    datetimelabel.h
+    colorpicker.cpp
+    colorpicker.h
+    colorspacewidget.cpp
+    colorspacewidget.h
     decoratedlabel.cpp
     decoratedlabel.h
     editablelabel.cpp
@@ -50,9 +56,9 @@ add_executable(${PROJECT_NAME}
     mousehandlingframe.h
     overlaywidget.cpp
     overlaywidget.h
-    propertyeditorfactory.cpp
-    propertyeditorfactory.h
     resources/resource.qrc
+    recurrence.cpp
+    recurrence.h
     search/matchinfo.h
     search/searchcontroller.cpp
     search/searchcontroller.h
@@ -63,6 +69,13 @@ add_executable(${PROJECT_NAME}
     style.cpp
     style.h
     styleExtension.h
+    tageditor.cpp
+    tageditor.h
+    tagprovider.cpp
+    tagprovider.h
+    tagproviderinterface.h
+    tagwidget.cpp
+    tagwidget.h
     taskcreationdialog.cpp
     taskcreationdialog.h
     tasklistwidget.cpp

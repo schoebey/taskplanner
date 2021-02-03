@@ -12,6 +12,8 @@ add_library(${PROJECT_NAME} SHARED
     constraintfactory.h
     conversion.cpp
     conversion.h
+    conversion_fancy.cpp
+    conversion_fancy.h
     group.cpp
     group.h
     groupinterface.h
@@ -46,6 +48,8 @@ add_library(${PROJECT_NAME} SHARED
     serializers/serializerfactory.h
     serializers/serializerinterface.h
     serializers/serializerregister.h
+    tag.cpp
+    tag.h
     task.cpp
     task.h
     taskinterface.h
