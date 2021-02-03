@@ -130,6 +130,8 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
   assert(bOk);
   bOk = QObject::connect(pTaskWidget, SIGNAL(addPropertyRequested(task_id, QString)),     m_pController, SLOT(onAddPropertyRequested(task_id, QString)));
   assert(bOk);
+  bOk = QObject::connect(pTaskWidget, SIGNAL(editTagsRequested()),                        m_pController, SLOT(openTagsEditor()));
+  assert(bOk);
   bOk = QObject::connect(m_pController, SIGNAL(timeTrackingStopped(task_id)),             pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
   assert(bOk);
 

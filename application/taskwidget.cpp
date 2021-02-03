@@ -200,6 +200,7 @@ void TaskWidget::showContextMenu(QPoint pt)
       pTagsMenu->addAction(pAction);
     }
     QAction* pEditTags = new QAction("Edit tags...", this);
+    connect(pEditTags, &QAction::triggered, this, &TaskWidget::editTagsRequested);
     pTagsMenu->addAction(pEditTags);
   }
 

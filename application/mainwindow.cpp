@@ -243,18 +243,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   ui->menuTools->addAction(pChooseScript);
 
   QAction* pOpenTagEditor = new QAction(tr("Edit tags..."), this);
-  connect(pOpenTagEditor, &QAction::triggered, this, [&]()
-  {
-    auto pEditor = m_pWidgetManager->createTagEditor();
-
-    OverlayWidget* pOverlay = new OverlayWidget(this);
-    pOverlay->setObjectName("TagEditor");
-    pOverlay->setAutoDeleteOnClose(true);
-    pOverlay->addWidget(pEditor);
-    pOverlay->setTitle(tr("Tags"));
-    pEditor->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    pOverlay->appear();
-  });
+  connect(pOpenTagEditor, &QAction::triggered, this, &MainWindow::openTagsEditor);
   ui->menuTools->addAction(pOpenTagEditor);
   pOpenTagEditor->setShortcut(Qt::CTRL + Qt::Key_T);
 
@@ -1771,4 +1760,17 @@ void MainWindow::onAddPropertyRequested(task_id taskId, const QString& sProperty
       pTaskWidget->addProperty((*it)->name(), QString(), (*it)->displayFunction());
     }
   }
+}
+
+void MainWindow::openTagsEditor()
+{
+  auto pEditor = m_pWidgetManager->createTagEditor();
+
+  OverlayWidget* pOverlay = new OverlayWidget(this);
+  pOverlay->setObjectName("TagEditor");
+  pOverlay->setAutoDeleteOnClose(true);
+  pOverlay->addWidget(pEditor);
+  pOverlay->setTitle(tr("Tags"));
+  pEditor->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+  pOverlay->appear();
 }
