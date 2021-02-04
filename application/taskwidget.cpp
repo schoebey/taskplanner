@@ -1177,7 +1177,11 @@ start the timer and a timer that will automatically stop the tracking and start 
 */
   m_vAutoRecurrences = vRecurrences;
 
+  startNextAutoRecurrenceTimer();
+}
 
+void TaskWidget::startNextAutoRecurrenceTimer()
+{
   // find the closest occurrence
   struct cmp {
     bool operator()(const SRecurrence& lhs, const SRecurrence& rhs) const {
@@ -1215,6 +1219,7 @@ start the timer and a timer that will automatically stop the tracking and start 
         m_recurringTimerConnection = connect(m_pRecurringStopTimer, &QTimer::timeout,
                 [this, dtStart, dtStop](){
           emit addTimeRequested(id(), dtStart, dtStop);
+          startNextAutoRecurrenceTimer();
         });
 
         int iSecsToTimeout = now.secsTo(dtStop);

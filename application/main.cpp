@@ -84,9 +84,9 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Task, "color", QColor, false);
 
 
-  REGISTER_CUSTOM_DISPLAY_PROPERTY(Task, "auto_repeat_every", std::bitset<7>, &conversion::bitsetToWeekDays);
-  REGISTER_PROPERTY(Task, "auto_start_time", QTime, true);
-  REGISTER_CUSTOM_DISPLAY_PROPERTY(Task, "auto_duration", std::chrono::minutes, &conversion::chrono::toDisplayString<std::chrono::minutes>);
+//  REGISTER_CUSTOM_DISPLAY_PROPERTY(Task, "auto_repeat_every", std::bitset<7>, &conversion::bitsetToWeekDays);
+//  REGISTER_PROPERTY(Task, "auto_start_time", QTime, true);
+//  REGISTER_CUSTOM_DISPLAY_PROPERTY(Task, "auto_duration", std::chrono::minutes, &conversion::chrono::toDisplayString<std::chrono::minutes>);
 
 
 

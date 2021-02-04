@@ -514,7 +514,7 @@ QStringList detail::toList(const QString& s, const QChar& startChar, const QChar
     else if (ch == endChar && iNofOpenTags == 0)  { iEndOfElement = i; }
     else { iEndOfElement = iStartOfElement; }
 
-    if (iEndOfElement != iStartOfElement)
+    if (iEndOfElement > iStartOfElement)
     {
       l.push_back(s.mid(iStartOfElement + 1, iEndOfElement - iStartOfElement - 1));
     }

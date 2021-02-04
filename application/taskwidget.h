@@ -147,6 +147,7 @@ private slots:
 private:
   void emphasise();
   void showContextMenu(QPoint pt);
+  void startNextAutoRecurrenceTimer();
 
 private:
   Q_DISABLE_COPY(TaskWidget)
