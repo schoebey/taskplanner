@@ -25,6 +25,7 @@ class SearchFrame;
 class SearchController;
 class QFileSystemWatcher;
 class ToolBarInfoDisplay;
+class Logger;
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -129,6 +130,7 @@ private:
   ToolBarInfoDisplay* m_pInfoDisplay;
   SearchFrame* m_pSearchFrame;
   std::shared_ptr<SearchController> m_spSearchController;
+  std::unique_ptr<Logger> m_spLogger;
   void setCurrentFileName(const QString& sFileName);
 };
 

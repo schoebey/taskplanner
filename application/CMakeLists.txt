@@ -48,6 +48,8 @@ add_executable(${PROJECT_NAME}
     linkwidget.cpp
     linkwidget.h
     linkwidget.ui
+    logger.cpp
+    logger.h
     main.cpp
     mainwindow.cpp
     mainwindow.h

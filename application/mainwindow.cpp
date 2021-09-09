@@ -19,6 +19,7 @@
 #include "propertieshelpers.h"
 #include "tagwidget.h"
 #include "version.h"
+#include "logger.h"
 
 #include "search/searchframe.h"
 #include "search/searchcontroller.h"
@@ -61,6 +62,8 @@
 
 namespace
 {
+  static const QString c_sDtFormat = "yyyy-MM-dd hh:mm:ss";
+
   bool IsVisibleToTopLevel(Manager* pManager, task_id id)
   {
     auto pTask = pManager->task(id);
@@ -276,10 +279,22 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   {
     m_pWatcher->addPath("stylesheet.css");
   }
+
+
+  m_spLogger = std::unique_ptr<Logger>(new Logger());
+  if (!m_spLogger->setFileName("log.log"))
+  {
+    assert(false && "failed to initialize logger");
+  }
+  m_spLogger->log(tr("application started"));
 }
 
 MainWindow::~MainWindow()
 {
+  m_vspPlugins.clear();
+
+  m_spLogger->log(tr("application stopped"));
+
   delete ui;
 }
 
@@ -580,6 +595,8 @@ void MainWindow::onNewTaskAccepted()
     m_undoStack.push(pCommand);
 
     emit documentModified();
+
+    m_spLogger->log(tr("new task created: <%1>").arg(m_pTaskCreationDialog->name()));
   }
 }
 
@@ -636,6 +653,8 @@ void MainWindow::onNewSubTaskAccepted()
     m_undoStack.push(pCommand);
 
     emit documentModified();
+
+    m_spLogger->log(tr("new task created: <%1>").arg(m_pTaskCreationDialog->name()));
   }
 }
 
@@ -755,10 +774,11 @@ void MainWindow::startTimeTracking(task_id taskId)
     if (otherTaskId != taskId)
     {
       ITask* pTask = m_pManager->task(otherTaskId);
-      if (nullptr != pTask)
+      if (nullptr != pTask && pTask->isWorking())
       {
         pTask->stopWork();
         emit timeTrackingStopped(otherTaskId);
+        m_spLogger->log(tr("stopped tracking <%1>").arg(pTask->name()));
       }
 
     }
@@ -769,6 +789,7 @@ void MainWindow::startTimeTracking(task_id taskId)
   if (nullptr != pTask)
   {
     pTask->startWork();
+    m_spLogger->log(tr("started tracking <%1>").arg(pTask->name()));
   }
 
   emit documentModified();
@@ -777,12 +798,14 @@ void MainWindow::startTimeTracking(task_id taskId)
 void MainWindow::stopTimeTracking(task_id taskId)
 {
   ITask* pTask = m_pManager->task(taskId);
-  if (nullptr != pTask)
+  if (nullptr != pTask && pTask->isWorking())
   {
     pTask->stopWork();
     emit timeTrackingStopped(taskId);
 
     emit documentModified();
+
+    m_spLogger->log(tr("stopped tracking <%1>").arg(pTask->name()));
   }
 }
 
@@ -1021,8 +1044,8 @@ void MainWindow::on_actionOpen_triggered()
                    QMessageBox::Yes | QMessageBox::No);
     mb.setDetailedText(tr("%1 saved on %2,\n"
                           "%3 saved on %4\n\n")
-                       .arg(info.fileName()).arg(info.lastModified().toString("yyyy-MM-dd hh:mm:ss"))
-                       .arg(tempInfo.fileName()).arg(tempInfo.lastModified().toString("yyyy-MM-dd hh:mm:ss")));
+                       .arg(info.fileName()).arg(info.lastModified().toString(c_sDtFormat))
+                       .arg(tempInfo.fileName()).arg(tempInfo.lastModified().toString(c_sDtFormat)));
 
 
     if (QMessageBox::Yes == mb.exec())
@@ -1081,6 +1104,7 @@ void MainWindow::on_actionDisplayReport_triggered()
     QByteArray ba;
     QBuffer buffer(&ba);
     spReport->setParameter("device", QVariant::fromValue<QIODevice*>(&buffer));
+//    spReport->setParameter("numberOfDays", 100);
     spReport->create(*m_pManager);
 
     QString s(ba.data());
@@ -1499,6 +1523,10 @@ void MainWindow::onWokeUpFromHibernation(const QDateTime& sleepTime,
       pTask->startWork(wakeUpTime);
     }
   }
+
+  m_spLogger->log(tr("hibernation event detected between <%1> and <%2>")
+                  .arg(sleepTime.toString(c_sDtFormat))
+                  .arg(wakeUpTime.toString(c_sDtFormat)));
 }
 
 bool MainWindow::eventFilter(QObject* /*pWatched*/, QEvent* pEvent)

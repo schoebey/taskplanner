@@ -33,6 +33,7 @@ public:
 
   virtual void startWork(const QDateTime& when = QDateTime::currentDateTime()) = 0;
   virtual void stopWork(const QDateTime& when = QDateTime::currentDateTime()) = 0;
+  virtual bool isWorking() const = 0;
 
   /*!
    * \brief insetTimeFragment inserts a fragment of time into the collection

@@ -62,6 +62,7 @@ public:
 
   void startWork(const QDateTime& when) override;
   void stopWork(const QDateTime& when) override;
+  bool isWorking() const override;
   void insertTimeFragment(const QDateTime& start, const QDateTime& end) override;
   void removeTimeFragment(const QDateTime& start, const QDateTime& end) override;
   bool isTrackingTime() const override;

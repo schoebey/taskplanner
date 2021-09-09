@@ -311,6 +311,13 @@ void Task::stopWork(const QDateTime& when)
   }
 }
 
+bool Task::isWorking() const
+{
+  if (m_vTimingInfo.empty())  { return false; }
+
+  return !m_vTimingInfo.back().stopTime.isValid();
+}
+
 void Task::insertTimeFragment(const QDateTime& start, const QDateTime& end)
 {
   startWork(start);
