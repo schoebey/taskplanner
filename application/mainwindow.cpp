@@ -291,7 +291,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-  m_spLogger->log(tr("application stopped"));
+  m_spLogger->log(tr("application terminated"));
 
   delete ui;
 }
