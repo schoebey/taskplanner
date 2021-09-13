@@ -26,6 +26,7 @@ class SearchController;
 class QFileSystemWatcher;
 class ToolBarInfoDisplay;
 class Logger;
+class IPlugin;
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -124,7 +125,6 @@ private:
   std::map<group_id, QTimer*> m_autoSortTimers;
   QSignalMapper* m_pTimeoutGroupIdMapper;
   QUndoStack m_undoStack;
-  std::vector<std::shared_ptr<QObject>> m_vspPlugins;
   QAction* m_pEnableHibernationDetection;
   QFileSystemWatcher* m_pWatcher;
   ToolBarInfoDisplay* m_pInfoDisplay;

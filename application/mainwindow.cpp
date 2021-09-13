@@ -291,8 +291,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-  m_vspPlugins.clear();
-
   m_spLogger->log(tr("application stopped"));
 
   delete ui;
@@ -517,7 +515,6 @@ void MainWindow::loadPlugins(const QString& sInitialSearchPath)
         if (nullptr != p)
         {
           p->initialize();
-          m_vspPlugins.push_back(std::shared_ptr<QObject>(pPlugin));
         }
       }
       else
