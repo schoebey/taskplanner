@@ -1101,7 +1101,7 @@ void MainWindow::on_actionDisplayReport_triggered()
     QByteArray ba;
     QBuffer buffer(&ba);
     spReport->setParameter("device", QVariant::fromValue<QIODevice*>(&buffer));
-//    spReport->setParameter("numberOfDays", 100);
+    spReport->setParameter("numberOfDays", 100);
     spReport->create(*m_pManager);
 
     QString s(ba.data());

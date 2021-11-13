@@ -240,7 +240,7 @@ TEST_F(TimedTaskTest, insertTimeFragment_isolated)
   EXPECT_EQ(3u, m_pTask0->timeFragments().size());
 
   // insert a time fragment that stands on its own
-  m_pTask0->insertTimeFragment(m_end.addSecs(300), m_end.addSecs(120));
+  m_pTask0->insertTimeFragment(m_end.addSecs(300), m_end.addSecs(600));
 
   EXPECT_EQ(4u, m_pTask0->timeFragments().size());
 }

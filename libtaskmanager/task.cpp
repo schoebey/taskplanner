@@ -3,6 +3,68 @@
 #include "manager.h"
 #include "serializerinterface.h"
 
+namespace {
+  const int c_iMaxSecsDeltaForFuse = 60;
+
+  void sortTimestamps(std::vector<STimeFragment>& timestamps)
+  {
+    std::sort(timestamps.begin(), timestamps.end(),
+              [](const STimeFragment& lhs, const STimeFragment& rhs)
+    {
+      return lhs.startTime < rhs.startTime;
+    });
+  }
+
+  void joinOverlaps(std::vector<STimeFragment>& timestamps)
+  {
+    // iterate through all time fragments and check for overlaps or fragments
+    // in close proximity to each other and fuse themg
+    sortTimestamps(timestamps);
+
+    // todo: move this code to its own function: fuseFragments
+    auto it = timestamps.begin();
+    STimeFragment* pLastEl = &*it;
+    ++it;
+    while (it != timestamps.end())
+    {
+      if (c_iMaxSecsDeltaForFuse >= pLastEl->stopTime.secsTo(it->startTime))
+      {
+        pLastEl->stopTime = std::max<QDateTime>(pLastEl->stopTime, it->stopTime);
+        it = timestamps.erase(it);
+      }
+      else
+      {
+        // only if the two elements were not fused should the last element pointer
+        // point to the current element.
+        pLastEl = &*it;
+        ++it;
+      }
+    }
+  }
+
+  bool ensureSanitized(std::vector<STimeFragment>& timestamps)
+  {
+    sortTimestamps(timestamps);
+
+    for (size_t idx = 0; idx < timestamps.size(); ++idx)
+    {
+      // only the last timestamp entry is allowed to have an invalid stop date
+      if (!timestamps[idx].stopTime.isValid() && idx < timestamps.size() - 1)
+      {
+        return false;
+      }
+
+      // no overlaps should occur
+      if (0 < idx && c_iMaxSecsDeltaForFuse >= timestamps[idx - 1].stopTime.secsTo(timestamps[idx].startTime))
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
 Task::Task(Manager* pManager, task_id id)
  : ITask(id),
    m_pManager(pManager)
@@ -298,135 +360,125 @@ void Task::startWork(const QDateTime& when)
 {
   STimeFragment fragment;
   fragment.startTime = when;
-  m_vTimingInfo.push_back(fragment);
+  m_timingInfo.push_back(fragment);
 }
 
 void Task::stopWork(const QDateTime& when)
 {
-  if (m_vTimingInfo.empty())  { return; }
+  if (m_timingInfo.empty())  { return; }
 
-  if (!m_vTimingInfo.back().stopTime.isValid())
+  auto& el = m_timingInfo.back();
+  if (!el.stopTime.isValid())
   {
-    m_vTimingInfo.back().stopTime = when;
+    el.stopTime = when;
+  }
+
+
+  // optimize timestamp fragments by joining overlaps
+  joinOverlaps(m_timingInfo);
+
+
+  if (!ensureSanitized(m_timingInfo))
+  {
+    throw std::runtime_error("corrupt timing info");
   }
 }
 
 bool Task::isWorking() const
 {
-  if (m_vTimingInfo.empty())  { return false; }
+  if (m_timingInfo.empty())  { return false; }
 
-  return !m_vTimingInfo.back().stopTime.isValid();
+  return !m_timingInfo.rbegin()->stopTime.isValid();
 }
 
 void Task::insertTimeFragment(const QDateTime& start, const QDateTime& end)
 {
+  assert(start <= end);
+  if (start > end)  { return; }
+
   startWork(start);
   stopWork(end);
-
-  // TODO: move this code to stopWork so that merging of fragment also works
-  // with starting/stopping when providing specific date times.
-
-  // iterate through all time fragments and check for overlaps or fragments
-  // in close proximity to each other and fuse themg
-  std::sort(m_vTimingInfo.begin(), m_vTimingInfo.end(),
-            [](const STimeFragment& lhs, const STimeFragment& rhs)
-  {
-    return lhs.startTime < rhs.startTime;
-  });
-
-  static const int c_iMaxSecsDeltaForFuse = 60;
-  auto it = m_vTimingInfo.begin();
-  STimeFragment* pLastEl = &*it++;
-  while (it != m_vTimingInfo.end())
-  {
-    if (nullptr != pLastEl)
-    {
-      if (c_iMaxSecsDeltaForFuse >= pLastEl->stopTime.secsTo(it->startTime))
-      {
-        pLastEl->stopTime = std::max<QDateTime>(pLastEl->stopTime, it->stopTime);
-        it = m_vTimingInfo.erase(it);
-      }
-      else
-      {
-        // only if the two elements were not fused should the last element pointer
-        // point to the current element.
-        pLastEl = &*it;
-        ++it;
-      }
-    }
-    else
-    {
-      ++it;
-    }
-  }
 }
 
 void Task::removeTimeFragment(const QDateTime& start, const QDateTime& end)
 {
-  auto it = m_vTimingInfo.begin();
-  while (it != m_vTimingInfo.end())
+  sortTimestamps(m_timingInfo);
+
+  auto itStart = std::find_if(m_timingInfo.begin(), m_timingInfo.end(),
+                              [&](const STimeFragment& tf) { return tf.startTime <= start && tf.stopTime >= start; });
+
+  auto itEnd = std::find_if(m_timingInfo.begin(), m_timingInfo.end(),
+                              [&](const STimeFragment& tf) { return tf.startTime <= end && tf.stopTime >= end; });
+
+  // delete all ranges between itStart and itEnd
+  std::shared_ptr<STimeFragment> spStart;
+  if (itStart != m_timingInfo.end())
   {
-    if (it->startTime >= end || it->stopTime <= start)
-    {
-      // common case: no collision with [start, end]
-      ++it;
-    }
-    else
-    {
-      if (it->startTime>= start && it->stopTime <= end)
-      {
-        // the current time fragment lies completely within [start, end]
-        // -> remove the fragment
-        it = m_vTimingInfo.erase(it);
-      }
-      else if (it->startTime < start && it->stopTime > end)
-      {
-        // the time fragment that is to be excluded lies completely within the current fragment
-        // -> split the fragment
-        auto originalStop = it->stopTime;
-        it->stopTime = start;
-        STimeFragment newFragment;
-        newFragment.startTime = end;
-        newFragment.stopTime = originalStop;
-        it = m_vTimingInfo.insert(it + 1, newFragment);
-      }
-      else if (it->startTime < end && it->stopTime > end)
-      {
-        // start point of current time fragment lies within [start, end]
-        // -> chop from the beginning of the fragment
-        it->startTime = end;
-        ++it;
-      }
-      else if (it->startTime < start && it->stopTime > start)
-      {
-        // end point of current fragment lies within [start, end]
-        // -> chop from the end of the fragment
-        it->stopTime = start;
-        ++it;
-      }
-      else
-      {
-        assert(false && "all cases should be covered. This code should not be executed.");
-      }
-    }
+    spStart = std::make_shared<STimeFragment>();
+    spStart->startTime = itStart->startTime;
+    spStart->stopTime = start;
+  }
+
+  std::shared_ptr<STimeFragment> spStop;
+  if (itEnd != m_timingInfo.end())
+  {
+    spStop = std::make_shared<STimeFragment>();
+    spStop->startTime = end;
+    spStop->stopTime = itEnd->stopTime;
+  }
+
+  if (itStart != m_timingInfo.end() &&
+      itEnd != m_timingInfo.end() &&
+      itStart != itEnd)
+  {
+    m_timingInfo.erase(itStart, itEnd);
+  }
+  else if (itStart != m_timingInfo.end())
+  {
+    m_timingInfo.erase(itStart);
+  }
+  else if (itEnd != m_timingInfo.end())
+  {
+    m_timingInfo.erase(itEnd);
+  }
+
+  if (spStart)
+  {
+    m_timingInfo.push_back(*spStart);
+  }
+
+  if (spStop)
+  {
+    m_timingInfo.push_back(*spStop);
+  }
+
+  sortTimestamps(m_timingInfo);
+
+
+  if (!ensureSanitized(m_timingInfo))
+  {
+    throw std::runtime_error("corrupt timing info");
   }
 }
 
 bool Task::isTrackingTime() const
 {
-  if (m_vTimingInfo.empty())  { return false; }
+  if (m_timingInfo.empty())  { return false; }
 
-  return !m_vTimingInfo.back().stopTime.isValid();
+  return !m_timingInfo.rbegin()->stopTime.isValid();
 }
 
 std::vector<STimeFragment> Task::timeFragments() const
 {
-  return m_vTimingInfo;
+  std::vector<STimeFragment> v;
+  v.insert(v.begin(), m_timingInfo.begin(), m_timingInfo.end());
+  return v;
 }
 
 void Task::setTimeFragments(const std::vector<STimeFragment>& vFragments)
 {
-  m_vTimingInfo = vFragments;
+  m_timingInfo.clear();
+  m_timingInfo.insert(m_timingInfo.end(), vFragments.begin(), vFragments.end());
 }
 
 std::set<tag_id> Task::tagIds() const

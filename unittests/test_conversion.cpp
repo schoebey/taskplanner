@@ -204,7 +204,7 @@ TEST(Conversion, vector_int_fromString)
 TEST(Conversion, vector_int_toString)
 {
   QString sResult = conversion::toString(std::vector<int>{1,2,3});
-  EXPECT_EQ(sResult, "1|2|3");
+  EXPECT_EQ(sResult, "{1},{2},{3}");
 }
 
 TEST(Conversion, vector_string_fromString)
@@ -218,7 +218,7 @@ TEST(Conversion, vector_string_fromString)
 TEST(Conversion, vector_string_toString)
 {
   QString sResult = conversion::toString(std::vector<QString>{"1", "2", "3"});
-  EXPECT_EQ(sResult, "1|2|3");
+  EXPECT_EQ(sResult, "{1},{2},{3}");
 }
 
 TEST(Conversion, vector_id_fromString)
@@ -237,7 +237,7 @@ TEST(Conversion, vector_id_toString)
   myIdType t(1);
 //  test(t);
   QString sResult = conversion::toString(std::vector<myIdType>{1,2,3});
-  EXPECT_EQ(sResult, "1|2|3");
+  EXPECT_EQ(sResult, "{1},{2},{3}");
 }
 
 TEST(Conversion, bitset_fromString)
