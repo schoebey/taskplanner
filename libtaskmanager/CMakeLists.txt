@@ -17,6 +17,7 @@ add_library(${PROJECT_NAME} SHARED
     group.cpp
     group.h
     groupinterface.h
+    interfaces/applicationinterface.h
     id_generator.h
     id_types.h
     libtaskmanager.h

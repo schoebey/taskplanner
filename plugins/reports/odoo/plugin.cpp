@@ -1,12 +1,12 @@
-#include "textreportplugin.h"
+#include "plugin.h"
 
 #include <QDebug>
 
-TextReportPlugin::TextReportPlugin()
+Plugin::Plugin()
 {
 
 }
 
-void TextReportPlugin::initialize()
+void Plugin::initialize()
 {
 }

@@ -1,16 +1,16 @@
-#ifndef TEXTREPORT_H
-#define TEXTREPORT_H
+#ifndef ODOOREPORT_H
+#define ODOOREPORT_H
 
 #include "report.h"
 
-class TextReport : public Report
+class OdooReport : public Report
 {
 public:
-  TextReport();
+  OdooReport();
 
   EReportError create_impl(const Manager& manager) const override;
 
 private:
 };
 
-#endif // TEXTREPORT_H
+#endif // ODOOREPORT_H

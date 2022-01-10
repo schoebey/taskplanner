@@ -1,20 +1,20 @@
-#ifndef TEXTREPORTPLUGIN_H
-#define TEXTREPORTPLUGIN_H
+#ifndef PLUGIN_H
+#define PLUGIN_H
 
 #include "plugininterface.h"
 
 #include <QObject>
 
-class TextReportPlugin : public QObject, public IPlugin
+class Plugin : public QObject, public IPlugin
 {
   Q_OBJECT
   Q_PLUGIN_METADATA(IID "app.taskplanner.interface")
   Q_INTERFACES(IPlugin)
 
 public:
-  TextReportPlugin();
+  Plugin();
 
   void initialize() override;
 };
 
-#endif // TEXTREPORTPLUGIN_H
+#endif // PLUGIN_H
