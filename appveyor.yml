@@ -10,6 +10,8 @@ configuration:
   - Debug
 
 install:
+    - set QTDIR=:\Qt\5.13.2\msvc2017_64
+    - set PATH=%PATH%;%QTDIR%\bin;
     - git submodule update --init --recursive
 
 before_build:
