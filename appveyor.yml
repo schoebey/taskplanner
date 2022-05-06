@@ -10,6 +10,7 @@ configuration:
   - Debug
 
 install:
+    - set Qt5_DIR=:\Qt\5.13.2\msvc2017_64\lib\cmake\Qt5
     - set QTDIR=:\Qt\5.13.2\msvc2017_64
     - set PATH=%PATH%;%QTDIR%\bin;
     - git submodule update --init --recursive
