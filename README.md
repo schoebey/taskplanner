@@ -1,7 +1,8 @@
 # taskplanner
 task planning tool
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/dba3df2f803a47cabd1f16c733a1bc03)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=schoebey/taskplanner&amp;utm_campaign=Badge_Grade)
+[![GitHub version](https://badge.fury.io/gh/schoebey%2Ftaskplanner.svg)](https://badge.fury.io/gh/schoebey%2Ftaskplanner)
+[![Build status](https://ci.appveyor.com/api/projects/status/owlunevmqy5penk3/branch/master?svg=true)](https://ci.appveyor.com/project/schoebey/taskplanner/branch/master)
 
 ![screenshot1](screenshots/screenshot1.png)
 
