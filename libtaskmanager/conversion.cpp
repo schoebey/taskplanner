@@ -289,11 +289,18 @@ namespace conversion
                                                    "dd.MM.yy"};
 
   static const std::set<QString> c_sTimeFormats = {"hh:mm:ss",
+                                                   "h:mm:ss",
                                                    "hh:mm:ss AP",
+                                                   "h:mm:ss AP",
                                                    "hh:mm:ss ap",
+                                                   "h:mm:ss ap",
                                                    "hh:mm",
+                                                   "h:mm",
                                                    "hh:mm AP",
-                                                   "hh:mm ap"};
+                                                   "h:mm AP",
+                                                   "hh:mm ap",
+                                                   "h:mm ap"};
+
   QDateTime dateTimeFromString(const QString& sVal, bool& bConversionStatus,
                                const QDateTime& baseDateTime)
   {
