@@ -3,6 +3,77 @@
 #include "manager.h"
 #include "serializerinterface.h"
 
+namespace {
+  const int c_iMaxSecsDeltaForFuse = 60;
+
+  void sortTimestamps(std::vector<STimeFragment>& timestamps)
+  {
+    std::sort(timestamps.begin(), timestamps.end(),
+              [](const STimeFragment& lhs, const STimeFragment& rhs)
+    {
+      return lhs.startTime < rhs.startTime;
+    });
+  }
+
+  void joinOverlaps(std::vector<STimeFragment>& timestamps)
+  {
+    // iterate through all time fragments and check for overlaps or fragments
+    // in close proximity to each other and fuse themg
+    sortTimestamps(timestamps);
+
+    // todo: move this code to its own function: fuseFragments
+    auto it = timestamps.begin();
+    STimeFragment* pLastEl = &*it;
+    ++it;
+    while (it != timestamps.end())
+    {
+      if (c_iMaxSecsDeltaForFuse >= pLastEl->stopTime.secsTo(it->startTime))
+      {
+        pLastEl->stopTime = std::max<QDateTime>(pLastEl->stopTime, it->stopTime);
+        it = timestamps.erase(it);
+      }
+      else
+      {
+        // only if the two elements were not fused should the last element pointer
+        // point to the current element.
+        pLastEl = &*it;
+        ++it;
+      }
+    }
+  }
+
+  /*!
+   * \brief ensureSanitized checks any open time fragments apart from the last one.
+   * This function returns false if multiple open time fragments are found, or if
+   * any but the last fragment is still open.
+   * \param timestamps vector of timestamp fragments that need to be checked.
+   * \return false, if the timestamps overlap or a fragment apart from the last is
+   * still open. If all fragments are disjunct and (except for the last one) closed,
+   * this function returns true.
+   */
+  bool ensureSanitized(std::vector<STimeFragment>& timestamps)
+  {
+    sortTimestamps(timestamps);
+
+    for (size_t idx = 0; idx < timestamps.size(); ++idx)
+    {
+      // only the last timestamp entry is allowed to have an invalid stop date
+      if (!timestamps[idx].stopTime.isValid() && idx < timestamps.size() - 1)
+      {
+        return false;
+      }
+
+      // no overlaps should occur
+      if (0 < idx && c_iMaxSecsDeltaForFuse >= timestamps[idx - 1].stopTime.secsTo(timestamps[idx].startTime))
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
 Task::Task(Manager* pManager, task_id id)
  : ITask(id),
    m_pManager(pManager)
@@ -286,9 +357,16 @@ bool Task::removeTask(task_id id)
 
 void Task::startWork(const QDateTime& when)
 {
-  STimeFragment fragment;
-  fragment.startTime = when;
-  m_vTimingInfo.push_back(fragment);
+  if (!m_vTimingInfo.empty() && !m_vTimingInfo.back().stopTime.isValid())
+  {
+    // task is already running, noting to do
+  }
+  else
+  {
+    STimeFragment fragment;
+    fragment.startTime = when;
+    m_vTimingInfo.push_back(fragment);
+  }
 }
 
 void Task::stopWork(const QDateTime& when)
