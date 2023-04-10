@@ -753,7 +753,6 @@ void MainWindow::startTimeTracking(task_id taskId)
         pTask->stopWork();
         emit timeTrackingStopped(otherTaskId);
       }
-
     }
   }
 
@@ -761,6 +760,7 @@ void MainWindow::startTimeTracking(task_id taskId)
   ITask* pTask = m_pManager->task(taskId);
   if (nullptr != pTask)
   {
+    bool bIsRunning = pTask->isTrackingTime();
     pTask->startWork();
   }
 
@@ -837,6 +837,46 @@ bool MainWindow::loadFile(const QString& sFileName, QString* psErrorMessage)
         setCurrentFileName(sFileName);
 
         initTaskUi();
+
+        // TODO: refactor
+        // check all time fragments of the file - only one should be open.
+        // close all time fragments but the most recent one, then find the
+        // appropriate task widget and track the task.
+        std::vector<std::tuple<task_id, size_t, QDateTime>> openTimeFragments;
+
+        for (const auto& id : m_pManager->taskIds())
+        {
+          auto pTask = m_pManager->task(id);
+          if (nullptr != pTask)
+          {
+            auto timefragments = pTask->timeFragments();
+            for (size_t idx = 0; idx < timefragments.size(); ++idx)
+            {
+              const auto& tf = timefragments[idx];
+              if (!tf.stopTime.isValid())
+              {
+                  openTimeFragments.push_back({id, idx, tf.startTime});
+              }
+            }
+          }
+        }
+
+        if (!openTimeFragments.empty())
+        {
+          // identify the newest still open time fragment
+          std::sort(openTimeFragments.begin(), openTimeFragments.end(), [](const auto& lhs,
+                                                                           const auto& rhs)
+                    {
+                        return std::get<2>(lhs) > std::get<2>(rhs);
+                    });
+
+          auto taskId = std::get<0>(openTimeFragments.front());
+          TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
+          if (nullptr != pTaskWidget)
+          {
+            pTaskWidget->setTimeTrackingEnabled(true);
+          }
+        }
 
         setWindowModified(false);
 
