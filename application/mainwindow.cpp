@@ -98,6 +98,20 @@ namespace
 
     return pTaskWidget;
   }
+
+  ITask* trackingTask(const Manager& manager)
+  {
+    for (const auto& taskId : manager.taskIds())
+    {
+      auto* pTask = manager.task(taskId);
+      if (nullptr != pTask && pTask->isTrackingTime())
+      {
+          return pTask;
+      }
+    }
+
+    return nullptr;
+  }
 }
 
 
@@ -988,6 +1002,41 @@ bool MainWindow::saveFile(const QString& sFileName, QString* psErrorMessage)
 
 QMessageBox::StandardButton MainWindow::askSave()
 {
+  // check for open time fragments.
+  // if there is an unfinalized time fragment, ask the user if it should be closed.
+  // This in turn should set the dirty flag, which will lead to asking the user
+  // if the file should be saved.
+  // If the user chooses not to save the file, the file will not be saved
+  // and thus the time fragment remains open in the file.
+  if (nullptr != m_pManager)
+  {
+    auto* pTrackingTask = trackingTask(*m_pManager);
+    if (nullptr != pTrackingTask)
+    {
+      auto button =
+          QMessageBox::question(nullptr, tr("Stop tracking?"),
+                                tr("The task \"%1\" is still being tracked.\n"
+                                   "Should the tracking be stopped?\n\n"
+                                   "%2")
+                                    .arg(pTrackingTask->name()),
+                                QMessageBox::Yes, QMessageBox::No, QMessageBox::Cancel);
+      auto b = static_cast<QMessageBox::StandardButton>(button);
+      switch (b)
+      {
+      case QMessageBox::Yes:
+        // stop tracking
+        stopTimeTracking(pTrackingTask->id());
+        break;
+      case QMessageBox::No:
+        // don't do anything but continue with asking the user
+        break;
+      case QMessageBox::Cancel:
+        // abort
+        return QMessageBox::Cancel;
+      }
+    }
+  }
+
   if (isWindowModified())
   {
     auto msecs = m_lastSaveTime.msecsTo(QDateTime::currentDateTime());
