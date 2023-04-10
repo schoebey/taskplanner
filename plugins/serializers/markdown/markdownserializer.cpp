@@ -162,8 +162,8 @@ namespace
 
   template<> QString convertFrom(const STimeFragment& f)
   {
-    QDateTime stopTime = f.stopTime.isValid() ? f.stopTime : QDateTime::currentDateTime();
-    return QString("[%1|%2]").arg(f.startTime.toString(c_sTimeFormat)).arg(stopTime.toString(c_sTimeFormat));
+    QString sStopTime = f.stopTime.isValid() ? f.stopTime.toString(c_sTimeFormat) : "";
+    return QString("[%1|%2]").arg(f.startTime.toString(c_sTimeFormat)).arg(sStopTime);
   }
 
   template<> QString convertFrom(const SPriority& prio)
@@ -228,9 +228,13 @@ namespace
     STimeFragment tf;
 
     QStringList parts = s.split("|");
-    if (2 <= parts.size())
+    if (1 <= parts.size())
     {
       tf.startTime = QDateTime::fromString(parts[0].remove(0,1), c_sTimeFormat);
+    }
+
+    if (2 <= parts.size())
+    {
       tf.stopTime = QDateTime::fromString(parts[1].remove(parts[1].size() - 1, 1), c_sTimeFormat);
     }
 
