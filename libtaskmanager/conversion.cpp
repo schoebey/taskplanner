@@ -400,7 +400,7 @@ in a hundred years
     {
       if (dt.time() > t)
       {
-        dt.addDays(1);
+        dt = dt.addDays(1);
       }
       dt.setTime(t);
     };
