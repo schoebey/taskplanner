@@ -222,7 +222,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
     addAction(pSetPriorityAction);
     pMapper->setMapping(pSetPriorityAction, i);
     connect(pSetPriorityAction, &QAction::triggered, pMapper, static_cast<void(QSignalMapper::*)(void)>(&QSignalMapper::map));
-    connect(pMapper, static_cast<void(QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &MainWindow::setPriority);
+    connect(pMapper, &QSignalMapper::mappedInt, this, &MainWindow::setPriority);
   }
 
   initTaskUi();
@@ -1031,6 +1031,7 @@ QMessageBox::StandardButton MainWindow::askSave()
         // don't do anything but continue with asking the user
         break;
       case QMessageBox::Cancel:
+      default:
         // abort
         return QMessageBox::Cancel;
       }

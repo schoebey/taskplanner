@@ -18,7 +18,7 @@ QString keyFromSettings(const QString& sText, const QString& sModifier,
                         const QFontMetrics& m, QColor col, QColor shadowCol)
 {
   return QString("%1_%2x%3_%4_%5_%6")
-      .arg(sText).arg(m.width(sText)).arg(m.height())
+      .arg(sText).arg(m.horizontalAdvance(sText)).arg(m.height())
       .arg(col.name()).arg(shadowCol.name()).arg(sModifier);
 }
 
@@ -37,10 +37,10 @@ namespace
     QFontMetrics m(f);
 
     QString sKey = keyFromSettings(sText, "normal", m, col, shadowColor);
-    QPixmap* pPixmap = QPixmapCache::find(sKey);
-    if (nullptr == pPixmap)
+    QPixmap* pPixmap;
+    if (QPixmapCache::find(sKey, pPixmap) && nullptr == pPixmap)
     {
-      QImage img(m.width(sText), m.height() + 2, QImage::Format_ARGB32);
+      QImage img(m.horizontalAdvance(sText), m.height() + 2, QImage::Format_ARGB32);
       if (!img.isNull())
       {
         img.fill(Qt::transparent);
@@ -60,7 +60,7 @@ namespace
         p.drawPath(textPath);
 
         QPixmapCache::insert(sKey, QPixmap::fromImage(img));
-        pPixmap = QPixmapCache::find(sKey);
+        QPixmapCache::find(sKey, pPixmap);
       }
     }
 
@@ -84,10 +84,10 @@ namespace
 
 
     QString sKey = keyFromSettings(sText, "shadow", m, col, shadowColor);
-    QPixmap* pPixmap = QPixmapCache::find(sKey);
-    if (nullptr == pPixmap)
+    QPixmap* pPixmap;
+    if (QPixmapCache::find(sKey, pPixmap) && nullptr == pPixmap)
     {
-      QImage img(m.width(sText), m.height() + 2, QImage::Format_ARGB32);
+      QImage img(m.horizontalAdvance(sText), m.height() + 2, QImage::Format_ARGB32);
       if (!img.isNull())
       {
         img.fill(Qt::transparent);
@@ -113,7 +113,7 @@ namespace
         p.setBrush(col);
         p.drawPath(textPath);
         QPixmapCache::insert(sKey, QPixmap::fromImage(img));
-        pPixmap = QPixmapCache::find(sKey);
+        QPixmapCache::find(sKey, pPixmap);
       }
     }
 
@@ -139,10 +139,10 @@ namespace
 
 
     QString sKey = keyFromSettings(sText, "outlined", m, col, outlineColor);
-    QPixmap* pPixmap = QPixmapCache::find(sKey);
-    if (nullptr == pPixmap)
+    QPixmap* pPixmap;
+    if (QPixmapCache::find(sKey, pPixmap) && nullptr == pPixmap)
     {
-      QImage img(m.width(sText) + iOutlineSize, m.height() + 2, QImage::Format_ARGB32);
+      QImage img(m.horizontalAdvance(sText) + iOutlineSize, m.height() + 2, QImage::Format_ARGB32);
       if (!img.isNull())
       {
         img.fill(Qt::transparent);
@@ -163,7 +163,7 @@ namespace
         p.setBrush(col);
         p.drawPath(textPath);
         QPixmapCache::insert(sKey, QPixmap::fromImage(img));
-        pPixmap = QPixmapCache::find(sKey);
+        QPixmapCache::find(sKey, pPixmap);
       }
     }
 
@@ -428,9 +428,7 @@ void Style::drawControl(ControlElement element,
                         QPainter* pPainter,
                         const QWidget* pWidget) const
 {
-  switch (element)
-  {
-  case CustomControlElements::CE_LinkWidget:
+  if (element == static_cast<ControlElement>(CustomControlElements::CE_LinkWidget))
   {
     const QStyleOptionLinkWidget* pLinkOption = qstyleoption_cast<const QStyleOptionLinkWidget*>(pOption);
     if (nullptr != pLinkOption)
@@ -486,11 +484,11 @@ void Style::drawControl(ControlElement element,
         pPainter->restore();
       }
     }
-  } break;
-  default:
+  }
+  else
+  {
     return QProxyStyle::drawControl(element, pOption, pPainter, pWidget);
   }
-
 }
 
 int Style::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const

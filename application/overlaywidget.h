@@ -14,7 +14,7 @@ public:
 
   void setAutoDeleteOnClose(bool bAutoDelete);
 
-  void addWidget(QWidget* pWidget, Qt::Alignment alignment = 0);
+  void addWidget(QWidget* pWidget, Qt::Alignment alignment = {});
 
   void keyPressEvent(QKeyEvent* pEvent) override;
 

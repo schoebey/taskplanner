@@ -198,7 +198,7 @@ void LinkWidget::paintEvent(QPaintEvent* /*pEvent*/)
   opt.dBorderRadius = m_dBorderRadius;
 
   QRect iconLabelRect = ui->pIcon->rect();
-  opt.iconRect = ui->pIcon->pixmap()->rect();
+  opt.iconRect = ui->pIcon->pixmap(Qt::ReturnByValue).rect();
   int iOffsetX = (iconLabelRect.width() - opt.iconRect.width()) / 2;
   int iOffsetY = (iconLabelRect.height() - opt.iconRect.height()) / 2;
   opt.iconRect.moveTo(ui->pIcon->mapTo(this, QPoint(iOffsetX, iOffsetY)));

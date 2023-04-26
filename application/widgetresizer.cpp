@@ -5,6 +5,7 @@
 #include <QStyle>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QScreen>
 
 WidgetResizer::WidgetResizer(QWidget* pParent, EPosition anchor)
   : QFrame(pParent),
@@ -66,29 +67,35 @@ void WidgetResizer::mouseDoubleClickEvent(QMouseEvent *pEvent)
   if (!isEnabled())  { return; }
 
   auto pDesktop = QApplication::desktop();
-  auto screenGeo = pDesktop->availableGeometry(pDesktop->screenNumber(this));
-
-  switch (m_anchor)
+  int i = pDesktop->screenNumber(this);
+  auto screens = QGuiApplication::screens();
+  if (screens.size() > i)
   {
-  case eTopLeft:
-  case eTopRight:
-  case eBottomRight:
-  case eBottomLeft:
-    break;
-  case eTop:
-  case eBottom:
-    m_pParent->move(m_pParent->pos().x(), screenGeo.y());
-    m_pParent->resize(m_pParent->size().width(), screenGeo.height());
-    break;
-  case eRight:
-  case eLeft:
-    m_pParent->move(screenGeo.x(), m_pParent->pos().y());
-    m_pParent->resize(screenGeo.width(), m_pParent->size().height());
-    break;
-  case eCenter:
-  default:
-    pEvent->ignore();
-    break;
+    QScreen* pScreen = screens.at(pDesktop->screenNumber(this));
+    auto screenGeo = pScreen->availableGeometry();;
+
+    switch (m_anchor)
+    {
+    case eTopLeft:
+    case eTopRight:
+    case eBottomRight:
+    case eBottomLeft:
+        break;
+    case eTop:
+    case eBottom:
+        m_pParent->move(m_pParent->pos().x(), screenGeo.y());
+        m_pParent->resize(m_pParent->size().width(), screenGeo.height());
+        break;
+    case eRight:
+    case eLeft:
+        m_pParent->move(screenGeo.x(), m_pParent->pos().y());
+        m_pParent->resize(screenGeo.width(), m_pParent->size().height());
+        break;
+    case eCenter:
+    default:
+        pEvent->ignore();
+        break;
+    }
   }
 }
 
