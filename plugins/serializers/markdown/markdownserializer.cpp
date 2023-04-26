@@ -73,7 +73,7 @@ namespace
     {
       m_stream.flush();
       *m_ppStream = m_pOriginalStream;
-      **m_ppStream << m_sHeader << endl;
+      **m_ppStream << m_sHeader << Qt::endl;
       **m_ppStream << m_string;
     }
   };
@@ -269,7 +269,7 @@ namespace
   {
     stream << sName << ":";
     stream << convertFrom(t);
-    stream << endl;
+    stream << Qt::endl;
   }
 
   template<typename T>
@@ -364,8 +364,8 @@ ESerializingError MarkdownSerializer::initSerialization()
       }
       m_pStream->setDevice(&m_file);
       m_pStream->setCodec("UTF-8");
-      *m_pStream << QString("# task planner") << endl;
-      *m_pStream << "change date: " << QDateTime::currentDateTime().toString(c_sTimeFormat) << endl;
+      *m_pStream << QString("# task planner") << Qt::endl;
+      *m_pStream << "change date: " << QDateTime::currentDateTime().toString(c_sTimeFormat) << Qt::endl;
       return ESerializingError::eOk;
     }
 

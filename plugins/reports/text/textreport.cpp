@@ -55,8 +55,8 @@ EReportError TextReport::create_impl(const Manager& manager) const
   s.setCodec("UTF-8");
 
   // generate a report for the past seven days
-  QDateTime startDate(QDate::currentDate().addDays(-iNofDays));
-  QDateTime stopDate(QDate::currentDate().addDays(1));
+  QDate startDate(QDate::currentDate().addDays(-iNofDays));
+  QDate stopDate(QDate::currentDate().addDays(1));
 
   auto numerationFromInt = [](int i) -> QString
   {
@@ -81,15 +81,15 @@ EReportError TextReport::create_impl(const Manager& manager) const
   QString sFirstLine =
       QObject::tr("Timesheet for %1 to %2")
       .arg(startDate.toString(QString("dddd, MMMM dd'%1', yyyy")
-                              .arg(numerationFromInt(startDate.date().day()))))
+                              .arg(numerationFromInt(startDate.day()))))
       .arg(stopDate.addDays(-1).toString(QString("dddd, MMMM dd'%1', yyyy")
-                                         .arg(numerationFromInt(stopDate.date().day()))));
-  s << sFirstLine << endl;
-  s << QString("=").repeated(sFirstLine.size()) << endl << endl;
+                                         .arg(numerationFromInt(stopDate.day()))));
+  s << sFirstLine << Qt::endl;
+  s << QString("=").repeated(sFirstLine.size()) << Qt::endl << Qt::endl;
 
-  QDateTime startOfDay = startDate;
-  QDateTime endOfDay = startDate.addDays(1);
-  while (endOfDay <= stopDate)
+  QDateTime startOfDay = startDate.startOfDay();
+  QDateTime endOfDay = startDate.startOfDay().addDays(1);
+  while (endOfDay <= stopDate.endOfDay())
   {
     std::map<QDateTime, std::pair<QDateTime, QString>> timings;
 
@@ -117,15 +117,15 @@ EReportError TextReport::create_impl(const Manager& manager) const
 
     if (!timings.empty())
     {
-      s << startOfDay.toString("yyyy-MM-dd") << endl;
-      s << "----------" << endl;
+      s << startOfDay.toString("yyyy-MM-dd") << Qt::endl;
+      s << "----------" << Qt::endl;
 
       for (const auto& el : timings)
       {
-        s << el.first.toString("hh:mm") << el.second.first.toString(" - hh:mm : ") << el.second.second << endl;
+        s << el.first.toString("hh:mm") << el.second.first.toString(" - hh:mm : ") << el.second.second << Qt::endl;
       }
 
-      s << endl;
+      s << Qt::endl;
     }
 
     // jump to the next day
