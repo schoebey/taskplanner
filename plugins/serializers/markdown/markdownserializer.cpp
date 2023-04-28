@@ -3,6 +3,7 @@
 #include "serializablemanager.h"
 #include "group.h"
 #include "task.h"
+#include "compat.h"
 
 #include <QString>
 #include <QVariant>

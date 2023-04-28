@@ -5,6 +5,7 @@ project(libtaskmanager VERSION ${APP_VERSION})
 include(common)
 
 add_library(${PROJECT_NAME} SHARED
+    compat.h
     constraint.cpp
     constraint.h
     constraint_grammar.h

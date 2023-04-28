@@ -2,6 +2,7 @@
 #include "reportregister.h"
 #include "manager.h"
 #include "task.h"
+#include "compat.h"
 
 #include <QString>
 #include <QVariant>
