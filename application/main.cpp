@@ -113,6 +113,8 @@ int main(int argc, char *argv[])
   QApplication app(argc, argv);
 
 //  QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
+  QGuiApplication::setOrganizationName(taskplanner::organization_name);
+  QGuiApplication::setApplicationName(taskplanner::project_name);
   QGuiApplication::setApplicationDisplayName(QString("%1 (%2)")
                                              .arg(taskplanner::project_name)
                                              .arg(taskplanner::project_full_version));
