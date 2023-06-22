@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include "id_types.h"
+#include "taskcontrollerinterface.h"
+#include "groupcontrollerinterface.h"
+
 #include <QMainWindow>
 #include <QPointer>
 #include <QUrl>
@@ -25,7 +28,7 @@ class SearchFrame;
 class SearchController;
 class QFileSystemWatcher;
 class ToolBarInfoDisplay;
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public ITaskController, public IGroupController
 {
   Q_OBJECT
 
@@ -43,37 +46,37 @@ public:
   void restoreDefaultLayout();
 
 private slots:
-  void createNewTask(group_id groupId);
-  void renameGroup(group_id id, const QString& sNewName);
-  void renameTask(task_id id, const QString& sNewName);
-  void changeTaskDescription(task_id id, const QString& sNewDescr);
-  void onTaskMoved(task_id id, group_id groupId, int iPos);
-  void onTaskMoved(task_id id, task_id newParentTaskId, int iPos);
-  void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue);
-  void onPropertyRemoved(task_id taskId, const QString& sPropertyName);
-  void onLinkAdded(task_id taskId, QUrl url);
-  void onLinkRemoved(task_id taskId, QUrl url);
-  void onLinkInserted(task_id taskId, QUrl url, int iPos);
-  void onTaskDeleted(task_id id);
-  void onTaskRemoved(task_id parentTaskId, task_id childTaskId);
+  void createNewTask(group_id groupId) override;
+  void renameGroup(group_id id, const QString& sNewName) override;
+  void renameTask(task_id id, const QString& sNewName) override;
+  void changeTaskDescription(task_id id, const QString& sNewDescr) override;
+  void onTaskMoved(task_id id, group_id groupId, int iPos) override;
+  void onTaskMoved(task_id id, task_id newParentTaskId, int iPos) override;
+  void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue) override;
+  void onPropertyRemoved(task_id taskId, const QString& sPropertyName) override;
+  void onLinkAdded(task_id taskId, QUrl url) override;
+  void onLinkRemoved(task_id taskId, QUrl url) override;
+  void onLinkInserted(task_id taskId, QUrl url, int iPos) override;
+  void onTaskDeleted(task_id id) override;
+  void onTaskRemoved(task_id parentTaskId, task_id childTaskId) override;
   void onTaskAdded(task_id parentTaskId, task_id childTaskId);
   void onNewTaskAccepted();
   void setPriority(int iPriority);
   void createNewSubTask();
-  void createNewSubTask(task_id taskId);
+  void createNewSubTask(task_id taskId) override;
   void onNewSubTaskAccepted();
   void reloadStylesheet(const QString& sPath);
   void initTaskUi();
   void updateTaskUi();
-  void startTimeTracking(task_id taskId);
-  void stopTimeTracking(task_id taskId);
+  void startTimeTracking(task_id taskId) override;
+  void stopTimeTracking(task_id taskId) override;
   void on_actionOpen_triggered();
   void on_actionSave_triggered();
   void on_actionSaveAs_triggered();
   void on_actionReport_triggered();
   void on_actionDisplayReport_triggered();
-  void setAutoSortEnabled(group_id);
-  void setAutoSortDisabled(group_id);
+  void setAutoSortEnabled(group_id) override;
+  void setAutoSortDisabled(group_id) override;
   void onSortGroupTriggered(int iGroupId);
   void sortGroup(group_id groupId);
   void sortGroups();
@@ -84,9 +87,11 @@ private slots:
   void onWokeUpFromHibernation(const QDateTime& sleepTime,
                                const QDateTime& wakeUpTime);
   void on_actionFind_triggered();
-  void onPriorityUpdateRequested(task_id);
-  void onAddTimeToTaskRequested(task_id);
-  void onRemoveTimeFromTaskRequested(task_id);
+  void onPriorityUpdateRequested(task_id) override;
+  void onAddTimeToTaskRequested(task_id) override;
+  void onRemoveTimeFromTaskRequested(task_id) override;
+  void onTimeTrackingStopped(task_id) override;
+  void onChildPropertyChangeRequested(task_id, const QString&, const QString&, bool) override;
 
 signals:
   void timeTrackingStopped(task_id taskId);

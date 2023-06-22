@@ -14,7 +14,25 @@
 
 namespace
 {
-static const int c_iIconSize = 16;
+static const int c_iIconSize = 32;
+
+QPixmap ToScaledPixmap(const QImage& image)
+{
+    if (image.width() < c_iIconSize || image.height() < c_iIconSize)
+    {
+        QImage target(c_iIconSize, c_iIconSize, QImage::Format_ARGB32);
+        target.fill(0);
+        QPainter p(&target);
+        int iOffsetX = (c_iIconSize - image.width())/2;
+        int iOffsetY = (c_iIconSize - image.height())/2;
+        p.drawImage(iOffsetX, iOffsetY, image);
+        return QPixmap::fromImage(target);
+    }
+    else
+    {
+        return QPixmap::fromImage(image).scaled(c_iIconSize, c_iIconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+}
 
 QString toString(const QUrl& url)
 {
@@ -258,7 +276,7 @@ LinkWidget::LinkWidget(const QUrl& link)
     }
     else
     {
-        ui->pIcon->setPixmap(QPixmap::fromImage(*pImg).scaled(c_iIconSize, c_iIconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->pIcon->setPixmap(ToScaledPixmap(*pImg));
     }
   }
 
@@ -401,7 +419,7 @@ void LinkWidget::paintEvent(QPaintEvent* /*pEvent*/)
   opt.dBorderRadius = m_dBorderRadius;
 
   QRect iconLabelRect = ui->pIcon->rect();
-  opt.iconRect = ui->pIcon->rect();
+  opt.iconRect = ui->pIcon->pixmap()->rect();
   int iOffsetX = (iconLabelRect.width() - opt.iconRect.width()) / 2;
   int iOffsetY = (iconLabelRect.height() - opt.iconRect.height()) / 2;
   opt.iconRect.moveTo(ui->pIcon->mapTo(this, QPoint(iOffsetX, iOffsetY)));
@@ -445,7 +463,7 @@ void LinkWidget::fileDownloaded()
     if (img.loadFromData(ba) && !img.isNull())
     {
         Cache().add(m_link, img);
-        ui->pIcon->setPixmap(QPixmap::fromImage(img).scaled(c_iIconSize, c_iIconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->pIcon->setPixmap(ToScaledPixmap(img));
     }
     else
     {

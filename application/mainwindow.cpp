@@ -121,7 +121,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
   m_pManager(pManager),
-  m_pWidgetManager(new WidgetManager(m_pManager, this)),
+  m_pWidgetManager(new WidgetManager(m_pManager, this, this, this)),
   m_pTimeoutGroupIdMapper(new QSignalMapper(this)),
   m_pSearchFrame(new SearchFrame(this)),
   m_spSearchController(std::make_shared<SearchController>(m_pManager, m_pWidgetManager))
@@ -1860,6 +1860,30 @@ void MainWindow::onRemoveTimeFromTaskRequested(task_id id)
     {
       pTask->removeTimeFragment(start, stop);
       emit documentModified();
+    }
+  }
+}
+
+void MainWindow::onTimeTrackingStopped(task_id id)
+{
+  // TODO: consult task stack and jump back to previously active task
+
+}
+
+void MainWindow::onChildPropertyChangeRequested(task_id id, const QString& sPropertyName, const QString& sPropertyValue, bool bRecursive)
+{
+  auto* pTask = m_pManager->task(id);
+  if (nullptr != pTask)
+  {
+    for (const auto& childId : pTask->taskIds())
+    {
+      // set the property via change-handler. This will add an undo step if the task in question has a ui representation.
+      onPropertyChanged(childId, sPropertyName, sPropertyValue);
+
+      if (bRecursive)
+      {
+        onChildPropertyChangeRequested(childId, sPropertyName, sPropertyValue, bRecursive);
+      }
     }
   }
 }

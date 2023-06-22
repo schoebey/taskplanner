@@ -7,11 +7,13 @@
 class TaskWidget;
 class GroupWidget;
 class Manager;
+class ITaskController;
+class IGroupController;
 
 class WidgetManager
 {
 public:
-  WidgetManager(Manager* pManager, QWidget* pController);
+  WidgetManager(Manager* pManager, ITaskController* pTaskController, IGroupController* pGroupController, QWidget* pParentWidget);
 
   void clear();
 
@@ -24,7 +26,9 @@ public:
 
 private:
   Manager* m_pManager;
-  QWidget* m_pController;
+  ITaskController* m_pTaskController;
+  IGroupController* m_pGroupController;
+  QWidget* m_pParentWidget;
   std::map<group_id, QPointer<GroupWidget>> m_groupWidgets;
   std::map<task_id, QPointer<TaskWidget>> m_taskWidgets;
 };
