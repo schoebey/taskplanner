@@ -1863,3 +1863,8 @@ void MainWindow::onRemoveTimeFromTaskRequested(task_id id)
     }
   }
 }
+
+void MainWindow::onTimeTrackingStopped(task_id id)
+{
+  // TODO: consult task stack and jump back to previously active task
+}

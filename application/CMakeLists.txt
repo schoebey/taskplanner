@@ -59,6 +59,7 @@ add_executable(${PROJECT_NAME}
     style.cpp
     style.h
     styleExtension.h
+    taskcontrollerinterface.h
     taskcreationdialog.cpp
     taskcreationdialog.h
     tasklistwidget.cpp
@@ -90,6 +91,10 @@ target_link_libraries(${PROJECT_NAME}
         Qt5::Qml
         Qt5::Gui
 )
+
+if (WIN32)
+  set_property(TARGET taskplanner PROPERTY WIN32_EXECUTABLE true)
+endif()
 
 if(UNIX)
     target_link_libraries(${PROJECT_NAME} PUBLIC pthread)
