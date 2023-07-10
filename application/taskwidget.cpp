@@ -186,6 +186,14 @@ void TaskWidget::setUpContextMenu()
   QAction* pRemoveTimeAction = new QAction(tr("Remove time"), this);
   connect(pRemoveTimeAction, &QAction::triggered, this, [&](){ emit removeTimeRequested(id()); });
   m_pContextMenu->addAction(pRemoveTimeAction);
+
+  QAction* pCollapseAllChildren = new QAction(tr("Collapse all child tasks"), this);
+  connect(pCollapseAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", false); });
+  m_pContextMenu->addAction(pCollapseAllChildren);
+
+  QAction* pExpandAllChildren = new QAction(tr("Expand all child tasks"), this);
+  connect(pCollapseAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", true); });
+  m_pContextMenu->addAction(pExpandAllChildren);
 }
 
 task_id TaskWidget::id() const
