@@ -121,7 +121,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
   m_pManager(pManager),
-  m_pWidgetManager(new WidgetManager(m_pManager, this)),
+  m_pWidgetManager(new WidgetManager(m_pManager, this, this, this)),
   m_pTimeoutGroupIdMapper(new QSignalMapper(this)),
   m_pSearchFrame(new SearchFrame(this)),
   m_spSearchController(std::make_shared<SearchController>(m_pManager, m_pWidgetManager))
