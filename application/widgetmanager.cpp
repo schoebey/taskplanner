@@ -7,14 +7,20 @@
 #include "conversion.h"
 #include "task.h"
 #include "group.h"
+#include "taskcontrollerinterface.h"
+#include "groupcontrollerinterface.h"
 
 #include <QHBoxLayout>
 #include <property.h>
 
 WidgetManager::WidgetManager(Manager* pManager,
-                               QWidget* pController)
+                             ITaskController* pTaskController,
+                             IGroupController* pGroupController,
+                             QWidget* pParentWidget)
   : m_pManager(pManager),
-    m_pController(pController)
+    m_pTaskController(pTaskController),
+    m_pGroupController(pGroupController),
+    m_pParentWidget(pParentWidget)
 {
 
 }
@@ -60,11 +66,11 @@ GroupWidget* WidgetManager::createGroupWidget(group_id id)
 {
   GroupWidget* pGroupWidget = new GroupWidget(id);
 
-  QObject::connect(pGroupWidget, SIGNAL(renamed(group_id, QString)),          m_pController, SLOT(renameGroup(group_id, QString)));
-  QObject::connect(pGroupWidget, SIGNAL(newTaskClicked(group_id)),            m_pController, SLOT(createNewTask(group_id)));
-  QObject::connect(pGroupWidget, SIGNAL(taskMovedTo(task_id, group_id, int)), m_pController, SLOT(onTaskMoved(task_id, group_id, int)));
-  QObject::connect(pGroupWidget, SIGNAL(autoSortEnabled(group_id)),           m_pController, SLOT(setAutoSortEnabled(group_id)));
-  QObject::connect(pGroupWidget, SIGNAL(autoSortDisabled(group_id)),          m_pController, SLOT(setAutoSortDisabled(group_id)));
+  QObject::connect(pGroupWidget, &GroupWidget::renamed,             std::bind(&IGroupController::renameGroup, m_pGroupController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pGroupWidget, &GroupWidget::newTaskClicked,      std::bind(&IGroupController::createNewTask, m_pGroupController, std::placeholders::_1));
+  QObject::connect(pGroupWidget, &GroupWidget::taskMovedTo,         std::bind(&IGroupController::onTaskMoved, m_pGroupController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  QObject::connect(pGroupWidget, &GroupWidget::autoSortEnabled,     std::bind(&IGroupController::setAutoSortEnabled, m_pGroupController, std::placeholders::_1));
+  QObject::connect(pGroupWidget, &GroupWidget::autoSortDisabled,    std::bind(&IGroupController::setAutoSortDisabled, m_pGroupController, std::placeholders::_1));
 
   IGroup* pGroup = m_pManager->group(id);
   if (nullptr != pGroup)
@@ -80,25 +86,27 @@ GroupWidget* WidgetManager::createGroupWidget(group_id id)
 TaskWidget* WidgetManager::createTaskWidget(task_id id)
 {
 
-  TaskWidget* pTaskWidget = new TaskWidget(id, m_pController);
+  TaskWidget* pTaskWidget = new TaskWidget(id, m_pParentWidget);
 
-  QObject::connect(pTaskWidget, SIGNAL(renamed(task_id, QString)),                  m_pController, SLOT(renameTask(task_id, QString)));
-  QObject::connect(pTaskWidget, SIGNAL(descriptionChanged(task_id, QString)),       m_pController, SLOT(changeTaskDescription(task_id, QString)));
-  QObject::connect(pTaskWidget, SIGNAL(timeTrackingStarted(task_id)),               m_pController, SLOT(startTimeTracking(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(timeTrackingStopped(task_id)),               m_pController, SLOT(stopTimeTracking(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(propertyChanged(task_id, QString, QString)), m_pController, SLOT(onPropertyChanged(task_id, QString, QString)));
-  QObject::connect(pTaskWidget, SIGNAL(propertyRemoved(task_id, QString)),          m_pController, SLOT(onPropertyRemoved(task_id, QString)));
-  QObject::connect(pTaskWidget, SIGNAL(taskMovedTo(task_id, task_id, int)),         m_pController, SLOT(onTaskMoved(task_id, task_id, int)));
-  QObject::connect(pTaskWidget, SIGNAL(taskRemoved(task_id, task_id)),              m_pController, SLOT(onTaskRemoved(task_id, task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(taskDeleted(task_id)),                       m_pController, SLOT(onTaskDeleted(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(newSubTaskRequested(task_id)),               m_pController, SLOT(createNewSubTask(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(addTimeRequested(task_id)),                  m_pController, SLOT(onAddTimeToTaskRequested(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(removeTimeRequested(task_id)),               m_pController, SLOT(onRemoveTimeFromTaskRequested(task_id)));
-  QObject::connect(pTaskWidget, SIGNAL(linkAdded(task_id, QUrl)),                   m_pController, SLOT(onLinkAdded(task_id, QUrl)));
-  QObject::connect(pTaskWidget, SIGNAL(linkRemoved(task_id, QUrl)),                 m_pController, SLOT(onLinkRemoved(task_id, QUrl)));
-  QObject::connect(pTaskWidget, SIGNAL(linkInserted(task_id, QUrl, int)),           m_pController, SLOT(onLinkInserted(task_id, QUrl, int)));
-  QObject::connect(pTaskWidget, SIGNAL(priorityUpdateRequested(task_id)),           m_pController, SLOT(onPriorityUpdateRequested(task_id)));
-  QObject::connect(m_pController, SIGNAL(timeTrackingStopped(task_id)),             pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
+  QObject::connect(pTaskWidget, &TaskWidget::renamed,                  std::bind(&ITaskController::renameTask, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::descriptionChanged,       std::bind(&ITaskController::changeTaskDescription, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::timeTrackingStarted,      std::bind(&ITaskController::startTimeTracking, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::timeTrackingStopped,      std::bind(&ITaskController::stopTimeTracking, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::propertyChanged,          std::bind(&ITaskController::onPropertyChanged, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  QObject::connect(pTaskWidget, &TaskWidget::propertyRemoved,          std::bind(&ITaskController::onPropertyRemoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::taskMovedTo,              std::bind(&ITaskController::onTaskMoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  QObject::connect(pTaskWidget, &TaskWidget::taskRemoved,              std::bind(&ITaskController::onTaskRemoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::taskDeleted,              std::bind(&ITaskController::onTaskDeleted, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::newSubTaskRequested,      std::bind(&ITaskController::createNewSubTask, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::addTimeRequested,         std::bind(&ITaskController::onAddTimeToTaskRequested, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::removeTimeRequested,      std::bind(&ITaskController::onRemoveTimeFromTaskRequested, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::linkAdded,                std::bind(&ITaskController::onLinkAdded, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::linkRemoved,              std::bind(&ITaskController::onLinkRemoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::linkInserted,             std::bind(&ITaskController::onLinkInserted, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  QObject::connect(pTaskWidget, &TaskWidget::priorityUpdateRequested,  std::bind(&ITaskController::onPriorityUpdateRequested, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::priorityUpdateRequested,  std::bind(&ITaskController::onTimeTrackingStopped, m_pTaskController, std::placeholders::_1));
+
+  QObject::connect(m_pParentWidget, SIGNAL(timeTrackingStopped(task_id)),             pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
 
   auto pTask = m_pManager->task(id);
