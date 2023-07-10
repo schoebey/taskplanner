@@ -251,6 +251,7 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
         {
           vWidgetsToReconstruct.push_front(id);
           id = pTask->parentTask();
+          pTask = m_pTaskManager->task(id);
           if (-1 == id) { break; }
           pTaskWidget = m_pWidgetManager->taskWidget(id);
         }
