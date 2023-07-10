@@ -28,6 +28,7 @@ add_executable(${PROJECT_NAME}
     floatingwidget.h
     flowlayout.cpp
     flowlayout.h
+    groupcontrollerinterface.h
     groupwidget.cpp
     groupwidget.h
     groupwidget.ui

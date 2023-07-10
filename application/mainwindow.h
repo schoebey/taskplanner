@@ -3,6 +3,8 @@
 
 #include "id_types.h"
 #include "taskcontrollerinterface.h"
+#include "groupcontrollerinterface.h"
+
 #include <QMainWindow>
 #include <QPointer>
 #include <QUrl>
@@ -26,7 +28,7 @@ class SearchFrame;
 class SearchController;
 class QFileSystemWatcher;
 class ToolBarInfoDisplay;
-class MainWindow : public QMainWindow, public ITaskController
+class MainWindow : public QMainWindow, public ITaskController, public IGroupController
 {
   Q_OBJECT
 
@@ -44,11 +46,11 @@ public:
   void restoreDefaultLayout();
 
 private slots:
-  void createNewTask(group_id groupId);
-  void renameGroup(group_id id, const QString& sNewName);
+  void createNewTask(group_id groupId) override;
+  void renameGroup(group_id id, const QString& sNewName) override;
   void renameTask(task_id id, const QString& sNewName) override;
   void changeTaskDescription(task_id id, const QString& sNewDescr) override;
-  void onTaskMoved(task_id id, group_id groupId, int iPos);
+  void onTaskMoved(task_id id, group_id groupId, int iPos) override;
   void onTaskMoved(task_id id, task_id newParentTaskId, int iPos) override;
   void onPropertyChanged(task_id taskId, const QString& sPropertyName, const QString& sValue) override;
   void onPropertyRemoved(task_id taskId, const QString& sPropertyName) override;
@@ -73,8 +75,8 @@ private slots:
   void on_actionSaveAs_triggered();
   void on_actionReport_triggered();
   void on_actionDisplayReport_triggered();
-  void setAutoSortEnabled(group_id);
-  void setAutoSortDisabled(group_id);
+  void setAutoSortEnabled(group_id) override;
+  void setAutoSortDisabled(group_id) override;
   void onSortGroupTriggered(int iGroupId);
   void sortGroup(group_id groupId);
   void sortGroups();
