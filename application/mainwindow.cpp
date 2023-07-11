@@ -1867,4 +1867,25 @@ void MainWindow::onRemoveTimeFromTaskRequested(task_id id)
 void MainWindow::onTimeTrackingStopped(task_id id)
 {
   // TODO: consult task stack and jump back to previously active task
+
+}
+
+void MainWindow::onApplyPropertyToChildTasks(task_id id, const QString& sPropertyName, const QString& sPropertyValue, bool bRecursive)
+{
+  auto* pTask = m_pManager->task(id);
+  if (nullptr != pTask)
+  {
+    for (const auto& childId : pTask->taskIds())
+    {
+      auto* pChildTask = m_pManager->task(childId);
+      pChildTask->setPropertyValue(sPropertyName, sPropertyValue);
+
+      onPropertyChanged(childId, sPropertyName, sPropertyValue);
+
+      if (bRecursive)
+      {
+        onApplyPropertyToChildTasks(childId, sPropertyName, sPropertyValue, bRecursive);
+      }
+    }
+  }
 }
