@@ -109,6 +109,7 @@ signals:
   void priorityUpdateRequested(task_id);
   void addTimeRequested(task_id);
   void removeTimeRequested(task_id);
+  void childPropertyChangeRequested(task_id, const QString& sName, const QString& sValue, bool bRecursive);
 
 private slots:
   void onTitleEdited();
