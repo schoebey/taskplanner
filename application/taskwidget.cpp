@@ -188,11 +188,11 @@ void TaskWidget::setUpContextMenu()
   m_pContextMenu->addAction(pRemoveTimeAction);
 
   QAction* pCollapseAllChildren = new QAction(tr("Collapse all child tasks"), this);
-  connect(pCollapseAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", false); });
+  connect(pCollapseAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", "false", false); });
   m_pContextMenu->addAction(pCollapseAllChildren);
 
   QAction* pExpandAllChildren = new QAction(tr("Expand all child tasks"), this);
-  connect(pCollapseAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", true); });
+  connect(pExpandAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", "true", false); });
   m_pContextMenu->addAction(pExpandAllChildren);
 }
 
