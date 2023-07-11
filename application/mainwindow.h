@@ -91,8 +91,7 @@ private slots:
   void onAddTimeToTaskRequested(task_id) override;
   void onRemoveTimeFromTaskRequested(task_id) override;
   void onTimeTrackingStopped(task_id) override;
-
-  void onApplyPropertyToChildTasks(task_id id, const QString& sPropertyName, const QString& sPropertyValue, bool bRecursive);
+  void onChildPropertyChangeRequested(task_id, const QString&, const QString&, bool) override;
 
 signals:
   void timeTrackingStopped(task_id taskId);
