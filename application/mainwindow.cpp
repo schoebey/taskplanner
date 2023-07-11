@@ -1870,21 +1870,19 @@ void MainWindow::onTimeTrackingStopped(task_id id)
 
 }
 
-void MainWindow::onApplyPropertyToChildTasks(task_id id, const QString& sPropertyName, const QString& sPropertyValue, bool bRecursive)
+void MainWindow::onChildPropertyChangeRequested(task_id id, const QString& sPropertyName, const QString& sPropertyValue, bool bRecursive)
 {
   auto* pTask = m_pManager->task(id);
   if (nullptr != pTask)
   {
     for (const auto& childId : pTask->taskIds())
     {
-      auto* pChildTask = m_pManager->task(childId);
-      pChildTask->setPropertyValue(sPropertyName, sPropertyValue);
-
+      // set the property via change-handler. This will add an undo step if the task in question has a ui representation.
       onPropertyChanged(childId, sPropertyName, sPropertyValue);
 
       if (bRecursive)
       {
-        onApplyPropertyToChildTasks(childId, sPropertyName, sPropertyValue, bRecursive);
+        onChildPropertyChangeRequested(childId, sPropertyName, sPropertyValue, bRecursive);
       }
     }
   }

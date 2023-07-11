@@ -27,6 +27,7 @@ public:
   virtual void onLinkInserted(task_id, QUrl, int) = 0;
   virtual void onPriorityUpdateRequested(task_id) = 0;
   virtual void onTimeTrackingStopped(task_id) = 0;
+  virtual void onChildPropertyChangeRequested(task_id, const QString&, const QString&, bool) = 0;
 
   protected:
   ITaskController() = default;
