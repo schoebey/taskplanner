@@ -88,23 +88,24 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
 
   TaskWidget* pTaskWidget = new TaskWidget(id, m_pParentWidget);
 
-  QObject::connect(pTaskWidget, &TaskWidget::renamed,                  std::bind(&ITaskController::renameTask, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
-  QObject::connect(pTaskWidget, &TaskWidget::descriptionChanged,       std::bind(&ITaskController::changeTaskDescription, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
-  QObject::connect(pTaskWidget, &TaskWidget::timeTrackingStarted,      std::bind(&ITaskController::startTimeTracking, m_pTaskController, std::placeholders::_1));
-  QObject::connect(pTaskWidget, &TaskWidget::timeTrackingStopped,      std::bind(&ITaskController::stopTimeTracking, m_pTaskController, std::placeholders::_1));
-  QObject::connect(pTaskWidget, &TaskWidget::propertyChanged,          std::bind(&ITaskController::onPropertyChanged, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-  QObject::connect(pTaskWidget, &TaskWidget::propertyRemoved,          std::bind(&ITaskController::onPropertyRemoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
-  QObject::connect(pTaskWidget, &TaskWidget::taskMovedTo,              std::bind(&ITaskController::onTaskMoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-  QObject::connect(pTaskWidget, &TaskWidget::taskRemoved,              std::bind(&ITaskController::onTaskRemoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
-  QObject::connect(pTaskWidget, &TaskWidget::taskDeleted,              std::bind(&ITaskController::onTaskDeleted, m_pTaskController, std::placeholders::_1));
-  QObject::connect(pTaskWidget, &TaskWidget::newSubTaskRequested,      std::bind(&ITaskController::createNewSubTask, m_pTaskController, std::placeholders::_1));
-  QObject::connect(pTaskWidget, &TaskWidget::addTimeRequested,         std::bind(&ITaskController::onAddTimeToTaskRequested, m_pTaskController, std::placeholders::_1));
-  QObject::connect(pTaskWidget, &TaskWidget::removeTimeRequested,      std::bind(&ITaskController::onRemoveTimeFromTaskRequested, m_pTaskController, std::placeholders::_1));
-  QObject::connect(pTaskWidget, &TaskWidget::linkAdded,                std::bind(&ITaskController::onLinkAdded, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
-  QObject::connect(pTaskWidget, &TaskWidget::linkRemoved,              std::bind(&ITaskController::onLinkRemoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
-  QObject::connect(pTaskWidget, &TaskWidget::linkInserted,             std::bind(&ITaskController::onLinkInserted, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-  QObject::connect(pTaskWidget, &TaskWidget::priorityUpdateRequested,  std::bind(&ITaskController::onPriorityUpdateRequested, m_pTaskController, std::placeholders::_1));
-  QObject::connect(pTaskWidget, &TaskWidget::priorityUpdateRequested,  std::bind(&ITaskController::onTimeTrackingStopped, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::renamed,                      std::bind(&ITaskController::renameTask, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::descriptionChanged,           std::bind(&ITaskController::changeTaskDescription, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::timeTrackingStarted,          std::bind(&ITaskController::startTimeTracking, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::timeTrackingStopped,          std::bind(&ITaskController::stopTimeTracking, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::propertyChanged,              std::bind(&ITaskController::onPropertyChanged, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  QObject::connect(pTaskWidget, &TaskWidget::propertyRemoved,              std::bind(&ITaskController::onPropertyRemoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::taskMovedTo,                  std::bind(&ITaskController::onTaskMoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  QObject::connect(pTaskWidget, &TaskWidget::taskRemoved,                  std::bind(&ITaskController::onTaskRemoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::taskDeleted,                  std::bind(&ITaskController::onTaskDeleted, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::newSubTaskRequested,          std::bind(&ITaskController::createNewSubTask, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::addTimeRequested,             std::bind(&ITaskController::onAddTimeToTaskRequested, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::removeTimeRequested,          std::bind(&ITaskController::onRemoveTimeFromTaskRequested, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::linkAdded,                    std::bind(&ITaskController::onLinkAdded, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::linkRemoved,                  std::bind(&ITaskController::onLinkRemoved, m_pTaskController, std::placeholders::_1, std::placeholders::_2));
+  QObject::connect(pTaskWidget, &TaskWidget::linkInserted,                 std::bind(&ITaskController::onLinkInserted, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  QObject::connect(pTaskWidget, &TaskWidget::priorityUpdateRequested,      std::bind(&ITaskController::onPriorityUpdateRequested, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::priorityUpdateRequested,      std::bind(&ITaskController::onTimeTrackingStopped, m_pTaskController, std::placeholders::_1));
+  QObject::connect(pTaskWidget, &TaskWidget::childPropertyChangeRequested, std::bind(&ITaskController::onChildPropertyChangeRequested, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
   QObject::connect(m_pParentWidget, SIGNAL(timeTrackingStopped(task_id)),             pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
