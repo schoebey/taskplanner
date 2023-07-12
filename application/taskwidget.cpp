@@ -188,11 +188,17 @@ void TaskWidget::setUpContextMenu()
   m_pContextMenu->addAction(pRemoveTimeAction);
 
   QAction* pCollapseAllChildren = new QAction(tr("Collapse all child tasks"), this);
-  connect(pCollapseAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", "false", false); });
+  pCollapseAllChildren->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus));
+  pCollapseAllChildren->setShortcutContext(Qt::WidgetShortcut);
+  connect(pCollapseAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", "false", true); });
+  addAction(pCollapseAllChildren);
   m_pContextMenu->addAction(pCollapseAllChildren);
 
   QAction* pExpandAllChildren = new QAction(tr("Expand all child tasks"), this);
-  connect(pExpandAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", "true", false); });
+  pExpandAllChildren->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Plus));
+  pExpandAllChildren->setShortcutContext(Qt::WidgetShortcut);
+  connect(pExpandAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", "true", true); });
+  addAction(pExpandAllChildren);
   m_pContextMenu->addAction(pExpandAllChildren);
 }
 
