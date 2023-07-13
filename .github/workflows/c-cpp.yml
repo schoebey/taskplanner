@@ -14,20 +14,6 @@ jobs:
     steps:
     -
       uses: actions/checkout@v2
-#    -
-#      name: Check mingw g++ version
-#      run: |
-#        Write-Output (Get-Command g++.exe).Path
-#        g++.exe --version
-    -
-      name: Install correct version of mingw
-      uses: crazy-max/ghaction-chocolatey@v1
-      with:
-        args: install mingw --version=8.1.0  -y
-#    -
-#      name: Check mingw directory
-#      run: |
-#        ls C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin
     -
       name: Install Qt
       uses: jurplel/install-qt-action@v2
