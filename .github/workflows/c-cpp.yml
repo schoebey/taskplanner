@@ -24,12 +24,12 @@ jobs:
         arch: 'win64_msvc2019_64'
         dir: "${{github.workspace}}/qt"
         install-deps: "true"
-#    -
-#      name: Configure CMake Project
-#      working-directory: ${{github.workspace}}
-#     env:
-#        CMAKE_PREFIX_PATH: ${{env.Qt5_Dir}}
-#      run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "CodeBlocks - MinGW Makefiles" -B ${{github.workspace}}/build
+    -
+      name: Configure CMake Project
+      working-directory: ${{github.workspace}}
+      env:
+        CMAKE_PREFIX_PATH: ${{env.Qt5_Dir}}
+      run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "Visual Studio 16 2019" -A x64 -B ${{github.workspace}}/build
     -
       name: Build project
       shell: bash
