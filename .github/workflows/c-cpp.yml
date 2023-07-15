@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
     -
       uses: actions/checkout@v2
@@ -24,16 +24,17 @@ jobs:
         arch: 'win64_msvc2019_64'
         dir: "${{github.workspace}}/qt"
         install-deps: "true"
-    -
-      name: Configure CMake Project
-      working-directory: ${{github.workspace}}
-      env:
-        CMAKE_PREFIX_PATH: ${{env.Qt5_Dir}}
-      run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "CodeBlocks - MinGW Makefiles" -B ${{github.workspace}}/build
+#    -
+#      name: Configure CMake Project
+#      working-directory: ${{github.workspace}}
+#     env:
+#        CMAKE_PREFIX_PATH: ${{env.Qt5_Dir}}
+#      run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "CodeBlocks - MinGW Makefiles" -B ${{github.workspace}}/build
     -
       name: Build project
+      shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake.exe
+      run: cmake $GITHUB_WORKSPACE -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_UNIT_TESTS=ON
     -
       name: Compress portable program
       run: |
