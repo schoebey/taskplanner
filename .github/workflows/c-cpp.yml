@@ -14,16 +14,16 @@ jobs:
     steps:
     -
       uses: actions/checkout@v2
-    #-
-    #  name: Install Qt
-    #  uses: jurplel/install-qt-action@v3
-    #  with:
-    #   version: ${{ env.QT_VERSION }}
-    #    host: 'windows'
-    #    target: 'desktop'
-    #    arch: 'win64_msvc2019_64'
-    #    dir: "${{github.workspace}}/qt"
-    #    install-deps: "true"     
+    -
+      name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        dir: "${{github.workspace}}/qt"
+        install-deps: "true"     
     - name: "Create build directory and run CMake"
       run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
     - name: "Build Project" 
