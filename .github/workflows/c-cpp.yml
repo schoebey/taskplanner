@@ -23,13 +23,11 @@ jobs:
     #    target: 'desktop'
     #    arch: 'win64_msvc2019_64'
     #    dir: "${{github.workspace}}/qt"
-    #    install-deps: "true"
-    - name: mkdir
-      run: mkdir build
-    - name: cmake build
-      run: cmake --help-command-list
-    - name: cmake make
-      run: cmake --build build/ --target all
+    #    install-deps: "true"     
+    - name: "Create build directory and run CMake"
+      run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+    - name: "Build Project" 
+      run: cmake --build build --target all --config Release -- -j4 
     -
       name: Compress portable program
       run: |
