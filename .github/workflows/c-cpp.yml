@@ -21,7 +21,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'windows'
         target: 'desktop'
-        arch: 'win64_msvc2019_64'
+        arch:    ${{ env.MINGW_VERSION }}
         dir: "${{github.workspace}}/qt"
         install-deps: "true"     
     - name: "Create build directory and run CMake"
