@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(libtaskmanager VERSION ${APP_VERSION})
 
+set(CMAKE_STATIC_LIBRARY_PREFIX "")
+
 include(common)
 
 add_library(${PROJECT_NAME} SHARED
