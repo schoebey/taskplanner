@@ -32,9 +32,10 @@ jobs:
       name: Compress portable program
       run: |
         mkdir ${{github.workspace}}\build\all\plugins
+        cd ${{github.workspace}}\build\
+        Get-ChildItem -Path ${{github.workspace}}\build\ -Recurse | Select-Object FullName
         cp ${{github.workspace}}/build/taskplanner.exe ${{github.workspace}}\build\all\
         cp ${{github.workspace}}/build/plugins/* ${{github.workspace}}\build\all\plugins
-        cd ${{github.workspace}}\build\all\
         windeployqt.exe taskplanner.exe --release
         ls
         Compress-Archive -Path ${{github.workspace}}\build\all\ -DestinationPath ${{github.workspace}}\build\final.zip
