@@ -34,8 +34,9 @@ jobs:
       run: |
         mkdir ${{github.workspace}}\build\all\plugins
         cd ${{github.workspace}}\build\
-        Get-ChildItem -Path ${{github.workspace}}\build\ -Recurse | Select-Object FullName
+        #Get-ChildItem -Path ${{github.workspace}}\build\ -Recurse | Select-Object FullName
         cp ${{github.workspace}}/build/bin/taskplanner.exe ${{github.workspace}}\build\all\
+        cp ${{github.workspace}}/build/bin/libtaskmanager/libtaskmanager.* ${{github.workspace}}\build\all\
         cp ${{github.workspace}}/build/plugins/* ${{github.workspace}}\build\all\plugins
         windeployqt.exe all\taskplanner.exe
         cd ${{github.workspace}}\build\all
