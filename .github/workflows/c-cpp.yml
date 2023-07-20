@@ -37,7 +37,8 @@ jobs:
         Get-ChildItem -Path ${{github.workspace}}\build\ -Recurse | Select-Object FullName
         cp ${{github.workspace}}/build/bin/taskplanner.exe ${{github.workspace}}\build\all\
         cp ${{github.workspace}}/build/plugins/* ${{github.workspace}}\build\all\plugins
-        windeployqt.exe bin\taskplanner.exe
+        windeployqt.exe all\taskplanner.exe
+        cd ${{github.workspace}}\build\all
         ls
         Compress-Archive -Path ${{github.workspace}}\build\all\ -DestinationPath ${{github.workspace}}\build\final.zip
     -
