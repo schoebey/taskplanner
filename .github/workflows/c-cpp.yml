@@ -40,7 +40,7 @@ jobs:
         cp ${{github.workspace}}/build/plugins/* ${{github.workspace}}\build\all\plugins
         windeployqt.exe all\taskplanner.exe
         cd ${{github.workspace}}\build\all
-        ls
+        Get-ChildItem -Path . -Recurse | Select-Object FullName
         Compress-Archive -Path ${{github.workspace}}\build\all\ -DestinationPath ${{github.workspace}}\build\final.zip
     -
       name: Release
