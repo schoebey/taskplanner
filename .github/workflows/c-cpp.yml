@@ -43,6 +43,7 @@ jobs:
         cd ${{github.workspace}}\build\all
         #Get-ChildItem -Path . -Recurse | Select-Object FullName
         Compress-Archive -Path ${{github.workspace}}\build\all\* -DestinationPath ${{github.workspace}}\build\final.zip
+        dir ${{github.workspace}}\build\
     -
       name: Release
       uses: softprops/action-gh-release@v1
