@@ -42,7 +42,7 @@ jobs:
         windeployqt.exe all\taskplanner.exe
         cd ${{github.workspace}}\build\all
         #Get-ChildItem -Path . -Recurse | Select-Object FullName
-        Compress-Archive -Path ${{github.workspace}}\build\all\* -DestinationPath ${{github.workspace}}\build\final.zip -WhatIf
+        Compress-Archive -Path ${{github.workspace}}\build\all\* -DestinationPath ${{github.workspace}}\build\final.zip
     -
       name: Release
       uses: softprops/action-gh-release@v1
