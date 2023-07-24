@@ -51,6 +51,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: ./*
+        files: ./build/release/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
