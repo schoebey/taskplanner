@@ -42,6 +42,7 @@ jobs:
         windeployqt.exe all\taskplanner.exe
         cd ${{github.workspace}}\build\all
         #Get-ChildItem -Path . -Recurse | Select-Object FullName
+        mkdir ${{github.workspace}}\build\release
         Compress-Archive -Path ${{github.workspace}}\build\all\* -DestinationPath ${{github.workspace}}\build\release\final.zip
         dir ${{github.workspace}}\build\release
     -
