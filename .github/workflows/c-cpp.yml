@@ -34,18 +34,15 @@ jobs:
       run: |
         mkdir ${{github.workspace}}\build\all\plugins
         cd ${{github.workspace}}\build\
-        #Get-ChildItem -Path ${{github.workspace}}\build\ -Recurse | Select-Object FullName
         cp ${{github.workspace}}/build/bin/taskplanner.exe ${{github.workspace}}\build\all\
         cp ${{github.workspace}}/build/libtaskmanager/libtaskmanager.* ${{github.workspace}}\build\all\
-        #cp -r ${{github.workspace}}/build/plugins/* ${{github.workspace}}\build\all\plugins
         xcopy ${{github.workspace}}\build\plugins\*.dll ${{github.workspace}}\build\all\plugins /sy
         windeployqt.exe all\taskplanner.exe
         cd ${{github.workspace}}\build\all
-        #Get-ChildItem -Path . -Recurse | Select-Object FullName
+        pip install mingw_ldd
+        ./mingw-ldd.py ./taskplanner.exe
         mkdir ${{github.workspace}}\build\release
         Compress-Archive -Path ${{github.workspace}}\build\all\* -DestinationPath ${{github.workspace}}\build\release\final.zip
-        cd ${{github.workspace}}\build\release
-        dir
     -
       name: Release
       uses: softprops/action-gh-release@v1
