@@ -42,13 +42,13 @@ jobs:
         windeployqt.exe all\taskplanner.exe
         cd ${{github.workspace}}\build\all
         #Get-ChildItem -Path . -Recurse | Select-Object FullName
-        Compress-Archive -Path ${{github.workspace}}\build\all\* -DestinationPath ${{github.workspace}}\build\final.zip
-        dir ${{github.workspace}}\build\
+        Compress-Archive -Path ${{github.workspace}}\build\all\* -DestinationPath ${{github.workspace}}\build\release\final.zip
+        dir ${{github.workspace}}\build\release
     -
       name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: ..\build\final.zip
+        files: ..\build\release\*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
