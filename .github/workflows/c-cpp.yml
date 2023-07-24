@@ -40,7 +40,7 @@ jobs:
         windeployqt.exe all\taskplanner.exe
         cd ${{github.workspace}}\build\all
         pip install mingw_ldd
-        ./mingw-ldd.py ./taskplanner.exe
+        mingw-ldd.py ./taskplanner.exe
         mkdir ${{github.workspace}}\build\release
         Compress-Archive -Path ${{github.workspace}}\build\all\* -DestinationPath ${{github.workspace}}\build\release\final.zip
     -
