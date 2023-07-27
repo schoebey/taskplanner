@@ -13,6 +13,8 @@ jobs:
     runs-on: windows-2019
     steps:
     -
+      uses: actions/setup-python@v1
+    -
       uses: actions/checkout@v2
     -
       name: Install Qt
@@ -39,11 +41,11 @@ jobs:
         xcopy ${{github.workspace}}\build\plugins\*.dll ${{github.workspace}}\build\all\plugins /sy
         windeployqt.exe all\taskplanner.exe
         cd ${{github.workspace}}\build\all
-        pip install mingw_ldd 
-        pip -V
-        pip list -v
+        pip install --user mingw_ldd 
+        #pip -V
+        #pip list -v
         #Get-ChildItem -Path ${{github.workspace}}\build\ -Recurse | Select-Object FullName
-        python C:/hostedtoolcache/windows/Python/3.11.4/x64/Lib/site-packages/mingw-ldd.py ./taskplanner.exe
+        python -m mingw-ldd ./taskplanner.exe
         mkdir ${{github.workspace}}\build\release
         Compress-Archive -Path ${{github.workspace}}\build\all\* -DestinationPath ${{github.workspace}}\build\release\final.zip
     -
