@@ -37,6 +37,7 @@ jobs:
         cp ${{github.workspace}}/build/bin/taskplanner.exe ${{github.workspace}}\build\all\
         cp ${{github.workspace}}/build/libtaskmanager/libtaskmanager.* ${{github.workspace}}\build\all\
         xcopy ${{github.workspace}}\build\plugins\*.dll ${{github.workspace}}\build\all\plugins /sy
+        env
         windeployqt.exe --compiler-runtime all\taskplanner.exe
         cd ${{github.workspace}}\build\all
         #pip install --user mingw_ldd 
