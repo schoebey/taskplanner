@@ -37,14 +37,9 @@ jobs:
         cp ${{github.workspace}}/build/bin/taskplanner.exe ${{github.workspace}}\build\all\
         cp ${{github.workspace}}/build/libtaskmanager/libtaskmanager.* ${{github.workspace}}\build\all\
         xcopy ${{github.workspace}}\build\plugins\*.dll ${{github.workspace}}\build\all\plugins /sy
-        env
+        ${{ env.Qt5_Dir }}/bin/qtenv2.bat
         windeployqt.exe --compiler-runtime all\taskplanner.exe
         cd ${{github.workspace}}\build\all
-        #pip install --user mingw_ldd 
-        #pip -V
-        #pip list -v
-        #Get-ChildItem -Path ${{github.workspace}}\build\ -Recurse | Select-Object FullName
-        #python -m mingw-ldd ./taskplanner.exe
         mkdir ${{github.workspace}}\build\release
         Compress-Archive -Path ${{github.workspace}}\build\all\* -DestinationPath ${{github.workspace}}\build\release\final.zip
     -
