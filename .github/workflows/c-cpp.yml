@@ -25,9 +25,9 @@ jobs:
         dir: "${{github.workspace}}/qt"
         install-deps: "true"
         cache: "true"
-    - name: "Create build directory and run CMake"
+    #- name: "Create build directory and run CMake"
       #run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
-    - name: "Build Project" 
+    #- name: "Build Project" 
       #run: cmake --build build --target all --config Release -- -j4 
     -
       name: Compress portable program
