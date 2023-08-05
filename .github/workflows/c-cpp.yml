@@ -25,13 +25,13 @@ jobs:
         dir: "${{github.workspace}}/qt"
         install-deps: "true"
         cache: "true"
-    - name: "Create build directory and run CMake"
-      run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
-    - name: "Build Project" 
-      run: cmake --build build --target all --config Release -- -j4 
-    - 
-      name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
+    #- name: "Create build directory and run CMake"
+    #  run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+    #- name: "Build Project" 
+    #  run: cmake --build build --target all --config Release -- -j4 
+    #- 
+    #  name: Setup tmate session
+    #  uses: mxschmitt/action-tmate@v3
     -
       name: Compress portable program
       run: |
@@ -43,6 +43,7 @@ jobs:
         ${{ env.Qt5_Dir }}/bin/qtenv2.bat
         echo "C:/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         #echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
+        echo %PATH%
         windeployqt.exe --compiler-runtime all\taskplanner.exe
         cd ${{github.workspace}}\build\all
         mkdir ${{github.workspace}}\build\release
