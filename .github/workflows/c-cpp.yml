@@ -43,7 +43,7 @@ jobs:
         ${{ env.Qt5_Dir }}/bin/qtenv2.bat
         echo "C:/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         #echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
-        echo %PATH%
+        echo ${{GITHUB_PATH}}
         windeployqt.exe --compiler-runtime all\taskplanner.exe
         cd ${{github.workspace}}\build\all
         mkdir ${{github.workspace}}\build\release
