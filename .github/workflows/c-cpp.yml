@@ -29,6 +29,9 @@ jobs:
       #run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
     #- name: "Build Project" 
       #run: cmake --build build --target all --config Release -- -j4 
+    - 
+      name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
     -
       name: Compress portable program
       run: |
