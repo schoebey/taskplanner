@@ -994,8 +994,9 @@ void TaskWidget::ensureVisible(QWidget* pWidget)
   if (isAncestorOf(pWidget) && !pWidget->isVisible())
   {
     setExpanded(true);
-    m_pContainer->ensureVisible(pWidget);
   }
+
+  m_pContainer->ensureVisible(pWidget);
 }
 
 void TaskWidget::onDeleteTriggered()
