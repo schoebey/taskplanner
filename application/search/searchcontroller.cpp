@@ -160,6 +160,11 @@ namespace {
             SearchController::tMatches& matches)
   {
     auto labels = pWidget->findChildren<QLabel*>();
+
+    // remove all labels not directly visible
+    labels.erase(std::remove_if(labels.begin(), labels.end(), [](QLabel* pLabel){ return !pLabel->isVisible(); }), labels.end());
+
+    // sort the labels by their y-coordinate
     std::sort(labels.begin(), labels.end(), [pWidget](const QLabel* pLhs, const QLabel* pRhs)
     { return pLhs->mapTo(pWidget, pLhs->pos()).y() < pRhs->mapTo(pWidget, pRhs->pos()).y(); });
 
@@ -177,10 +182,7 @@ namespace {
   bool containsMatch(const QString& sTerm, const ITask* pTask,
                      bool bCaseSensitive, bool bRegExp)
   {
-
     Qt::CaseSensitivity cs = bCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
-    QString sName = pTask->name();
-    QString sDesc = pTask->description();
 
     std::function<detail::SSearchResult(const QString&, const QString&, Qt::CaseSensitivity, int)> fnFind
         = bRegExp ? detail::findRx : detail::findStr;
