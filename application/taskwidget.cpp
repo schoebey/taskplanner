@@ -71,7 +71,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
 
   setUpContextMenu();
 
-  setExpanded(true);
+  setExpanded(false);
   setAcceptDrops(true);
 }
 

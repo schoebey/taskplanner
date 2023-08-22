@@ -280,7 +280,8 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
         auto id = taskId;
         TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(id);
         std::deque<task_id> vWidgetsToExpand;
-        while (nullptr == pTaskWidget)
+        while (nullptr == pTaskWidget ||
+               !pTaskWidget->isVisible())
         {
           id = pTask->parentTask();
           pTask = m_pTaskManager->task(id);
@@ -297,14 +298,14 @@ void SearchController::onSearchTermChanged(const QString& sTerm)
         if (!vWidgetsToExpand.empty()) {
           SMatchInfo hit;
           hit.pClosestParentTaskWidget = pTaskWidget;
-          vWidgetsToExpand.push_front(pTaskWidget->id());
           hit.vToExpand = vWidgetsToExpand;
           vMatchInfo.push_back(hit);
         }
       }
     }
 
-
+    // TODO: refactor this. Instead of looping through all the existing task widgets, loop through the matchinfo-vector.
+    // All the necessary information is there. If the widget exists, vMatchInfo stores it.
     for (const auto& groupId : m_pTaskManager->groupIds())
     {
       tvMatchInfo& vMatchInfo = matchesByGroup[groupId];
@@ -404,15 +405,15 @@ void SearchController::setCurrent(tMatches::iterator it)
 
   // determine if the new position falls on a not yet expanded widget
   if (it != m_hits.end() &&
-      !it->vToExpand.empty()) {
-
+      !it->vToExpand.empty())
+  {
     while (!it->vToExpand.empty())
     {
       task_id childId = it->vToExpand.front();
       it->vToExpand.pop_front();
       TaskWidget* pChildWidget = m_pWidgetManager->taskWidget(childId);
       if (nullptr != pChildWidget) {
-          pChildWidget->setExpanded(true);
+        pChildWidget->setExpanded(true);
       }
     }
 

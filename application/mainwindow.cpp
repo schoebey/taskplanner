@@ -1226,6 +1226,30 @@ void MainWindow::on_actionAbout_triggered()
   pAboutDialog->appear();
 }
 
+TaskWidget* EnsureTaskWidgetCreated(task_id taskId, Manager* pManager,
+                                    WidgetManager* pWidgetManager)
+{
+  TaskWidget* pTaskWidget = pWidgetManager->taskWidget(taskId);
+  if (nullptr == pTaskWidget)
+  {
+    pTaskWidget = pWidgetManager->createTaskWidget(taskId);
+
+    ITask* pTask = pManager->task(taskId);
+    if (nullptr != pTask &&
+        0 == pTask->propertyValue("expanded").compare("true", Qt::CaseInsensitive))
+    {
+      for (auto childTaskId : pTask->taskIds())
+      {
+        TaskWidget* pChildTaskWidget =
+            EnsureTaskWidgetCreated(childTaskId, pManager, pWidgetManager);
+        pTaskWidget->insertTask(pChildTaskWidget, -1, false);
+      }
+    }
+  }
+
+  return pTaskWidget;
+}
+
 void MainWindow::onPropertyChanged(task_id taskId,
                                    const QString& sPropertyName,
                                    const QString& sValue)
@@ -1278,10 +1302,10 @@ void MainWindow::onPropertyChanged(task_id taskId,
           {
             for (auto childTaskId : pTask->taskIds())
             {
-              TaskWidget* pChildTaskWidget = m_pWidgetManager->taskWidget(childTaskId);
-              if (nullptr == pChildTaskWidget)
+              TaskWidget* pChildTaskWidget = EnsureTaskWidgetCreated(
+                  childTaskId, m_pManager, m_pWidgetManager);
+              if (nullptr != pChildTaskWidget)
               {
-                pChildTaskWidget = m_pWidgetManager->createTaskWidget(childTaskId);
                 pTaskWidget->insertTask(pChildTaskWidget, -1, false);
               }
             }
