@@ -675,17 +675,21 @@ void TaskWidget::onTaskInsertRequested(TaskWidget *pTaskWidget, int iPos)
 }
 
 
-void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int iPos)
+void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int /*iPos*/)
 {
   if (nullptr != pTaskWidget)
   {
     updateSize();
+
+    emit autoPriorityUpdateRequested(id());
   }
 }
 
 void TaskWidget::onTaskRemoved(TaskWidget* /*pTaskWidget*/)
 {
   updateSize();
+
+  emit autoPriorityUpdateRequested(id());
 }
 
 HighlightingMethod TaskWidget::highlight() const
