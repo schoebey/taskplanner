@@ -19,7 +19,7 @@ GroupWidget::GroupWidget(group_id id, QWidget *parent) :
   connect(ui->pAddTask, &QPushButton::clicked, this, &GroupWidget::onNewTaskClicked);
   connect(ui->pTitle, &EditableLabel::editingFinished, this, &GroupWidget::onTitleEdited);
   connect(ui->pSortTasks, &QPushButton::toggled, this, &GroupWidget::onSortClicked);
-  connect(ui->pGroupTaskListWidget, &TaskListWidget::taskInserted, this, &GroupWidget::onTaskInserted);
+  connect(ui->pGroupTaskListWidget, &TaskListWidget::taskInsertRequested, this, &GroupWidget::onTaskInsertRequested);
 
   setUpContextMenu();
 }
@@ -44,7 +44,7 @@ void GroupWidget::setUpContextMenu()
   connect(pAddTaskAction, SIGNAL(triggered()), this, SLOT(onNewTaskClicked()));
 }
 
-void GroupWidget::onTaskInserted(TaskWidget *pTaskWidget, int iPos)
+void GroupWidget::onTaskInsertRequested(TaskWidget *pTaskWidget, int iPos)
 {
   if (nullptr != pTaskWidget)
   {

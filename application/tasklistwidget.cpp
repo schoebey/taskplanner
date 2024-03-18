@@ -81,7 +81,7 @@ void TaskListWidget::requestInsert(TaskWidget* pTaskWidget, int iPos)
     // insert the new widget
     if (-1 == iPos) iPos = static_cast<int>(m_vpTaskWidgets.size());
 
-    emit taskInserted(pTaskWidget, iPos);
+    emit taskInsertRequested(pTaskWidget, iPos);
   }
 }
 

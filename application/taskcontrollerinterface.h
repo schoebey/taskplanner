@@ -28,6 +28,7 @@ public:
   virtual void onPriorityUpdateRequested(task_id) = 0;
   virtual void onTimeTrackingStopped(task_id) = 0;
   virtual void onChildPropertyChangeRequested(task_id, const QString&, const QString&, bool) = 0;
+  virtual void onAutoPriorityUpdateRequested(task_id) = 0;
 
   protected:
   ITaskController() = default;

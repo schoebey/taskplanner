@@ -92,6 +92,7 @@ private slots:
   void onRemoveTimeFromTaskRequested(task_id) override;
   void onTimeTrackingStopped(task_id) override;
   void onChildPropertyChangeRequested(task_id, const QString&, const QString&, bool) override;
+  void onAutoPriorityUpdateRequested(task_id) override;
 
 signals:
   void timeTrackingStopped(task_id taskId);
