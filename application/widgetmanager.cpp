@@ -124,6 +124,8 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
   // sonst soll defaultmässig expandiert sein.
   pTaskWidget->setExpanded(!bOk || bExpanded);
 
+  // let the widget know which priority it has to visualize
+  pTaskWidget->setAutoPriority(pTask->autoPriority());
 
   // TODO: hier die Links auslesen und via pTaskWidget->addLink() einzeln hinzufügen
   // TODO: im Taskwidget: addLink, removeLink, insertLink(pos, link)

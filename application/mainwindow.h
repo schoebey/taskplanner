@@ -98,10 +98,8 @@ signals:
   void documentModified();
 
 private:
-  void timerEvent(QTimerEvent* pEvent) override;
   void closeEvent(QCloseEvent *) override;
   bool eventFilter(QObject *, QEvent *pEvent) override;
-  void updateAutoPrioritiesInTaskWidgets();
   void saveTempFile();
   void loadPlugins(const QString &sInitialSearchPath = QString());
   void saveSettings();
