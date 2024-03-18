@@ -42,8 +42,7 @@ public:
 
   QSize sizeHint() const override;
 signals:
-  void taskInserted(TaskWidget* pTaskWidget, int iPos);
-  void taskRemoved(TaskWidget* pTaskWidget);
+  void taskInsertRequested(TaskWidget* pTaskWidget, int iPos);
   void sizeChanged();
 
 private:

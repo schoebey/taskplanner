@@ -124,6 +124,7 @@ private slots:
   void onDeleteTriggered();
   void onLinkPasted();
   void onAddSubtaskTriggered();
+  void onTaskInsertRequested(TaskWidget *pTaskWidget, int iPos);
   void onTaskInserted(TaskWidget* pTaskWidget, int iPos = -1);
   void onTaskRemoved(TaskWidget *pTaskWidget);
 

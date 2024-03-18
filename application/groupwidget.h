@@ -63,7 +63,7 @@ protected:
   void setUpContextMenu();
 
 protected slots:
-  void onTaskInserted(TaskWidget* pTaskWidget, int iPos = -1);
+  void onTaskInsertRequested(TaskWidget* pTaskWidget, int iPos = -1);
   void onNewTaskClicked();
   void onTitleEdited();
   void onSortClicked(bool bChecked);

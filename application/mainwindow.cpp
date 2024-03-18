@@ -1928,3 +1928,8 @@ void MainWindow::onChildPropertyChangeRequested(task_id id, const QString& sProp
     }
   }
 }
+
+void MainWindow::onAutoPriorityUpdateRequested(task_id id)
+{
+  updateAutoPriorityRecursively(m_pManager, m_pWidgetManager, id);
+}

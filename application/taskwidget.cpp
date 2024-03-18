@@ -64,8 +64,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   connect(ui->pDescription, SIGNAL(editingFinished()), this, SLOT(onDescriptionEdited()));
   connect(ui->pDescription, SIGNAL(sizeChanged()), this, SLOT(updateSize()));
   connect(ui->pShowDetails, SIGNAL(toggled(bool)), this, SLOT(setExpanded(bool)));
-  connect(ui->pTaskListWidget, &TaskListWidget::taskInserted, this, &TaskWidget::onTaskInserted);
-  connect(ui->pTaskListWidget, &TaskListWidget::taskRemoved, this, &TaskWidget::onTaskRemoved);
+  connect(ui->pTaskListWidget, &TaskListWidget::taskInsertRequested, this, &TaskWidget::onTaskInsertRequested);
   connect(ui->pTaskListWidget, &TaskListWidget::sizeChanged, this, &TaskWidget::updateSize, Qt::QueuedConnection);
   connect(this, &TaskWidget::attentionNeeded, this, &TaskWidget::emphasise);
 
@@ -667,12 +666,19 @@ void TaskWidget::onAddSubtaskTriggered()
   emit newSubTaskRequested(id());
 }
 
+void TaskWidget::onTaskInsertRequested(TaskWidget *pTaskWidget, int iPos)
+{
+    if (nullptr != pTaskWidget)
+    {
+        emit taskMovedTo(pTaskWidget->id(), m_taskId, iPos);
+    }
+}
+
+
 void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int iPos)
 {
   if (nullptr != pTaskWidget)
   {
-    emit taskMovedTo(pTaskWidget->id(), m_taskId, iPos);
-
     updateSize();
   }
 }
@@ -972,6 +978,9 @@ bool TaskWidget::insertTask(TaskWidget *pTaskWidget, int iPos, bool bAnimateInse
   if (ui->pTaskListWidget->insertTask(pTaskWidget, iPos, bAnimateInsert))
   {
     pTaskWidget->setParentContainerWidget(this);
+
+    onTaskInserted(pTaskWidget, iPos);
+
     return true;
   }
   return false;
@@ -981,7 +990,8 @@ void TaskWidget::removeTask(TaskWidget *pTaskWidget)
 {
   pTaskWidget->setParentContainerWidget(nullptr);
   ui->pTaskListWidget->removeTask(pTaskWidget);
-  updateSize();
+
+  onTaskRemoved(pTaskWidget);
 }
 
 std::vector<TaskWidget*> TaskWidget::tasks() const

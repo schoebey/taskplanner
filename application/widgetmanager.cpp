@@ -106,6 +106,7 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
   QObject::connect(pTaskWidget, &TaskWidget::priorityUpdateRequested,      std::bind(&ITaskController::onPriorityUpdateRequested, m_pTaskController, std::placeholders::_1));
   QObject::connect(pTaskWidget, &TaskWidget::priorityUpdateRequested,      std::bind(&ITaskController::onTimeTrackingStopped, m_pTaskController, std::placeholders::_1));
   QObject::connect(pTaskWidget, &TaskWidget::childPropertyChangeRequested, std::bind(&ITaskController::onChildPropertyChangeRequested, m_pTaskController, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+  QObject::connect(pTaskWidget, &TaskWidget::autoPriorityUpdateRequested,  std::bind(&ITaskController::onAutoPriorityUpdateRequested, m_pTaskController, std::placeholders::_1));
 
   QObject::connect(m_pParentWidget, SIGNAL(timeTrackingStopped(task_id)),             pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
 
