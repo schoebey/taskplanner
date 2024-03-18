@@ -112,6 +112,43 @@ namespace
 
     return nullptr;
   }
+
+
+
+  void updateAutoPriority(Manager* pManager,
+                          WidgetManager* pWidgetManager, task_id taskId)
+  {
+      auto* pTask = pManager->task(taskId);
+      auto* pTaskWidget = pWidgetManager->taskWidget(taskId);
+      if (nullptr != pTask && nullptr != pTaskWidget)
+      {
+          pTaskWidget->setAutoPriority(pTask->autoPriority());
+      }
+  }
+
+  void updateAutoPriorityRecursively(Manager *pManager,
+                                     WidgetManager *pWidgetManager,
+                                     task_id taskId)
+  {
+      auto* pTask = pManager->task(taskId);
+      if (nullptr != pTask)
+      {
+        updateAutoPriority(pManager, pWidgetManager, taskId);
+
+          // climb through the parent hierarchy up to the root and let every widget on
+          // the way know that the property has changed.
+
+        auto parentTaskId = pTask->parentTask();
+          auto* pParentTask = pManager->task(parentTaskId);
+          while (nullptr != pParentTask)
+          {
+              updateAutoPriority(pManager, pWidgetManager, parentTaskId);
+
+              parentTaskId = pParentTask->parentTask();
+              pParentTask = pManager->task(parentTaskId);
+          }
+      }
+  }
 }
 
 
@@ -471,10 +508,6 @@ void MainWindow::updateTaskUi()
   // reconnect to the modified signal so that we get all the modifications from now on
   bOk = connect(this, SIGNAL(documentModified()), this, SLOT(onDocumentModified()));
   assert(bOk);
-
-
-  // update the auto priority in all widgets (old and new)
-  updateAutoPrioritiesInTaskWidgets();
 }
 
 void MainWindow::loadPlugins(const QString& sInitialSearchPath)
@@ -1289,19 +1322,7 @@ void MainWindow::onPropertyChanged(task_id taskId,
       }
       else if ("priority" == sPropertyName)
       {
-        pTaskWidget->setAutoPriority(pTask->autoPriority());
-
-        // climb through the parent hierarchy up to the root and let every widget on
-        // the way know that the property has changed.
-        auto parentTaskId = pTask->parentTask();
-        TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(parentTaskId);
-        while (nullptr != pParentTaskWidget)
-        {
-          ITask* pParentTask = m_pManager->task(parentTaskId);
-          pParentTaskWidget->setAutoPriority(pParentTask->autoPriority());
-          parentTaskId = pParentTask->parentTask();
-          pParentTaskWidget = m_pWidgetManager->taskWidget(parentTaskId);
-        }
+        updateAutoPriorityRecursively(m_pManager, m_pWidgetManager, taskId);
       }
       else if ("expanded" == sPropertyName)
       {
@@ -1347,6 +1368,11 @@ void MainWindow::onPropertyRemoved(task_id taskId, const QString& sPropertyName)
         new ChangeTaskPropertyCommand(taskId, sPropertyName, pTask->propertyValue(sPropertyName),
                                       QString(), m_pManager, m_pWidgetManager);
     m_undoStack.push(pChangeCommand);
+
+    if ("priority" == sPropertyName)
+    {
+      updateAutoPriorityRecursively(m_pManager, m_pWidgetManager, taskId);
+    }
   }
 }
 
@@ -1653,27 +1679,6 @@ void MainWindow::onPasteFromClipboard()
       updateTaskUi();
     }
   }
-}
-
-void MainWindow::updateAutoPrioritiesInTaskWidgets()
-{
-  for (const auto& taskId : m_pManager->taskIds())
-  {
-    auto pTask = m_pManager->task(taskId);
-    if (nullptr != pTask)
-    {
-      TaskWidget* pWidget = m_pWidgetManager->taskWidget(pTask->id());
-      if (nullptr != pWidget)
-      {
-        pWidget->setAutoPriority(pTask->autoPriority());
-      }
-    }
-  }
-}
-
-void MainWindow::timerEvent(QTimerEvent* /*pEvent*/)
-{
-  updateAutoPrioritiesInTaskWidgets();
 }
 
 void MainWindow::onReloadDocument()
