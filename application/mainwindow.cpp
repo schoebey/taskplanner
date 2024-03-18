@@ -1290,6 +1290,18 @@ void MainWindow::onPropertyChanged(task_id taskId,
       else if ("priority" == sPropertyName)
       {
         pTaskWidget->setAutoPriority(pTask->autoPriority());
+
+        // climb through the parent hierarchy up to the root and let every widget on
+        // the way know that the property has changed.
+        auto parentTaskId = pTask->parentTask();
+        TaskWidget* pParentTaskWidget = m_pWidgetManager->taskWidget(parentTaskId);
+        while (nullptr != pParentTaskWidget)
+        {
+          ITask* pParentTask = m_pManager->task(parentTaskId);
+          pParentTaskWidget->setAutoPriority(pParentTask->autoPriority());
+          parentTaskId = pParentTask->parentTask();
+          pParentTaskWidget = m_pWidgetManager->taskWidget(parentTaskId);
+        }
       }
       else if ("expanded" == sPropertyName)
       {
