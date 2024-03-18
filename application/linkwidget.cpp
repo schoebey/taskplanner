@@ -258,7 +258,7 @@ LinkWidget::LinkWidget(const QUrl& link)
     m_spNetworkAccessManager = std::make_shared<QNetworkAccessManager>(this);
 
     QSslConfiguration sslConfiguration(QSslConfiguration::defaultConfiguration());
-    sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
+    sslConfiguration.setPeerVerifyMode(QSslSocket::AutoVerifyPeer);
     sslConfiguration.setProtocol(QSsl::AnyProtocol);
 
 
@@ -457,36 +457,38 @@ void LinkWidget::fileDownloaded()
   QNetworkReply* pReply = dynamic_cast<QNetworkReply*>(sender());
   if (nullptr != pReply)
   {
-    QByteArray ba = pReply->readAll();
+      if (QNetworkReply::NoError != pReply->error()) {
+          qDebug() << pReply->error();
+          qDebug() << pReply->errorString();
+          qDebug() << pReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+          qDebug()<<" ssl versions "<<QSslSocket::sslLibraryBuildVersionNumber()<<"  "<<QSslSocket::sslLibraryBuildVersionString()<<"  "<<QSslSocket::sslLibraryVersionString();
+      } else {
+          QByteArray ba = pReply->readAll();
 
-    QImage img;
-    if (img.loadFromData(ba) && !img.isNull())
-    {
-        Cache().add(m_link, img);
-        ui->pIcon->setPixmap(ToScaledPixmap(img));
-    }
-    else
-    {
-        // ba contains the site source.
-        // scan it for favicon links like "shortcut icon"
-      QString sTag = extractTagFromDocument(ba);
-      QString sIconUrl = extractHrefFromTag(sTag);
-      if (!sIconUrl.isEmpty())
-      {
-        QUrl url(sIconUrl);
-        if (url.isRelative())
-        {
-            QString sHost = m_link.scheme() + "://" + m_link.host();
-            QString sUrl = sHost + sIconUrl;
-            url = sUrl;
-        }
-        // TODO: query local cache before issuing network request
-        QNetworkRequest request;
-        request.setUrl(url);
-        QNetworkReply *reply = m_spNetworkAccessManager->get(request);
-        connect(reply, SIGNAL(finished()), this, SLOT(fileDownloaded()));
+          QImage img;
+          if (img.loadFromData(ba) && !img.isNull()) {
+              Cache().add(m_link, img);
+              ui->pIcon->setPixmap(ToScaledPixmap(img));
+          } else {
+              // ba contains the site source.
+              // scan it for favicon links like "shortcut icon"
+              QString sTag = extractTagFromDocument(ba);
+              QString sIconUrl = extractHrefFromTag(sTag);
+              if (!sIconUrl.isEmpty()) {
+                  QUrl url(sIconUrl);
+                  if (url.isRelative()) {
+                      QString sHost = m_link.scheme() + "://" + m_link.host();
+                      QString sUrl = sHost + sIconUrl;
+                      url = sUrl;
+                  }
+                  // TODO: query local cache before issuing network request
+                  QNetworkRequest request;
+                  request.setUrl(url);
+                  QNetworkReply *reply = m_spNetworkAccessManager->get(request);
+                  connect(reply, SIGNAL(finished()), this, SLOT(fileDownloaded()));
+              }
+          }
       }
-    }
   }
 }
 
