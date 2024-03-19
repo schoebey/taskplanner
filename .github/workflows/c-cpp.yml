@@ -1,6 +1,9 @@
-name: compile and release Qt5 Project
+name: compile and release
 
-on: push
+on:
+  push:
+    tags:
+    - '*'
 
 env:
   QT_VERSION:     "5.15.2"
