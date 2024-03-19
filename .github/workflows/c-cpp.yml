@@ -1,4 +1,4 @@
-name: compile and release Qt5 Project
+name: compile and release
 
 on: push
 
