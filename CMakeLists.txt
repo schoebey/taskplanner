@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 set(APPLICATION_NAME taskplanner)
-set(APP_VERSION 0.8.5)
+set(APP_VERSION 0.8.6)
 set(ORGANIZATION_NAME ancor)
 
 project(taskplanner VERSION ${APP_VERSION})
