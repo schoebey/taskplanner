@@ -1,7 +1,7 @@
 # taskplanner
 task planning tool
 
-[![GitHub version](https://badge.fury.io/gh/schoebey%2Ftaskplanner.svg)](https://badge.fury.io/gh/schoebey%2Ftaskplanner)
+![version](https://img.shields.io/github/v/release/schoebey/taskplanner)
 [![Build status](https://ci.appveyor.com/api/projects/status/owlunevmqy5penk3?svg=true)](https://ci.appveyor.com/project/schoebey/taskplanner)
 
 ![screenshot1](screenshots/screenshot1.png)
