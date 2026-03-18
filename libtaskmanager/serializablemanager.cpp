@@ -90,6 +90,7 @@ bool SerializableManager::changeTaskId(task_id oldId, task_id newId)
     m_tasks.erase(it);
     spTask->setId(newId);
     m_tasks[newId] = spTask;
+    return true;
   }
 
   return false;
@@ -144,6 +145,7 @@ bool SerializableManager::changeGroupId(group_id oldId, group_id newId)
     m_groups.erase(it);
     spGroup->setId(newId);
     m_groups[newId] = spGroup;
+    return true;
   }
 
   return false;
