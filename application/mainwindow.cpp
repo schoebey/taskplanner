@@ -433,6 +433,12 @@ void MainWindow::saveSettings()
   settings.setValue("hibernationDetection", m_pEnableHibernationDetection->isChecked());
   settings.setValue("stylesheet", m_sStylesheetPath);
   settings.setValue("infoDisplayScriptPath", m_pInfoDisplay->scriptPath());
+
+  settings.beginGroup("visualisation");
+  settings.setValue("showTaskTime", m_taskTimeVisualisation.bEnabled);
+  settings.setValue("nominalWorkHours", m_taskTimeVisualisation.dNominalWorkHours);
+  settings.endGroup();
+
   settings.endGroup();
 }
 
@@ -456,6 +462,12 @@ void MainWindow::loadSettings()
   m_pEnableHibernationDetection->setChecked(settings.value("hibernationDetection", true).toBool());
   m_sStylesheetPath = settings.value("stylesheet", QString()).toString();
   m_pInfoDisplay->startScript(settings.value("infoDisplayScriptPath").toString());
+
+  settings.beginGroup("visualisation");
+  m_taskTimeVisualisation.bEnabled = settings.value("showTaskTime", true).toBool();
+  m_taskTimeVisualisation.dNominalWorkHours = settings.value("nominalWorkHours", 8.4).toDouble();
+  settings.endGroup();
+
   settings.endGroup();
 
   if (!m_sStylesheetPath.isEmpty())
@@ -2015,11 +2027,15 @@ void MainWindow::onAutoPriorityUpdateRequested(task_id id)
 
 void MainWindow::onUpdateTotalTimeDisplayRequested(task_id id)
 {
-  // TODO: show recursive time, including sub-tasks?
-  auto *pTask = m_pManager->task(id);
-  auto *pTaskWidget = m_pWidgetManager->taskWidget(id);
-  if (nullptr != pTask && nullptr != pTaskWidget) {
+  if (m_taskTimeVisualisation.bEnabled) {
+    // TODO: show recursive time, including sub-tasks?
+    auto* pTask = m_pManager->task(id);
+    auto* pTaskWidget = m_pWidgetManager->taskWidget(id);
+    if (nullptr != pTask && nullptr != pTaskWidget) {
       auto totalSeconds = getTotalTimeSeconds(pTask->timeFragments());
-      pTaskWidget->setTotalTimeDisplay(TimeFormatter::formatTimeInterval(totalSeconds, 8.4));
+      pTaskWidget->setTotalTimeDisplay(
+          TimeFormatter::formatTimeInterval(totalSeconds,
+                                            m_taskTimeVisualisation.dNominalWorkHours));
+    }
   }
 }
