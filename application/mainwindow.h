@@ -110,6 +110,7 @@ private:
   void onChooseScript();
   void showError(const QString& sErrorMessage);
   QMessageBox::StandardButton askSave();
+  void setCurrentFileName(const QString& sFileName);
 
 private:
   Ui::MainWindow *ui;
@@ -128,7 +129,12 @@ private:
   ToolBarInfoDisplay* m_pInfoDisplay;
   SearchFrame* m_pSearchFrame;
   std::shared_ptr<SearchController> m_spSearchController;
-  void setCurrentFileName(const QString& sFileName);
+
+  struct STaskTimeVisualisationOptions
+  {
+    bool bEnabled = true;
+    double dNominalWorkHours = 8.4;
+  } m_taskTimeVisualisation;
 };
 
 #endif // MAINWINDOW_H
