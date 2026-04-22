@@ -59,6 +59,9 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
   FlowLayout* pFlowLayout = new FlowLayout(ui->pLinks, 0, 0, 0);
   ui->pLinks->setLayout(pFlowLayout);
 
+  m_timeDisplayTimer.setInterval(500);
+
+  connect(&m_timeDisplayTimer, &QTimer::timeout, this, [this](){ emit updateTotalTimeDisplayRequested(m_taskId);});
   connect(this, SIGNAL(sizeChanged()), this, SLOT(updateSize()), Qt::QueuedConnection);
   connect(ui->pTitle, SIGNAL(editingFinished()), this, SLOT(onTitleEdited()));
   connect(ui->pDescription, SIGNAL(editingFinished()), this, SLOT(onDescriptionEdited()));
@@ -872,12 +875,19 @@ void TaskWidget::setTimeTrackingEnabled(bool bEnabled)
     m_pTrackAction->setText(tr("Stop tracking"));
     emit timeTrackingStarted(m_taskId);
     setHighlight(highlight() | EHighlightMethod::eTimeTrackingActive);
+    m_timeDisplayTimer.start();
   }
   else {
     m_pTrackAction->setText(tr("Start tracking"));
     emit timeTrackingStopped(m_taskId);
     setHighlight(highlight() & ~EHighlightMethod::eTimeTrackingActive);
+    m_timeDisplayTimer.stop();
   }
+}
+
+void TaskWidget::setTotalTimeDisplay(const QString &sDisplay)
+{
+  ui->pTimeDisplay->setText(sDisplay);
 }
 
 void TaskWidget::onTimeTrackingStopped(task_id id)
