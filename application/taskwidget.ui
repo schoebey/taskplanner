@@ -83,7 +83,7 @@
          <property name="bottomMargin">
           <number>0</number>
          </property>
-         <item row="1" column="0" colspan="3">
+         <item row="3" column="0" colspan="3">
           <widget class="QFrame" name="pProperties">
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
@@ -137,7 +137,33 @@
                <property name="spacing">
                 <number>0</number>
                </property>
-               <item row="0" column="0" colspan="2">
+               <item row="4" column="0" colspan="2">
+                <widget class="QFrame" name="pLinks">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="frameShape">
+                  <enum>QFrame::NoFrame</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0" colspan="2">
+                <widget class="QFrame" name="pSeparator">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0" colspan="2">
                 <widget class="EditableLabel" name="pDescription">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -162,29 +188,28 @@
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0" colspan="2">
-                <widget class="QFrame" name="pSeparator">
+               <item row="0" column="0" colspan="2">
+                <widget class="EditableLabel" name="pTimeDisplay">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                </widget>
-               </item>
-               <item row="3" column="0" colspan="2">
-                <widget class="QFrame" name="pLinks">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+                 <property name="text">
+                  <string/>
                  </property>
-                 <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
+                 <property name="textFormat">
+                  <enum>Qt::PlainText</enum>
                  </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
+                 <property name="alignment">
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                 <property name="indent">
+                  <number>0</number>
                  </property>
                 </widget>
                </item>
@@ -244,6 +269,25 @@
            </property>
           </widget>
          </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="pStartStop">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0">
           <widget class="QPushButton" name="pShowDetails">
            <property name="sizePolicy">
@@ -262,25 +306,6 @@
             <bool>true</bool>
            </property>
            <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QPushButton" name="pStartStop">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="focusPolicy">
-            <enum>Qt::NoFocus</enum>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="checkable">
             <bool>true</bool>
            </property>
           </widget>

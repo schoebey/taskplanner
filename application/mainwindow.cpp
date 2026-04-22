@@ -149,6 +149,74 @@ namespace
           }
       }
   }
+
+  qint64 getTotalTimeSeconds(const std::vector<STimeFragment>& timingInfo)
+  {
+      qint64 totalSeconds = 0;
+
+      // Cache the current time once in case the loop execution takes a few milliseconds
+      QDateTime now = QDateTime::currentDateTime();
+
+      for (size_t i = 0; i < timingInfo.size(); ++i) {
+          const STimeFragment& fragment = timingInfo[i];
+
+          // Safeguard against invalid start times
+          if (!fragment.startTime.isValid()) {
+              continue;
+          }
+
+          if (fragment.stopTime.isValid()) {
+              // Closed fragment
+              totalSeconds += fragment.startTime.secsTo(fragment.stopTime);
+          } else if (i == timingInfo.size() - 1) {
+              // Open fragment: stopTime is invalid AND it is the last element
+              totalSeconds += fragment.startTime.secsTo(now);
+          }
+      }
+
+      return totalSeconds;
+  }
+
+  class TimeFormatter {
+      Q_DECLARE_TR_FUNCTIONS(TimeFormatter)
+
+  public:
+      static QString formatTimeInterval(qint64 totalSeconds, double dNominalWorkHoursPerDay = 24)
+      {
+          if (totalSeconds == 0) {
+              return {};
+          }
+
+          const double dNominalWorkSecondsPerDay = dNominalWorkHoursPerDay * 3600;
+
+          qint64 days = totalSeconds / dNominalWorkSecondsPerDay;
+          qint64 remainder = totalSeconds - (days * dNominalWorkSecondsPerDay);
+
+          qint64 hours = remainder / 3600;
+          remainder %= 3600;
+
+          qint64 minutes = remainder / 60;
+          qint64 seconds = remainder % 60;
+
+          QStringList parts;
+
+          if (days > 0) {
+              // Days remain unpadded per request
+              parts << tr("%n wd", "", days);
+          }
+          if (hours > 0) {
+              parts << tr("%1 h", "", hours).arg(hours, 2, 10, QLatin1Char(' '));
+          }
+          if (minutes > 0) {
+              parts << tr("%1 m", "", minutes).arg(minutes, 2, 10, QLatin1Char(' '));
+          }
+          if (seconds > 0) {
+              parts << tr("%1 s", "", seconds).arg(seconds, 2, 10, QLatin1Char(' '));
+          }
+
+          return parts.join(tr(", "));
+      }
+  };
 }
 
 
@@ -1860,6 +1928,7 @@ std::tuple<QDateTime, QDateTime> getRangeFromDialog(const QString& sTitle,
 
 void MainWindow::onAddTimeToTaskRequested(task_id id)
 {
+  std::set<task_id> modifiedTasks;
   auto range = getRangeFromDialog(tr("Add time to task"),
                                   tr("Enter start and end time to be added to the task:"));
 
@@ -1875,6 +1944,8 @@ void MainWindow::onAddTimeToTaskRequested(task_id id)
       if (nullptr != pTask)
       {
         pTask->removeTimeFragment(start, stop);
+        // TODO: only add id if task really was modified
+        modifiedTasks.insert(id);
       }
     }
 
@@ -1882,8 +1953,14 @@ void MainWindow::onAddTimeToTaskRequested(task_id id)
     if (nullptr != pTask)
     {
       pTask->insertTimeFragment(start, stop);
+      modifiedTasks.insert(id);
       emit documentModified();
     }
+  }
+
+  for (const auto& id : modifiedTasks)
+  {
+      onUpdateTotalTimeDisplayRequested(id);
   }
 }
 
@@ -1903,6 +1980,8 @@ void MainWindow::onRemoveTimeFromTaskRequested(task_id id)
       emit documentModified();
     }
   }
+
+  onUpdateTotalTimeDisplayRequested(id);
 }
 
 void MainWindow::onTimeTrackingStopped(task_id id)
@@ -1932,4 +2011,15 @@ void MainWindow::onChildPropertyChangeRequested(task_id id, const QString& sProp
 void MainWindow::onAutoPriorityUpdateRequested(task_id id)
 {
   updateAutoPriorityRecursively(m_pManager, m_pWidgetManager, id);
+}
+
+void MainWindow::onUpdateTotalTimeDisplayRequested(task_id id)
+{
+  // TODO: show recursive time, including sub-tasks?
+  auto *pTask = m_pManager->task(id);
+  auto *pTaskWidget = m_pWidgetManager->taskWidget(id);
+  if (nullptr != pTask && nullptr != pTaskWidget) {
+      auto totalSeconds = getTotalTimeSeconds(pTask->timeFragments());
+      pTaskWidget->setTotalTimeDisplay(TimeFormatter::formatTimeInterval(totalSeconds, 8.4));
+  }
 }

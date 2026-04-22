@@ -7,6 +7,7 @@
 #include "itaskcontainerwidget.h"
 
 #include <QFrame>
+#include <QTimer>
 #include <QUrl>
 
 #include <map>
@@ -90,6 +91,8 @@ public slots:
   void setAutoPriority(double dPriority);
   void setTimeTrackingEnabled(bool bEnabled);
 
+  void setTotalTimeDisplay(const QString& sDisplay);
+
 signals:
   void renamed(task_id taskId, const QString& sNewName);
   void descriptionChanged(task_id taskId, const QString& sNewDescription);
@@ -111,6 +114,7 @@ signals:
   void removeTimeRequested(task_id);
   void childPropertyChangeRequested(task_id, const QString& sName, const QString& sValue, bool bRecursive);
   void autoPriorityUpdateRequested(task_id);
+  void updateTotalTimeDisplayRequested(task_id);
 
 private slots:
   void onTitleEdited();
@@ -179,6 +183,8 @@ private:
   std::map<QUrl, LinkWidget*> m_linkWidgets;
 
   QSize m_expandedSize;
+
+  QTimer m_timeDisplayTimer;
 
   static TaskWidget* m_pDraggingTaskWidget;
   static TaskWidget* m_pTaskWidgetUnderMouse;
