@@ -1,10 +1,11 @@
 #ifndef LINKWIDGET_H
 #define LINKWIDGET_H
 
-#include <QStyleOption>
 #include <QFrame>
-#include <QUrl>
 #include <QMenu>
+#include <QStyleOption>
+#include <QUrl>
+#include <memory>
 
 namespace Ui {
   class LinkWidget;
