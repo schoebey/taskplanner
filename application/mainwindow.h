@@ -121,7 +121,6 @@ private:
   WidgetManager* m_pWidgetManager = nullptr;
   TaskCreationDialog* m_pTaskCreationDialog = nullptr;
   std::map<group_id, QTimer*> m_autoSortTimers;
-  QSignalMapper* m_pTimeoutGroupIdMapper;
   QUndoStack m_undoStack;
   std::vector<std::shared_ptr<QObject>> m_vspPlugins;
   QAction* m_pEnableHibernationDetection;

@@ -146,7 +146,7 @@ private:
   void resizeEvent(QResizeEvent* pEvent) override;
   void focusInEvent(QFocusEvent* pEvent) override;
   void focusOutEvent(QFocusEvent* pEvent) override;
-  void enterEvent(QEvent* pEvent) override;
+  void enterEvent(QEnterEvent* pEvent) override;
   void leaveEvent(QEvent* pEvent) override;
   void contextMenuEvent(QContextMenuEvent* pEvent) override;
   void showEvent(QShowEvent* pEvent) override;

@@ -23,7 +23,14 @@
 
 int main(int argc, char *argv[])
 {
-//  QRegExp relativeToNow("^in ((?:\\S*\\s*)*)\\s+(\\S+){1}$");
+  // Enable High DPI scaling
+  QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+  // Ensure pixmaps/icons are scaled smoothly
+  QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+
+//  QRegularExpression relativeToNow("^in ((?:\\S*\\s*)*)\\s+(\\S+){1}$");
 //  QString s("in a hundred years");
 //  if (0 == relativeToNow.indexIn(s))
 //  {

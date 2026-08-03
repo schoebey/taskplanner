@@ -4,7 +4,7 @@
 #include <QMouseEvent>
 #include <QStyle>
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QScreen>
 
 WidgetResizer::WidgetResizer(QWidget* pParent, EPosition anchor)
   : QFrame(pParent),
@@ -65,8 +65,8 @@ void WidgetResizer::mouseDoubleClickEvent(QMouseEvent *pEvent)
 {
   if (!isEnabled())  { return; }
 
-  auto pDesktop = QApplication::desktop();
-  auto screenGeo = pDesktop->availableGeometry(pDesktop->screenNumber(this));
+  auto pScreen = this->screen();
+  auto screenGeo = pScreen->geometry();
 
   switch (m_anchor)
   {

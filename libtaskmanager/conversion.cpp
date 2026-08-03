@@ -1,6 +1,6 @@
 #include "conversion.h"
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QString>
 #include <QStringList>
 #include <set>
@@ -265,11 +265,12 @@ namespace conversion
   {
     if (s.isEmpty())  { return true; }
 
-    QRegExp rx(R"(\d{1,2})");
-    if (0 <= rx.indexIn(s))
+    QRegularExpression rx(R"(\d{1,2})");
+    QRegularExpressionMatch match = rx.match(s);
+    if (match.hasMatch())
     {
       bool bOk(false);
-      int iDay = rx.cap(0).toInt(&bOk);
+      int iDay = match.captured(0).toInt(&bOk);
       if (bOk && 0 < iDay && iDay < dt.date().daysInMonth())
       {
         dt = dt.addDays(iDay - dt.date().day());
@@ -332,12 +333,13 @@ namespace conversion
     // e.g. at 7:45 AM
 //    on august 25th
 //    on august 25th at 7:45 PM
-    QRegExp rx(R"((^.*)( on | at |@)(.*))");
-    if (0 == rx.indexIn(sVal))
+    QRegularExpression rx(R"((^.*)( on | at |@)(.*))");
+    QRegularExpressionMatch match = rx.match(sVal);
+    if (match.hasMatch())
     {
       // we have an absolute time/date point. Parse it!
-      QString sFirstPart = rx.cap(1);
-      QString sSecondPart = rx.cap(3);
+      QString sFirstPart = match.captured(1);
+      QString sSecondPart = match.captured(3);
 
       if (sFirstPart.isEmpty() ^ sSecondPart.isEmpty())
       {
@@ -352,10 +354,11 @@ namespace conversion
     }
     else
     {
-      rx = QRegExp(R"(^(on |at |@)\s*(.*)$)");
-      if (0 == rx.indexIn(sVal))
+      rx = QRegularExpression(R"(^(on |at |@)\s*(.*)$)");
+      QRegularExpressionMatch match = rx.match(sVal);
+      if (match.hasMatch())
       {
-        QString sCap = rx.cap(2);
+        QString sCap = match.captured(2);
         if (!sCap.isEmpty())
         {
           return dateTimeFromString(sCap, bConversionStatus, baseDateTime);
@@ -430,30 +433,32 @@ in a hundred years
     std::function<void(QDateTime&, int)> addWeeks = [](QDateTime& dt, int iOffset) { dt = dt.addDays(7 * iOffset); };
     std::function<void(QDateTime&, int)> addMonths = [](QDateTime& dt, int iOffset) { dt = dt.addMonths(iOffset); };
     std::function<void(QDateTime&, int)> addYears = [](QDateTime& dt, int iOffset) { dt = dt.addYears(iOffset); };
-    std::vector<std::pair<QRegExp, std::function<void(QDateTime&, int)>>> addUnitQuantity;
-    addUnitQuantity.push_back(std::make_pair(QRegExp("s(?:ec(?:ond)?)?(?:s)?"), addSecs));
-    addUnitQuantity.push_back(std::make_pair(QRegExp("m(?:in(?:ute)?)?(?:s)?"), addMins));
-    addUnitQuantity.push_back(std::make_pair(QRegExp("h(?:our)?(?:s)?"), addHours));
-    addUnitQuantity.push_back(std::make_pair(QRegExp("d(?:ay)?(?:s)?"), addDays));
-    addUnitQuantity.push_back(std::make_pair(QRegExp("w(?:eek)?(?:s)?"), addWeeks));
-    addUnitQuantity.push_back(std::make_pair(QRegExp("month(?:s)?"), addMonths));
-    addUnitQuantity.push_back(std::make_pair(QRegExp("y(?:ear)?(?:s)?"), addYears));
-    QRegExp relativeToNow("^in ((?:\\S*\\s*)*)\\s+(\\S+){1}$");
-
-    if (0 == relativeToNow.indexIn(sVal))
+    std::vector<std::pair<QRegularExpression, std::function<void(QDateTime&, int)>>> addUnitQuantity;
+    addUnitQuantity.push_back(std::make_pair(QRegularExpression("s(?:ec(?:ond)?)?(?:s)?"), addSecs));
+    addUnitQuantity.push_back(std::make_pair(QRegularExpression("m(?:in(?:ute)?)?(?:s)?"), addMins));
+    addUnitQuantity.push_back(std::make_pair(QRegularExpression("h(?:our)?(?:s)?"), addHours));
+    addUnitQuantity.push_back(std::make_pair(QRegularExpression("d(?:ay)?(?:s)?"), addDays));
+    addUnitQuantity.push_back(std::make_pair(QRegularExpression("w(?:eek)?(?:s)?"), addWeeks));
+    addUnitQuantity.push_back(std::make_pair(QRegularExpression("month(?:s)?"), addMonths));
+    addUnitQuantity.push_back(std::make_pair(QRegularExpression("y(?:ear)?(?:s)?"), addYears));
+    QRegularExpression relativeToNow("^in ((?:\\S*\\s*)*)\\s+(\\S+){1}$");
+    QRegularExpressionMatch relativeToNowMatch = relativeToNow.match(sVal);
+    if (relativeToNowMatch.hasMatch())
     {
-      QString sQuantity = relativeToNow.cap(1);
-      QString sTest = relativeToNow.cap(2);
-      QString sB = relativeToNow.cap(3);
-      QString sWhole = relativeToNow.cap(0);
+      QString sQuantity = relativeToNowMatch.captured(1);
+      QString sTest = relativeToNowMatch.captured(2);
+      QString sB = relativeToNowMatch.captured(3);
+      QString sWhole = relativeToNowMatch.captured(0);
       bool bIsInt(false);
       int iQuantity = fromString<int>(sQuantity, bIsInt);
       if (bIsInt)
       {
-        QString sUnit = relativeToNow.cap(2);
+        QString sUnit = relativeToNowMatch.captured(2);
         for (const auto& el : addUnitQuantity)
         {
-          if (el.first.exactMatch(sUnit))
+          QRegularExpressionMatch addUnitQuantityMatch = el.first.match(sUnit);
+          if (0 == addUnitQuantityMatch.capturedStart(0) &&
+                sVal.length() == addUnitQuantityMatch.capturedLength(0))
           {
             QDateTime dt = baseDateTime;
             el.second(dt, iQuantity);
@@ -471,47 +476,50 @@ in a hundred years
     // e.g. next day will set the date to the end of the next day
     // (end of work day and end of week will have to be configured,
     // like 5pm, friday
-    static const std::vector<QRegExp> weekdays = {QRegExp("mon(?:day)?"),
-                                                  QRegExp("tue(?:sday)?"),
-                                                  QRegExp("wed(?:nesday)?"),
-                                                  QRegExp("thu(?:rsday)?"),
-                                                  QRegExp("fri(?:day)?"),
-                                                  QRegExp("sat(?:urday)?"),
-                                                  QRegExp("sun(?:day)?")};
-    static const std::vector<QRegExp> months = {QRegExp("jan(?:uary)?"),
-                                                QRegExp("feb(?:ruary)?"),
-                                                QRegExp("mar(?:ch)?"),
-                                                QRegExp("apr(?:il)?"),
-                                                QRegExp("may"),
-                                                QRegExp("jun(?:e)?"),
-                                                QRegExp("jul(?:y)?"),
-                                                QRegExp("aug(?:ust)?"),
-                                                QRegExp("sep(?:t(?:empber)?)?"),
-                                                QRegExp("oct(?:ober)?"),
-                                                QRegExp("nov(?:ember)?"),
-                                                QRegExp("dec(?:ember)?")};
+    static const std::vector<QRegularExpression> weekdays = {QRegularExpression("mon(?:day)?"),
+                                                  QRegularExpression("tue(?:sday)?"),
+                                                  QRegularExpression("wed(?:nesday)?"),
+                                                  QRegularExpression("thu(?:rsday)?"),
+                                                  QRegularExpression("fri(?:day)?"),
+                                                  QRegularExpression("sat(?:urday)?"),
+                                                  QRegularExpression("sun(?:day)?")};
+    static const std::vector<QRegularExpression> months = {QRegularExpression("jan(?:uary)?"),
+                                                QRegularExpression("feb(?:ruary)?"),
+                                                QRegularExpression("mar(?:ch)?"),
+                                                QRegularExpression("apr(?:il)?"),
+                                                QRegularExpression("may"),
+                                                QRegularExpression("jun(?:e)?"),
+                                                QRegularExpression("jul(?:y)?"),
+                                                QRegularExpression("aug(?:ust)?"),
+                                                QRegularExpression("sep(?:t(?:empber)?)?"),
+                                                QRegularExpression("oct(?:ober)?"),
+                                                QRegularExpression("nov(?:ember)?"),
+                                                QRegularExpression("dec(?:ember)?")};
     // keywords, e.g. 'tomorrow', 'yesterday', 'noon', 'midnight', etc.
-    std::vector<std::pair<QRegExp, std::function<void(QDateTime&)>>> addFixQuantityForKeywords;
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("tomorrow"), std::bind(addDays, std::placeholders::_1, 1)));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("yesterday"), std::bind(addDays, std::placeholders::_1, -1)));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("midnight"), std::bind(setToNextTime, std::placeholders::_1, QTime(0, 0))));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("noon"), std::bind(setToNextTime, std::placeholders::_1, QTime(12, 0))));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("christmas|xmas"), std::bind(setToNextDate, std::placeholders::_1, -1, 12, 25)));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("new year's eve"), std::bind(setToNextDate, std::placeholders::_1, -1, 12, 31)));
-    addFixQuantityForKeywords.push_back(std::make_pair(QRegExp("new year"), std::bind(setToNextDate, std::placeholders::_1, -1, 1, 1)));
+    std::vector<std::pair<QRegularExpression, std::function<void(QDateTime&)>>> addFixQuantityForKeywords;
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegularExpression("tomorrow"), std::bind(addDays, std::placeholders::_1, 1)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegularExpression("yesterday"), std::bind(addDays, std::placeholders::_1, -1)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegularExpression("midnight"), std::bind(setToNextTime, std::placeholders::_1, QTime(0, 0))));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegularExpression("noon"), std::bind(setToNextTime, std::placeholders::_1, QTime(12, 0))));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegularExpression("christmas|xmas"), std::bind(setToNextDate, std::placeholders::_1, -1, 12, 25)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegularExpression("new year's eve"), std::bind(setToNextDate, std::placeholders::_1, -1, 12, 31)));
+    addFixQuantityForKeywords.push_back(std::make_pair(QRegularExpression("new year"), std::bind(setToNextDate, std::placeholders::_1, -1, 1, 1)));
 
     QDateTime dt = baseDateTime;
-    QRegExp nextInstance(R"(^(next |this )?(\D*))");
-    if (0 == nextInstance.indexIn(sVal))
+    QRegularExpression nextInstance(R"(^(next |this )?(\D*))");
+    QRegularExpressionMatch nextInstanceMatch = nextInstance.match(sVal);
+    if (nextInstanceMatch.hasMatch())
     {
       // TODO: differentiate this/next (-> next occurrence,or the one after)
-      QString sInst = nextInstance.cap(1);
-      QString sType = nextInstance.cap(2);
+      QString sInst = nextInstanceMatch.captured(1);
+      QString sType = nextInstanceMatch.captured(2);
 
       // unit (see above)?
       for (const auto& el : addUnitQuantity)
       {
-        if (el.first.exactMatch(sType))
+          QRegularExpressionMatch addUnitQuantityMatch = el.first.match(sType);
+          if (0 == addUnitQuantityMatch.capturedStart(0) &&
+              sVal.length() == addUnitQuantityMatch.capturedLength(0))
         {
           // for now, we will calculate the same timepoint in the next unit
           // (e.g. the same time tomorrow, same day next week, etc.)
@@ -526,7 +534,8 @@ in a hundred years
       // weekday (mon-sun)? for this, string format "on XY" would also work
       for (int i = 0; i < weekdays.size(); ++i)
       {
-        if (0 == weekdays[i].indexIn(sType))
+        QRegularExpressionMatch weekdaysMatch = weekdays[i].match(sType);
+        if (weekdaysMatch.hasMatch())
         {
           int iCurrentDay = dt.date().dayOfWeek() - 1;
           int iOffset = i - iCurrentDay;
@@ -541,7 +550,8 @@ in a hundred years
       // month (jan-dec)?
       for (int i = 0; i < months.size(); ++i)
       {
-        if (0 <= months[i].indexIn(sType))
+        QRegularExpressionMatch monthsMatch = months[i].match(sType);
+        if (monthsMatch.hasMatch())
         {
           int iCurrentMonth = dt.date().month() - 1;
           int iOffset = i - iCurrentMonth;
@@ -549,7 +559,7 @@ in a hundred years
           dt = dt.addMonths(iOffset);
 
           QString sRest = sVal;
-          sRest.remove(nextInstance.cap(0));
+          sRest.remove(monthsMatch.captured(0));
 
           // try to extract day number from the rest
           bConversionStatus = setDayFromString(dt, sRest);
@@ -565,12 +575,13 @@ in a hundred years
         // if keyword finds a match in the string, execute its function
         // After a match was found, remove the whole capture and call dateFromString with the rest
         // This way, constructs like "tomorrow at 4:53" should be possible...
-        int iIndex = el.first.indexIn(sType);
-        if (-1 != iIndex)
+        QRegularExpressionMatch addFixQuantityMatch = el.first.match(sType);
+        if (addFixQuantityMatch.hasMatch())
         {
           el.second(dt);
           QString sModifiedVal(sType);
-          sModifiedVal.remove(iIndex, el.first.matchedLength());
+          int iIndex = addFixQuantityMatch.capturedStart(0);
+          sModifiedVal.remove(iIndex, addFixQuantityMatch.capturedLength());
 
           if (!sModifiedVal.isEmpty())
           {

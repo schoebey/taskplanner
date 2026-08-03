@@ -42,7 +42,7 @@ EReportError TextReport::create_impl(const Manager& manager) const
 {
   QIODevice* pDevice = parameter(c_sPara_Device).value<QIODevice*>();
 
-  int iNofDays = hasParameter(c_sNofDays) ? parameter(c_sNofDays).value<int>() : 7;
+  qint64 iNofDays = hasParameter(c_sNofDays) ? parameter(c_sNofDays).value<int>() : 7;
 
   if (!pDevice->isOpen() &&
       !pDevice->open(QIODevice::ReadWrite | QIODevice::Truncate))
@@ -52,11 +52,10 @@ EReportError TextReport::create_impl(const Manager& manager) const
 
 
   QTextStream s(pDevice);
-  s.setCodec("UTF-8");
 
   // generate a report for the past seven days
-  QDateTime startDate(QDate::currentDate().addDays(-iNofDays));
-  QDateTime stopDate(QDate::currentDate().addDays(1));
+  QDateTime startDate = QDate::currentDate().addDays(-iNofDays).startOfDay();
+  QDateTime stopDate = QDate::currentDate().addDays(1).startOfDay();
 
   auto numerationFromInt = [](int i) -> QString
   {
@@ -84,8 +83,8 @@ EReportError TextReport::create_impl(const Manager& manager) const
                               .arg(numerationFromInt(startDate.date().day()))))
       .arg(stopDate.addDays(-1).toString(QString("dddd, MMMM dd'%1', yyyy")
                                          .arg(numerationFromInt(stopDate.date().day()))));
-  s << sFirstLine << endl;
-  s << QString("=").repeated(sFirstLine.size()) << endl << endl;
+  s << sFirstLine << '\n';
+  s << QString("=").repeated(sFirstLine.size()) << '\n' << '\n';
 
   QDateTime startOfDay = startDate;
   QDateTime endOfDay = startDate.addDays(1);
@@ -117,15 +116,15 @@ EReportError TextReport::create_impl(const Manager& manager) const
 
     if (!timings.empty())
     {
-      s << startOfDay.toString("yyyy-MM-dd") << endl;
-      s << "----------" << endl;
+      s << startOfDay.toString("yyyy-MM-dd") << '\n';
+      s << "----------" << '\n';
 
       for (const auto& el : timings)
       {
-        s << el.first.toString("hh:mm") << el.second.first.toString(" - hh:mm : ") << el.second.second << endl;
+        s << el.first.toString("hh:mm") << el.second.first.toString(" - hh:mm : ") << el.second.second << '\n';
       }
 
-      s << endl;
+      s << '\n';
     }
 
     // jump to the next day

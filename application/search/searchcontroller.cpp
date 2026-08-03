@@ -111,13 +111,14 @@ namespace detail
 
   SSearchResult findRx(const QString& sTerm,
                        const QString& s,
-                       Qt::CaseSensitivity cs,
+                       Qt::CaseSensitivity /*cs*/,
                        int iIndex)
   {
-    QRegExp rx(sTerm, cs);
-    if (-1 != (iIndex = rx.indexIn(s, iIndex + 1)))
+    QRegularExpression rx(sTerm);
+      QRegularExpressionMatch match = rx.match(s, iIndex + 1);
+    if (match.hasMatch())
     {
-      return SSearchResult{iIndex, rx.cap().size()};
+      return SSearchResult{iIndex, static_cast<int>(match.captured().size())};
     }
 
     return SSearchResult{};
@@ -130,7 +131,7 @@ namespace detail
   {
     if (-1 != (iIndex = s.indexOf(sTerm, iIndex + 1, cs)))
     {
-      return SSearchResult{iIndex, sTerm.size()};
+      return SSearchResult{iIndex, static_cast<int>(sTerm.size())};
     }
 
     return SSearchResult{};

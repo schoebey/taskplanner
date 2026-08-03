@@ -23,7 +23,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
   uint timestamp = static_cast<uint>(QString(taskplanner::git_timestamp).toInt(&bOk));
   if (bOk)
   {
-    QDateTime dt = QDateTime::fromTime_t(timestamp);
+    QDateTime dt = QDateTime::fromSecsSinceEpoch(timestamp);
     ui->pCopyright->setText(QString("Copyright 2018-%1 Roman Schaub").arg(dt.toString("yyyy")));
   }
 

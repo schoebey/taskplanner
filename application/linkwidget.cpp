@@ -9,6 +9,7 @@
 #include <QNetworkReply>
 #include <QDir>
 #include <QImage>
+#include <QStandardPaths>
 
 #include <cmath>
 
@@ -383,7 +384,7 @@ void LinkWidget::onDeleteTriggered()
   emit deleteTriggered(m_link);
 }
 
-void LinkWidget::enterEvent(QEvent* /*pEvent*/)
+void LinkWidget::enterEvent(QEnterEvent * /*pEvent*/)
 {
   showOverlay();
 }
@@ -419,7 +420,7 @@ void LinkWidget::paintEvent(QPaintEvent* /*pEvent*/)
   opt.dBorderRadius = m_dBorderRadius;
 
   QRect iconLabelRect = ui->pIcon->rect();
-  opt.iconRect = ui->pIcon->pixmap()->rect();
+  opt.iconRect = ui->pIcon->pixmap().rect();
   int iOffsetX = (iconLabelRect.width() - opt.iconRect.width()) / 2;
   int iOffsetY = (iconLabelRect.height() - opt.iconRect.height()) / 2;
   opt.iconRect.moveTo(ui->pIcon->mapTo(this, QPoint(iOffsetX, iOffsetY)));
