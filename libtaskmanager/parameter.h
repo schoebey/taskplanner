@@ -6,6 +6,7 @@
 struct SParameter
 {
   QVariant value;
+  QVariant::Type type;
   bool bRequired;
 };
 

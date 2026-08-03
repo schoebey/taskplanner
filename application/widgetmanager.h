@@ -4,6 +4,7 @@
 #include "id_types.h"
 #include <QPointer>
 
+class QWidget;
 class TaskWidget;
 class GroupWidget;
 class Manager;

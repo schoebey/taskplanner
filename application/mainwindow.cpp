@@ -36,7 +36,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QTimer>
-#include <QSignalMapper>
 #include <QClipboard>
 #include <QThread>
 #include <QPluginLoader>
@@ -227,7 +226,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   ui(new Ui::MainWindow),
   m_pManager(pManager),
   m_pWidgetManager(new WidgetManager(m_pManager, this, this, this)),
-  m_pTimeoutGroupIdMapper(new QSignalMapper(this)),
   m_pSearchFrame(new SearchFrame(this)),
   m_spSearchController(std::make_shared<SearchController>(m_pManager, m_pWidgetManager))
 {
@@ -261,13 +259,13 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   qApp->installEventFilter(this);
 
   auto pUndoAction = m_undoStack.createUndoAction(this);
-  pUndoAction->setShortcut(Qt::CTRL + Qt::Key_Z);
+  pUndoAction->setShortcut(QKeySequence::Undo);
   pUndoAction->setIcon(QIcon(":/icons/undo.png"));
   ui->pMainToolBar->insertAction(ui->actionReport, pUndoAction);
   ui->menuEdit->addAction(pUndoAction);
 
   auto pRedoAction = m_undoStack.createRedoAction(this);
-  pRedoAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Z);
+  pRedoAction->setShortcut(QKeySequence::Redo);
   pRedoAction->setIcon(QIcon(":/icons/redo.png"));
   ui->pMainToolBar->insertAction(ui->actionReport, pRedoAction);
   ui->menuEdit->addAction(pRedoAction);
@@ -283,8 +281,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QWidget* pSpacer = new QWidget();
   pSpacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
   ui->pInfoToolBar->insertWidget(pInfoDisplayAction, pSpacer);
-
-  connect(m_pTimeoutGroupIdMapper, SIGNAL(mapped(int)), this, SLOT(onSortGroupTriggered(int)));
 
   static const std::vector<QString> c_vsPluginFolders = { QCoreApplication::applicationDirPath() + "/plugins/serializers",
                                                           QCoreApplication::applicationDirPath() + "/plugins/reports",
@@ -318,16 +314,16 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   connect(pAddSubTaskAction, &QAction::triggered, this, static_cast<void(MainWindow::*)(void)>(&MainWindow::createNewSubTask));
 
 
-  QSignalMapper* pMapper = new QSignalMapper(this);
   for (int i = 0; i < 10; ++i)
   {
     QAction* pSetPriorityAction = new QAction(tr("set priority"), this);
     pSetPriorityAction->setShortcut(Qt::Key_0 + i);
     pSetPriorityAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     addAction(pSetPriorityAction);
-    pMapper->setMapping(pSetPriorityAction, i);
-    connect(pSetPriorityAction, &QAction::triggered, pMapper, static_cast<void(QSignalMapper::*)(void)>(&QSignalMapper::map));
-    connect(pMapper, static_cast<void(QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &MainWindow::setPriority);
+    connect(pSetPriorityAction, &QAction::triggered, this,
+            [this, i](){
+                setPriority(i);
+    });
   }
 
   initTaskUi();
@@ -1272,26 +1268,39 @@ void MainWindow::on_actionDisplayReport_triggered()
   tspReport spReport = ReportFactory::create("text");
   if (nullptr != spReport)
   {
-    QByteArray ba;
-    QBuffer buffer(&ba);
-    spReport->setParameter("device", QVariant::fromValue<QIODevice*>(&buffer));
-    spReport->create(*m_pManager);
+      QByteArray ba;
+      QBuffer buffer(&ba);
+      spReport->setParameter("device", QVariant::fromValue<QIODevice*>(&buffer));
+      spReport->create(*m_pManager);
 
-    QString s(ba.data());
+      QString s(ba.data());
 
-    OverlayWidget* pOverlay = new OverlayWidget(this);
-    pOverlay->setObjectName("ReportDialog");
-    QScrollArea* pScrollArea = new QScrollArea(pOverlay);
-    QLabel* pLabel = new QLabel(s);
-    pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
-    pLabel->setObjectName("report");
-    pLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    pOverlay->setAutoDeleteOnClose(true);
-    pScrollArea->setWidget(pLabel);
-    pOverlay->addWidget(pScrollArea);
-    pOverlay->setTitle(tr("Report"));
-    pLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    pOverlay->appear();
+      OverlayWidget* pOverlay = new OverlayWidget(this);
+      pOverlay->setObjectName("ReportDialog");
+
+      QScrollArea* pScrollArea = new QScrollArea(pOverlay);
+      pScrollArea->setWidgetResizable(true);
+
+      // Force the scroll area to constrain the label's width, ensuring word wrap
+      pScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+      QLabel* pLabel = new QLabel(s);
+      pLabel->setWordWrap(true);
+      pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+      pLabel->setObjectName("report");
+      pLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+
+      // Force the label to expand horizontally
+      pLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+      // Bypass Qt's unwrapped text minimum size constraint
+      pLabel->setMinimumWidth(1);
+
+      pOverlay->setAutoDeleteOnClose(true);
+      pScrollArea->setWidget(pLabel);
+      pOverlay->addWidget(pScrollArea);
+      pOverlay->setTitle(tr("Report"));
+
+      pOverlay->appear();
   }
 }
 
@@ -1582,8 +1591,7 @@ void MainWindow::setAutoSortEnabled(group_id groupId)
       m_autoSortTimers.end())
   {
     m_autoSortTimers[groupId] = new QTimer(this);
-    m_pTimeoutGroupIdMapper->setMapping(m_autoSortTimers[groupId], int(groupId));
-    connect(m_autoSortTimers[groupId], SIGNAL(timeout()), m_pTimeoutGroupIdMapper, SLOT(map()));
+    connect(m_autoSortTimers[groupId], &QTimer::timeout, this, [this, groupId](){onSortGroupTriggered(int(groupId));});
   }
 
   m_autoSortTimers[groupId]->start(60000);
@@ -1694,11 +1702,12 @@ void MainWindow::onPasteFromClipboard()
     auto elements = sText.split("\n");
 
     // check if it's a bullet point list
-    QRegExp rx(R"(^(\s*)(\*|\-|\>)+(.*)$)");
+    QRegularExpression rx(R"(^(\s*)(\*|\-|\>)+(.*)$)");
+
     bool bIsBulletPointList = true;
     for (const auto& el : elements)
     {
-      bIsBulletPointList |= (0 == rx.indexIn(el));
+      bIsBulletPointList |= rx.match(el).hasMatch();
     }
 
     if (bIsBulletPointList)
@@ -1718,10 +1727,11 @@ void MainWindow::onPasteFromClipboard()
       ITask* pNewTask = nullptr;
       for (const auto& el : elements)
       {
-        if (0 == rx.indexIn(el))
+          auto match = rx.match(el);
+        if (match.hasMatch())
         {
           pNewTask = m_pManager->addTask();
-          QString sIndent = rx.cap(1);
+          QString sIndent = match.captured(1);
           iCurrentIndentationLevel = sIndent.size();
 
           // find potential parent by looking for a task with a lesser indent
@@ -1739,7 +1749,7 @@ void MainWindow::onPasteFromClipboard()
 
           pGroup->addTask(pNewTask->id());
 
-          pNewTask->setName(rx.cap(3));
+          pNewTask->setName(match.captured(3));
 
           // remember latest task of current indent level as potential parent
           potentialParentTasks[iCurrentIndentationLevel] = pNewTask;

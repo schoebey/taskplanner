@@ -85,12 +85,14 @@ include(version)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC libtaskmanager)
 
-find_package(Qt5 COMPONENTS Qml Gui)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network)
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
-        Qt5::Qml
-        Qt5::Gui
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::Network
 )
 
 if (WIN32)

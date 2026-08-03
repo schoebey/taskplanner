@@ -22,7 +22,7 @@ OverlayWidget::OverlayWidget(QWidget *parent)
   m_pCloseButton->setObjectName("pClose");
   m_pCloseButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
   m_pLayout->addWidget(m_pCloseButton, 0, 1);
-  m_pLayout->setMargin(0);
+  // m_pLayout->setMargin(0);
 }
 
 void OverlayWidget::setAutoDeleteOnClose(bool bAutoDelete)

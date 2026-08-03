@@ -5,7 +5,6 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QApplication>
-#include <QDesktopWidget>
 
 WindowTitleMenuBar::WindowTitleMenuBar(QWidget *pParent)
   : QMenuBar(pParent)
@@ -117,8 +116,8 @@ void WindowTitleMenuBar::mousePressEvent(QMouseEvent* pEvent)
 
 QPoint WindowTitleMenuBar::stickToScreenBorders(const QPoint& targetPos, int iMagneticDistance)
 {
-  auto pDesktop = QApplication::desktop();
-  auto screenGeo = pDesktop->availableGeometry(pDesktop->screenNumber(this));
+    auto pScreen = this->screen();
+    auto screenGeo = pScreen->geometry();
 
   // check if window is near desktop border and magnetically stick to it
   bool bTearOffX = abs((targetPos - m_mouseDownPoint).x()) > 2 * iMagneticDistance;

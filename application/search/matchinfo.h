@@ -6,6 +6,7 @@
 #include <QMetaType>
 #include <QRect>
 #include <QPointer>
+#include <QWidget>
 
 #include <vector>
 #include <deque>
