@@ -7,6 +7,8 @@
 #include "constraintfactory.h"
 
 #include <QDebug>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 #include <memory>
 #include <functional>
@@ -18,16 +20,18 @@ template<typename T, typename U>
 std::shared_ptr<U> fnUnaryCreator(const QString& sName,
                                   const QString& sConfiguration)
 {
-  QRegExp rx("(.*):(.*)");
-  if (-1 != rx.indexIn(sConfiguration))
-  {
-    if (sName == rx.cap(1))
+    QRegularExpression rx("(.*):(.*)");
+    QRegularExpressionMatch match = rx.match(sConfiguration);
+
+    if (match.hasMatch())
     {
-      QString sConfig = rx.cap(2);
-      bool bDummy(false);
-      return std::make_shared<U>(conversion::fromString<T>(sConfig, bDummy));
+        if (sName == match.captured(1))
+        {
+            QString sConfig = match.captured(2);
+            bool bDummy(false);
+            return std::make_shared<U>(conversion::fromString<T>(sConfig, bDummy));
+        }
     }
-  }
   return nullptr;
 }
 
@@ -35,18 +39,19 @@ template<typename T, typename U>
 std::shared_ptr<U> fnBinaryCreator(const QString& sName,
                                    const QString& sConfiguration)
 {
-  QRegExp rx(R"(([^:]+):\[([^\]]+)\];\[(.*)\])");
-  if (-1 != rx.indexIn(sConfiguration))
+  QRegularExpression rx(R"(([^:]+):\[([^\]]+)\];\[(.*)\])");
+    QRegularExpressionMatch match = rx.match(sConfiguration);
+  if (match.hasMatch())
   {
-    QString sType = rx.cap(1);
-    QString sLeftConfig = rx.cap(2);
-    QString sRightConfig = rx.cap(3);
-    if (sName == rx.cap(1))
+    QString sType = match.captured(1);
+    QString sLeftConfig = match.captured(2);
+    QString sRightConfig = match.captured(3);
+    if (sName == match.captured(1))
     {
       QString sLeftName = sLeftConfig.left(sLeftConfig.indexOf(":"));
       QString sRightName = sRightConfig.left(sRightConfig.indexOf(":"));
-      tspConstraintTpl<T> spL = ConstraintFactory::create<T>(sLeftName, rx.cap(2));
-      tspConstraintTpl<T> spR = ConstraintFactory::create<T>(sRightName, rx.cap(3));
+      tspConstraintTpl<T> spL = ConstraintFactory::create<T>(sLeftName, match.captured(2));
+      tspConstraintTpl<T> spR = ConstraintFactory::create<T>(sRightName, match.captured(3));
 
       return std::make_shared<U>(spL, spR);
     }

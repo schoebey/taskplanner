@@ -2,7 +2,7 @@
 #define TOOLBARINFODISPLAY_H
 
 #include <QFrame>
-#include <QJSEngine>
+// #include <QJSEngine>
 
 #include <thread>
 
@@ -61,7 +61,7 @@ private:
 
   QLabel* m_pLabel = nullptr;
   int m_iTimer = -1;
-  QJSEngine m_engine;
+  // QJSEngine m_engine;
   std::thread m_thread;
   QString m_sScriptPath;
 };

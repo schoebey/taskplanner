@@ -63,12 +63,13 @@ target_include_directories(${PROJECT_NAME}
         serializers
 )
 
-find_package(Qt5 COMPONENTS Core Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-        Qt5::Widgets
-        Qt5::Core
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
 )
 
 include(lib-install-target)

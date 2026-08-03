@@ -87,32 +87,32 @@ bool ToolBarInfoDisplay::startScript(const QString& sFileName,
   CommObject* pObj = new CommObject();
   connect(this, &ToolBarInfoDisplay::quit, pObj, &CommObject::quit);
   connect(pObj, &CommObject::textChanged, this, &ToolBarInfoDisplay::setText);
-  QJSValue scriptObject = m_engine.newQObject(pObj);
-  m_engine.globalObject().setProperty("display", scriptObject);
-  QJSValue fn = m_engine.evaluate(contents, sFileName);
-  if (fn.isError())
-  {
-    if (nullptr != psErrorMessage)
-    {
-      *psErrorMessage = tr("JavaScript error: %1").arg(fn.toString());
-    }
+  // QJSValue scriptObject = m_engine.newQObject(pObj);
+  // m_engine.globalObject().setProperty("display", scriptObject);
+  // QJSValue fn = m_engine.evaluate(contents, sFileName);
+  // if (fn.isError())
+  // {
+  //   if (nullptr != psErrorMessage)
+  //   {
+  //     *psErrorMessage = tr("JavaScript error: %1").arg(fn.toString());
+  //   }
 
-    return false;
-  }
+  //   return false;
+  // }
 
-  auto fnEval = [this, fn]()
-  {
-    auto fnNonConst = fn;
-    auto res = fnNonConst.call();
-    if (res.isError())
-    {
-      emit showError(tr("JavaScript error: %1").arg(res.toString()));
-    }
-  };
+  // auto fnEval = [this, fn]()
+  // {
+  //   auto fnNonConst = fn;
+  //   auto res = fnNonConst.call();
+  //   if (res.isError())
+  //   {
+  //     emit showError(tr("JavaScript error: %1").arg(res.toString()));
+  //   }
+  // };
 
-  killTimer(m_iTimer);
-  m_thread = std::thread{fnEval};
-  m_thread.detach();
+  // killTimer(m_iTimer);
+  // m_thread = std::thread{fnEval};
+  // m_thread.detach();
 
   return true;
 }

@@ -51,7 +51,7 @@ void BlendableImageWidget::paintEvent(QPaintEvent* /*pEvent*/)
     m_cache.fill(Qt::transparent);
     QPainter painter(&m_cache);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+    // painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
     QRectF rct(contentsRect());

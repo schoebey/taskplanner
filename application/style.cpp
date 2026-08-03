@@ -15,11 +15,11 @@
 #include <cmath>
 
 QString keyFromSettings(const QString& sText, const QString& sModifier,
-                        const QFontMetrics& m, QColor col, QColor shadowCol)
+                        const QFontMetrics& m, QColor col, QColor shadowCol, qreal dpr)
 {
-  return QString("%1_%2x%3_%4_%5_%6")
-      .arg(sText).arg(m.width(sText)).arg(m.height())
-      .arg(col.name()).arg(shadowCol.name()).arg(sModifier);
+    return QString("%1_%2x%3_%4_%5_%6_dpr%7")
+    .arg(sText).arg(m.horizontalAdvance(sText)).arg(m.height())
+        .arg(col.name()).arg(shadowCol.name()).arg(sModifier).arg(dpr);
 }
 
 typedef void(*tfnDrawText)(QPainter*, const QPointF&, const QString&,
@@ -27,154 +27,159 @@ typedef void(*tfnDrawText)(QPainter*, const QPointF&, const QString&,
 
 namespace
 {
-  void drawNormalText(QPainter* pPainter, const QPointF& pt, const QString& sText,
+void drawNormalText(QPainter* pPainter, const QPointF& pt, const QString& sText,
+                    const QColor& col, const QColor& shadowColor)
+{
+    if (nullptr == pPainter)  { return; }
+
+    pPainter->save();
+    qreal dpr = pPainter->device()->devicePixelRatioF();
+    QFont f(pPainter->font());
+    QFontMetrics m(f);
+
+    QString sKey = keyFromSettings(sText, "normal", m, col, shadowColor, dpr);
+    QPixmap pixmap;
+    if (!QPixmapCache::find(sKey, &pixmap))
+    {
+        int physWidth = std::ceil(m.horizontalAdvance(sText) * dpr);
+        int physHeight = std::ceil((m.height() + 2) * dpr);
+        QImage img(physWidth, physHeight, QImage::Format_ARGB32);
+        if (!img.isNull())
+        {
+            img.setDevicePixelRatio(dpr);
+            img.fill(Qt::transparent);
+
+            QPainterPath textPath;
+            textPath.addText(0, m.ascent(), f, sText);
+
+            QPainter p(&img);
+            p.setRenderHint(QPainter::Antialiasing, true);
+            p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+            p.setPen(Qt::NoPen);
+            p.setBrush(col);
+            p.drawPath(textPath);
+
+            QPixmapCache::insert(sKey, QPixmap::fromImage(img));
+            QPixmapCache::find(sKey, &pixmap);
+        }
+    }
+
+    pPainter->restore();
+
+    if (!pixmap.isNull())
+    {
+        pPainter->drawPixmap(static_cast<int>(pt.x()),
+                             static_cast<int>(pt.y()), pixmap);
+    }
+}
+
+void drawShadowedText(QPainter* pPainter, const QPointF& pt, const QString& sText,
                       const QColor& col, const QColor& shadowColor)
-  {
+{
     if (nullptr == pPainter)  { return; }
 
     pPainter->save();
+    qreal dpr = pPainter->device()->devicePixelRatioF();
     QFont f(pPainter->font());
     QFontMetrics m(f);
 
-    QString sKey = keyFromSettings(sText, "normal", m, col, shadowColor);
-    QPixmap* pPixmap = QPixmapCache::find(sKey);
-    if (nullptr == pPixmap)
+    QString sKey = keyFromSettings(sText, "shadow", m, col, shadowColor, dpr);
+    QPixmap pixmap;
+    if (!QPixmapCache::find(sKey, &pixmap))
     {
-      QImage img(m.width(sText), m.height() + 2, QImage::Format_ARGB32);
-      if (!img.isNull())
-      {
-        img.fill(Qt::transparent);
+        int physWidth = std::ceil(m.horizontalAdvance(sText) * dpr);
+        int physHeight = std::ceil((m.height() + 2) * dpr);
+        QImage img(physWidth, physHeight, QImage::Format_ARGB32);
+        if (!img.isNull())
+        {
+            img.setDevicePixelRatio(dpr);
+            img.fill(Qt::transparent);
 
-        QPainterPath textPath;
-        textPath.addText(0, m.ascent(), f, sText);
+            QPainterPath textPath;
+            textPath.addText(0, m.ascent(), f, sText);
 
+            QPainterPath shadowPath;
+            shadowPath.addText(0, m.ascent() + 1, f, sText);
 
-        QPainter p(&img);
+            QPainter p(&img);
+            p.setPen(Qt::NoPen);
+            p.setBrush(shadowColor);
+            p.setRenderHint(QPainter::Antialiasing, true);
+            p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+            p.drawPath(shadowPath);
+            p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+            p.setBrush(QColor(0,0,0,255));
+            p.drawPath(textPath);
+            p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+            p.setPen(Qt::NoPen);
+            p.setBrush(col);
+            p.drawPath(textPath);
 
-        p.setRenderHint(QPainter::Antialiasing, true);
-        p.setRenderHint(QPainter::HighQualityAntialiasing, true);
-        p.setRenderHint(QPainter::SmoothPixmapTransform, true);
-
-        p.setPen(Qt::NoPen);
-        p.setBrush(col);
-        p.drawPath(textPath);
-
-        QPixmapCache::insert(sKey, QPixmap::fromImage(img));
-        pPixmap = QPixmapCache::find(sKey);
-      }
+            QPixmapCache::insert(sKey, QPixmap::fromImage(img));
+            QPixmapCache::find(sKey, &pixmap);
+        }
     }
 
     pPainter->restore();
 
-    if (nullptr != pPixmap)
+    if (!pixmap.isNull())
     {
-      pPainter->drawPixmap(static_cast<int>(pt.x()),
-                           static_cast<int>(pt.y()), *pPixmap);
+        pPainter->drawPixmap(static_cast<int>(pt.x()),
+                             static_cast<int>(pt.y()), pixmap);
     }
-  }
+}
 
-  void drawShadowedText(QPainter* pPainter, const QPointF& pt, const QString& sText,
-                        const QColor& col, const QColor& shadowColor)
-  {
+void drawOutlinedText(QPainter* pPainter, const QPointF& pt, const QString& sText,
+                      const QColor& col, const QColor& outlineColor)
+{
     if (nullptr == pPainter)  { return; }
 
     pPainter->save();
-    QFont f(pPainter->font());
-    QFontMetrics m(f);
-
-
-    QString sKey = keyFromSettings(sText, "shadow", m, col, shadowColor);
-    QPixmap* pPixmap = QPixmapCache::find(sKey);
-    if (nullptr == pPixmap)
-    {
-      QImage img(m.width(sText), m.height() + 2, QImage::Format_ARGB32);
-      if (!img.isNull())
-      {
-        img.fill(Qt::transparent);
-
-        QPainterPath textPath;
-        textPath.addText(0, m.ascent(), f, sText);
-
-        QPainterPath shadowPath;
-        shadowPath.addText(0, m.ascent() + 1, f, sText);
-
-        QPainter p(&img);
-        p.setPen(Qt::NoPen);
-        p.setBrush(shadowColor);
-        p.setRenderHint(QPainter::Antialiasing, true);
-        p.setRenderHint(QPainter::HighQualityAntialiasing, true);
-        p.setRenderHint(QPainter::SmoothPixmapTransform, true);
-        p.drawPath(shadowPath);
-        p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
-        p.setBrush(QColor(0,0,0,255));
-        p.drawPath(textPath);
-        p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-        p.setPen(Qt::NoPen);
-        p.setBrush(col);
-        p.drawPath(textPath);
-        QPixmapCache::insert(sKey, QPixmap::fromImage(img));
-        pPixmap = QPixmapCache::find(sKey);
-      }
-    }
-
-    pPainter->restore();
-
-    if (nullptr != pPixmap)
-    {
-      pPainter->drawPixmap(static_cast<int>(pt.x()),
-                           static_cast<int>(pt.y()), *pPixmap);
-    }
-  }
-
-  void drawOutlinedText(QPainter* pPainter, const QPointF& pt, const QString& sText,
-                        const QColor& col, const QColor& outlineColor)
-  {
-    if (nullptr == pPainter)  { return; }
-
-    pPainter->save();
-
+    qreal dpr = pPainter->device()->devicePixelRatioF();
     QFont f(pPainter->font());
     QFontMetrics m(f);
     const int iOutlineSize = m.height() / 5;
 
-
-    QString sKey = keyFromSettings(sText, "outlined", m, col, outlineColor);
-    QPixmap* pPixmap = QPixmapCache::find(sKey);
-    if (nullptr == pPixmap)
+    QString sKey = keyFromSettings(sText, "outlined", m, col, outlineColor, dpr);
+    QPixmap pixmap;
+    if (!QPixmapCache::find(sKey, &pixmap))
     {
-      QImage img(m.width(sText) + iOutlineSize, m.height() + 2, QImage::Format_ARGB32);
-      if (!img.isNull())
-      {
-        img.fill(Qt::transparent);
+        int physWidth = std::ceil((m.horizontalAdvance(sText) + iOutlineSize) * dpr);
+        int physHeight = std::ceil((m.height() + 2) * dpr);
+        QImage img(physWidth, physHeight, QImage::Format_ARGB32);
+        if (!img.isNull())
+        {
+            img.setDevicePixelRatio(dpr);
+            img.fill(Qt::transparent);
 
-        QPainterPath textPath;
-        textPath.addText(iOutlineSize/2, m.ascent(), f, sText);
+            QPainterPath textPath;
+            textPath.addText(iOutlineSize/2, m.ascent(), f, sText);
 
-        QPainter p(&img);
-        p.setPen(QPen(outlineColor, iOutlineSize));
-        p.setBrush(outlineColor);
-        p.setRenderHint(QPainter::Antialiasing, true);
-        p.setRenderHint(QPainter::HighQualityAntialiasing, true);
-        p.setRenderHint(QPainter::SmoothPixmapTransform, true);
-        p.drawPath(textPath);
+            QPainter p(&img);
+            p.setPen(QPen(outlineColor, iOutlineSize));
+            p.setBrush(outlineColor);
+            p.setRenderHint(QPainter::Antialiasing, true);
+            p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+            p.drawPath(textPath);
 
-        p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-        p.setPen(Qt::NoPen);
-        p.setBrush(col);
-        p.drawPath(textPath);
-        QPixmapCache::insert(sKey, QPixmap::fromImage(img));
-        pPixmap = QPixmapCache::find(sKey);
-      }
+            p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+            p.setPen(Qt::NoPen);
+            p.setBrush(col);
+            p.drawPath(textPath);
+
+            QPixmapCache::insert(sKey, QPixmap::fromImage(img));
+            QPixmapCache::find(sKey, &pixmap);
+        }
     }
 
     pPainter->restore();
 
-    if (nullptr != pPixmap)
+    if (!pixmap.isNull())
     {
-      pPainter->drawPixmap(static_cast<int>(pt.x()),
-                           static_cast<int>(pt.y()), *pPixmap);
+        pPainter->drawPixmap(static_cast<int>(pt.x()),
+                             static_cast<int>(pt.y()), pixmap);
     }
-  }
+}
 
 
   void qt_format_text(tfnDrawText fnDrawText,
@@ -384,9 +389,9 @@ namespace
                   int iHighlightInLineStart = highlight.iStart - line.textStart();
                   if (0 <= iHighlightInLineStart && iHighlightInLineStart < line.textLength())
                   {
-                    QRectF highlightRect(static_cast<int>(pt.x() + fm.width(lineText.left(iHighlightInLineStart))),
+                    QRectF highlightRect(static_cast<int>(pt.x() + fm.horizontalAdvance(lineText.left(iHighlightInLineStart))),
                                         static_cast<int>(pt.y()),
-                                        static_cast<int>(fm.width(lineText.mid(iHighlightInLineStart, highlight.iSize))),
+                                        static_cast<int>(fm.horizontalAdvance(lineText.mid(iHighlightInLineStart, highlight.iSize))),
                                         static_cast<int>(fm.height() + 1));
 
 

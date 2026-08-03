@@ -214,7 +214,7 @@ void TaskWidgetOverlay::paintEvent(QPaintEvent* /*pEvent*/)
 {
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing, true);
-  painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+  // painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
   painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
   QColor borderColor(m_borderColor);

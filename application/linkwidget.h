@@ -59,7 +59,7 @@ signals:
   void deleteTriggered(QUrl);
 
 private:
-  void enterEvent(QEvent* pEvent) override;
+  void enterEvent(QEnterEvent* pEvent) override;
   void leaveEvent(QEvent* pEvent) override;
   void paintEvent(QPaintEvent*) override;
   void mousePressEvent(QMouseEvent*) override;

@@ -11,7 +11,7 @@ Parametrizable::~Parametrizable()
 void Parametrizable::registerParameter(const QString& sName, QVariant::Type type, bool bRequired)
 {
   SParameter param;
-  param.value = QVariant(type);
+  param.type = type;
   param.bRequired = bRequired;
   m_parameters[sName] = param;
 }
@@ -48,7 +48,7 @@ bool Parametrizable::setParameter(const QString& sName, const QVariant& value)
 {
   auto it = m_parameters.find(sName);
   if (it != m_parameters.end() &&
-      it->second.value.type() == value.type())
+      it->second.type == value.type())
   {
     it->second.value = value;
     return true;

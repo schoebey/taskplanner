@@ -29,10 +29,11 @@ namespace
   {
     if (!s.isEmpty())
     {
-      QRegExp rx("^#+");
-      if (0 == rx.indexIn(s))
+      QRegularExpression rx("^#+");
+      QRegularExpressionMatch match = rx.match(s);
+      if (match.hasMatch())
       {
-        return rx.cap(0);
+        return match.captured(0);
       }
     }
 
@@ -73,7 +74,7 @@ namespace
     {
       m_stream.flush();
       *m_ppStream = m_pOriginalStream;
-      **m_ppStream << m_sHeader << endl;
+      **m_ppStream << m_sHeader << '\n';
       **m_ppStream << m_string;
     }
   };
@@ -269,7 +270,7 @@ namespace
   {
     stream << sName << ":";
     stream << convertFrom(t);
-    stream << endl;
+    stream << '\n';
   }
 
   template<typename T>
@@ -363,9 +364,8 @@ ESerializingError MarkdownSerializer::initSerialization()
         m_pStream = new QTextStream();
       }
       m_pStream->setDevice(&m_file);
-      m_pStream->setCodec("UTF-8");
-      *m_pStream << QString("# task planner") << endl;
-      *m_pStream << "change date: " << QDateTime::currentDateTime().toString(c_sTimeFormat) << endl;
+      *m_pStream << QString("# task planner") << '\n';
+      *m_pStream << "change date: " << QDateTime::currentDateTime().toString(c_sTimeFormat) << '\n';
       return ESerializingError::eOk;
     }
 
@@ -397,7 +397,6 @@ EDeserializingError MarkdownSerializer::initDeserialization()
         m_pStream = new QTextStream();
       }
       m_pStream->setDevice(&m_file);
-      m_pStream->setCodec("UTF-8");
 
       /*QString sHeader = */m_pStream->readLine();
       /*QString sWriteTimestamp = */m_pStream->readLine();

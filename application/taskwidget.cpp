@@ -359,7 +359,7 @@ void TaskWidget::addProperty(const QString& sName,
       pFrame->setObjectName("pPropertyFrame");
       QHBoxLayout* pHboxLayout = new QHBoxLayout();
       pHboxLayout->setSpacing(0);
-      pHboxLayout->setMargin(0);
+      // pHboxLayout->setMargin(0);
       pFrame->setLayout(pHboxLayout);
       QLabel* pLabel = new DecoratedLabel(sName);
       pLabel->setFocusPolicy(Qt::NoFocus);
@@ -930,7 +930,7 @@ void TaskWidget::focusOutEvent(QFocusEvent* pEvent)
   m_pOverlay->setHighlight(m_pOverlay->highlight() & ~EHighlightMethod::eFocus);
 }
 
-void TaskWidget::enterEvent(QEvent* /*pEvent*/)
+void TaskWidget::enterEvent(QEnterEvent * /*pEvent*/)
 {
   setHighlight(highlight() | EHighlightMethod::eHover);
 }
@@ -1046,9 +1046,10 @@ void TaskWidget::onLinkPasted()
       QUrl url(sLink);
 
       // checking a QUrl for validity is pointless since everything seems to be valid...
-      static const QRegExp c_rx(R"(^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$)");
+      static const QRegularExpression c_rx(R"(^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$)");
+      QRegularExpressionMatch match = c_rx.match(url.toString());
       if (url.isLocalFile() ||
-          0 == c_rx.indexIn(url.toString()))
+          !match.hasMatch())
       {
         emit linkAdded(m_taskId, sLink);
       }

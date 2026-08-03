@@ -34,9 +34,8 @@ ESerializingError TextSerializer::initSerialization()
     if (m_file.open(QIODevice::ReadWrite | QIODevice::Text))
     {
       m_stream.setDevice(&m_file);
-      m_stream.setCodec("UTF-8");
-      m_stream << QString("task planner") << endl;
-      m_stream << QDateTime::currentDateTime().toString(c_sTimeFormat) << endl;
+      m_stream << QString("task planner") << '\n';
+      m_stream << QDateTime::currentDateTime().toString(c_sTimeFormat) << '\n';
       return ESerializingError::eOk;
     }
 
@@ -65,7 +64,6 @@ EDeserializingError TextSerializer::initDeserialization()
     if (m_file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
       m_stream.setDevice(&m_file);
-      m_stream.setCodec("UTF-8");
 
       /*QString sHeader = */m_stream.readLine();
       /*QString sWriteTimestamp = */m_stream.readLine();
@@ -89,10 +87,10 @@ EDeserializingError TextSerializer::deinitDeserialization()
 
 ESerializingError TextSerializer::serialize(const SerializableManager& m)
 {
-  m_stream << c_sManagerHeader << endl;
-  m_stream << m.version() << endl;
-  m_stream << m.groupIds().size() << endl;
-  m_stream << m.taskIds().size() << endl;
+  m_stream << c_sManagerHeader << '\n';
+  m_stream << m.version() << '\n';
+  m_stream << m.groupIds().size() << '\n';
+  m_stream << m.taskIds().size() << '\n';
 
 
   for (const auto & id : m.groupIds())
@@ -184,27 +182,27 @@ EDeserializingError TextSerializer::deserialize(IConstraint&)
 
 ESerializingError TextSerializer::serialize(const Task& t)
 {
-  m_stream << c_sTaskHeader << endl;
-  m_stream << t.version() << endl;
-  m_stream << int(t.id()) << endl;
-  m_stream << t.name() << endl;
-  m_stream << t.description() << endl;
+  m_stream << c_sTaskHeader << '\n';
+  m_stream << t.version() << '\n';
+  m_stream << int(t.id()) << '\n';
+  m_stream << t.name() << '\n';
+  m_stream << t.description() << '\n';
 
-  m_stream << t.timeFragments().size() << endl;
+  m_stream << t.timeFragments().size() << '\n';
   for (const auto& fragment : t.timeFragments())
   {
-    m_stream << fragment.startTime.toString(c_sTimeFormat) << endl;
-    m_stream << fragment.stopTime.toString(c_sTimeFormat) << endl;
+    m_stream << fragment.startTime.toString(c_sTimeFormat) << '\n';
+    m_stream << fragment.stopTime.toString(c_sTimeFormat) << '\n';
   }
 
 //  m_stream << t.priority();
 
-  m_stream << int(t.parentTask()) << endl;
+  m_stream << int(t.parentTask()) << '\n';
 
-  m_stream << t.taskIds().size() << endl;
+  m_stream << t.taskIds().size() << '\n';
   for (const auto& id : t.taskIds())
   {
-    m_stream << int(id) << endl;
+    m_stream << int(id) << '\n';
   }
 
   // TODO: serialize generic properties
@@ -286,16 +284,16 @@ EDeserializingError TextSerializer::deserialize(Task& t)
 
 ESerializingError TextSerializer::serialize(const Group& g)
 {
-  m_stream << c_sGroupHeader << endl;
-  m_stream << g.version() << endl;
-  m_stream << int(g.id()) << endl;
-  m_stream << g.name() << endl;
-  m_stream << g.description() << endl;
+  m_stream << c_sGroupHeader << '\n';
+  m_stream << g.version() << '\n';
+  m_stream << int(g.id()) << '\n';
+  m_stream << g.name() << '\n';
+  m_stream << g.description() << '\n';
 
-  m_stream << g.taskIds().size() << endl;
+  m_stream << g.taskIds().size() << '\n';
   for (const auto& id : g.taskIds())
   {
-    m_stream << int(id) << endl;
+    m_stream << int(id) << '\n';
   }
 
   return ESerializingError::eOk;

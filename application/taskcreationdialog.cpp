@@ -29,7 +29,7 @@ void TaskCreationDialog::show()
   QPushButton* pCancel(new QPushButton(tr("Cancel")));
   pCancel->setObjectName("pCancel");
   pCancel->setFocusPolicy(Qt::StrongFocus);
-  pCancel->setAutoDefault(true);
+  pCancel->setAutoDefault(false);
   connect(pCancel, SIGNAL(clicked()), this, SLOT(reject()));
   pLayout->addWidget(pCancel, 1, 0);
   QPushButton* pOk(new QPushButton(tr("OK")));
@@ -42,7 +42,7 @@ void TaskCreationDialog::show()
   addWidget(pWidget, Qt::AlignCenter);
   appear();
 
-  QWidget::setTabOrder(pCancel, pOk);
+  QWidget::setTabOrder(pOk, pCancel);
   connect(m_pTaskWidget, SIGNAL(descriptionChanged(task_id, QString)), pOk, SLOT(setFocus()));
   m_pTaskWidget->edit();
 }
