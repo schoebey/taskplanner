@@ -673,5 +673,38 @@ in a hundred years
     return c.name(QColor::HexArgb);
   }
 
+  template<>
+  SReminder fromString<SReminder>(const QString& sVal, bool& bConversionStatus)
+  {
+    SReminder reminder;
+
+    QStringList parts = sVal.split("|");
+    if (3 != parts.size())
+    {
+      bConversionStatus = false;
+      return SReminder();
+    }
+
+    bool bUnitOk = "hours" == parts[0] || "days" == parts[0];
+    reminder.intervalUnit = "days" == parts[0] ? EReminderIntervalUnit::Days : EReminderIntervalUnit::Hours;
+
+    bool bCountOk = false;
+    reminder.iIntervalCount = parts[1].toInt(&bCountOk);
+
+    QTime time = QTime::fromString(parts[2], "hh:mm:ss");
+    bool bTimeOk = time.isValid();
+    reminder.triggerTime = time;
+
+    bConversionStatus = bUnitOk && bCountOk && bTimeOk;
+
+    return reminder;
+  }
+
+  QString toString(const SReminder& reminder)
+  {
+    QString sUnit = EReminderIntervalUnit::Days == reminder.intervalUnit ? "days" : "hours";
+
+    return QString("%1|%2|%3").arg(sUnit).arg(reminder.iIntervalCount).arg(reminder.triggerTime.toString("hh:mm:ss"));
+  }
 
 }
