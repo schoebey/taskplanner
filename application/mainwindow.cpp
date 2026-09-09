@@ -1360,12 +1360,14 @@ TaskWidget* EnsureTaskWidgetCreated(task_id taskId, Manager* pManager,
     if (nullptr != pTask &&
         0 == pTask->propertyValue("expanded").compare("true", Qt::CaseInsensitive))
     {
+      pTaskWidget->beginInsertBatch();
       for (auto childTaskId : pTask->taskIds())
       {
         TaskWidget* pChildTaskWidget =
             EnsureTaskWidgetCreated(childTaskId, pManager, pWidgetManager);
         pTaskWidget->insertTask(pChildTaskWidget, -1, false);
       }
+      pTaskWidget->endInsertBatch();
     }
   }
 
@@ -1422,6 +1424,7 @@ void MainWindow::onPropertyChanged(task_id taskId,
           auto pTask = m_pManager->task(taskId);
           if (nullptr != pTaskWidget && nullptr != pTask)
           {
+            pTaskWidget->beginInsertBatch();
             for (auto childTaskId : pTask->taskIds())
             {
               TaskWidget* pChildTaskWidget = EnsureTaskWidgetCreated(
@@ -1431,6 +1434,7 @@ void MainWindow::onPropertyChanged(task_id taskId,
                 pTaskWidget->insertTask(pChildTaskWidget, -1, false);
               }
             }
+            pTaskWidget->endInsertBatch();
           }
         }
       }

@@ -684,6 +684,29 @@ void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int /*iPos*/)
   {
     updateSize();
 
+    if (m_bInsertBatchActive)
+    {
+      m_bAutoPriorityUpdatePending = true;
+    }
+    else
+    {
+      emit autoPriorityUpdateRequested(id());
+    }
+  }
+}
+
+void TaskWidget::beginInsertBatch()
+{
+  m_bInsertBatchActive = true;
+}
+
+void TaskWidget::endInsertBatch()
+{
+  m_bInsertBatchActive = false;
+
+  if (m_bAutoPriorityUpdatePending)
+  {
+    m_bAutoPriorityUpdatePending = false;
     emit autoPriorityUpdateRequested(id());
   }
 }
