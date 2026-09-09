@@ -13,7 +13,8 @@ enum EHighlightMethod
   eHover = 0x10,
   eInsertPossible = 0x20,
   eSearchResult = 0x40,
-  eActiveSearchResult = eSearchResult | eFocus
+  eActiveSearchResult = eSearchResult | eFocus,
+  eReminderDue = 0x80 // persistent flag, cleared explicitly (e.g. on user click), like eFocus/eHover
 };
 Q_DECLARE_FLAGS(HighlightingMethod, EHighlightMethod)
 

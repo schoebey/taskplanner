@@ -679,7 +679,9 @@ in a hundred years
     SReminder reminder;
 
     QStringList parts = sVal.split("|");
-    if (3 != parts.size())
+    // Old format had 6 fields (no bEnabled); new format has 7 (bEnabled appended at the end).
+    // Accept both for backward compatibility with previously saved project files.
+    if (6 != parts.size() && 7 != parts.size())
     {
       bConversionStatus = false;
       return SReminder();
@@ -695,7 +697,41 @@ in a hundred years
     bool bTimeOk = time.isValid();
     reminder.triggerTime = time;
 
-    bConversionStatus = bUnitOk && bCountOk && bTimeOk;
+    bool bRepeatModeOk = "recurring" == parts[3] || "singleshot" == parts[3];
+    reminder.repeatMode = "singleshot" == parts[3] ? EReminderRepeatMode::SingleShot
+                                                    : EReminderRepeatMode::Recurring;
+
+    // dueDateTime is only meaningful for SingleShot; an empty part means "unused" (invalid QDateTime)
+    reminder.dueDateTime = parts[4].isEmpty() ? QDateTime()
+                                               : QDateTime::fromString(parts[4], c_sDateTimeFormat);
+    bool bDueDateTimeOk = parts[4].isEmpty() || reminder.dueDateTime.isValid();
+
+    // cycleStart is only meaningful for Recurring; an empty part means "unused" (invalid QDateTime)
+    reminder.cycleStart = parts[5].isEmpty() ? QDateTime()
+                                              : QDateTime::fromString(parts[5], c_sDateTimeFormat);
+    bool bCycleStartOk = parts[5].isEmpty() || reminder.cycleStart.isValid();
+
+    // bEnabled is the 7th field, added after the original 6-field format. Old (6-field) strings
+    // default to bEnabled = true.
+    bool bEnabledOk = true;
+    if (7 == parts.size())
+    {
+      if ("true" == parts[6] || "false" == parts[6])
+      {
+        reminder.bEnabled = "true" == parts[6];
+      }
+      else
+      {
+        bEnabledOk = false;
+      }
+    }
+    else
+    {
+      reminder.bEnabled = true;
+    }
+
+    bConversionStatus = bUnitOk && bCountOk && bTimeOk && bRepeatModeOk && bDueDateTimeOk &&
+        bCycleStartOk && bEnabledOk;
 
     return reminder;
   }
@@ -703,8 +739,14 @@ in a hundred years
   QString toString(const SReminder& reminder)
   {
     QString sUnit = EReminderIntervalUnit::Days == reminder.intervalUnit ? "days" : "hours";
+    QString sRepeatMode = EReminderRepeatMode::SingleShot == reminder.repeatMode ? "singleshot" : "recurring";
+    QString sDueDateTime = reminder.dueDateTime.isValid() ? reminder.dueDateTime.toString(c_sDateTimeFormat) : "";
+    QString sCycleStart = reminder.cycleStart.isValid() ? reminder.cycleStart.toString(c_sDateTimeFormat) : "";
+    QString sEnabled = reminder.bEnabled ? "true" : "false";
 
-    return QString("%1|%2|%3").arg(sUnit).arg(reminder.iIntervalCount).arg(reminder.triggerTime.toString("hh:mm:ss"));
+    return QString("%1|%2|%3|%4|%5|%6|%7").arg(sUnit).arg(reminder.iIntervalCount)
+        .arg(reminder.triggerTime.toString("hh:mm:ss")).arg(sRepeatMode).arg(sDueDateTime)
+        .arg(sCycleStart).arg(sEnabled);
   }
 
 }

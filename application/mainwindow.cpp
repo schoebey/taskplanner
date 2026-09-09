@@ -7,6 +7,8 @@
 #include "manager.h"
 #include "groupinterface.h"
 #include "taskinterface.h"
+#include "task.h"
+#include "reminder.h"
 #include "serializerfactory.h"
 #include "reportfactory.h"
 #include "property.h"
@@ -27,6 +29,7 @@
 #include "commands/addtaskcommand.h"
 #include "commands/deletetaskcommand.h"
 
+#include <QApplication>
 #include <QFileSystemWatcher>
 #include <QDebug>
 #include <QFile>
@@ -357,11 +360,15 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
 
 
+  m_pWatcher = new QFileSystemWatcher(this);
+  connect(m_pWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::reloadStylesheet);
+
   loadSettings();
 
 
-  m_pWatcher = new QFileSystemWatcher(this);
-  connect(m_pWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::reloadStylesheet);
+  m_pReminderSweepTimer = new QTimer(this);
+  connect(m_pReminderSweepTimer, &QTimer::timeout, this, &MainWindow::onReminderSweepTimeout);
+  m_pReminderSweepTimer->start(30000);
 
   if (m_sStylesheetPath.isEmpty())
   {
@@ -373,17 +380,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
     {
       reloadStylesheet(":/stylesheet.css");
     }
-  }
-  else
-  {
-    m_pWatcher->addPath(m_sStylesheetPath);
-  }
-
-  m_pWatcher->addPath("application/resources/stylesheet.css");
-
-  if (QFileInfo("stylesheet.css").exists())
-  {
-    m_pWatcher->addPath("stylesheet.css");
   }
 }
 
@@ -406,6 +402,22 @@ void MainWindow::closeEvent(QCloseEvent* pEvent)
   }
 
   saveSettings();
+}
+
+void MainWindow::changeEvent(QEvent* pEvent)
+{
+  QMainWindow::changeEvent(pEvent);
+
+  // Re-trigger the taskbar flash whenever the window loses activation again while
+  // at least one reminder highlight is still undismissed. QApplication::alert()
+  // only flashes until the window is focused (or moved), which is not sufficient
+  // acknowledgement if the still-flashing task widget was never actually clicked.
+  if (QEvent::ActivationChange == pEvent->type() &&
+      !isActiveWindow() &&
+      !m_setPendingReminderTaskIds.empty())
+  {
+    QApplication::alert(this);
+  }
 }
 
 
@@ -641,6 +653,16 @@ void MainWindow::reloadStylesheet(const QString& sPath)
   if (f.open(QIODevice::ReadOnly))
   {
     setStyleSheet(QString::fromUtf8(f.readAll()));
+
+    if (m_pWatcher && !sPath.startsWith(":/"))
+    {
+      const QStringList vsWatchedFiles = m_pWatcher->files();
+      if (!vsWatchedFiles.isEmpty())
+      {
+        m_pWatcher->removePaths(vsWatchedFiles);
+      }
+      m_pWatcher->addPath(QFileInfo(sPath).absoluteFilePath());
+    }
   }
 }
 
@@ -1299,7 +1321,7 @@ void MainWindow::on_actionDisplayReport_triggered()
 
       pOverlay->setAutoDeleteOnClose(true);
       pScrollArea->setWidget(pLabel);
-      pOverlay->addWidget(pScrollArea);
+      pOverlay->addWidget(pScrollArea, Qt::Alignment());
       pOverlay->setTitle(tr("Report"));
 
       pOverlay->appear();
@@ -1849,8 +1871,6 @@ void MainWindow::onChooseStylesheet()
   m_sStylesheetPath = sFileName;
 
   reloadStylesheet(sFileName);
-
-  m_pWatcher->addPath(m_sStylesheetPath);
 }
 
 void MainWindow::onChooseScript()
@@ -2126,4 +2146,136 @@ void MainWindow::onUpdateTotalTimeDisplayRequested(task_id id)
                                             m_taskTimeVisualisation.dNominalWorkHours));
     }
   }
+}
+
+void MainWindow::onReminderSweepTimeout()
+{
+  QDateTime now = QDateTime::currentDateTime();
+
+  for (const task_id& taskId : m_pManager->taskIds())
+  {
+    ITask* pTask = m_pManager->task(taskId);
+    if (nullptr == pTask || !pTask->hasPropertyValue("reminder"))
+    {
+      continue;
+    }
+
+    Task* pConcreteTask = dynamic_cast<Task*>(pTask);
+    if (nullptr == pConcreteTask)
+    {
+      continue;
+    }
+
+    SReminder reminder = pConcreteTask->property<SReminder>("reminder");
+
+    if (!reminder.bEnabled)
+    {
+      continue;
+    }
+
+    if (EReminderRepeatMode::SingleShot == reminder.repeatMode)
+    {
+      if (reminder.dueDateTime.isValid() && now >= reminder.dueDateTime)
+      {
+        onReminderDue(taskId);
+        pConcreteTask->removeProperty("reminder");
+        TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
+        if (nullptr != pTaskWidget)
+        {
+          pTaskWidget->removeProperty("reminder");
+        }
+        m_lastReminderFireTimes.erase(taskId);
+      }
+      continue;
+    }
+
+    if (0 >= reminder.iIntervalCount)
+    {
+      continue;
+    }
+
+    // cycleStart is the fixed moment the recurring cycle began; the cycle repeats every
+    // iIntervalCount hours/days from there, indefinitely. It must NOT be recomputed relative
+    // to "today" on every sweep, otherwise the interval math breaks (e.g. "every 3 days"
+    // would fire daily, and hour intervals that don't evenly divide 24 would phase-shift at
+    // each day rollover). Reminders created before this field existed have an invalid
+    // cycleStart; lazily initialize and persist it once so subsequent sweeps use a stable
+    // anchor from then on.
+    if (!reminder.cycleStart.isValid())
+    {
+      reminder.cycleStart = QDateTime(QDate::currentDate(), reminder.triggerTime);
+      pConcreteTask->setPropertyValue("reminder", conversion::toString(reminder));
+    }
+
+    qint64 iIntervalSecs = static_cast<qint64>(reminder.iIntervalCount) *
+        (EReminderIntervalUnit::Days == reminder.intervalUnit ? 86400 : 3600);
+
+    QDateTime anchor = reminder.cycleStart;
+    qint64 iDeltaSecs = anchor.secsTo(now);
+    qint64 iCycles = 0 <= iDeltaSecs ? iDeltaSecs / iIntervalSecs
+                                     : -((-iDeltaSecs + iIntervalSecs - 1) / iIntervalSecs);
+    QDateTime boundary = anchor.addSecs(iCycles * iIntervalSecs);
+
+    auto itLastFired = m_lastReminderFireTimes.find(taskId);
+    QDateTime lastFired = m_lastReminderFireTimes.end() != itLastFired ? itLastFired->second : QDateTime();
+
+    if (boundary <= now && (!lastFired.isValid() || boundary > lastFired))
+    {
+      onReminderDue(taskId);
+      m_lastReminderFireTimes[taskId] = now;
+    }
+  }
+}
+
+void MainWindow::onReminderDue(task_id taskId)
+{
+  qDebug() << "Reminder due for task" << int(taskId);
+
+  // Flash the taskbar entry (FlashWindowEx on Windows) until the user focuses the window.
+  QApplication::alert(this);
+
+  // Track this reminder as undismissed so renewed focus loss re-triggers the flash
+  // (see changeEvent()) until the highlight is cleared via onReminderDismissed().
+  m_setPendingReminderTaskIds.insert(taskId);
+
+  // ensure all ancestor tasks are expanded so the task widget exists,
+  // mirroring the lazy-expansion approach used by the search feature
+  // (see SearchController::onSearchTermChanged()).
+  ITask* pTask = m_pManager->task(taskId);
+  TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
+  std::vector<task_id> vAncestorsToExpand;
+  while (nullptr != pTask &&
+         (nullptr == pTaskWidget || !pTaskWidget->isVisible()))
+  {
+    task_id id = pTask->parentTask();
+    if (-1 == id)  { break; }
+    pTask = m_pManager->task(id);
+    pTaskWidget = m_pWidgetManager->taskWidget(id);
+    vAncestorsToExpand.push_back(id);
+  }
+
+  // expand ancestors from the outermost down to the direct parent of taskId,
+  // creating the missing task widgets along the way.
+  for (auto it = vAncestorsToExpand.rbegin(); it != vAncestorsToExpand.rend(); ++it)
+  {
+    TaskWidget* pAncestorWidget = m_pWidgetManager->taskWidget(*it);
+    if (nullptr != pAncestorWidget)
+    {
+      pAncestorWidget->setExpanded(true);
+    }
+  }
+
+  TaskWidget* pTargetWidget = m_pWidgetManager->taskWidget(taskId);
+  if (nullptr != pTargetWidget)
+  {
+    // scroll the task into view, then trigger the highlight animation
+    // (fading green flash) to draw the user's attention to it.
+    pTargetWidget->ensureVisible();
+    pTargetWidget->setHighlight(pTargetWidget->highlight() | EHighlightMethod::eReminderDue);
+  }
+}
+
+void MainWindow::onReminderDismissed(task_id taskId)
+{
+  m_setPendingReminderTaskIds.erase(taskId);
 }

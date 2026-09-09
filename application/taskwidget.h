@@ -5,6 +5,7 @@
 #include "highlightmethod.h"
 #include "propertyproviderinterface.h"
 #include "itaskcontainerwidget.h"
+#include "reminder.h"
 
 #include <QFrame>
 #include <QTimer>
@@ -113,6 +114,7 @@ signals:
   void taskMovedTo(task_id taskId, task_id newParentTaskId, int iPos);
   void taskRemoved(task_id parentId, task_id childId);
   void taskDeleted(task_id id);
+  void reminderDismissed(task_id taskId);
   void linkAdded(task_id id, QUrl url);
   void linkRemoved(task_id id, QUrl url);
   void linkInserted(task_id id, QUrl url, int iPos);
@@ -128,6 +130,7 @@ private slots:
   void onTitleEdited();
   void onDescriptionEdited();
   void on_pStartStop_toggled(bool bOn);
+  void on_pReminder_clicked(bool bChecked);
   void onTimeTrackingStopped(task_id id);
   void onPropertyEdited();
   void onAddPropertyTriggered();
@@ -172,6 +175,9 @@ private:
   bool m_bAutoPriorityUpdatePending = false;
   bool m_bUpdateSizeOnBatchEndPending = false;
   bool m_bSettling = false;
+  bool m_bHasReminder = false;
+  bool m_bSyncingReminderChecked = false;
+  SReminder m_reminder;
   QPoint m_mouseDownPos;
   double m_dAutoPriority = 0;
 
@@ -193,6 +199,7 @@ private:
 
   QMenu* m_pContextMenu = nullptr;
   QAction* m_pTrackAction = nullptr;
+  QAction* m_pEditReminderAction = nullptr;
 
   std::map<QUrl, LinkWidget*> m_linkWidgets;
 

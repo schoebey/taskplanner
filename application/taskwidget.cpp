@@ -9,6 +9,9 @@
 #include "tasklistwidget.h"
 #include "decoratedlabel.h"
 #include "groupwidget.h"
+#include "reminderdialog.h"
+#include "reminder.h"
+#include "conversion.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -196,6 +199,25 @@ void TaskWidget::setUpContextMenu()
   QAction* pExpandAllChildren = new QAction(tr("Expand all child tasks"), this);
   connect(pExpandAllChildren, &QAction::triggered, this, [&](){ emit childPropertyChangeRequested(id(), "expanded", "true", false); });
   m_pContextMenu->addAction(pExpandAllChildren);
+
+  m_pContextMenu->addSeparator();
+  m_pEditReminderAction = new QAction(tr("Edit reminder settings..."), this);
+  m_pEditReminderAction->setEnabled(m_bHasReminder);
+  m_pContextMenu->addAction(m_pEditReminderAction);
+  connect(m_pEditReminderAction, &QAction::triggered, this, [this]()
+  {
+    if (!m_bHasReminder)  { return; }
+
+    ReminderDialog dlg(this);
+    dlg.setReminder(m_reminder);
+
+    if (QDialog::Accepted == dlg.exec())
+    {
+      SReminder reminder = dlg.reminder();
+      reminder.bEnabled = m_reminder.bEnabled;
+      setPropertyValue("reminder", conversion::toString(reminder));
+    }
+  });
 }
 
 task_id TaskWidget::id() const
@@ -483,6 +505,23 @@ QString TaskWidget::propertyValue(const QString& sName) const
 
 bool TaskWidget::removeProperty(const QString& sName)
 {
+  if ("reminder" == sName)
+  {
+    m_bHasReminder = false;
+    m_reminder = SReminder();
+
+    m_bSyncingReminderChecked = true;
+    ui->pReminder->setChecked(false);
+    m_bSyncingReminderChecked = false;
+
+    if (nullptr != m_pEditReminderAction)
+    {
+      m_pEditReminderAction->setEnabled(m_bHasReminder);
+    }
+
+    return true;
+  }
+
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {
@@ -552,6 +591,24 @@ bool TaskWidget::onPropertyValueChanged(const QString& sName, const QString& sVa
     bool bOk(false);
     bool bExpanded = conversion::fromString<bool>(sValue, bOk);
     if (bOk)  { setExpanded(bExpanded); }
+  }
+  else if ("reminder" == sName)
+  {
+    bool bOk(false);
+    SReminder reminder = conversion::fromString<SReminder>(sValue, bOk);
+    m_bHasReminder = bOk;
+    m_reminder = bOk ? reminder : SReminder();
+
+    m_bSyncingReminderChecked = true;
+    ui->pReminder->setChecked(m_bHasReminder && m_reminder.bEnabled);
+    m_bSyncingReminderChecked = false;
+
+    if (nullptr != m_pEditReminderAction)
+    {
+      m_pEditReminderAction->setEnabled(m_bHasReminder);
+    }
+
+    return true;
   }
   else if ("links" == sName)
   {
@@ -869,6 +926,12 @@ void TaskWidget::mousePressEvent(QMouseEvent* pMouseEvent)
 {
   QFrame::mousePressEvent(pMouseEvent);
 
+  if (highlight().testFlag(EHighlightMethod::eReminderDue))
+  {
+    setHighlight(highlight() & ~EHighlightMethod::eReminderDue);
+    emit reminderDismissed(m_taskId);
+  }
+
   m_bMouseDown = pMouseEvent->buttons() & Qt::LeftButton;
   if (m_bMouseDown)
   {
@@ -917,6 +980,40 @@ void TaskWidget::onDescriptionEdited()
 void TaskWidget::on_pStartStop_toggled(bool bOn)
 {
   setTimeTrackingEnabled(bOn);
+}
+
+void TaskWidget::on_pReminder_clicked(bool bChecked)
+{
+  // pReminder is auto-connected via clicked(bool), which Qt only emits on user
+  // interaction (never from setChecked()), so this guard is a defensive no-op
+  // against re-entrancy rather than something the setChecked() calls below rely on.
+  if (m_bSyncingReminderChecked)  { return; }
+
+  if (!m_bHasReminder)
+  {
+    // first click on an unconfigured task: open the dialog to configure the
+    // reminder. The button is only left checked if the dialog is accepted.
+    ReminderDialog dlg(this);
+
+    if (QDialog::Accepted == dlg.exec())
+    {
+      SReminder reminder = dlg.reminder();
+      reminder.bEnabled = true;
+      setPropertyValue("reminder", conversion::toString(reminder));
+    }
+    else
+    {
+      m_bSyncingReminderChecked = true;
+      ui->pReminder->setChecked(false);
+      m_bSyncingReminderChecked = false;
+    }
+  }
+  else
+  {
+    // an already-configured reminder: just toggle its enabled state, no dialog.
+    m_reminder.bEnabled = bChecked;
+    setPropertyValue("reminder", conversion::toString(m_reminder));
+  }
 }
 
 void TaskWidget::setTimeTrackingEnabled(bool bEnabled)

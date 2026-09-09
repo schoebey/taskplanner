@@ -5,6 +5,7 @@
 #include "floatingwidget.h"
 
 #include <QVariant>
+#include <QTimer>
 
 class TaskWidget;
 class TaskWidgetOverlay : public FloatingWidget
@@ -34,14 +35,20 @@ signals:
 
 public slots:
 
+private slots:
+  void onReminderFlashTick();
+
 private:
   void paintEvent(QPaintEvent* pEvent) override;
+  void updateReminderFlashTimer();
 
 private:
   HighlightingMethod m_method = EHighlightMethod::eNoHighlight;
   QColor m_borderColor = QColor(0,0,0,0);
   QColor m_highlightColor = QColor(0,0,0,0);
   QBrush m_backgroundBrush;
+  QTimer* m_pReminderFlashTimer = nullptr;
+  bool m_bReminderFlashOn = false;
 };
 
 #endif // TASKWIDGETOVERLAY_H
