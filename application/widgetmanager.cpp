@@ -147,6 +147,11 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
     pTaskWidget->setOverlayBackground(color);
   }
 
+  if (pTask->hasPropertyValue("reminder"))
+  {
+    pTaskWidget->onPropertyValueChanged("reminder", pTask->propertyValue("reminder"));
+  }
+
   for (const QString& sName : Properties<Task>::registeredPropertyNames())
   {
     if (!Properties<Task>::visible(sName))  { continue; }

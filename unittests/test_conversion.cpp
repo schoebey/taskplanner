@@ -558,3 +558,61 @@ TEST(Conversion, reminder_fromString_failsOnMalformedInput)
   conversion::fromString<SReminder>("not-a-valid-reminder", bStatus);
   EXPECT_FALSE(bStatus);
 }
+
+TEST(Conversion, reminder_toString_fromString_roundTrip_enabledTrue)
+{
+  SReminder reminder;
+  reminder.intervalUnit = EReminderIntervalUnit::Hours;
+  reminder.iIntervalCount = 3;
+  reminder.triggerTime = QTime(7, 30, 0);
+  reminder.repeatMode = EReminderRepeatMode::Recurring;
+  reminder.cycleStart = QDateTime(QDate(2026, 9, 1), QTime(7, 30, 0));
+  reminder.bEnabled = true;
+
+  QString s = conversion::toString(reminder);
+
+  bool bStatus(false);
+  SReminder reminder2 = conversion::fromString<SReminder>(s, bStatus);
+
+  EXPECT_TRUE(bStatus);
+  EXPECT_TRUE(reminder2.bEnabled);
+  EXPECT_EQ(reminder, reminder2);
+}
+
+TEST(Conversion, reminder_toString_fromString_roundTrip_enabledFalse)
+{
+  SReminder reminder;
+  reminder.intervalUnit = EReminderIntervalUnit::Hours;
+  reminder.iIntervalCount = 3;
+  reminder.triggerTime = QTime(7, 30, 0);
+  reminder.repeatMode = EReminderRepeatMode::Recurring;
+  reminder.cycleStart = QDateTime(QDate(2026, 9, 1), QTime(7, 30, 0));
+  reminder.bEnabled = false;
+
+  QString s = conversion::toString(reminder);
+
+  bool bStatus(false);
+  SReminder reminder2 = conversion::fromString<SReminder>(s, bStatus);
+
+  EXPECT_TRUE(bStatus);
+  EXPECT_FALSE(reminder2.bEnabled);
+  EXPECT_EQ(reminder, reminder2);
+}
+
+TEST(Conversion, reminder_fromString_backwardCompatible_missingEnabledField)
+{
+  // Simulate an old-format saved string (6 fields, no trailing bEnabled field).
+  QString sOldFormat("hours|3|07:30:00|recurring||2026-09-01 07:30:00.000");
+
+  bool bStatus(false);
+  SReminder reminder = conversion::fromString<SReminder>(sOldFormat, bStatus);
+
+  EXPECT_TRUE(bStatus);
+  EXPECT_TRUE(reminder.bEnabled);
+  EXPECT_EQ(reminder.intervalUnit, EReminderIntervalUnit::Hours);
+  EXPECT_EQ(reminder.iIntervalCount, 3);
+  EXPECT_EQ(reminder.triggerTime, QTime(7, 30, 0));
+  EXPECT_EQ(reminder.repeatMode, EReminderRepeatMode::Recurring);
+  EXPECT_FALSE(reminder.dueDateTime.isValid());
+  EXPECT_EQ(reminder.cycleStart, QDateTime(QDate(2026, 9, 1), QTime(7, 30, 0)));
+}
