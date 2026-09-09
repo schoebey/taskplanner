@@ -963,11 +963,19 @@ void TaskWidget::contextMenuEvent(QContextMenuEvent* pEvent)
 
 void TaskWidget::setExpanded(bool bExpanded)
 {
+  // setPropertyValue() below triggers a synchronous propertyChanged -> ... ->
+  // onPropertyValueChanged() cascade that re-enters setExpanded() for the same
+  // value. Bail out of that re-entrant call immediately instead of redoing
+  // (already no-op) work.
+  if (m_bSettingExpanded)  { return; }
+
   ui->pProperties->setVisible(bExpanded);
   ui->pShowDetails->setChecked(bExpanded);
 
   if (property("expanded").toBool() ^ bExpanded)
   {
+    m_bSettingExpanded = true;
+
     setProperty("expanded", bExpanded);
 
     setPropertyValue("expanded", bExpanded ? "true" : "false");
@@ -987,6 +995,8 @@ void TaskWidget::setExpanded(bool bExpanded)
     ui->pStartStop->style()->polish(ui->pStartStop);
 
     updateSize();
+
+    m_bSettingExpanded = false;
   }
 }
 

@@ -159,6 +159,7 @@ private:
 
   bool m_bMouseDown = false;
   bool m_bUpdateSizePending = false;
+  bool m_bSettingExpanded = false;
   QPoint m_mouseDownPos;
   double m_dAutoPriority = 0;
 
