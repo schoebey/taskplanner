@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
   {
     QFileInfo info(sArg);
     if (info.exists() &&
-        window.loadFile(info.fileName()))
+        window.loadFile(info.absoluteFilePath()))
     {
       bLoadedFileFromArgs = true;
       break;
