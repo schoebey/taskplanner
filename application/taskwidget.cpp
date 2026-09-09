@@ -9,6 +9,9 @@
 #include "tasklistwidget.h"
 #include "decoratedlabel.h"
 #include "groupwidget.h"
+#include "reminderdialog.h"
+#include "reminder.h"
+#include "conversion.h"
 
 #include <QMouseEvent>
 #include <QPixmapCache>
@@ -917,6 +920,26 @@ void TaskWidget::onDescriptionEdited()
 void TaskWidget::on_pStartStop_toggled(bool bOn)
 {
   setTimeTrackingEnabled(bOn);
+}
+
+void TaskWidget::on_pReminder_clicked()
+{
+  ReminderDialog dlg(this);
+
+  if (hasPropertyValue("reminder"))
+  {
+    bool bOk = false;
+    SReminder reminder = conversion::fromString<SReminder>(propertyValue("reminder"), bOk);
+    if (bOk)
+    {
+      dlg.setReminder(reminder);
+    }
+  }
+
+  if (QDialog::Accepted == dlg.exec())
+  {
+    setPropertyValue("reminder", conversion::toString(dlg.reminder()));
+  }
 }
 
 void TaskWidget::setTimeTrackingEnabled(bool bEnabled)
