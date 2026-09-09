@@ -74,12 +74,20 @@ public:
   void ensureVisible();
 
   bool onPropertyValueChanged(const QString& sName, const QString& sValue);
+
+  void settleLayout();
 public slots:
   void setExpanded(bool bExpanded);
 
   void requestInsert(TaskWidget* pTaskWidget, int iPos = -1) override;
   bool insertTask(TaskWidget* pTaskWidget, int iPos = -1, bool bAnimateInsert = true) override;
   void removeTask(TaskWidget* pTaskWidget) override;
+
+  // Coalesce autoPriorityUpdateRequested emissions from onTaskInserted() while a
+  // batch of insertTask() calls is in progress: emits at most once, in
+  // endInsertBatch(), instead of once per inserted child.
+  void beginInsertBatch();
+  void endInsertBatch();
   std::vector<TaskWidget*> tasks() const override;
   void ensureVisible(QWidget* pWidget) override;
   void reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets) override;
@@ -158,6 +166,12 @@ private:
   task_id m_taskId;
 
   bool m_bMouseDown = false;
+  bool m_bUpdateSizePending = false;
+  bool m_bSettingExpanded = false;
+  bool m_bInsertBatchActive = false;
+  bool m_bAutoPriorityUpdatePending = false;
+  bool m_bUpdateSizeOnBatchEndPending = false;
+  bool m_bSettling = false;
   QPoint m_mouseDownPos;
   double m_dAutoPriority = 0;
 
