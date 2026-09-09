@@ -679,7 +679,7 @@ in a hundred years
     SReminder reminder;
 
     QStringList parts = sVal.split("|");
-    if (5 != parts.size())
+    if (6 != parts.size())
     {
       bConversionStatus = false;
       return SReminder();
@@ -704,7 +704,13 @@ in a hundred years
                                                : QDateTime::fromString(parts[4], c_sDateTimeFormat);
     bool bDueDateTimeOk = parts[4].isEmpty() || reminder.dueDateTime.isValid();
 
-    bConversionStatus = bUnitOk && bCountOk && bTimeOk && bRepeatModeOk && bDueDateTimeOk;
+    // cycleStart is only meaningful for Recurring; an empty part means "unused" (invalid QDateTime)
+    reminder.cycleStart = parts[5].isEmpty() ? QDateTime()
+                                              : QDateTime::fromString(parts[5], c_sDateTimeFormat);
+    bool bCycleStartOk = parts[5].isEmpty() || reminder.cycleStart.isValid();
+
+    bConversionStatus = bUnitOk && bCountOk && bTimeOk && bRepeatModeOk && bDueDateTimeOk &&
+        bCycleStartOk;
 
     return reminder;
   }
@@ -714,9 +720,11 @@ in a hundred years
     QString sUnit = EReminderIntervalUnit::Days == reminder.intervalUnit ? "days" : "hours";
     QString sRepeatMode = EReminderRepeatMode::SingleShot == reminder.repeatMode ? "singleshot" : "recurring";
     QString sDueDateTime = reminder.dueDateTime.isValid() ? reminder.dueDateTime.toString(c_sDateTimeFormat) : "";
+    QString sCycleStart = reminder.cycleStart.isValid() ? reminder.cycleStart.toString(c_sDateTimeFormat) : "";
 
-    return QString("%1|%2|%3|%4|%5").arg(sUnit).arg(reminder.iIntervalCount)
-        .arg(reminder.triggerTime.toString("hh:mm:ss")).arg(sRepeatMode).arg(sDueDateTime);
+    return QString("%1|%2|%3|%4|%5|%6").arg(sUnit).arg(reminder.iIntervalCount)
+        .arg(reminder.triggerTime.toString("hh:mm:ss")).arg(sRepeatMode).arg(sDueDateTime)
+        .arg(sCycleStart);
   }
 
 }

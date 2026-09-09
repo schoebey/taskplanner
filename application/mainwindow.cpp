@@ -2170,15 +2170,23 @@ void MainWindow::onReminderSweepTimeout()
       continue;
     }
 
-    // triggerTime is the time-of-day anchor of the recurring cycle; the cycle repeats
-    // every iIntervalCount hours/days from there, indefinitely. Anchoring on today's date
-    // is a simplification (ponytail: for Days intervals that do not divide evenly there is
-    // no persisted "cycle start day", so the current date is used as that reference; upgrade
-    // path would be to persist an explicit cycle start date in SReminder).
+    // cycleStart is the fixed moment the recurring cycle began; the cycle repeats every
+    // iIntervalCount hours/days from there, indefinitely. It must NOT be recomputed relative
+    // to "today" on every sweep, otherwise the interval math breaks (e.g. "every 3 days"
+    // would fire daily, and hour intervals that don't evenly divide 24 would phase-shift at
+    // each day rollover). Reminders created before this field existed have an invalid
+    // cycleStart; lazily initialize and persist it once so subsequent sweeps use a stable
+    // anchor from then on.
+    if (!reminder.cycleStart.isValid())
+    {
+      reminder.cycleStart = QDateTime(QDate::currentDate(), reminder.triggerTime);
+      pConcreteTask->setPropertyValue("reminder", conversion::toString(reminder));
+    }
+
     qint64 iIntervalSecs = static_cast<qint64>(reminder.iIntervalCount) *
         (EReminderIntervalUnit::Days == reminder.intervalUnit ? 86400 : 3600);
 
-    QDateTime anchor(QDate::currentDate(), reminder.triggerTime);
+    QDateTime anchor = reminder.cycleStart;
     qint64 iDeltaSecs = anchor.secsTo(now);
     qint64 iCycles = 0 <= iDeltaSecs ? iDeltaSecs / iIntervalSecs
                                      : -((-iDeltaSecs + iIntervalSecs - 1) / iIntervalSecs);

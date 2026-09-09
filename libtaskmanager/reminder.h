@@ -23,6 +23,8 @@ struct SReminder
   QTime triggerTime;
   EReminderRepeatMode repeatMode = EReminderRepeatMode::Recurring;
   QDateTime dueDateTime; // only used when repeatMode == SingleShot: absolute one-time fire moment
+  QDateTime cycleStart; // only used when repeatMode == Recurring: fixed moment the cycle began,
+                        // set once at creation/first-set time; NOT recomputed relative to "today"
 
   bool operator==(const SReminder& other) const
   {
@@ -30,7 +32,8 @@ struct SReminder
         iIntervalCount == other.iIntervalCount &&
         triggerTime == other.triggerTime &&
         repeatMode == other.repeatMode &&
-        dueDateTime == other.dueDateTime;
+        dueDateTime == other.dueDateTime &&
+        cycleStart == other.cycleStart;
   }
 };
 
