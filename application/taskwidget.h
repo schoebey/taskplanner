@@ -74,6 +74,8 @@ public:
   void ensureVisible();
 
   bool onPropertyValueChanged(const QString& sName, const QString& sValue);
+
+  void settleLayout();
 public slots:
   void setExpanded(bool bExpanded);
 
@@ -169,6 +171,7 @@ private:
   bool m_bInsertBatchActive = false;
   bool m_bAutoPriorityUpdatePending = false;
   bool m_bUpdateSizeOnBatchEndPending = false;
+  bool m_bSettling = false;
   QPoint m_mouseDownPos;
   double m_dAutoPriority = 0;
 

@@ -711,7 +711,7 @@ void TaskWidget::endInsertBatch()
   if (m_bUpdateSizeOnBatchEndPending)
   {
     m_bUpdateSizeOnBatchEndPending = false;
-    updateSize();
+    settleLayout();
   }
 
   if (m_bAutoPriorityUpdatePending)
@@ -804,12 +804,23 @@ void TaskWidget::updateSize()
 void TaskWidget::updateSize2()
 {
   m_bUpdateSizePending = false;
+  settleLayout();
+}
+
+void TaskWidget::settleLayout()
+{
+  if (m_bSettling) return;
+
+  m_bSettling = true;
+
+  ui->pTaskListWidget->settleLayout();
 
   layout()->invalidate();
   layout()->update();
 
-  int iSuggestedHeight = ui->pBackdrop->sizeHint().height();
-  resize(width(), iSuggestedHeight);
+  resize(width(), ui->pBackdrop->sizeHint().height());
+
+  m_bSettling = false;
 }
 
 bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
