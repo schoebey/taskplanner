@@ -7,6 +7,8 @@
 #include "manager.h"
 #include "groupinterface.h"
 #include "taskinterface.h"
+#include "task.h"
+#include "reminder.h"
 #include "serializerfactory.h"
 #include "reportfactory.h"
 #include "property.h"
@@ -359,6 +361,10 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
   loadSettings();
 
+
+  m_pReminderSweepTimer = new QTimer(this);
+  connect(m_pReminderSweepTimer, &QTimer::timeout, this, &MainWindow::onReminderSweepTimeout);
+  m_pReminderSweepTimer->start(30000);
 
   m_pWatcher = new QFileSystemWatcher(this);
   connect(m_pWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::reloadStylesheet);
@@ -2126,4 +2132,72 @@ void MainWindow::onUpdateTotalTimeDisplayRequested(task_id id)
                                             m_taskTimeVisualisation.dNominalWorkHours));
     }
   }
+}
+
+void MainWindow::onReminderSweepTimeout()
+{
+  QDateTime now = QDateTime::currentDateTime();
+
+  for (const task_id& taskId : m_pManager->taskIds())
+  {
+    ITask* pTask = m_pManager->task(taskId);
+    if (nullptr == pTask || !pTask->hasPropertyValue("reminder"))
+    {
+      continue;
+    }
+
+    Task* pConcreteTask = dynamic_cast<Task*>(pTask);
+    if (nullptr == pConcreteTask)
+    {
+      continue;
+    }
+
+    SReminder reminder = pConcreteTask->property<SReminder>("reminder");
+
+    if (EReminderRepeatMode::SingleShot == reminder.repeatMode)
+    {
+      if (reminder.dueDateTime.isValid() && now >= reminder.dueDateTime)
+      {
+        onReminderDue(taskId);
+        pConcreteTask->removeProperty("reminder");
+        m_lastReminderFireTimes.erase(taskId);
+      }
+      continue;
+    }
+
+    if (0 >= reminder.iIntervalCount)
+    {
+      continue;
+    }
+
+    // triggerTime is the time-of-day anchor of the recurring cycle; the cycle repeats
+    // every iIntervalCount hours/days from there, indefinitely. Anchoring on today's date
+    // is a simplification (ponytail: for Days intervals that do not divide evenly there is
+    // no persisted "cycle start day", so the current date is used as that reference; upgrade
+    // path would be to persist an explicit cycle start date in SReminder).
+    qint64 iIntervalSecs = static_cast<qint64>(reminder.iIntervalCount) *
+        (EReminderIntervalUnit::Days == reminder.intervalUnit ? 86400 : 3600);
+
+    QDateTime anchor(QDate::currentDate(), reminder.triggerTime);
+    qint64 iDeltaSecs = anchor.secsTo(now);
+    qint64 iCycles = 0 <= iDeltaSecs ? iDeltaSecs / iIntervalSecs
+                                     : -((-iDeltaSecs + iIntervalSecs - 1) / iIntervalSecs);
+    QDateTime boundary = anchor.addSecs(iCycles * iIntervalSecs);
+
+    auto itLastFired = m_lastReminderFireTimes.find(taskId);
+    QDateTime lastFired = m_lastReminderFireTimes.end() != itLastFired ? itLastFired->second : QDateTime();
+
+    if (boundary <= now && (!lastFired.isValid() || boundary > lastFired))
+    {
+      onReminderDue(taskId);
+      m_lastReminderFireTimes[taskId] = now;
+    }
+  }
+}
+
+void MainWindow::onReminderDue(task_id taskId)
+{
+  // Placeholder: the actual visible notification mechanism (dialog/tray/toast) is
+  // deferred to a follow-up task.
+  qDebug() << "Reminder due for task" << int(taskId);
 }
