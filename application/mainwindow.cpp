@@ -2210,4 +2210,40 @@ void MainWindow::onReminderDue(task_id taskId)
 
   // Flash the taskbar entry (FlashWindowEx on Windows) until the user focuses the window.
   QApplication::alert(this);
+
+  // ensure all ancestor tasks are expanded so the task widget exists,
+  // mirroring the lazy-expansion approach used by the search feature
+  // (see SearchController::onSearchTermChanged()).
+  ITask* pTask = m_pManager->task(taskId);
+  TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
+  std::vector<task_id> vAncestorsToExpand;
+  while (nullptr != pTask &&
+         (nullptr == pTaskWidget || !pTaskWidget->isVisible()))
+  {
+    task_id id = pTask->parentTask();
+    if (-1 == id)  { break; }
+    pTask = m_pManager->task(id);
+    pTaskWidget = m_pWidgetManager->taskWidget(id);
+    vAncestorsToExpand.push_back(id);
+  }
+
+  // expand ancestors from the outermost down to the direct parent of taskId,
+  // creating the missing task widgets along the way.
+  for (auto it = vAncestorsToExpand.rbegin(); it != vAncestorsToExpand.rend(); ++it)
+  {
+    TaskWidget* pAncestorWidget = m_pWidgetManager->taskWidget(*it);
+    if (nullptr != pAncestorWidget)
+    {
+      pAncestorWidget->setExpanded(true);
+    }
+  }
+
+  TaskWidget* pTargetWidget = m_pWidgetManager->taskWidget(taskId);
+  if (nullptr != pTargetWidget)
+  {
+    // scroll the task into view, then trigger the highlight animation
+    // (fading green flash) to draw the user's attention to it.
+    pTargetWidget->ensureVisible();
+    pTargetWidget->setHighlight(pTargetWidget->highlight() | EHighlightMethod::eValueAccepted);
+  }
 }
