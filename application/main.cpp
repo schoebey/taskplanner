@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Task, "sort_priority", int, false);
   REGISTER_PROPERTY(Task, "priority", int, true);
   REGISTER_PROPERTY(Task, "color", QColor, false);
-  REGISTER_PROPERTY(Task, "reminder", SReminder, true);
+  REGISTER_PROPERTY(Task, "reminder", SReminder, false);
   Properties<Task>::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
   Properties<Task>::registerConstraint("duration (days)", MIN(0));
 
