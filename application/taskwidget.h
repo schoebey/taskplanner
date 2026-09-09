@@ -5,6 +5,7 @@
 #include "highlightmethod.h"
 #include "propertyproviderinterface.h"
 #include "itaskcontainerwidget.h"
+#include "reminder.h"
 
 #include <QFrame>
 #include <QTimer>
@@ -128,7 +129,7 @@ private slots:
   void onTitleEdited();
   void onDescriptionEdited();
   void on_pStartStop_toggled(bool bOn);
-  void on_pReminder_clicked();
+  void on_pReminder_clicked(bool bChecked);
   void onTimeTrackingStopped(task_id id);
   void onPropertyEdited();
   void onAddPropertyTriggered();
@@ -173,6 +174,9 @@ private:
   bool m_bAutoPriorityUpdatePending = false;
   bool m_bUpdateSizeOnBatchEndPending = false;
   bool m_bSettling = false;
+  bool m_bHasReminder = false;
+  bool m_bSyncingReminderChecked = false;
+  SReminder m_reminder;
   QPoint m_mouseDownPos;
   double m_dAutoPriority = 0;
 
@@ -194,6 +198,7 @@ private:
 
   QMenu* m_pContextMenu = nullptr;
   QAction* m_pTrackAction = nullptr;
+  QAction* m_pEditReminderAction = nullptr;
 
   std::map<QUrl, LinkWidget*> m_linkWidgets;
 

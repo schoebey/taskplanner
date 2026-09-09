@@ -679,7 +679,9 @@ in a hundred years
     SReminder reminder;
 
     QStringList parts = sVal.split("|");
-    if (6 != parts.size())
+    // Old format had 6 fields (no bEnabled); new format has 7 (bEnabled appended at the end).
+    // Accept both for backward compatibility with previously saved project files.
+    if (6 != parts.size() && 7 != parts.size())
     {
       bConversionStatus = false;
       return SReminder();
@@ -709,8 +711,27 @@ in a hundred years
                                               : QDateTime::fromString(parts[5], c_sDateTimeFormat);
     bool bCycleStartOk = parts[5].isEmpty() || reminder.cycleStart.isValid();
 
+    // bEnabled is the 7th field, added after the original 6-field format. Old (6-field) strings
+    // default to bEnabled = true.
+    bool bEnabledOk = true;
+    if (7 == parts.size())
+    {
+      if ("true" == parts[6] || "false" == parts[6])
+      {
+        reminder.bEnabled = "true" == parts[6];
+      }
+      else
+      {
+        bEnabledOk = false;
+      }
+    }
+    else
+    {
+      reminder.bEnabled = true;
+    }
+
     bConversionStatus = bUnitOk && bCountOk && bTimeOk && bRepeatModeOk && bDueDateTimeOk &&
-        bCycleStartOk;
+        bCycleStartOk && bEnabledOk;
 
     return reminder;
   }
@@ -721,10 +742,11 @@ in a hundred years
     QString sRepeatMode = EReminderRepeatMode::SingleShot == reminder.repeatMode ? "singleshot" : "recurring";
     QString sDueDateTime = reminder.dueDateTime.isValid() ? reminder.dueDateTime.toString(c_sDateTimeFormat) : "";
     QString sCycleStart = reminder.cycleStart.isValid() ? reminder.cycleStart.toString(c_sDateTimeFormat) : "";
+    QString sEnabled = reminder.bEnabled ? "true" : "false";
 
-    return QString("%1|%2|%3|%4|%5|%6").arg(sUnit).arg(reminder.iIntervalCount)
+    return QString("%1|%2|%3|%4|%5|%6|%7").arg(sUnit).arg(reminder.iIntervalCount)
         .arg(reminder.triggerTime.toString("hh:mm:ss")).arg(sRepeatMode).arg(sDueDateTime)
-        .arg(sCycleStart);
+        .arg(sCycleStart).arg(sEnabled);
   }
 
 }
