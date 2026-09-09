@@ -471,6 +471,8 @@ TEST(Conversion, reminder_toString_fromString_roundTrip_hours)
   reminder.intervalUnit = EReminderIntervalUnit::Hours;
   reminder.iIntervalCount = 3;
   reminder.triggerTime = QTime(7, 30, 0);
+  reminder.repeatMode = EReminderRepeatMode::Recurring;
+  reminder.cycleStart = QDateTime(QDate(2026, 9, 1), QTime(7, 30, 0));
 
   QString s = conversion::toString(reminder);
 
@@ -481,6 +483,29 @@ TEST(Conversion, reminder_toString_fromString_roundTrip_hours)
   EXPECT_EQ(reminder.intervalUnit, reminder2.intervalUnit);
   EXPECT_EQ(reminder.iIntervalCount, reminder2.iIntervalCount);
   EXPECT_EQ(reminder.triggerTime, reminder2.triggerTime);
+  EXPECT_EQ(reminder.repeatMode, reminder2.repeatMode);
+  EXPECT_EQ(reminder.dueDateTime, reminder2.dueDateTime);
+  EXPECT_EQ(reminder.cycleStart, reminder2.cycleStart);
+  EXPECT_EQ(reminder, reminder2);
+}
+
+TEST(Conversion, reminder_toString_fromString_roundTrip_missingCycleStart)
+{
+  // backward compatibility: cycleStart left invalid/unset, e.g. records predating this field
+  SReminder reminder;
+  reminder.intervalUnit = EReminderIntervalUnit::Hours;
+  reminder.iIntervalCount = 5;
+  reminder.triggerTime = QTime(7, 30, 0);
+  reminder.repeatMode = EReminderRepeatMode::Recurring;
+
+  QString s = conversion::toString(reminder);
+
+  bool bStatus(false);
+  SReminder reminder2 = conversion::fromString<SReminder>(s, bStatus);
+
+  EXPECT_TRUE(bStatus);
+  EXPECT_FALSE(reminder2.cycleStart.isValid());
+  EXPECT_EQ(reminder, reminder2);
 }
 
 TEST(Conversion, reminder_toString_fromString_roundTrip_days)
@@ -489,6 +514,8 @@ TEST(Conversion, reminder_toString_fromString_roundTrip_days)
   reminder.intervalUnit = EReminderIntervalUnit::Days;
   reminder.iIntervalCount = 2;
   reminder.triggerTime = QTime(23, 59, 59);
+  reminder.repeatMode = EReminderRepeatMode::Recurring;
+  reminder.cycleStart = QDateTime(QDate(2026, 8, 30), QTime(23, 59, 59));
 
   QString s = conversion::toString(reminder);
 
@@ -499,6 +526,30 @@ TEST(Conversion, reminder_toString_fromString_roundTrip_days)
   EXPECT_EQ(reminder.intervalUnit, reminder2.intervalUnit);
   EXPECT_EQ(reminder.iIntervalCount, reminder2.iIntervalCount);
   EXPECT_EQ(reminder.triggerTime, reminder2.triggerTime);
+  EXPECT_EQ(reminder.repeatMode, reminder2.repeatMode);
+  EXPECT_EQ(reminder.dueDateTime, reminder2.dueDateTime);
+  EXPECT_EQ(reminder.cycleStart, reminder2.cycleStart);
+  EXPECT_EQ(reminder, reminder2);
+}
+
+TEST(Conversion, reminder_toString_fromString_roundTrip_singleShot)
+{
+  SReminder reminder;
+  reminder.intervalUnit = EReminderIntervalUnit::Hours;
+  reminder.iIntervalCount = 0;
+  reminder.triggerTime = QTime(7, 30, 0);
+  reminder.repeatMode = EReminderRepeatMode::SingleShot;
+  reminder.dueDateTime = QDateTime(QDate(2026, 9, 10), QTime(14, 0, 0));
+
+  QString s = conversion::toString(reminder);
+
+  bool bStatus(false);
+  SReminder reminder2 = conversion::fromString<SReminder>(s, bStatus);
+
+  EXPECT_TRUE(bStatus);
+  EXPECT_EQ(reminder.repeatMode, reminder2.repeatMode);
+  EXPECT_EQ(reminder.dueDateTime, reminder2.dueDateTime);
+  EXPECT_EQ(reminder, reminder2);
 }
 
 TEST(Conversion, reminder_fromString_failsOnMalformedInput)

@@ -679,7 +679,7 @@ in a hundred years
     SReminder reminder;
 
     QStringList parts = sVal.split("|");
-    if (3 != parts.size())
+    if (6 != parts.size())
     {
       bConversionStatus = false;
       return SReminder();
@@ -695,7 +695,22 @@ in a hundred years
     bool bTimeOk = time.isValid();
     reminder.triggerTime = time;
 
-    bConversionStatus = bUnitOk && bCountOk && bTimeOk;
+    bool bRepeatModeOk = "recurring" == parts[3] || "singleshot" == parts[3];
+    reminder.repeatMode = "singleshot" == parts[3] ? EReminderRepeatMode::SingleShot
+                                                    : EReminderRepeatMode::Recurring;
+
+    // dueDateTime is only meaningful for SingleShot; an empty part means "unused" (invalid QDateTime)
+    reminder.dueDateTime = parts[4].isEmpty() ? QDateTime()
+                                               : QDateTime::fromString(parts[4], c_sDateTimeFormat);
+    bool bDueDateTimeOk = parts[4].isEmpty() || reminder.dueDateTime.isValid();
+
+    // cycleStart is only meaningful for Recurring; an empty part means "unused" (invalid QDateTime)
+    reminder.cycleStart = parts[5].isEmpty() ? QDateTime()
+                                              : QDateTime::fromString(parts[5], c_sDateTimeFormat);
+    bool bCycleStartOk = parts[5].isEmpty() || reminder.cycleStart.isValid();
+
+    bConversionStatus = bUnitOk && bCountOk && bTimeOk && bRepeatModeOk && bDueDateTimeOk &&
+        bCycleStartOk;
 
     return reminder;
   }
@@ -703,8 +718,13 @@ in a hundred years
   QString toString(const SReminder& reminder)
   {
     QString sUnit = EReminderIntervalUnit::Days == reminder.intervalUnit ? "days" : "hours";
+    QString sRepeatMode = EReminderRepeatMode::SingleShot == reminder.repeatMode ? "singleshot" : "recurring";
+    QString sDueDateTime = reminder.dueDateTime.isValid() ? reminder.dueDateTime.toString(c_sDateTimeFormat) : "";
+    QString sCycleStart = reminder.cycleStart.isValid() ? reminder.cycleStart.toString(c_sDateTimeFormat) : "";
 
-    return QString("%1|%2|%3").arg(sUnit).arg(reminder.iIntervalCount).arg(reminder.triggerTime.toString("hh:mm:ss"));
+    return QString("%1|%2|%3|%4|%5|%6").arg(sUnit).arg(reminder.iIntervalCount)
+        .arg(reminder.triggerTime.toString("hh:mm:ss")).arg(sRepeatMode).arg(sDueDateTime)
+        .arg(sCycleStart);
   }
 
 }

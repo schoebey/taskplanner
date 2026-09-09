@@ -95,6 +95,8 @@ private slots:
   void onChildPropertyChangeRequested(task_id, const QString&, const QString&, bool) override;
   void onAutoPriorityUpdateRequested(task_id) override;
   void onUpdateTotalTimeDisplayRequested(task_id) override;
+  void onReminderSweepTimeout();
+  void onReminderDue(task_id taskId);
 
 signals:
   void timeTrackingStopped(task_id taskId);
@@ -123,6 +125,9 @@ private:
   WidgetManager* m_pWidgetManager = nullptr;
   TaskCreationDialog* m_pTaskCreationDialog = nullptr;
   std::map<group_id, QTimer*> m_autoSortTimers;
+  QTimer* m_pReminderSweepTimer = nullptr;
+  // last time a Recurring reminder fired, in-memory only (not persisted)
+  std::map<task_id, QDateTime> m_lastReminderFireTimes;
   QUndoStack m_undoStack;
   std::vector<std::shared_ptr<QObject>> m_vspPlugins;
   QAction* m_pEnableHibernationDetection;
