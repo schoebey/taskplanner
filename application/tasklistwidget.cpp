@@ -204,7 +204,6 @@ void TaskListWidget::reorderTasks(const std::vector<task_id>& vIds)
     }
   }
 
-  m_bContentDirty = true;
   reorderTasks(vpTaskWidgets);
 }
 
@@ -214,12 +213,14 @@ void TaskListWidget::ShowGhost(TaskWidget* pTaskWidget, int iPos)
   {
     m_iGhostSpace = pTaskWidget->height();
     m_iGhostPos = iPos;
+    m_bContentDirty = true;
     updatePositions(pTaskWidget->height(), iPos);
   }
   else
   {
     m_iGhostSpace = -1;
     m_iGhostPos = 0;
+    m_bContentDirty = true;
     updatePositions();
   }
 }
@@ -314,10 +315,13 @@ int TaskListWidget::contentHeight(int iSpace, int iGhostPos) const
 
 void TaskListWidget::settleLayout()
 {
-  if (m_bSettling || !m_bContentDirty) return;
+  if (m_bSettling) return;
 
   m_bSettling = true;
 
+  // Always give children a chance to settle first, regardless of whether
+  // this list's own content is marked dirty - a grandchild's height change
+  // may need to propagate up through an otherwise "clean" intermediate list.
   for (TaskWidget* pTaskWidget : m_vpTaskWidgets)
   {
     if (nullptr != pTaskWidget)
@@ -328,19 +332,25 @@ void TaskListWidget::settleLayout()
 
   int iHeight = contentHeight(m_iGhostSpace, m_iGhostPos);
 
-  if (m_bAutoResize)
+  // Only redo the (otherwise redundant) apply/emit work if either this list's
+  // own content was marked dirty, or a settled child actually changed the
+  // resulting height.
+  if (m_bContentDirty || iHeight != m_iLastContentHeight)
   {
-    setMinimumHeight(iHeight);
-    setMaximumHeight(iHeight);
-    updateGeometry();
-  }
+    if (m_bAutoResize)
+    {
+      setMinimumHeight(iHeight);
+      setMaximumHeight(iHeight);
+      updateGeometry();
+    }
 
-  m_bContentDirty = false;
+    m_bContentDirty = false;
 
-  if (iHeight != m_iLastContentHeight)
-  {
-    m_iLastContentHeight = iHeight;
-    emit sizeChanged();
+    if (iHeight != m_iLastContentHeight)
+    {
+      m_iLastContentHeight = iHeight;
+      emit sizeChanged();
+    }
   }
 
   m_bSettling = false;
@@ -508,5 +518,10 @@ bool TaskListWidget::onMouseMoved(const QPoint& pt)
 
 void TaskListWidget::setAutoResize(bool bAutoResize)
 {
-  m_bAutoResize = bAutoResize;
+  if (m_bAutoResize != bAutoResize)
+  {
+    m_bAutoResize = bAutoResize;
+    m_bContentDirty = true;
+    updateGeometry();
+  }
 }

@@ -791,8 +791,6 @@ void TaskWidget::updateSize()
   int iWidth = ui->pProperties->width();
   ui->pDescription->suggestWidth(iWidth);
 
-  m_bLayoutDirty = true;
-
   // Coalesce bursts of updateSize() calls (e.g. resize() below re-entering via
   // sizeChanged()) into a single queued updateSize2() invocation, avoiding
   // redundant layout invalidate/resize passes.
@@ -822,7 +820,6 @@ void TaskWidget::settleLayout()
 
   resize(width(), ui->pBackdrop->sizeHint().height());
 
-  m_bLayoutDirty = false;
   m_bSettling = false;
 }
 
