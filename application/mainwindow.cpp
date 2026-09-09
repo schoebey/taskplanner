@@ -29,6 +29,7 @@
 #include "commands/addtaskcommand.h"
 #include "commands/deletetaskcommand.h"
 
+#include <QApplication>
 #include <QFileSystemWatcher>
 #include <QDebug>
 #include <QFile>
@@ -2205,7 +2206,8 @@ void MainWindow::onReminderSweepTimeout()
 
 void MainWindow::onReminderDue(task_id taskId)
 {
-  // Placeholder: the actual visible notification mechanism (dialog/tray/toast) is
-  // deferred to a follow-up task.
   qDebug() << "Reminder due for task" << int(taskId);
+
+  // Flash the taskbar entry (FlashWindowEx on Windows) until the user focuses the window.
+  QApplication::alert(this);
 }
