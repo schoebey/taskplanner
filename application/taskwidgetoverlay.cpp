@@ -55,6 +55,11 @@ namespace
       props.borderColor = Qt::red;
       props.highlightColor = QColor(255, 0, 0, 100);
      }
+    if (method.testFlag(EHighlightMethod::eReminderDue))
+    {
+      props.borderColor = QColor(255, 140, 0);
+      props.highlightColor = QColor(255, 140, 0, 150);
+    }
     if (method.testFlag(EHighlightMethod::eSearchResult))
     {
       props.borderColor = QColor(255, 200, 0, 100);
@@ -155,6 +160,49 @@ void TaskWidgetOverlay::setHighlight(HighlightingMethod method)
     {
       setHighlightColor(newHighlightColor, colors.iFadeTimeMs);
     }
+  }
+
+  updateReminderFlashTimer();
+}
+
+void TaskWidgetOverlay::updateReminderFlashTimer()
+{
+  bool bShouldFlash = m_method.testFlag(EHighlightMethod::eReminderDue);
+  if (bShouldFlash && nullptr == m_pReminderFlashTimer)
+  {
+    m_pReminderFlashTimer = new QTimer(this);
+    m_bReminderFlashOn = true;
+    connect(m_pReminderFlashTimer, &QTimer::timeout, this, &TaskWidgetOverlay::onReminderFlashTick);
+    m_pReminderFlashTimer->start(900);
+  }
+  else if (!bShouldFlash && nullptr != m_pReminderFlashTimer)
+  {
+    m_pReminderFlashTimer->stop();
+    m_pReminderFlashTimer->deleteLater();
+    m_pReminderFlashTimer = nullptr;
+  }
+}
+
+void TaskWidgetOverlay::onReminderFlashTick()
+{
+  if (!m_method.testFlag(EHighlightMethod::eReminderDue))
+  {
+    return;
+  }
+
+  m_bReminderFlashOn = !m_bReminderFlashOn;
+
+  SHighlightProperties targetColors = m_bReminderFlashOn
+      ? colorsFromMethod(m_method)
+      : colorsFromMethod(m_method & ~EHighlightMethod::eReminderDue);
+
+  if (targetColors.borderColor.isValid())
+  {
+    setBorderColor(targetColors.borderColor, 400);
+  }
+  if (targetColors.highlightColor.isValid())
+  {
+    setHighlightColor(targetColors.highlightColor, 400);
   }
 }
 

@@ -2244,6 +2244,6 @@ void MainWindow::onReminderDue(task_id taskId)
     // scroll the task into view, then trigger the highlight animation
     // (fading green flash) to draw the user's attention to it.
     pTargetWidget->ensureVisible();
-    pTargetWidget->setHighlight(pTargetWidget->highlight() | EHighlightMethod::eValueAccepted);
+    pTargetWidget->setHighlight(pTargetWidget->highlight() | EHighlightMethod::eReminderDue);
   }
 }
