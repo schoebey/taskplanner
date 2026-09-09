@@ -387,6 +387,15 @@ public:
     { return sPropertyName == p->descriptor()->name(); });
     if (it != allProperties.end())
     {
+      // If the stored property is already of type T, its typed value is
+      // already available - use it directly instead of a stringify+reparse
+      // round-trip. Fall back to string conversion for any mismatch.
+      auto spTyped = std::dynamic_pointer_cast<PropertyTpl<T>>(*it);
+      if (nullptr != spTyped)
+      {
+        return spTyped->get();
+      }
+
       bool bUnused = false;
       return conversion::fromString<T>((*it)->value(), bUnused);
     }
