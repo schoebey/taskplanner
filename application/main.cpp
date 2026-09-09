@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <QApplication>
+#include <QPixmapCache>
 
 #include "mainwindow.h"
 #include "manager.h"
@@ -29,6 +30,12 @@ int main(int argc, char *argv[])
 
   // Ensure pixmaps/icons are scaled smoothly
   QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+  // High-DPI glyph pixmaps cached by Style::draw*Text are dpr^2 times larger
+  // in bytes than before. Raise Qt's default ~10MB QPixmapCache limit so a
+  // fully expanded task's glyph pixmaps aren't evicted/thrashed on every
+  // repaint. 100MB comfortably covers high-DPI (e.g. dpr=2-3) cases.
+  QPixmapCache::setCacheLimit(100 * 1024);
 
 
 //  QRegularExpression relativeToNow("^in ((?:\\S*\\s*)*)\\s+(\\S+){1}$");

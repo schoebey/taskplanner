@@ -157,18 +157,22 @@ double Task::autoPriority() const
     qint64 iTimeToDue = std::max<qint64>(1, QDateTime::currentDateTime().secsTo(dueDate));
 
     // piecewise linear interpolation based on the segment we're in
-    std::vector<qint64> viPivots = {18000,
-                                    24 * 3600,
-                                    2 * 24 * 3600,
-                                    7 * 24 * 3600,
-                                    14 * 24 * 3600,
-                                    30 * 24 * 3600,
-                                    2 * 30 * 24 * 3600,
-                                    6 * 30 * 24 * 3600,
-                                    3600,
-                                    600,
-                                    0};
-    std::sort(viPivots.begin(), viPivots.end(), std::greater<qint64>());
+    // pivots are constant across calls, so build and sort them once instead of per call
+    static const std::vector<qint64> viPivots = []() {
+      std::vector<qint64> v = {18000,
+                                24 * 3600,
+                                2 * 24 * 3600,
+                                7 * 24 * 3600,
+                                14 * 24 * 3600,
+                                30 * 24 * 3600,
+                                2 * 30 * 24 * 3600,
+                                6 * 30 * 24 * 3600,
+                                3600,
+                                600,
+                                0};
+      std::sort(v.begin(), v.end(), std::greater<qint64>());
+      return v;
+    }();
     dDueTimeWeight = viPivots.size() - 1;
     for (size_t idx = viPivots.size() - 2;; --idx)
     {

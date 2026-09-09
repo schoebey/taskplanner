@@ -682,8 +682,41 @@ void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int /*iPos*/)
 {
   if (nullptr != pTaskWidget)
   {
-    updateSize();
+    if (m_bInsertBatchActive)
+    {
+      // Defer the corrective updateSize() until the whole batch of children
+      // has been inserted (see endInsertBatch()), instead of triggering it on
+      // the first child - otherwise pBackdrop->sizeHint() gets computed before
+      // later siblings' subtrees exist, yielding a wrong intermediate size.
+      m_bUpdateSizeOnBatchEndPending = true;
+      m_bAutoPriorityUpdatePending = true;
+    }
+    else
+    {
+      updateSize();
+      emit autoPriorityUpdateRequested(id());
+    }
+  }
+}
 
+void TaskWidget::beginInsertBatch()
+{
+  m_bInsertBatchActive = true;
+}
+
+void TaskWidget::endInsertBatch()
+{
+  m_bInsertBatchActive = false;
+
+  if (m_bUpdateSizeOnBatchEndPending)
+  {
+    m_bUpdateSizeOnBatchEndPending = false;
+    settleLayout();
+  }
+
+  if (m_bAutoPriorityUpdatePending)
+  {
+    m_bAutoPriorityUpdatePending = false;
     emit autoPriorityUpdateRequested(id());
   }
 }
@@ -758,17 +791,36 @@ void TaskWidget::updateSize()
   int iWidth = ui->pProperties->width();
   ui->pDescription->suggestWidth(iWidth);
 
-  QMetaObject::invokeMethod(this, "updateSize2", Qt::QueuedConnection);
+  // Coalesce bursts of updateSize() calls (e.g. resize() below re-entering via
+  // sizeChanged()) into a single queued updateSize2() invocation, avoiding
+  // redundant layout invalidate/resize passes.
+  if (!m_bUpdateSizePending)
+  {
+    m_bUpdateSizePending = true;
+    QMetaObject::invokeMethod(this, "updateSize2", Qt::QueuedConnection);
+  }
 }
 
 void TaskWidget::updateSize2()
 {
+  m_bUpdateSizePending = false;
+  settleLayout();
+}
+
+void TaskWidget::settleLayout()
+{
+  if (m_bSettling) return;
+
+  m_bSettling = true;
+
+  ui->pTaskListWidget->settleLayout();
+
   layout()->invalidate();
   layout()->update();
 
+  resize(width(), ui->pBackdrop->sizeHint().height());
 
-  int iSuggestedHeight = ui->pBackdrop->sizeHint().height();
-  resize(width(), iSuggestedHeight);
+  m_bSettling = false;
 }
 
 bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
@@ -955,11 +1007,19 @@ void TaskWidget::contextMenuEvent(QContextMenuEvent* pEvent)
 
 void TaskWidget::setExpanded(bool bExpanded)
 {
+  // setPropertyValue() below triggers a synchronous propertyChanged -> ... ->
+  // onPropertyValueChanged() cascade that re-enters setExpanded() for the same
+  // value. Bail out of that re-entrant call immediately instead of redoing
+  // (already no-op) work.
+  if (m_bSettingExpanded)  { return; }
+
   ui->pProperties->setVisible(bExpanded);
   ui->pShowDetails->setChecked(bExpanded);
 
   if (property("expanded").toBool() ^ bExpanded)
   {
+    m_bSettingExpanded = true;
+
     setProperty("expanded", bExpanded);
 
     setPropertyValue("expanded", bExpanded ? "true" : "false");
@@ -979,6 +1039,8 @@ void TaskWidget::setExpanded(bool bExpanded)
     ui->pStartStop->style()->polish(ui->pStartStop);
 
     updateSize();
+
+    m_bSettingExpanded = false;
   }
 }
 
