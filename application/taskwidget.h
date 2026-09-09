@@ -168,6 +168,7 @@ private:
   bool m_bSettingExpanded = false;
   bool m_bInsertBatchActive = false;
   bool m_bAutoPriorityUpdatePending = false;
+  bool m_bUpdateSizeOnBatchEndPending = false;
   QPoint m_mouseDownPos;
   double m_dAutoPriority = 0;
 

@@ -682,14 +682,18 @@ void TaskWidget::onTaskInserted(TaskWidget *pTaskWidget, int /*iPos*/)
 {
   if (nullptr != pTaskWidget)
   {
-    updateSize();
-
     if (m_bInsertBatchActive)
     {
+      // Defer the corrective updateSize() until the whole batch of children
+      // has been inserted (see endInsertBatch()), instead of triggering it on
+      // the first child - otherwise pBackdrop->sizeHint() gets computed before
+      // later siblings' subtrees exist, yielding a wrong intermediate size.
+      m_bUpdateSizeOnBatchEndPending = true;
       m_bAutoPriorityUpdatePending = true;
     }
     else
     {
+      updateSize();
       emit autoPriorityUpdateRequested(id());
     }
   }
@@ -703,6 +707,12 @@ void TaskWidget::beginInsertBatch()
 void TaskWidget::endInsertBatch()
 {
   m_bInsertBatchActive = false;
+
+  if (m_bUpdateSizeOnBatchEndPending)
+  {
+    m_bUpdateSizeOnBatchEndPending = false;
+    updateSize();
+  }
 
   if (m_bAutoPriorityUpdatePending)
   {
