@@ -758,14 +758,22 @@ void TaskWidget::updateSize()
   int iWidth = ui->pProperties->width();
   ui->pDescription->suggestWidth(iWidth);
 
-  QMetaObject::invokeMethod(this, "updateSize2", Qt::QueuedConnection);
+  // Coalesce bursts of updateSize() calls (e.g. resize() below re-entering via
+  // sizeChanged()) into a single queued updateSize2() invocation, avoiding
+  // redundant layout invalidate/resize passes.
+  if (!m_bUpdateSizePending)
+  {
+    m_bUpdateSizePending = true;
+    QMetaObject::invokeMethod(this, "updateSize2", Qt::QueuedConnection);
+  }
 }
 
 void TaskWidget::updateSize2()
 {
+  m_bUpdateSizePending = false;
+
   layout()->invalidate();
   layout()->update();
-
 
   int iSuggestedHeight = ui->pBackdrop->sizeHint().height();
   resize(width(), iSuggestedHeight);

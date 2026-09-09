@@ -158,6 +158,7 @@ private:
   task_id m_taskId;
 
   bool m_bMouseDown = false;
+  bool m_bUpdateSizePending = false;
   QPoint m_mouseDownPos;
   double m_dAutoPriority = 0;
 
