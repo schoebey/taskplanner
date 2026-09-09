@@ -5,6 +5,7 @@
 #include "manager.h"
 #include "task.h"
 #include "group.h"
+#include "reminder.h"
 #include "serializerfactory.h"
 #include "style.h"
 #include "property.h"
@@ -89,6 +90,7 @@ int main(int argc, char *argv[])
   REGISTER_PROPERTY(Task, "sort_priority", int, false);
   REGISTER_PROPERTY(Task, "priority", int, true);
   REGISTER_PROPERTY(Task, "color", QColor, false);
+  REGISTER_PROPERTY(Task, "reminder", SReminder, true);
   Properties<Task>::registerConstraint("category", ONE_OF(QString("a"), QString("b"), QString("c")));
   Properties<Task>::registerConstraint("duration (days)", MIN(0));
 
