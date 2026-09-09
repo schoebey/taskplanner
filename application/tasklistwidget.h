@@ -41,6 +41,9 @@ public:
   void setAutoResize(bool bAutoResize);
 
   QSize sizeHint() const override;
+
+  int contentHeight(int iSpace = -1, int iGhostPos = 0) const;
+  void settleLayout();
 signals:
   void taskInsertRequested(TaskWidget* pTaskWidget, int iPos);
   void sizeChanged();
@@ -66,7 +69,12 @@ private:
   static TaskListWidget* m_pMouseHoveringOver;
   QImage m_backgroundImage;
   bool m_bAutoResize = false;
-  QSize m_minimumSize;
+
+  bool m_bContentDirty = true;
+  bool m_bSettling = false;
+  int m_iGhostSpace = -1;
+  int m_iGhostPos = 0;
+  int m_iLastContentHeight = -1;
 };
 
 #endif // TASKLISTWIDGET_H

@@ -711,7 +711,7 @@ void TaskWidget::endInsertBatch()
   if (m_bUpdateSizeOnBatchEndPending)
   {
     m_bUpdateSizeOnBatchEndPending = false;
-    updateSize();
+    settleLayout();
   }
 
   if (m_bAutoPriorityUpdatePending)
@@ -791,6 +791,8 @@ void TaskWidget::updateSize()
   int iWidth = ui->pProperties->width();
   ui->pDescription->suggestWidth(iWidth);
 
+  m_bLayoutDirty = true;
+
   // Coalesce bursts of updateSize() calls (e.g. resize() below re-entering via
   // sizeChanged()) into a single queued updateSize2() invocation, avoiding
   // redundant layout invalidate/resize passes.
@@ -804,12 +806,24 @@ void TaskWidget::updateSize()
 void TaskWidget::updateSize2()
 {
   m_bUpdateSizePending = false;
+  settleLayout();
+}
+
+void TaskWidget::settleLayout()
+{
+  if (m_bSettling) return;
+
+  m_bSettling = true;
+
+  ui->pTaskListWidget->settleLayout();
 
   layout()->invalidate();
   layout()->update();
 
-  int iSuggestedHeight = ui->pBackdrop->sizeHint().height();
-  resize(width(), iSuggestedHeight);
+  resize(width(), ui->pBackdrop->sizeHint().height());
+
+  m_bLayoutDirty = false;
+  m_bSettling = false;
 }
 
 bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)

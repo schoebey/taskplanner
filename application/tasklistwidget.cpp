@@ -114,6 +114,7 @@ bool TaskListWidget::insertTask(TaskWidget* pTaskWidget, int iPos, bool bAnimate
 
 
     m_vpTaskWidgets.insert(m_vpTaskWidgets.begin() + iPos, pTaskWidget);
+    m_bContentDirty = true;
 
     pTaskWidget->show();
     pTaskWidget->style()->unpolish(pTaskWidget);
@@ -140,6 +141,7 @@ void TaskListWidget::removeTask(TaskWidget* pTaskWidget)
   if (m_vpTaskWidgets.end() != it)
   {
     m_vpTaskWidgets.erase(it);
+    m_bContentDirty = true;
 
     QMetaObject::invokeMethod(this, "updatePositions", Qt::QueuedConnection);
 
@@ -179,6 +181,7 @@ void TaskListWidget::reorderTasks(const std::vector<TaskWidget*>& vpTaskWidgets)
   if (vpTaskWidgets != m_vpTaskWidgets)
   {
     m_vpTaskWidgets = vpTaskWidgets;
+    m_bContentDirty = true;
     QMetaObject::invokeMethod(this, "updatePositions", Qt::QueuedConnection);
   }
 }
@@ -201,6 +204,7 @@ void TaskListWidget::reorderTasks(const std::vector<task_id>& vIds)
     }
   }
 
+  m_bContentDirty = true;
   reorderTasks(vpTaskWidgets);
 }
 
@@ -208,10 +212,14 @@ void TaskListWidget::ShowGhost(TaskWidget* pTaskWidget, int iPos)
 {
   if (nullptr != pTaskWidget)
   {
+    m_iGhostSpace = pTaskWidget->height();
+    m_iGhostPos = iPos;
     updatePositions(pTaskWidget->height(), iPos);
   }
   else
   {
+    m_iGhostSpace = -1;
+    m_iGhostPos = 0;
     updatePositions();
   }
 }
@@ -235,6 +243,8 @@ void TaskListWidget::resizeEvent(QResizeEvent* pEvent)
 {
   QFrame::resizeEvent(pEvent);
 
+  m_bContentDirty = true;
+
   updatePositions();
 
   emit sizeChanged();
@@ -247,17 +257,93 @@ void TaskListWidget::moveEvent(QMoveEvent* /*pEvent*/)
 
 void TaskListWidget::updateTaskPositions()
 {
+  m_bContentDirty = true;
   updatePositions(-1, 0);
 }
 
 QSize TaskListWidget::minimumSizeHint() const
 {
-  return m_minimumSize;
+  return m_bAutoResize ? QSize(width(), contentHeight(m_iGhostSpace, m_iGhostPos)) : QSize();
 }
 
 QSize TaskListWidget::sizeHint() const
 {
-  return m_minimumSize;
+  return m_bAutoResize ? QSize(width(), contentHeight(m_iGhostSpace, m_iGhostPos)) : QSize();
+}
+
+int TaskListWidget::contentHeight(int iSpace, int iGhostPos) const
+{
+  QPoint origin(0, 0);
+  origin.setY(origin.y() + c_iItemSpacing);
+
+  size_t ghostPos = 0;
+  if (-1 == iGhostPos)
+  {
+    ghostPos = m_vpTaskWidgets.size();
+  }
+  else
+  {
+    ghostPos = static_cast<size_t>(iGhostPos);
+  }
+
+  for (size_t iWidget = 0; iWidget < std::min<size_t>(ghostPos, m_vpTaskWidgets.size()); ++iWidget)
+  {
+    QWidget* pWidget = m_vpTaskWidgets[iWidget];
+    if (nullptr != pWidget)
+    {
+      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
+    }
+  }
+
+  if (-1 < iSpace && ghostPos < m_vpTaskWidgets.size())
+  {
+    origin.setY(origin.y() + iSpace + c_iItemSpacing);
+  }
+
+  for (size_t iWidget = ghostPos; iWidget < m_vpTaskWidgets.size(); ++iWidget)
+  {
+    QWidget* pWidget = m_vpTaskWidgets[iWidget];
+    if (nullptr != pWidget)
+    {
+      origin.setY(origin.y() + pWidget->height() + c_iItemSpacing);
+    }
+  }
+
+  return origin.y();
+}
+
+void TaskListWidget::settleLayout()
+{
+  if (m_bSettling || !m_bContentDirty) return;
+
+  m_bSettling = true;
+
+  for (TaskWidget* pTaskWidget : m_vpTaskWidgets)
+  {
+    if (nullptr != pTaskWidget)
+    {
+      pTaskWidget->settleLayout();
+    }
+  }
+
+  int iHeight = contentHeight(m_iGhostSpace, m_iGhostPos);
+
+  if (m_bAutoResize)
+  {
+    setMinimumHeight(iHeight);
+    setMaximumHeight(iHeight);
+    updateGeometry();
+  }
+
+  m_bContentDirty = false;
+
+  if (iHeight != m_iLastContentHeight)
+  {
+    m_iLastContentHeight = iHeight;
+    emit sizeChanged();
+  }
+
+  m_bSettling = false;
 }
 
 void TaskListWidget::updatePositions(int iSpace, int iGhostPos, bool bAnimateMove)
@@ -313,18 +399,27 @@ void TaskListWidget::updatePositions(int iSpace, int iGhostPos, bool bAnimateMov
 
 
 
+  // derive the authoritative final height from contentHeight() so that it
+  // can never diverge from what sizeHint()/minimumSizeHint() report.
+  int iHeight = contentHeight(iSpace, iGhostPos);
+
   // only resize the list if it is a nested list (one within a task widget)
   // group widget lists have to have maximum height at all times...
   if (m_bAutoResize)
   {
-    setMinimumHeight(origin.y());
-    setMaximumHeight(origin.y());
-    m_minimumSize = QSize(width(), origin.y());
+    setMinimumHeight(iHeight);
+    setMaximumHeight(iHeight);
     updateGeometry();
   }
   else
   {
-    setMinimumHeight(origin.y());
+    setMinimumHeight(iHeight);
+  }
+
+  if (iHeight != m_iLastContentHeight)
+  {
+    m_iLastContentHeight = iHeight;
+    emit sizeChanged();
   }
 }
 
