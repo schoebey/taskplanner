@@ -48,9 +48,11 @@
 #include <QScrollArea>
 #include <QSlider>
 
+#include <algorithm>
 #include <array>
 #include <future>
 #include <memory>
+#include <vector>
 
 
 namespace
@@ -1424,6 +1426,14 @@ void MainWindow::onPropertyChanged(task_id taskId,
           auto pTask = m_pManager->task(taskId);
           if (nullptr != pTaskWidget && nullptr != pTask)
           {
+            // Suppress autoPriorityUpdateRequested handling for the whole recursive
+            // tree of widgets created/inserted below, not just this node's direct
+            // children: EnsureTaskWidgetCreated() recurses into already-expanded
+            // descendants and each of those wraps its own beginInsertBatch()/
+            // endInsertBatch(), which would otherwise each independently trigger a
+            // climb-to-root autoPriorityRecursively update.
+            ++m_iAutoPriorityUpdateSuppressionDepth;
+
             pTaskWidget->beginInsertBatch();
             for (auto childTaskId : pTask->taskIds())
             {
@@ -1435,6 +1445,12 @@ void MainWindow::onPropertyChanged(task_id taskId,
               }
             }
             pTaskWidget->endInsertBatch();
+
+            --m_iAutoPriorityUpdateSuppressionDepth;
+            if (0 == m_iAutoPriorityUpdateSuppressionDepth)
+            {
+              flushPendingAutoPriorityUpdates();
+            }
           }
         }
       }
@@ -2036,7 +2052,65 @@ void MainWindow::onChildPropertyChangeRequested(task_id id, const QString& sProp
 
 void MainWindow::onAutoPriorityUpdateRequested(task_id id)
 {
+  if (m_iAutoPriorityUpdateSuppressionDepth > 0)
+  {
+    // A recursive expand operation is still building task widgets: record the
+    // request and let the outermost caller perform the (deduplicated) update
+    // once the whole operation has finished, instead of climbing to the root
+    // once per expanded node in the subtree.
+    m_setPendingAutoPriorityUpdateIds.insert(id);
+    return;
+  }
+
   updateAutoPriorityRecursively(m_pManager, m_pWidgetManager, id);
+}
+
+void MainWindow::flushPendingAutoPriorityUpdates()
+{
+  if (m_setPendingAutoPriorityUpdateIds.empty()) { return; }
+
+  std::vector<task_id> vPendingIds(m_setPendingAutoPriorityUpdateIds.begin(),
+                                   m_setPendingAutoPriorityUpdateIds.end());
+  m_setPendingAutoPriorityUpdateIds.clear();
+
+  // updateAutoPriorityRecursively(id) updates "id" and climbs through all of its
+  // ancestors up to the root. So if one pending id is an ancestor of another
+  // pending id, updating the (deeper) descendant already covers the ancestor.
+  // Process the deepest ids first and skip ids that get covered this way, to
+  // keep the number of climb-to-root calls down to the minimum required to
+  // update every genuinely distinct affected branch.
+  auto depthOf = [this](task_id id)
+  {
+    int iDepth = 0;
+    auto* pTask = m_pManager->task(id);
+    while (nullptr != pTask)
+    {
+      pTask = m_pManager->task(pTask->parentTask());
+      ++iDepth;
+    }
+    return iDepth;
+  };
+  std::sort(vPendingIds.begin(), vPendingIds.end(),
+            [&depthOf](task_id a, task_id b) { return depthOf(a) > depthOf(b); });
+
+  std::set<task_id> setCoveredIds;
+  for (auto id : vPendingIds)
+  {
+    if (setCoveredIds.count(id) > 0) { continue; }
+
+    updateAutoPriorityRecursively(m_pManager, m_pWidgetManager, id);
+
+    setCoveredIds.insert(id);
+    auto* pTask = m_pManager->task(id);
+    auto parentId = (nullptr != pTask) ? pTask->parentTask() : task_id();
+    auto* pParentTask = m_pManager->task(parentId);
+    while (nullptr != pParentTask)
+    {
+      setCoveredIds.insert(parentId);
+      parentId = pParentTask->parentTask();
+      pParentTask = m_pManager->task(parentId);
+    }
+  }
 }
 
 void MainWindow::onUpdateTotalTimeDisplayRequested(task_id id)

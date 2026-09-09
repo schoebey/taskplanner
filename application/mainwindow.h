@@ -12,6 +12,7 @@
 #include <QUndoStack>
 #include <map>
 #include <memory>
+#include <set>
 #include <QMessageBox>
 
 namespace Ui {
@@ -111,6 +112,7 @@ private:
   void showError(const QString& sErrorMessage);
   QMessageBox::StandardButton askSave();
   void setCurrentFileName(const QString& sFileName);
+  void flushPendingAutoPriorityUpdates();
 
 private:
   Ui::MainWindow *ui;
@@ -134,6 +136,14 @@ private:
     bool bEnabled = true;
     double dNominalWorkHours = 8.4;
   } m_taskTimeVisualisation;
+
+  // Coalesce autoPriorityUpdateRequested signals fired while a whole (possibly
+  // deeply nested) recursive expand operation is building/inserting task widgets:
+  // while the depth counter is > 0, requests are recorded instead of triggering
+  // a climb-to-root update immediately; once the outermost expand call returns
+  // (depth back to 0) exactly one update per distinct requested task id is done.
+  int m_iAutoPriorityUpdateSuppressionDepth = 0;
+  std::set<task_id> m_setPendingAutoPriorityUpdateIds;
 };
 
 #endif // MAINWINDOW_H
