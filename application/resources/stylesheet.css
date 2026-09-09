@@ -283,6 +283,18 @@ TaskWidget #pShowDetails:checked {
   background-image: url(:/icons/arrow_down_dark.png);
 }
 
+TaskWidget #pReminder {
+  border: 1px solid rgba(255,255,255,50);
+  background-color: rgba(255,255,255,40);
+  padding: 5px;
+  min-height: 15px;
+  width: 20px;
+  color: rgba(255, 255, 255, 128);
+  background-image: url(:/icons/clock.png);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
 TaskWidget #pStartStop {
   border: 1px solid rgba(255,255,255,50);
   background-color: rgba(255,255,255,40);

@@ -314,11 +314,24 @@ TaskWidget #pShowDetails:checked {
   background-image: url(:/icons/arrow_down_dark.png);
 }
 
+TaskWidget #pReminder {
+  border: 0px;
+  background: qradialgradient(cx:1, cy:0, radius: 1,
+                fx:1, fy:0, stop:0 white, stop:0.95 white, stop:1 transparent);
+  padding: 6px;
+  min-height: 15px;
+  width: 15px;
+  color: rgba(255, 255, 255, 128);
+  background-image: url(:/icons/clock.png);
+  background-repeat: no-repeat;
+  background-position: top right;
+}
+
 TaskWidget #pStartStop {
   border: 0px;
   border-top-right-radius: 5px;
   background: qradialgradient(cx:1, cy:0, radius: 1,
-                fx:1, fy:0, stop:0 white, stop:0.95 white, stop:1 transparent); 
+                fx:1, fy:0, stop:0 white, stop:0.95 white, stop:1 transparent);
   padding: 6px;
   min-height: 15px;
   width: 15px;
