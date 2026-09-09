@@ -2,6 +2,7 @@
 #define CONVERSION_H
 
 #include "libtaskmanager.h"
+#include "reminder.h"
 
 #include <type_traits>
 
@@ -86,6 +87,10 @@ namespace conversion
   //-- QColor
   template<> QColor LIBTASKMANAGER fromString<QColor>(const QString& sVal, bool& bConversionStatus);
   QString LIBTASKMANAGER toString(const QColor& c);
+
+  //-- SReminder
+  template<> SReminder LIBTASKMANAGER fromString<SReminder>(const QString& sVal, bool& bConversionStatus);
+  QString LIBTASKMANAGER toString(const SReminder& reminder);
 }
 
 #endif // CONVERSION_H

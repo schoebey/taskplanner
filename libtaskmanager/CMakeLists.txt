@@ -33,6 +33,7 @@ add_library(${PROJECT_NAME} SHARED
     property.cpp
     property.h
     propertyproviderinterface.h
+    reminder.h
     reports/report.cpp
     reports/report.h
     reports/reportenums.h

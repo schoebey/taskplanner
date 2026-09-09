@@ -111,6 +111,24 @@ TEST(PropertiesTest, Set_WithCustomType_FailIfNotConvertible)
 }
 
 
+TEST(PropertiesTest, Set_WithReminderProperty)
+{
+  Properties<Scope> props;
+
+  REGISTER_PROPERTY(Scope, "reminder", SReminder, true);
+
+  SReminder reminder;
+  reminder.intervalUnit = EReminderIntervalUnit::Days;
+  reminder.iIntervalCount = 1;
+  reminder.triggerTime = QTime(9, 0, 0);
+
+  EXPECT_TRUE(props.set("reminder", reminder));
+  SReminder result = props.get<SReminder>("reminder");
+  EXPECT_EQ(reminder.intervalUnit, result.intervalUnit);
+  EXPECT_EQ(reminder.iIntervalCount, result.iIntervalCount);
+  EXPECT_EQ(reminder.triggerTime, result.triggerTime);
+}
+
 TEST(PropertiesTest, Set_WithMinMaxConstraint)
 {
   using namespace grammar;
