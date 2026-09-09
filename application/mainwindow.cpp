@@ -2155,12 +2155,22 @@ void MainWindow::onReminderSweepTimeout()
 
     SReminder reminder = pConcreteTask->property<SReminder>("reminder");
 
+    if (!reminder.bEnabled)
+    {
+      continue;
+    }
+
     if (EReminderRepeatMode::SingleShot == reminder.repeatMode)
     {
       if (reminder.dueDateTime.isValid() && now >= reminder.dueDateTime)
       {
         onReminderDue(taskId);
         pConcreteTask->removeProperty("reminder");
+        TaskWidget* pTaskWidget = m_pWidgetManager->taskWidget(taskId);
+        if (nullptr != pTaskWidget)
+        {
+          pTaskWidget->removeProperty("reminder");
+        }
         m_lastReminderFireTimes.erase(taskId);
       }
       continue;

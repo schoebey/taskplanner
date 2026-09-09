@@ -505,6 +505,23 @@ QString TaskWidget::propertyValue(const QString& sName) const
 
 bool TaskWidget::removeProperty(const QString& sName)
 {
+  if ("reminder" == sName)
+  {
+    m_bHasReminder = false;
+    m_reminder = SReminder();
+
+    m_bSyncingReminderChecked = true;
+    ui->pReminder->setChecked(false);
+    m_bSyncingReminderChecked = false;
+
+    if (nullptr != m_pEditReminderAction)
+    {
+      m_pEditReminderAction->setEnabled(m_bHasReminder);
+    }
+
+    return true;
+  }
+
   auto it = m_propertyLineEdits.find(sName);
   if (it != m_propertyLineEdits.end())
   {
@@ -966,6 +983,9 @@ void TaskWidget::on_pStartStop_toggled(bool bOn)
 
 void TaskWidget::on_pReminder_clicked(bool bChecked)
 {
+  // pReminder is auto-connected via clicked(bool), which Qt only emits on user
+  // interaction (never from setChecked()), so this guard is a defensive no-op
+  // against re-entrancy rather than something the setChecked() calls below rely on.
   if (m_bSyncingReminderChecked)  { return; }
 
   if (!m_bHasReminder)
