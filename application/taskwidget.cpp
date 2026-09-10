@@ -929,6 +929,7 @@ void TaskWidget::mousePressEvent(QMouseEvent* pMouseEvent)
   if (highlight().testFlag(EHighlightMethod::eReminderDue))
   {
     setHighlight(highlight() & ~EHighlightMethod::eReminderDue);
+    emit reminderDismissed(m_taskId);
   }
 
   m_bMouseDown = pMouseEvent->buttons() & Qt::LeftButton;

@@ -30,6 +30,7 @@ public:
   virtual void onChildPropertyChangeRequested(task_id, const QString&, const QString&, bool) = 0;
   virtual void onAutoPriorityUpdateRequested(task_id) = 0;
   virtual void onUpdateTotalTimeDisplayRequested(task_id) = 0;
+  virtual void onReminderDismissed(task_id) = 0;
 
   protected:
   ITaskController() = default;

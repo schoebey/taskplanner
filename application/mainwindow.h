@@ -97,6 +97,7 @@ private slots:
   void onUpdateTotalTimeDisplayRequested(task_id) override;
   void onReminderSweepTimeout();
   void onReminderDue(task_id taskId);
+  void onReminderDismissed(task_id taskId) override;
 
 signals:
   void timeTrackingStopped(task_id taskId);
@@ -105,6 +106,7 @@ signals:
 private:
   void closeEvent(QCloseEvent *) override;
   bool eventFilter(QObject *, QEvent *pEvent) override;
+  void changeEvent(QEvent *pEvent) override;
   void saveTempFile();
   void loadPlugins(const QString &sInitialSearchPath = QString());
   void saveSettings();
@@ -128,6 +130,9 @@ private:
   QTimer* m_pReminderSweepTimer = nullptr;
   // last time a Recurring reminder fired, in-memory only (not persisted)
   std::map<task_id, QDateTime> m_lastReminderFireTimes;
+  // task ids whose reminder highlight is still active (not yet dismissed by clicking
+  // the task widget); used to re-trigger the taskbar flash on renewed focus loss
+  std::set<task_id> m_setPendingReminderTaskIds;
   QUndoStack m_undoStack;
   std::vector<std::shared_ptr<QObject>> m_vspPlugins;
   QAction* m_pEnableHibernationDetection;
