@@ -1305,7 +1305,7 @@ void MainWindow::on_actionDisplayReport_triggered()
 
       pOverlay->setAutoDeleteOnClose(true);
       pScrollArea->setWidget(pLabel);
-      pOverlay->addWidget(pScrollArea);
+      pOverlay->addWidget(pScrollArea, Qt::Alignment());
       pOverlay->setTitle(tr("Report"));
 
       pOverlay->appear();
