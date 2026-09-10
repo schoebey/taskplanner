@@ -360,15 +360,15 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
 
 
 
+  m_pWatcher = new QFileSystemWatcher(this);
+  connect(m_pWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::reloadStylesheet);
+
   loadSettings();
 
 
   m_pReminderSweepTimer = new QTimer(this);
   connect(m_pReminderSweepTimer, &QTimer::timeout, this, &MainWindow::onReminderSweepTimeout);
   m_pReminderSweepTimer->start(30000);
-
-  m_pWatcher = new QFileSystemWatcher(this);
-  connect(m_pWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::reloadStylesheet);
 
   if (m_sStylesheetPath.isEmpty())
   {
@@ -380,17 +380,6 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
     {
       reloadStylesheet(":/stylesheet.css");
     }
-  }
-  else
-  {
-    m_pWatcher->addPath(m_sStylesheetPath);
-  }
-
-  m_pWatcher->addPath("application/resources/stylesheet.css");
-
-  if (QFileInfo("stylesheet.css").exists())
-  {
-    m_pWatcher->addPath("stylesheet.css");
   }
 }
 
@@ -648,6 +637,16 @@ void MainWindow::reloadStylesheet(const QString& sPath)
   if (f.open(QIODevice::ReadOnly))
   {
     setStyleSheet(QString::fromUtf8(f.readAll()));
+
+    if (m_pWatcher && !sPath.startsWith(":/"))
+    {
+      const QStringList vsWatchedFiles = m_pWatcher->files();
+      if (!vsWatchedFiles.isEmpty())
+      {
+        m_pWatcher->removePaths(vsWatchedFiles);
+      }
+      m_pWatcher->addPath(QFileInfo(sPath).absoluteFilePath());
+    }
   }
 }
 
@@ -1856,8 +1855,6 @@ void MainWindow::onChooseStylesheet()
   m_sStylesheetPath = sFileName;
 
   reloadStylesheet(sFileName);
-
-  m_pWatcher->addPath(m_sStylesheetPath);
 }
 
 void MainWindow::onChooseScript()
