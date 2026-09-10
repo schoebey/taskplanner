@@ -404,6 +404,22 @@ void MainWindow::closeEvent(QCloseEvent* pEvent)
   saveSettings();
 }
 
+void MainWindow::changeEvent(QEvent* pEvent)
+{
+  QMainWindow::changeEvent(pEvent);
+
+  // Re-trigger the taskbar flash whenever the window loses activation again while
+  // at least one reminder highlight is still undismissed. QApplication::alert()
+  // only flashes until the window is focused (or moved), which is not sufficient
+  // acknowledgement if the still-flashing task widget was never actually clicked.
+  if (QEvent::ActivationChange == pEvent->type() &&
+      !isActiveWindow() &&
+      !m_setPendingReminderTaskIds.empty())
+  {
+    QApplication::alert(this);
+  }
+}
+
 
 
 void MainWindow::saveSettings()
@@ -2218,6 +2234,10 @@ void MainWindow::onReminderDue(task_id taskId)
   // Flash the taskbar entry (FlashWindowEx on Windows) until the user focuses the window.
   QApplication::alert(this);
 
+  // Track this reminder as undismissed so renewed focus loss re-triggers the flash
+  // (see changeEvent()) until the highlight is cleared via onReminderDismissed().
+  m_setPendingReminderTaskIds.insert(taskId);
+
   // ensure all ancestor tasks are expanded so the task widget exists,
   // mirroring the lazy-expansion approach used by the search feature
   // (see SearchController::onSearchTermChanged()).
@@ -2253,4 +2273,9 @@ void MainWindow::onReminderDue(task_id taskId)
     pTargetWidget->ensureVisible();
     pTargetWidget->setHighlight(pTargetWidget->highlight() | EHighlightMethod::eReminderDue);
   }
+}
+
+void MainWindow::onReminderDismissed(task_id taskId)
+{
+  m_setPendingReminderTaskIds.erase(taskId);
 }
