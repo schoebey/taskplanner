@@ -309,14 +309,14 @@ TaskWidget #pReminder {
   min-height: 15px;
   width: 20px;
   color: rgba(255, 255, 255, 128);
-  qproperty-text: "🔕";
+  qproperty-text: "🔔";
   qproperty-alignment: AlignCenter;
   font-size: 11px;
 }
 
 TaskWidget #pReminder:checked {
+  border-color: rgba(0,255,0,120);
   background-color: rgba(0,255,0,40);
-  qproperty-text: "🔔";
 }
 
 TaskWidget #pStartStop {
