@@ -1,0 +1,499 @@
+MainWindow {
+  background: rgb(77, 77, 77);
+  border: 1px solid black;
+}
+
+MainWindow #frame {
+  border: 0px solid black;
+  padding: -12px;
+}
+
+WindowTitleMenuBar {
+    background-color: transparent;
+}
+
+WindowTitleMenuBar QLabel {
+  color: rgb(207, 207, 207);
+  font: 10pt;
+}
+
+QMenuBar {
+  color: rgb(207, 207, 207);
+  padding: 10 10 10 10;
+  min-height: 20px;
+}
+
+QMenuBar::item {
+    padding: 1px 10px;
+    background: transparent;
+	border: 1px solid transparent;
+	border-bottom: 0px;
+}
+
+QMenuBar::item:selected { /* when selected using mouse or keyboard */
+    background: #777;
+	border: 1px solid transparent;
+	border-bottom: 0px;
+}
+
+QMenuBar::item:pressed {
+    background: rgb(30, 30, 30);
+	border: 1px solid #555;
+	border-bottom: 0px;
+}
+
+QMenu {
+  color: white;
+  background: rgb(30, 30, 30);
+  border: 1px solid #555;
+  padding-top: 5px;
+}
+
+QMenu::item {
+    padding: 2px 25px 2px 20px;
+    border-left: 10px solid transparent; /* reserve space for selection border */
+}
+
+QMenu::item:selected { /* when user selects item using mouse or keyboard */
+    background-color: #777;
+}
+
+QMenu::item:disabled {
+  color: #444;
+}
+
+QToolBar {
+  background-color: #5a5a5a;
+  border: 1px solid #686868;
+  width: 150px;
+  border-left: 10px;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  min-height: 50px;
+}
+
+.AboutDialog #pContents {
+  min-width: 350px;
+  min-height: 200px;
+  padding: 10px;
+  border: 0px solid red;
+  border-radius: 5px;
+  background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 rgb(50, 90, 70),
+                stop:1 rgb(30, 40, 40));
+}
+
+.AboutDialog QWidget {
+  border: 0px solid red;
+}
+
+.AboutDialog #pAppIcon {
+  border: 1px solid rgba(255,255,255,150);
+  border-radius: 5px;
+  min-width: 64px;
+  min-height: 64px;
+  margin-right: 10px;
+  background: url(:/icons/appicon_64.png);
+  background-color: rgba(255,255,255,50);
+}
+
+.AboutDialog #pAppName {
+  font-size: 22pt;
+  font-weight: 700;
+}
+
+.AboutDialog #pCopyright {
+  margin-top: 8px;
+}
+
+DecoratedLabel {
+  qproperty-drawShadow: false;
+  qproperty-drawOutline: false;
+}
+
+EditableLabel {
+  border: 0px solid red;
+}
+
+
+QPushButton {
+  border: 1px solid rgba(70, 70, 70, 255);
+  background-color: rgba(255,255,255,10);
+  padding: 5px;
+  min-height: 15px;
+  width: 50px;
+  color: rgba(255, 255, 255, 128);
+}
+
+QPushButton:hover {
+  border: 1px solid rgba(255, 255, 255, 30);
+  background-color: rgba(255, 255, 255, 20);
+}
+
+QPushButton:focus {
+  border: 1px solid rgba(0, 255, 255, 80);
+  background-color: rgba(0, 255, 255, 20);
+}
+
+QPushButton:focus:hover {
+  background-color: rgba(0, 255, 255, 30);
+}
+
+QPushButton:pressed,
+QPushButton:checked {
+  background-color: rgba(0, 0, 0, 20);
+  padding: 1px 0 0 0;
+}
+
+QScrollArea {
+  /*border: 1px solid red;*/
+  border-radius: 5px;
+  background: transparent;
+}
+
+QScrollArea #scrollAreaWidgetContents {
+  background: transparent;
+}
+
+GroupWidget {
+  background-color: rgba(250, 250, 250, 0.096);
+  border: 1px solid #3f3f3f;
+  width: 150px;
+  border-radius: 7px;
+}
+
+GroupWidget > #pTitle {
+  color: rgb(197, 197, 197);
+}
+
+GroupWidget > #pAddTask,
+OverlayWidget > #pClose {
+  border-top-right-radius: 5px;
+}
+
+GroupWidget QScrollBar {
+  width: 0px;
+}
+
+#backlog { qproperty-backgroundImage: -1; } 
+#inprogress { qproperty-backgroundImage: -1; } 
+#testing { qproperty-backgroundImage: -1; }
+#done { qproperty-backgroundImage: -1; }
+
+OverlayWidget {
+  border: 0px;
+  border-radius: 10px;
+  background: rgba(50, 50, 50, 240);
+  margin: 12 12 12 12;
+  padding: 12px;
+}
+
+OverlayWidget QLabel {
+  color: rgba(200, 200, 200, 255);
+}
+
+OverlayWidget #report {
+  font-family: consolas;
+  background: rgba(255, 255, 255, 10);
+}
+
+#pInsertTask {
+  min-width: 450px;
+  max-width: 450px;
+  min-height: 250px;
+  max-height: 250px;
+}
+
+#pInsertTask TaskWidget {
+  min-width: 415px;
+}
+
+#pInsertTask TaskWidget #pShowDetails,
+#pInsertTask TaskWidget #pStartStop {
+  min-height: 0px;
+  max-height: 0px;
+  width: 0px;
+  padding: 0px;
+  border: 0px;
+}
+
+#pInsertTask #pOk{
+  border-bottom-right-radius: 5px;
+}
+
+#pInsertTask #pCancel {
+  border-bottom-left-radius: 5px;
+}
+
+TaskWidget, TaskWidget #pShadow {
+  border: 0px;
+}
+
+TaskWidget #pFrame {
+  border: 1px solid #3a3a3a;
+  border-radius: 5px;
+  margin: 2px;
+  color: white;
+  background-color: rgb(100, 100, 100);
+}
+
+TaskWidget:focus {
+  border: 2px solid rgba(50, 80, 255, 150);
+  border-radius: 7px;
+}
+
+TaskWidget QLabel {
+  font-size: 10pt;
+  color: #000000;
+}
+
+TaskWidget TaskWidget #pFrame {
+  border: 1px solid #3a3a3a;
+}
+
+TaskWidget TaskWidget #pShadow {
+  border: 0px;
+  border-image: -1;
+  padding: 0px;
+}
+
+TaskWidget #pTitle {
+  padding-left: 4px;
+  font-size: 11pt;
+  color: #ffffff;
+}
+
+TaskWidget #pTitle {
+  qproperty-drawShadow: false;
+  qproperty-drawOutline: true;
+}
+
+TaskWidget #pTimeDisplay {
+  font-family: cascadia;
+  font-size: 8pt;
+  qproperty-alignment: 'AlignVCenter | AlignHCenter';
+}
+
+TaskWidget #pLinks {
+  border: 0px solid #ff9900;
+}
+
+TaskWidget #pDescription {
+  padding: 0 10 0 10;
+}
+
+TaskWidget #pShowDetails {
+  border: 1px solid rgba(255,255,255,50);
+  background-color: rgba(255,255,255,40);
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  padding: 5px;
+  min-height: 15px;
+  width: 20px;
+  color: rgba(255, 255, 255, 128);
+  background-image: url(:/icons/arrow_right_dark.png);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+TaskWidget #pShowDetails:checked {
+  border-bottom-left-radius: 0px;
+  background-image: url(:/icons/arrow_down_dark.png);
+}
+
+TaskWidget #pStartStop {
+  border: 1px solid rgba(255,255,255,50);
+  background-color: rgba(255,255,255,40);
+  border-top-right-radius: 5px;
+  padding: 5px;
+  min-height: 15px;
+  width: 20px;
+  color: rgba(255, 255, 255, 128);
+  background-image: url(:/icons/timer_start_dark.png);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+TaskWidget[expanded=false] #pStartStop {
+  border-bottom-right-radius: 5px; 
+}
+
+TaskWidget #pStartStop:checked {
+  background-image: url(:/icons/timer_stop_dark.png);
+}
+
+TaskWidgetOverlay {
+  qproperty-background: rgba(255, 255, 255, 0);
+}
+
+TaskWidgetOverlay[autoPriority="10"] {
+  qproperty-background: rgba(0, 0, 0, 100);
+}
+TaskWidget[autoPriority="10"] QLabel {
+  color: rgb(255, 255, 255);
+}
+TaskWidgetOverlay[autoPriority="9"] {
+  qproperty-background: rgba(255, 0, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="8"] {
+  qproperty-background: rgba(255, 50, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="7"] {
+  qproperty-background: rgba(255, 100, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="6"] {
+  qproperty-background: rgba(255, 150, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="5"] {
+  qproperty-background: rgba(255, 200, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="4"] {
+  qproperty-background: rgba(150, 200, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="3"] {
+  qproperty-background: rgba(100, 255, 0, 100);
+}
+TaskWidgetOverlay[autoPriority="2"] {
+  qproperty-background: rgba(50, 255, 100, 100);
+}
+TaskWidgetOverlay[autoPriority="1"] {
+  qproperty-background: rgba(0, 255, 150, 100);
+}
+
+
+TaskWidget[autoPriority="10"] #pShowDetails,
+TaskWidget[autoPriority="9"] #pShowDetails,
+TaskWidget[autoPriority="8"] #pShowDetails,
+TaskWidget[autoPriority="7"] #pShowDetails {
+  background-image: url(:/icons/arrow_right.png);
+}
+
+TaskWidget[autoPriority="10"] #pShowDetails:checked,
+TaskWidget[autoPriority="9"] #pShowDetails:checked,
+TaskWidget[autoPriority="8"] #pShowDetails:checked,
+TaskWidget[autoPriority="7"] #pShowDetails:checked {
+  background-image: url(:/icons/arrow_down.png);
+}
+
+TaskWidget[autoPriority="10"] #pStartStop,
+TaskWidget[autoPriority="9"] #pStartStop,
+TaskWidget[autoPriority="8"] #pStartStop,
+TaskWidget[autoPriority="7"] #pStartStop  {
+  background-image: url(:/icons/timer_start.png);
+}
+
+TaskWidget[autoPriority="10"] #pStartStop:checked,
+TaskWidget[autoPriority="9"] #pStartStop:checked,
+TaskWidget[autoPriority="8"] #pStartStop:checked,
+TaskWidget[autoPriority="7"] #pStartStop:checked {
+  background-image: url(:/icons/timer_stop.png);
+}
+
+LinkWidget {
+  padding: 3px 7px 3px 7px;
+  margin: 0px;
+  background: qradialgradient(cx:0.5, cy:0.5, radius: 0.4,
+                fx:0.5, fy:0.5, stop:0 rgba(0,0,0,30), stop:1 transparent);
+}
+
+MainWindow > LinkWidget {
+  background: transparent;
+}
+
+LinkWidget #pIcon {
+}
+
+LinkWidget[isFile=true] {
+  border: 0px solid blue;
+}
+
+LinkWidget[isFile=false] {
+  border: 0px solid blue;
+}
+
+LinkWidget[isFile=false] #pIcon {
+  background: url(:/icons/link.png) center center no-repeat;
+}
+
+
+QMainWindow > LinkWidget {
+  color: rgba(0,0,0,100);
+  alternate-background-color: rgba(255, 255, 255, 200);
+  qproperty-borderRadius: 6;
+  padding: 6px;
+}
+
+LinkWidget:focus {
+  border: 1px solid rgba(90, 100, 255, 255);
+  border-radius: 3px;
+}
+
+#pProperties {
+  padding: 0px 0px 0px 0px;
+}
+
+
+#pDynamicProperties {
+  padding: 0 0 6px 0;
+  border: 0px solid red;
+}
+
+#pSeparator {
+  border-top: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
+                stop:0 rgba(0, 0, 0, 0),
+                stop:0.4 rgba(0, 0, 0, 80),
+                stop:0.6 rgba(0, 0, 0, 80),
+                stop:1 rgba(0, 0, 0, 0));
+  border-bottom: 1px solid qlineargradient(x1:0, y1:0, x2:1, y2:0
+                stop:0 rgba(255, 255, 255, 0),
+                stop:0.4 rgba(255, 255,  255, 80),
+                stop:0.6 rgba(255, 255, 255, 80),
+                stop:1 rgba(255, 255, 255, 0));
+  min-height: 0px;
+  margin: 5px 10px 5px 10px;
+}
+
+#pPropertyFrame {
+  border: 0px solid white;
+  min-height: 20px;
+  padding-left: 4px;
+  padding-top: 0px;
+  padding-right: 4px;
+}
+
+#priority_value {
+  color: white;
+  background:  rgba(0, 0, 0, 25);
+  border-top: 1px solid rgba(0,0,0,50);
+  border-left: 1px solid rgba(0,0,0,50);
+  border-bottom: 1px solid rgba(255, 255, 255, 50);
+  border-right: 1px solid rgba(255, 255, 255, 50);
+  border-radius: 9px;
+  min-height: 18px;
+  min-width: 18px;
+  margin-right: 5px;
+}
+
+ToolBarInfoDisplay {
+  background-color: red;
+}
+
+ToolBarInfoDisplay QLabel {
+  color: white;
+  font-size: 20pt;
+}
+
+TaskListWidget {
+	background-color: transparent;
+}
+
+SearchFrame {
+  border: 1px solid rgba(200,200,200,200);
+  background: rgba(190, 186, 184, 240);
+  border-bottom-right-radius: 15px;
+}
+
+SearchFrame #pClose {
+  max-width: 20px;
+  border-bottom-right-radius: 10px;
+}
