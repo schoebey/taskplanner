@@ -301,6 +301,25 @@ TaskWidget #pShowDetails:checked {
   background-image: url(:/icons/arrow_down_dark.png);
 }
 
+TaskWidget #pReminder {
+  border: 1px solid rgba(255,255,255,50);
+  background-color: rgba(255,255,255,40);
+  padding: 0px;
+  min-width: 32px;
+  max-width: 32px;
+  min-height: 27px;
+  max-height: 27px;
+  margin: 0px;
+  color: rgba(255, 255, 255, 128);
+  qproperty-text: "🔕";
+  qproperty-alignment: AlignCenter;
+  font-size: 11px;
+}
+
+TaskWidget #pReminder:checked {
+  qproperty-text: "🔔";
+}
+
 TaskWidget #pStartStop {
   border: 1px solid rgba(255,255,255,50);
   background-color: rgba(255,255,255,40);
