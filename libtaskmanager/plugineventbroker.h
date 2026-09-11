@@ -2,6 +2,7 @@
 #define PLUGINEVENTBROKER_H
 
 #include "id_types.h"
+#include "libtaskmanager.h"
 
 #include <QObject>
 #include <QString>
@@ -14,7 +15,7 @@
 // adding further signals directly on MainWindow via multiple QObject inheritance is not
 // an option). MainWindow owns one instance and calls the notifyXxx() methods at the
 // relevant points; the corresponding signals are emitted for any connected plugin.
-class PluginEventBroker : public QObject
+class LIBTASKMANAGER PluginEventBroker : public QObject
 {
   Q_OBJECT
 
