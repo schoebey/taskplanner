@@ -7,6 +7,6 @@ TextReportPlugin::TextReportPlugin()
 
 }
 
-void TextReportPlugin::initialize()
+void TextReportPlugin::initialize(PluginEventBroker* pEventSource)
 {
 }

@@ -4,6 +4,7 @@
 #include "id_types.h"
 #include "taskcontrollerinterface.h"
 #include "groupcontrollerinterface.h"
+#include "plugineventbroker.h"
 
 #include <QMainWindow>
 #include <QPointer>
@@ -124,6 +125,7 @@ private:
   QString m_sStylesheetPath;
   QDateTime m_lastSaveTime;
   Manager* m_pManager = nullptr;
+  PluginEventBroker m_pluginEventBroker;
   WidgetManager* m_pWidgetManager = nullptr;
   TaskCreationDialog* m_pTaskCreationDialog = nullptr;
   std::map<group_id, QTimer*> m_autoSortTimers;
