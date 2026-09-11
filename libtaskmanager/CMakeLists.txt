@@ -28,6 +28,8 @@ add_library(${PROJECT_NAME} SHARED
     patterns/factory/factory.h
     patterns/factory/register.h
     patterns/factory/registrar.h
+    plugineventbroker.cpp
+    plugineventbroker.h
     plugininterface.h
     priority.h
     property.cpp

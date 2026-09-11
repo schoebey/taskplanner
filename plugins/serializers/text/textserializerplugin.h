@@ -2,6 +2,7 @@
 #define TEXTSERIALIZERPLUGIN_H
 
 #include "plugininterface.h"
+#include "plugineventbroker.h"
 
 #include <QObject>
 
@@ -14,7 +15,7 @@ class TextSerializerPlugin : public QObject, public IPlugin
 public:
   TextSerializerPlugin();
 
-  void initialize() override;
+  void initialize(PluginEventBroker* pEventSource) override;
 };
 
 #endif // TEXTSERIALIZERPLUGIN_H

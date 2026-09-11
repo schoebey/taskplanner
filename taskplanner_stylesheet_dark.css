@@ -302,8 +302,8 @@ TaskWidget #pShowDetails:checked {
 }
 
 TaskWidget #pReminder {
-  border: 1px solid rgba(255,255,255,50);
-  background-color: rgba(255,255,255,40);
+  border: 0px solid rgba(255,255,255,50);
+  background-color: transparent;
   border-radius: 5px;
   padding: 0px;
   min-height: 15px;
@@ -315,8 +315,9 @@ TaskWidget #pReminder {
 }
 
 TaskWidget #pReminder:checked {
-  border-color: rgba(0,255,0,120);
-  background-color: rgba(0,255,0,40);
+  color: rgba(255, 0, 0, 255);
+  border-color: rgba(255,0,0,120);
+  background-color: rgba(255,0,0,40);
 }
 
 TaskWidget #pStartStop {

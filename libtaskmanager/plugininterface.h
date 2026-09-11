@@ -3,11 +3,18 @@
 
 #include <QtPlugin>
 
+class PluginEventBroker;
+
 class IPlugin
 {
 public:
   virtual ~IPlugin() {}
-  virtual void initialize() = 0;
+
+  // pEventSource is the application's event broker. Its concrete type is used (rather
+  // than a plain QObject) so that plugins can use type-safe pointer-to-member connects,
+  // e.g. connect(pEventSource, &PluginEventBroker::alert, ...), instead of the old-style
+  // string-based SIGNAL()/SLOT() macro connects.
+  virtual void initialize(PluginEventBroker* pEventSource) = 0;
 
 protected:
   IPlugin() {}
