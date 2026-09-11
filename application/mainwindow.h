@@ -125,6 +125,7 @@ private:
   QString m_sStylesheetPath;
   QDateTime m_lastSaveTime;
   Manager* m_pManager = nullptr;
+  PluginEventBroker m_pluginEventBroker;
   WidgetManager* m_pWidgetManager = nullptr;
   TaskCreationDialog* m_pTaskCreationDialog = nullptr;
   std::map<group_id, QTimer*> m_autoSortTimers;
@@ -135,7 +136,6 @@ private:
   // the task widget); used to re-trigger the taskbar flash on renewed focus loss
   std::set<task_id> m_setPendingReminderTaskIds;
   QUndoStack m_undoStack;
-  PluginEventBroker m_pluginEventBroker;
   std::vector<std::shared_ptr<QObject>> m_vspPlugins;
   QAction* m_pEnableHibernationDetection;
   QFileSystemWatcher* m_pWatcher;
