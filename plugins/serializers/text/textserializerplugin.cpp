@@ -7,6 +7,6 @@ TextSerializerPlugin::TextSerializerPlugin()
 
 }
 
-void TextSerializerPlugin::initialize(QObject* pEventSource)
+void TextSerializerPlugin::initialize(PluginEventBroker* pEventSource)
 {
 }

@@ -2,6 +2,7 @@
 #define TEXTREPORTPLUGIN_H
 
 #include "plugininterface.h"
+#include "plugineventbroker.h"
 
 #include <QObject>
 
@@ -14,7 +15,7 @@ class TextReportPlugin : public QObject, public IPlugin
 public:
   TextReportPlugin();
 
-  void initialize(QObject* pEventSource) override;
+  void initialize(PluginEventBroker* pEventSource) override;
 };
 
 #endif // TEXTREPORTPLUGIN_H
