@@ -14,7 +14,7 @@ class MarkdownSerializerPlugin : public QObject, public IPlugin
 public:
   MarkdownSerializerPlugin();
 
-  void initialize() override;
+  void initialize(QObject* pEventSource) override;
 };
 
 #endif // MARKDOWNSERIALIZERPLUGIN_H

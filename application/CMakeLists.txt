@@ -49,6 +49,8 @@ add_executable(${PROJECT_NAME}
     mousehandlingframe.h
     overlaywidget.cpp
     overlaywidget.h
+    plugineventbroker.cpp
+    plugineventbroker.h
     reminderdialog.cpp
     reminderdialog.h
     resources/resource.qrc

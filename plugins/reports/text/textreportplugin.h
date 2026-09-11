@@ -14,7 +14,7 @@ class TextReportPlugin : public QObject, public IPlugin
 public:
   TextReportPlugin();
 
-  void initialize() override;
+  void initialize(QObject* pEventSource) override;
 };
 
 #endif // TEXTREPORTPLUGIN_H

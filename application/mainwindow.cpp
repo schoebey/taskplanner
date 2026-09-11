@@ -230,7 +230,7 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
   m_pManager(pManager),
-  m_pWidgetManager(new WidgetManager(m_pManager, this, this, this)),
+  m_pWidgetManager(new WidgetManager(m_pManager, this, this, this, &m_pluginEventBroker)),
   m_pSearchFrame(new SearchFrame(this)),
   m_spSearchController(std::make_shared<SearchController>(m_pManager, m_pWidgetManager))
 {
@@ -630,7 +630,7 @@ void MainWindow::loadPlugins(const QString& sInitialSearchPath)
         IPlugin* p = dynamic_cast<IPlugin*>(pPlugin);
         if (nullptr != p)
         {
-          p->initialize();
+          p->initialize(&m_pluginEventBroker);
           m_vspPlugins.push_back(std::shared_ptr<QObject>(pPlugin));
         }
       }
@@ -2233,6 +2233,9 @@ void MainWindow::onReminderDue(task_id taskId)
 
   // Flash the taskbar entry (FlashWindowEx on Windows) until the user focuses the window.
   QApplication::alert(this);
+
+  // Broadcast the reminder to any subscribed plugins.
+  m_pluginEventBroker.notifyAlert(taskId);
 
   // Track this reminder as undismissed so renewed focus loss re-triggers the flash
   // (see changeEvent()) until the highlight is cleared via onReminderDismissed().

@@ -7,6 +7,6 @@ MarkdownSerializerPlugin::MarkdownSerializerPlugin()
 
 }
 
-void MarkdownSerializerPlugin::initialize()
+void MarkdownSerializerPlugin::initialize(QObject* pEventSource)
 {
 }

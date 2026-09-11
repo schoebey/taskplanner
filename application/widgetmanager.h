@@ -10,11 +10,12 @@ class GroupWidget;
 class Manager;
 class ITaskController;
 class IGroupController;
+class PluginEventBroker;
 
 class WidgetManager
 {
 public:
-  WidgetManager(Manager* pManager, ITaskController* pTaskController, IGroupController* pGroupController, QWidget* pParentWidget);
+  WidgetManager(Manager* pManager, ITaskController* pTaskController, IGroupController* pGroupController, QWidget* pParentWidget, PluginEventBroker* pPluginEventBroker = nullptr);
 
   void clear();
 
@@ -30,6 +31,7 @@ private:
   ITaskController* m_pTaskController;
   IGroupController* m_pGroupController;
   QWidget* m_pParentWidget;
+  PluginEventBroker* m_pPluginEventBroker;
   std::map<group_id, QPointer<GroupWidget>> m_groupWidgets;
   std::map<task_id, QPointer<TaskWidget>> m_taskWidgets;
 };

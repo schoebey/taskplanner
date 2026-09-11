@@ -4,6 +4,7 @@
 #include "id_types.h"
 #include "taskcontrollerinterface.h"
 #include "groupcontrollerinterface.h"
+#include "plugineventbroker.h"
 
 #include <QMainWindow>
 #include <QPointer>
@@ -134,6 +135,7 @@ private:
   // the task widget); used to re-trigger the taskbar flash on renewed focus loss
   std::set<task_id> m_setPendingReminderTaskIds;
   QUndoStack m_undoStack;
+  PluginEventBroker m_pluginEventBroker;
   std::vector<std::shared_ptr<QObject>> m_vspPlugins;
   QAction* m_pEnableHibernationDetection;
   QFileSystemWatcher* m_pWatcher;
