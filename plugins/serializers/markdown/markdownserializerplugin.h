@@ -2,6 +2,7 @@
 #define MARKDOWNSERIALIZERPLUGIN_H
 
 #include "plugininterface.h"
+#include "plugineventbroker.h"
 
 #include <QObject>
 
@@ -14,7 +15,7 @@ class MarkdownSerializerPlugin : public QObject, public IPlugin
 public:
   MarkdownSerializerPlugin();
 
-  void initialize() override;
+  void initialize(PluginEventBroker* pEventSource) override;
 };
 
 #endif // MARKDOWNSERIALIZERPLUGIN_H

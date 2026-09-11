@@ -9,6 +9,7 @@
 #include "group.h"
 #include "taskcontrollerinterface.h"
 #include "groupcontrollerinterface.h"
+#include "plugineventbroker.h"
 
 #include <QHBoxLayout>
 #include <property.h>
@@ -16,11 +17,13 @@
 WidgetManager::WidgetManager(Manager* pManager,
                              ITaskController* pTaskController,
                              IGroupController* pGroupController,
-                             QWidget* pParentWidget)
+                             QWidget* pParentWidget,
+                             PluginEventBroker* pPluginEventBroker)
   : m_pManager(pManager),
     m_pTaskController(pTaskController),
     m_pGroupController(pGroupController),
-    m_pParentWidget(pParentWidget)
+    m_pParentWidget(pParentWidget),
+    m_pPluginEventBroker(pPluginEventBroker)
 {
 
 }
@@ -109,6 +112,12 @@ TaskWidget* WidgetManager::createTaskWidget(task_id id)
   QObject::connect(pTaskWidget, &TaskWidget::autoPriorityUpdateRequested,  std::bind(&ITaskController::onAutoPriorityUpdateRequested, m_pTaskController, std::placeholders::_1));
   QObject::connect(pTaskWidget, &TaskWidget::updateTotalTimeDisplayRequested,  std::bind(&ITaskController::onUpdateTotalTimeDisplayRequested, m_pTaskController, std::placeholders::_1));
   QObject::connect(pTaskWidget, &TaskWidget::reminderDismissed,             std::bind(&ITaskController::onReminderDismissed, m_pTaskController, std::placeholders::_1));
+
+  if (nullptr != m_pPluginEventBroker)
+  {
+    QObject::connect(pTaskWidget, &TaskWidget::renamed,             m_pPluginEventBroker, &PluginEventBroker::notifySubjectChanged);
+    QObject::connect(pTaskWidget, &TaskWidget::descriptionChanged,  m_pPluginEventBroker, &PluginEventBroker::notifyDescriptionChanged);
+  }
 
 
   QObject::connect(m_pParentWidget, SIGNAL(timeTrackingStopped(task_id)),             pTaskWidget, SLOT(onTimeTrackingStopped(task_id)));
