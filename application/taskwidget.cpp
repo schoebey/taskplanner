@@ -78,6 +78,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
 
   setExpanded(false);
   setAcceptDrops(true);
+  setFocusPolicy(Qt::StrongFocus);
 }
 
 TaskWidget::~TaskWidget()
@@ -922,15 +923,22 @@ bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
   return false;
 }
 
-void TaskWidget::mousePressEvent(QMouseEvent* pMouseEvent)
+void TaskWidget::select()
 {
-  QFrame::mousePressEvent(pMouseEvent);
+  setFocus();
 
   if (highlight().testFlag(EHighlightMethod::eReminderDue))
   {
     setHighlight(highlight() & ~EHighlightMethod::eReminderDue);
     emit reminderDismissed(m_taskId);
   }
+}
+
+void TaskWidget::mousePressEvent(QMouseEvent* pMouseEvent)
+{
+  QFrame::mousePressEvent(pMouseEvent);
+
+  select();
 
   m_bMouseDown = pMouseEvent->buttons() & Qt::LeftButton;
   if (m_bMouseDown)

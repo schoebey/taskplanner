@@ -70,6 +70,8 @@ public:
 
   void edit();
 
+  void select();
+
   bool onMouseMoved(const QPoint &pt);
 
   void ensureVisible();
