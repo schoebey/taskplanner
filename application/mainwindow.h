@@ -14,6 +14,7 @@
 #include <QSystemTrayIcon>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <QMessageBox>
 
@@ -119,6 +120,8 @@ private:
   QMessageBox::StandardButton askSave();
   void setCurrentFileName(const QString& sFileName);
   void flushPendingAutoPriorityUpdates();
+  TaskWidget* revealTask(task_id taskId);
+  void jumpToTaskAndDismissReminder(task_id taskId);
 
 private:
   Ui::MainWindow *ui;
@@ -136,6 +139,9 @@ private:
   // task ids whose reminder highlight is still active (not yet dismissed by clicking
   // the task widget); used to re-trigger the taskbar flash on renewed focus loss
   std::set<task_id> m_setPendingReminderTaskIds;
+  // task id the currently shown tray notification refers to (if any); consumed by
+  // the QSystemTrayIcon::messageClicked handler to jump to and dismiss that task
+  std::optional<task_id> m_lastReminderNotificationTaskId;
   QUndoStack m_undoStack;
   std::vector<std::shared_ptr<QObject>> m_vspPlugins;
   QAction* m_pEnableHibernationDetection;

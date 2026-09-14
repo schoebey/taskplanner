@@ -284,6 +284,11 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   {
     connect(m_pTrayIcon, &QSystemTrayIcon::messageClicked, this, [this]()
     {
+      if (m_lastReminderNotificationTaskId.has_value())
+      {
+        jumpToTaskAndDismissReminder(m_lastReminderNotificationTaskId.value());
+      }
+
       raise();
       activateWindow();
     });
@@ -2250,6 +2255,7 @@ void MainWindow::onReminderDue(task_id taskId)
   {
     ITask* pReminderTask = m_pManager->task(taskId);
     QString sTaskName = nullptr != pReminderTask ? pReminderTask->name() : QString();
+    m_lastReminderNotificationTaskId = taskId;
     m_pTrayIcon->showMessage(tr("Reminder"), sTaskName, QSystemTrayIcon::Information);
   }
 
@@ -2260,6 +2266,19 @@ void MainWindow::onReminderDue(task_id taskId)
   // (see changeEvent()) until the highlight is cleared via onReminderDismissed().
   m_setPendingReminderTaskIds.insert(taskId);
 
+  // scroll the task into view (expanding ancestors as needed), then trigger the
+  // highlight animation (fading green flash) to draw the user's attention to it.
+  // Note: firing the reminder does NOT dismiss it, that only happens when the
+  // user actually clicks the task widget or the tray notification.
+  TaskWidget* pTargetWidget = revealTask(taskId);
+  if (nullptr != pTargetWidget)
+  {
+    pTargetWidget->setHighlight(pTargetWidget->highlight() | EHighlightMethod::eReminderDue);
+  }
+}
+
+TaskWidget* MainWindow::revealTask(task_id taskId)
+{
   // ensure all ancestor tasks are expanded so the task widget exists,
   // mirroring the lazy-expansion approach used by the search feature
   // (see SearchController::onSearchTermChanged()).
@@ -2290,11 +2309,28 @@ void MainWindow::onReminderDue(task_id taskId)
   TaskWidget* pTargetWidget = m_pWidgetManager->taskWidget(taskId);
   if (nullptr != pTargetWidget)
   {
-    // scroll the task into view, then trigger the highlight animation
-    // (fading green flash) to draw the user's attention to it.
     pTargetWidget->ensureVisible();
-    pTargetWidget->setHighlight(pTargetWidget->highlight() | EHighlightMethod::eReminderDue);
   }
+  return pTargetWidget;
+}
+
+void MainWindow::jumpToTaskAndDismissReminder(task_id taskId)
+{
+  // guard against a stale notification referring to a task that has meanwhile
+  // been deleted.
+  if (nullptr == m_pManager->task(taskId))
+  {
+    return;
+  }
+
+  TaskWidget* pTargetWidget = revealTask(taskId);
+  if (nullptr != pTargetWidget &&
+      pTargetWidget->highlight().testFlag(EHighlightMethod::eReminderDue))
+  {
+    pTargetWidget->setHighlight(pTargetWidget->highlight() & ~EHighlightMethod::eReminderDue);
+  }
+
+  onReminderDismissed(taskId);
 }
 
 void MainWindow::onReminderDismissed(task_id taskId)
