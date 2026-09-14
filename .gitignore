@@ -78,3 +78,7 @@ build/
 # Profiling artifacts
 callgrind.*
 
+# Claude sandbox and local files
+.claude-sandbox/
+CLAUDE.md
+Clipboard_09-09-2026_02.png
