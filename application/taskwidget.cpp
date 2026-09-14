@@ -78,6 +78,7 @@ TaskWidget::TaskWidget(task_id id, QWidget *parent) :
 
   setExpanded(false);
   setAcceptDrops(true);
+  setFocusPolicy(Qt::StrongFocus);
 }
 
 TaskWidget::~TaskWidget()
@@ -924,6 +925,8 @@ bool TaskWidget::eventFilter(QObject* /*pObj*/, QEvent* pEvent)
 
 void TaskWidget::select()
 {
+  setFocus();
+
   if (highlight().testFlag(EHighlightMethod::eReminderDue))
   {
     setHighlight(highlight() & ~EHighlightMethod::eReminderDue);
