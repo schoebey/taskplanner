@@ -11,6 +11,7 @@
 #include <QUrl>
 #include <QDateTime>
 #include <QUndoStack>
+#include <QSystemTrayIcon>
 #include <map>
 #include <memory>
 #include <set>
@@ -142,6 +143,7 @@ private:
   ToolBarInfoDisplay* m_pInfoDisplay;
   SearchFrame* m_pSearchFrame;
   std::shared_ptr<SearchController> m_spSearchController;
+  QSystemTrayIcon* m_pTrayIcon = nullptr;
 
   struct STaskTimeVisualisationOptions
   {

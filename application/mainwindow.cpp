@@ -279,6 +279,17 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   ui->pMainToolBar->insertAction(ui->actionReport, ui->actionDisplayReport);
 
 
+  m_pTrayIcon = new QSystemTrayIcon(QIcon(":/icons/taskplanner.png"), this);
+  if (QSystemTrayIcon::isSystemTrayAvailable())
+  {
+    connect(m_pTrayIcon, &QSystemTrayIcon::messageClicked, this, [this]()
+    {
+      raise();
+      activateWindow();
+    });
+    m_pTrayIcon->show();
+  }
+
   m_pInfoDisplay = new ToolBarInfoDisplay(this);
   auto pInfoDisplayAction = ui->pInfoToolBar->addWidget(m_pInfoDisplay);
   connect(m_pInfoDisplay, &ToolBarInfoDisplay::showError, this, &MainWindow::showError);
@@ -2233,6 +2244,14 @@ void MainWindow::onReminderDue(task_id taskId)
 
   // Flash the taskbar entry (FlashWindowEx on Windows) until the user focuses the window.
   QApplication::alert(this);
+
+  // Also show a desktop notification, if the platform provides a system tray.
+  if (nullptr != m_pTrayIcon && QSystemTrayIcon::isSystemTrayAvailable())
+  {
+    ITask* pReminderTask = m_pManager->task(taskId);
+    QString sTaskName = nullptr != pReminderTask ? pReminderTask->name() : QString();
+    m_pTrayIcon->showMessage(tr("Reminder"), sTaskName, QSystemTrayIcon::Information);
+  }
 
   // Broadcast the reminder to any subscribed plugins.
   m_pluginEventBroker.notifyAlert(taskId);
