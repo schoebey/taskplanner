@@ -2324,13 +2324,10 @@ void MainWindow::jumpToTaskAndDismissReminder(task_id taskId)
   }
 
   TaskWidget* pTargetWidget = revealTask(taskId);
-  if (nullptr != pTargetWidget &&
-      pTargetWidget->highlight().testFlag(EHighlightMethod::eReminderDue))
+  if (nullptr != pTargetWidget)
   {
-    pTargetWidget->setHighlight(pTargetWidget->highlight() & ~EHighlightMethod::eReminderDue);
+    pTargetWidget->select();
   }
-
-  onReminderDismissed(taskId);
 }
 
 void MainWindow::onReminderDismissed(task_id taskId)
