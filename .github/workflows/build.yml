@@ -6,7 +6,7 @@ on:
     - '*'
 
 env:
-  QT_VERSION:     "5.15.2"
+  QT_VERSION:     "6.8.3"
   MINGW_VERSION:  "win64_mingw81"
   MINGW_PATH:     "mingw81_64"
   BUILD_TYPE:      Release
