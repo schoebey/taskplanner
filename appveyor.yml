@@ -20,7 +20,7 @@ for:
       - git submodule update --init --recursive
 
     before_build:
-      - sh: sudo apt-get update && sudo apt-get install -y qt6-base-dev qt6-base-dev-tools && Qt6_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt6 cmake .
+      - sh: export Qt6_DIR=$(find $HOME/Qt /opt/Qt /usr -maxdepth 8 -type f -name "Qt6Config.cmake" 2>/dev/null | head -n 1 | xargs dirname) && echo "Using Qt6_DIR=$Qt6_DIR" && cmake .
 
     build_script:
       - make 
