@@ -1,7 +1,7 @@
 version: 1.0.{build}
 image: 
   - Ubuntu
-  - Visual Studio 2017
+  - Visual Studio 2022
 platform: 
   - x64
 configuration: 
@@ -19,7 +19,7 @@ for:
     before_build:
       # note: due to the fact that every variable is enclosed in quotation marks in appveyor, 
       # just do it the old-fasioned way....
-      - sh: export Qt5_DIR=$HOME/Qt/5.15.2/gcc_64/lib/cmake/Qt5
+      - sh: export Qt6_DIR=$HOME/Qt/6.8.3/gcc_64/lib/cmake/Qt6
       - cmake . 
 
     build_script:
@@ -30,16 +30,16 @@ for:
   -
     matrix:
       only:
-        - image: Visual Studio 2017
+        - image: Visual Studio 2022
 
     install:
-      - set Qt5_DIR=c:\Qt\5.13.2\msvc2017_64\lib\cmake\Qt5
-      - set QTDIR=c:\Qt\5.13.2\msvc2017_64
+      - set Qt6_DIR=c:\Qt\6.8.3\msvc2022_64\lib\cmake\Qt6
+      - set QTDIR=c:\Qt\6.8.3\msvc2022_64
       - set PATH=%PATH%;%QTDIR%\bin;
       - git submodule update --init --recursive
 
     before_build:
-      - cmake -G "Visual Studio 15 2017 Win64" .
+      - cmake -G "Visual Studio 17 2022 Win64" .
     
     build_script:
       - msbuild %APPVEYOR_PROJECT_NAME%.sln
