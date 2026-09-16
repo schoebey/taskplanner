@@ -16,15 +16,15 @@ for:
       only:
         - image: Ubuntu
 
+    install:
+      - git submodule update --init --recursive
+
     before_build:
-      # note: due to the fact that every variable is enclosed in quotation marks in appveyor, 
-      # just do it the old-fasioned way....
-      - sh: export Qt6_DIR=$HOME/Qt/6.8.3/gcc_64/lib/cmake/Qt6
-      - cmake . 
+      - sh: export Qt6_DIR=$HOME/Qt/6.8.3/gcc_64/lib/cmake/Qt6 && cmake .
 
     build_script:
       - make 
-      
+
     test_script:
 
   -
