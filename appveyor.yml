@@ -1,6 +1,6 @@
 version: 1.0.{build}
 image: 
-  - Ubuntu
+  - Ubuntu2204
   - Visual Studio 2022
 platform: 
   - x64
@@ -14,13 +14,13 @@ for:
   -
     matrix:
       only:
-        - image: Ubuntu
+        - image: Ubuntu2204
 
     install:
       - git submodule update --init --recursive
 
     before_build:
-      - sh: export Qt6_DIR=$HOME/Qt/6.8.3/gcc_64/lib/cmake/Qt6 && cmake .
+      - sh: sudo apt-get update && sudo apt-get install -y qt6-base-dev qt6-base-dev-tools && Qt6_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt6 cmake .
 
     build_script:
       - make 
