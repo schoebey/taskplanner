@@ -11,4 +11,4 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
-find_package(Qt5 COMPONENTS Core Widgets)
+find_package(Qt6 COMPONENTS Core Gui Widgets)
