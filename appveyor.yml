@@ -39,7 +39,7 @@ for:
       - git submodule update --init --recursive
 
     before_build:
-      - cmake -G "Visual Studio 17 2022 Win64" .
+      - cmake -G "Visual Studio 17 2022" -A x64 .
     
     build_script:
       - msbuild %APPVEYOR_PROJECT_NAME%.sln
