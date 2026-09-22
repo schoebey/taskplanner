@@ -2,8 +2,11 @@ name: compile and release
 
 on:
   push:
+    branches:
+    - '**'
     tags:
     - '*'
+  pull_request:
 
 env:
   QT_VERSION:     "6.8.3"
@@ -14,6 +17,9 @@ env:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write
+      checks: write
     steps:
     -
       uses: actions/checkout@v2
@@ -30,13 +36,22 @@ jobs:
         cache: "true"
     - name: "Create build directory and run CMake"
       run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}"
-    - name: "Build Project" 
-      run: cmake --build build --target all --config Release -- -j4 
-    #- 
+    - name: "Build Project"
+      run: cmake --build build --target all --config Release -- -j4
+    - name: "Run unit tests"
+      run: ctest --test-dir build -C Release --output-on-failure
+    - name: "Publish unit test results"
+      uses: mikepenz/action-junit-report@v4
+      if: always()
+      with:
+        report_paths: 'build/test-results/*.xml'
+        check_name: "Unit test results"
+    #-
     #  name: Setup tmate session
     #  uses: mxschmitt/action-tmate@v3
     -
       name: Compress portable program
+      if: startsWith(github.ref, 'refs/tags/')
       run: |
         mkdir ${{github.workspace}}\build\all\plugins
         cd ${{github.workspace}}\build\

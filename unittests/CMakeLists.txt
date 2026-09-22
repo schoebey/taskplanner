@@ -30,4 +30,9 @@ target_link_libraries(${PROJECT_NAME}
 
 include(app-output-dir)
 
+enable_testing()
+add_test(NAME ${PROJECT_NAME}
+    COMMAND ${PROJECT_NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test-results/${PROJECT_NAME}.xml
+)
+
 endif(GTest_FOUND)
