@@ -88,9 +88,20 @@ EReportError TextReport::create_impl(const Manager& manager) const
 
   QDateTime startOfDay = startDate;
   QDateTime endOfDay = startDate.addDays(1);
+
+  // snapshot "now" once so that every actively-tracked (open) fragment
+  // considered in this report run sees the same effective stop time,
+  // matching the convention in application/mainwindow.cpp
+  const QDateTime now = QDateTime::currentDateTime();
+
   while (endOfDay <= stopDate)
   {
-    std::map<QDateTime, std::pair<QDateTime, QString>> timings;
+    // a std::multimap (rather than std::map) is required here: several
+    // fragments from different tasks can legitimately clip to the exact
+    // same start timestamp (e.g. due to overlap trimming in
+    // Task::removeTimeFragment). A std::map keyed by start time would
+    // silently overwrite/drop one of them.
+    std::multimap<QDateTime, std::pair<QDateTime, QString>> timings;
 
     for (const auto& taskId : manager.taskIds())
     {
@@ -99,15 +110,25 @@ EReportError TextReport::create_impl(const Manager& manager) const
       {
         for (const STimeFragment& tf : pTask->timeFragments())
         {
-          if (tf.stopTime > startOfDay && tf.startTime < endOfDay)
+          // an actively-tracked fragment has no (valid) stop time yet;
+          // treat "now" as its effective end for the purposes of report
+          // inclusion, without mutating the stored fragment.
+          QDateTime effectiveStop = tf.stopTime.isValid() ? tf.stopTime : now;
+
+          // skip fragments whose effective interval would be empty or inverted -
+          // e.g. an open fragment whose start time got snapped to a future
+          // timestamp by Task::removeTimeFragment(); only include fragments
+          // where the effective stop is strictly after the start.
+          if (effectiveStop > startOfDay && tf.startTime < endOfDay &&
+              tf.startTime < effectiveStop)
           {
             // only count the time of this fragment that was spent within the given interval
             QDateTime start = std::max<QDateTime>(startOfDay, tf.startTime);
-            QDateTime stop = std::min<QDateTime>(endOfDay, tf.stopTime);
+            QDateTime stop = std::min<QDateTime>(endOfDay, effectiveStop);
 
             QString sName = fullName(pTask, &manager).join(" -> ");
 
-            timings[start] = std::make_pair(stop, sName);
+            timings.insert({start, std::make_pair(stop, sName)});
           }
         }
       }

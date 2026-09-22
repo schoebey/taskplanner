@@ -16,6 +16,9 @@ add_executable(${PROJECT_NAME}
     test_properties.cpp
     test_task.cpp
     test_taskmanager.cpp
+    test_textreport.cpp
+    ${CMAKE_SOURCE_DIR}/plugins/reports/text/textreport.cpp
+    ${CMAKE_SOURCE_DIR}/plugins/reports/text/textreport.h
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC libtaskmanager)
