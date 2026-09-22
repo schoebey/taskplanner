@@ -4,6 +4,24 @@ project(unittests VERSION ${APP_VERSION})
 
 find_package(GTest)
 
+if(NOT GTest_FOUND)
+    # No system/vcpkg GTest available (e.g. windows-latest CI runners).
+    # Fetch and build GoogleTest from source using the same compiler
+    # already selected for this build (works uniformly with the MinGW
+    # toolchain used for the Windows build, unlike vcpkg's default MSVC
+    # triplet, which would need extra triplet configuration for MinGW).
+    cmake_minimum_required(VERSION 3.14)
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+        DOWNLOAD_EXTRACT_TIMESTAMP true
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+    set(GTest_FOUND TRUE)
+endif()
+
 if(GTest_FOUND)
 
 include(common)
@@ -30,9 +48,17 @@ target_link_libraries(${PROJECT_NAME}
 
 include(app-output-dir)
 
-enable_testing()
 add_test(NAME ${PROJECT_NAME}
     COMMAND ${PROJECT_NAME} --gtest_output=xml:${CMAKE_BINARY_DIR}/test-results/${PROJECT_NAME}.xml
 )
+
+if(WIN32)
+    # libtaskmanager's DLL is built into build/libtaskmanager (its own
+    # subdirectory binary dir), not build/bin where unittests.exe lives,
+    # so the loader needs an extra PATH entry to find it at test time.
+    set_tests_properties(${PROJECT_NAME} PROPERTIES
+        ENVIRONMENT "PATH=${CMAKE_BINARY_DIR}/libtaskmanager;$ENV{PATH}"
+    )
+endif()
 
 endif(GTest_FOUND)

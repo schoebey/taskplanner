@@ -8,6 +8,10 @@ on:
     - '*'
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   QT_VERSION:     "6.8.3"
   MINGW_VERSION:  "win64_mingw81"
@@ -43,6 +47,7 @@ jobs:
     - name: "Publish unit test results"
       uses: mikepenz/action-junit-report@v4
       if: always()
+      continue-on-error: true
       with:
         report_paths: 'build/test-results/*.xml'
         check_name: "Unit test results"

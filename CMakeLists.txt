@@ -15,4 +15,6 @@ include(rpath)
 add_subdirectory(application)
 add_subdirectory(libtaskmanager)
 add_subdirectory(plugins)
+
+enable_testing()
 add_subdirectory(unittests)
