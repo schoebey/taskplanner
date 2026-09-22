@@ -88,6 +88,12 @@ EReportError TextReport::create_impl(const Manager& manager) const
 
   QDateTime startOfDay = startDate;
   QDateTime endOfDay = startDate.addDays(1);
+
+  // snapshot "now" once so that every actively-tracked (open) fragment
+  // considered in this report run sees the same effective stop time,
+  // matching the convention in application/mainwindow.cpp
+  const QDateTime now = QDateTime::currentDateTime();
+
   while (endOfDay <= stopDate)
   {
     // a std::multimap (rather than std::map) is required here: several
@@ -106,10 +112,15 @@ EReportError TextReport::create_impl(const Manager& manager) const
         {
           // an actively-tracked fragment has no (valid) stop time yet;
           // treat "now" as its effective end for the purposes of report
-          // inclusion and duration, without mutating the stored fragment.
-          QDateTime effectiveStop = tf.stopTime.isValid() ? tf.stopTime : QDateTime::currentDateTime();
+          // inclusion, without mutating the stored fragment.
+          QDateTime effectiveStop = tf.stopTime.isValid() ? tf.stopTime : now;
 
-          if (effectiveStop > startOfDay && tf.startTime < endOfDay)
+          // skip fragments whose effective interval would be empty or inverted -
+          // e.g. an open fragment whose start time got snapped to a future
+          // timestamp by Task::removeTimeFragment(); only include fragments
+          // where the effective stop is strictly after the start.
+          if (effectiveStop > startOfDay && tf.startTime < endOfDay &&
+              tf.startTime < effectiveStop)
           {
             // only count the time of this fragment that was spent within the given interval
             QDateTime start = std::max<QDateTime>(startOfDay, tf.startTime);
