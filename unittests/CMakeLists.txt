@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 
 project(unittests VERSION ${APP_VERSION})
 
@@ -11,9 +11,12 @@ if(NOT GTest_FOUND)
     # toolchain used for the Windows build, unlike vcpkg's default MSVC
     # triplet, which would need extra triplet configuration for MinGW).
     # DOWNLOAD_EXTRACT_TIMESTAMP is only recognized by FetchContent from
-    # CMake 3.24 onward; raise the local minimum accordingly (GitHub-hosted
-    # windows-latest runners ship a CMake well above this, so this is not a
-    # practical constraint on CI).
+    # CMake 3.24 onward. Raise the minimum only inside this branch (it is
+    # never evaluated when GTest_FOUND is already true, so the
+    # system/vcpkg-GTest path and the top-level app configure keep the
+    # file-wide 3.22 floor below and are not affected by this 3.24 bump).
+    # GitHub-hosted windows-latest runners ship a CMake well above this, so
+    # this is not a practical constraint on CI.
     cmake_minimum_required(VERSION 3.24)
     include(FetchContent)
     FetchContent_Declare(
@@ -65,9 +68,12 @@ if(WIN32)
     # raw "PATH=...;$ENV{PATH}" value to ENVIRONMENT gets split apart and
     # the rest of PATH (Qt6Core.dll, MinGW runtime DLLs) is lost.
     # ENVIRONMENT_MODIFICATION (CMake >= 3.22) prepends to PATH correctly
-    # without this splitting issue; requiring 3.22 here is fine since the
-    # FetchContent fallback branch above already requires >= 3.24, and
-    # GitHub-hosted windows-latest runners ship a much newer CMake.
+    # without this splitting issue. This property is set on both the
+    # system/vcpkg-GTest path and the FetchContent path, so it cannot rely
+    # on the FetchContent branch's 3.24 floor above (that floor is scoped
+    # to the NOT GTest_FOUND branch only); the file-wide
+    # cmake_minimum_required(VERSION 3.22) at the top of this file is what
+    # actually guarantees this property is honored here.
     set_tests_properties(${PROJECT_NAME} PROPERTIES
         ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${CMAKE_BINARY_DIR}/libtaskmanager"
     )

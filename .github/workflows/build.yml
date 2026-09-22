@@ -14,8 +14,9 @@ concurrency:
 
 env:
   QT_VERSION:     "6.8.3"
-  MINGW_VERSION:  "win64_mingw81"
-  MINGW_PATH:     "mingw81_64"
+  MINGW_VERSION:  "win64_mingw"
+  MINGW_PATH:     "mingw_64"
+  MINGW_TOOLS:    "tools_mingw1310,qt.tools.win64_mingw1310"
   BUILD_TYPE:      Release
 
 jobs:
@@ -35,6 +36,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch:    ${{ env.MINGW_VERSION }}
+        tools:   ${{ env.MINGW_TOOLS }}
         dir: "${{github.workspace}}/qt"
         install-deps: "true"
         cache: "true"
