@@ -10,7 +10,11 @@ if(NOT GTest_FOUND)
     # already selected for this build (works uniformly with the MinGW
     # toolchain used for the Windows build, unlike vcpkg's default MSVC
     # triplet, which would need extra triplet configuration for MinGW).
-    cmake_minimum_required(VERSION 3.14)
+    # DOWNLOAD_EXTRACT_TIMESTAMP is only recognized by FetchContent from
+    # CMake 3.24 onward; raise the local minimum accordingly (GitHub-hosted
+    # windows-latest runners ship a CMake well above this, so this is not a
+    # practical constraint on CI).
+    cmake_minimum_required(VERSION 3.24)
     include(FetchContent)
     FetchContent_Declare(
         googletest
@@ -56,8 +60,16 @@ if(WIN32)
     # libtaskmanager's DLL is built into build/libtaskmanager (its own
     # subdirectory binary dir), not build/bin where unittests.exe lives,
     # so the loader needs an extra PATH entry to find it at test time.
+    # ENVIRONMENT is a ';'-separated list of NAME=VALUE entries, and on
+    # Windows PATH itself uses ';' as its entry separator, so appending a
+    # raw "PATH=...;$ENV{PATH}" value to ENVIRONMENT gets split apart and
+    # the rest of PATH (Qt6Core.dll, MinGW runtime DLLs) is lost.
+    # ENVIRONMENT_MODIFICATION (CMake >= 3.22) prepends to PATH correctly
+    # without this splitting issue; requiring 3.22 here is fine since the
+    # FetchContent fallback branch above already requires >= 3.24, and
+    # GitHub-hosted windows-latest runners ship a much newer CMake.
     set_tests_properties(${PROJECT_NAME} PROPERTIES
-        ENVIRONMENT "PATH=${CMAKE_BINARY_DIR}/libtaskmanager;$ENV{PATH}"
+        ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${CMAKE_BINARY_DIR}/libtaskmanager"
     )
 endif()
 
