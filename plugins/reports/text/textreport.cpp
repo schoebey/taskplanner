@@ -90,7 +90,12 @@ EReportError TextReport::create_impl(const Manager& manager) const
   QDateTime endOfDay = startDate.addDays(1);
   while (endOfDay <= stopDate)
   {
-    std::map<QDateTime, std::pair<QDateTime, QString>> timings;
+    // a std::multimap (rather than std::map) is required here: several
+    // fragments from different tasks can legitimately clip to the exact
+    // same start timestamp (e.g. due to overlap trimming in
+    // Task::removeTimeFragment). A std::map keyed by start time would
+    // silently overwrite/drop one of them.
+    std::multimap<QDateTime, std::pair<QDateTime, QString>> timings;
 
     for (const auto& taskId : manager.taskIds())
     {
@@ -99,15 +104,20 @@ EReportError TextReport::create_impl(const Manager& manager) const
       {
         for (const STimeFragment& tf : pTask->timeFragments())
         {
-          if (tf.stopTime > startOfDay && tf.startTime < endOfDay)
+          // an actively-tracked fragment has no (valid) stop time yet;
+          // treat "now" as its effective end for the purposes of report
+          // inclusion and duration, without mutating the stored fragment.
+          QDateTime effectiveStop = tf.stopTime.isValid() ? tf.stopTime : QDateTime::currentDateTime();
+
+          if (effectiveStop > startOfDay && tf.startTime < endOfDay)
           {
             // only count the time of this fragment that was spent within the given interval
             QDateTime start = std::max<QDateTime>(startOfDay, tf.startTime);
-            QDateTime stop = std::min<QDateTime>(endOfDay, tf.stopTime);
+            QDateTime stop = std::min<QDateTime>(endOfDay, effectiveStop);
 
             QString sName = fullName(pTask, &manager).join(" -> ");
 
-            timings[start] = std::make_pair(stop, sName);
+            timings.insert({start, std::make_pair(stop, sName)});
           }
         }
       }
