@@ -2,11 +2,8 @@ name: compile and release
 
 on:
   push:
-    branches:
-    - master
     tags:
     - '*'
-  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
