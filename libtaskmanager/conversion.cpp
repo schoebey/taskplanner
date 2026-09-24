@@ -458,7 +458,7 @@ in a hundred years
         {
           QRegularExpressionMatch addUnitQuantityMatch = el.first.match(sUnit);
           if (0 == addUnitQuantityMatch.capturedStart(0) &&
-                sVal.length() == addUnitQuantityMatch.capturedLength(0))
+                sUnit.length() == addUnitQuantityMatch.capturedLength(0))
           {
             QDateTime dt = baseDateTime;
             el.second(dt, iQuantity);
@@ -519,7 +519,7 @@ in a hundred years
       {
           QRegularExpressionMatch addUnitQuantityMatch = el.first.match(sType);
           if (0 == addUnitQuantityMatch.capturedStart(0) &&
-              sVal.length() == addUnitQuantityMatch.capturedLength(0))
+              sType.length() == addUnitQuantityMatch.capturedLength(0))
         {
           // for now, we will calculate the same timepoint in the next unit
           // (e.g. the same time tomorrow, same day next week, etc.)
@@ -559,6 +559,7 @@ in a hundred years
           dt = dt.addMonths(iOffset);
 
           QString sRest = sVal;
+          if (!sInst.isEmpty())  { sRest.remove(sInst); }
           sRest.remove(monthsMatch.captured(0));
 
           // try to extract day number from the rest
