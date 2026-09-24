@@ -41,6 +41,9 @@ jobs:
         dir: "${{github.workspace}}/qt"
         install-deps: "true"
         cache: "true"
+    - name: "Prepend Qt-matched MinGW 13.1 toolchain to PATH"
+      run: |
+        echo "$env:IQTA_TOOLS\mingw1310_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: "Create build directory and run CMake"
       run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}"
     - name: "Build Project"
