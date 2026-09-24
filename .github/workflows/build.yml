@@ -41,11 +41,20 @@ jobs:
         dir: "${{github.workspace}}/qt"
         install-deps: "true"
         cache: "true"
-    - name: "Prepend Qt-matched MinGW 13.1 toolchain to PATH"
+    - name: "Diagnose IQTA_TOOLS contents"
       run: |
-        echo "$env:IQTA_TOOLS\mingw1310_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        echo "IQTA_TOOLS=$env:IQTA_TOOLS"
+        Get-ChildItem $env:IQTA_TOOLS
+        Get-ChildItem "$env:IQTA_TOOLS\mingw1310_64\bin" -ErrorAction SilentlyContinue
+    - name: "Resolve and prepend Qt-matched MinGW 13.1 toolchain to PATH"
+      run: |
+        $mingwDir = Get-ChildItem -Path $env:IQTA_TOOLS -Directory -Filter "mingw1310*" | Select-Object -First 1
+        if (-not $mingwDir) { throw "Could not locate a mingw1310* toolchain directory under $env:IQTA_TOOLS" }
+        $mingwBin = Join-Path $mingwDir.FullName "bin"
+        echo "MINGW1310_BIN=$mingwBin" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "$mingwBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: "Create build directory and run CMake"
-      run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}"
+      run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}" -DCMAKE_C_COMPILER="$env:MINGW1310_BIN\gcc.exe" -DCMAKE_CXX_COMPILER="$env:MINGW1310_BIN\g++.exe"
     - name: "Build Project"
       run: cmake --build build --target all --config Release -- -j4
     - name: "Run unit tests"
