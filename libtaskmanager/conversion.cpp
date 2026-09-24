@@ -491,7 +491,7 @@ in a hundred years
                                                 QRegularExpression("jun(?:e)?"),
                                                 QRegularExpression("jul(?:y)?"),
                                                 QRegularExpression("aug(?:ust)?"),
-                                                QRegularExpression("sep(?:t(?:empber)?)?"),
+                                                QRegularExpression("sep(?:t(?:ember)?)?"),
                                                 QRegularExpression("oct(?:ober)?"),
                                                 QRegularExpression("nov(?:ember)?"),
                                                 QRegularExpression("dec(?:ember)?")};
