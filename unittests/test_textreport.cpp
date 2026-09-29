@@ -1,6 +1,7 @@
 #include "plugins/reports/text/textreport.h"
 
 #include "libtaskmanager/manager.h"
+#include "libtaskmanager/property.h"
 #include "libtaskmanager/task.h"
 
 #include "gtest/gtest.h"
@@ -13,6 +14,7 @@
 #include <QVariant>
 
 #include <cstdlib>
+#include <mutex>
 #include <sstream>
 
 Q_DECLARE_METATYPE(QIODevice*)
@@ -34,10 +36,22 @@ namespace {
 
 }
 
+// Task properties are registered by the application at startup; register the
+// ones needed here exactly once per process, otherwise setName() is rejected.
+class TextReportTest : public ::testing::Test
+{
+protected:
+  void SetUp() override
+  {
+    static std::once_flag flag;
+    std::call_once(flag, []() { REGISTER_PROPERTY(Task, "name", QString, false); });
+  }
+};
+
 // reproduces the bug where two tasks' time fragments that clip to the same
 // start timestamp caused one of them to silently disappear from the report
 // because the report grouped fragments in a std::map keyed by start time.
-TEST(TextReportTest, CoincidentStartTimesAreBothReported)
+TEST_F(TextReportTest, CoincidentStartTimesAreBothReported)
 {
   Manager manager;
 
@@ -92,7 +106,7 @@ TEST(TextReportTest, CoincidentStartTimesAreBothReported)
 // reproduces the bug where an actively-tracked (still open) time fragment
 // was unconditionally excluded from the report because the comparison
 // against the invalid/null stopTime always failed.
-TEST(TextReportTest, ActivelyTrackedFragmentIsReported)
+TEST_F(TextReportTest, ActivelyTrackedFragmentIsReported)
 {
   Manager manager;
 
@@ -148,7 +162,7 @@ TEST(TextReportTest, ActivelyTrackedFragmentIsReported)
 // reacting to another task's fragment being inserted with an unvalidated
 // future end time (see MainWindow::onAddTimeToTaskRequested). The report must
 // not emit an inverted/garbage "start - stop" line for such a fragment.
-TEST(TextReportTest, FutureStartOpenFragmentIsNotReported)
+TEST_F(TextReportTest, FutureStartOpenFragmentIsNotReported)
 {
   Manager manager;
 
