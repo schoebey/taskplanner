@@ -13,6 +13,7 @@
 #include <QVariant>
 
 #include <cstdlib>
+#include <sstream>
 
 Q_DECLARE_METATYPE(QIODevice*)
 
@@ -25,7 +26,7 @@ namespace {
     EXPECT_TRUE(bParamSet);
 
     EReportError err = report.create(manager);
-    EXPECT_EQ(EReportError::eOk, err);
+    EXPECT_EQ(EReportError::eOk, err) << "err=" << static_cast<int>(err);
 
     device.seek(0);
     return QString::fromUtf8(device.readAll());
@@ -62,6 +63,26 @@ TEST(TextReportTest, CoincidentStartTimesAreBothReported)
 
   QString sOutput = runReport(report, manager, buffer);
 
+  {
+    std::ostringstream oss;
+    oss << "sOutput: " << sOutput.toStdString() << "\n";
+    oss << "buffer.size(): " << buffer.size() << "\n";
+    oss << "manager.taskIds().size(): " << manager.taskIds().size() << "\n";
+    oss << "pTask1 name: " << pTask1->name().toStdString() << ", fragments: " << pTask1->timeFragments().size() << "\n";
+    for (size_t i = 0; i < pTask1->timeFragments().size(); ++i) {
+      auto frag = pTask1->timeFragments()[i];
+      oss << "  Fragment " << i << ": " << frag.startTime.toString(Qt::ISODate).toStdString()
+          << " - " << frag.stopTime.toString(Qt::ISODate).toStdString() << "\n";
+    }
+    oss << "pTask2 name: " << pTask2->name().toStdString() << ", fragments: " << pTask2->timeFragments().size() << "\n";
+    for (size_t i = 0; i < pTask2->timeFragments().size(); ++i) {
+      auto frag = pTask2->timeFragments()[i];
+      oss << "  Fragment " << i << ": " << frag.startTime.toString(Qt::ISODate).toStdString()
+          << " - " << frag.stopTime.toString(Qt::ISODate).toStdString() << "\n";
+    }
+    SCOPED_TRACE(oss.str());
+  }
+
   EXPECT_EQ(1, sOutput.count("Alpha"));
   EXPECT_EQ(1, sOutput.count("Beta"));
 }
@@ -87,6 +108,20 @@ TEST(TextReportTest, ActivelyTrackedFragmentIsReported)
   QBuffer buffer;
 
   QString sOutput = runReport(report, manager, buffer);
+
+  {
+    std::ostringstream oss;
+    oss << "sOutput: " << sOutput.toStdString() << "\n";
+    oss << "buffer.size(): " << buffer.size() << "\n";
+    oss << "manager.taskIds().size(): " << manager.taskIds().size() << "\n";
+    oss << "pTask name: " << pTask->name().toStdString() << ", fragments: " << pTask->timeFragments().size() << "\n";
+    for (size_t i = 0; i < pTask->timeFragments().size(); ++i) {
+      auto frag = pTask->timeFragments()[i];
+      oss << "  Fragment " << i << ": " << frag.startTime.toString(Qt::ISODate).toStdString()
+          << " - " << frag.stopTime.toString(Qt::ISODate).toStdString() << "\n";
+    }
+    SCOPED_TRACE(oss.str());
+  }
 
   EXPECT_EQ(1, sOutput.count("Gamma"));
 
@@ -138,7 +173,22 @@ TEST(TextReportTest, FutureStartOpenFragmentIsNotReported)
 
   QString sOutput = runReport(report, manager, buffer);
 
+  {
+    std::ostringstream oss;
+    oss << "sOutput: " << sOutput.toStdString() << "\n";
+    oss << "buffer.size(): " << buffer.size() << "\n";
+    oss << "manager.taskIds().size(): " << manager.taskIds().size() << "\n";
+    oss << "pTask name: " << pTask->name().toStdString() << ", fragments: " << pTask->timeFragments().size() << "\n";
+    for (size_t i = 0; i < pTask->timeFragments().size(); ++i) {
+      auto frag = pTask->timeFragments()[i];
+      oss << "  Fragment " << i << ": " << frag.startTime.toString(Qt::ISODate).toStdString()
+          << " - " << frag.stopTime.toString(Qt::ISODate).toStdString() << "\n";
+    }
+    SCOPED_TRACE(oss.str());
+  }
+
   // the fragment's effective stop ("now") is not after its (future) start,
   // so no line must be emitted for it
+  EXPECT_TRUE(sOutput.contains("Timesheet for"));
   EXPECT_EQ(0, sOutput.count("Delta"));
 }
