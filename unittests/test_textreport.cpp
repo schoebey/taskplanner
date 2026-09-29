@@ -63,6 +63,7 @@ TEST(TextReportTest, CoincidentStartTimesAreBothReported)
 
   QString sOutput = runReport(report, manager, buffer);
 
+  std::string sDiag;
   {
     std::ostringstream oss;
     oss << "sOutput: " << sOutput.toStdString() << "\n";
@@ -80,8 +81,9 @@ TEST(TextReportTest, CoincidentStartTimesAreBothReported)
       oss << "  Fragment " << i << ": " << frag.startTime.toString(Qt::ISODate).toStdString()
           << " - " << frag.stopTime.toString(Qt::ISODate).toStdString() << "\n";
     }
-    SCOPED_TRACE(oss.str());
+    sDiag = oss.str();
   }
+  SCOPED_TRACE(sDiag);
 
   EXPECT_EQ(1, sOutput.count("Alpha"));
   EXPECT_EQ(1, sOutput.count("Beta"));
@@ -109,6 +111,7 @@ TEST(TextReportTest, ActivelyTrackedFragmentIsReported)
 
   QString sOutput = runReport(report, manager, buffer);
 
+  std::string sDiag;
   {
     std::ostringstream oss;
     oss << "sOutput: " << sOutput.toStdString() << "\n";
@@ -120,8 +123,9 @@ TEST(TextReportTest, ActivelyTrackedFragmentIsReported)
       oss << "  Fragment " << i << ": " << frag.startTime.toString(Qt::ISODate).toStdString()
           << " - " << frag.stopTime.toString(Qt::ISODate).toStdString() << "\n";
     }
-    SCOPED_TRACE(oss.str());
+    sDiag = oss.str();
   }
+  SCOPED_TRACE(sDiag);
 
   EXPECT_EQ(1, sOutput.count("Gamma"));
 
@@ -173,6 +177,7 @@ TEST(TextReportTest, FutureStartOpenFragmentIsNotReported)
 
   QString sOutput = runReport(report, manager, buffer);
 
+  std::string sDiag;
   {
     std::ostringstream oss;
     oss << "sOutput: " << sOutput.toStdString() << "\n";
@@ -184,8 +189,9 @@ TEST(TextReportTest, FutureStartOpenFragmentIsNotReported)
       oss << "  Fragment " << i << ": " << frag.startTime.toString(Qt::ISODate).toStdString()
           << " - " << frag.stopTime.toString(Qt::ISODate).toStdString() << "\n";
     }
-    SCOPED_TRACE(oss.str());
+    sDiag = oss.str();
   }
+  SCOPED_TRACE(sDiag);
 
   // the fragment's effective stop ("now") is not after its (future) start,
   // so no line must be emitted for it
