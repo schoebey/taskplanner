@@ -2,18 +2,30 @@ name: compile and release
 
 on:
   push:
+    branches:
+      - '**'
     tags:
-    - '*'
+      - '*'
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
-  QT_VERSION:     "5.15.2"
-  MINGW_VERSION:  "win64_mingw81"
-  MINGW_PATH:     "mingw81_64"
+  QT_VERSION:     "6.8.3"
+  MINGW_VERSION:  "win64_mingw"
+  MINGW_PATH:     "mingw_64"
+  MINGW_TOOLS:    "tools_mingw1310,qt.tools.win64_mingw1310"
   BUILD_TYPE:      Release
 
 jobs:
   build:
     runs-on: windows-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    permissions:
+      contents: write
+      checks: write
     steps:
     -
       uses: actions/checkout@v2
@@ -25,25 +37,45 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch:    ${{ env.MINGW_VERSION }}
+        tools:   ${{ env.MINGW_TOOLS }}
         dir: "${{github.workspace}}/qt"
         install-deps: "true"
         cache: "true"
+    - name: "Resolve and prepend Qt-matched MinGW 13.1 toolchain to PATH"
+      run: |
+        $mingwDir = Get-ChildItem -Path $env:IQTA_TOOLS -Directory -Filter "mingw1310*" | Select-Object -First 1
+        if (-not $mingwDir) { throw "Could not locate a mingw1310* toolchain directory under $env:IQTA_TOOLS" }
+        $mingwBin = Join-Path $mingwDir.FullName "bin"
+        echo "MINGW1310_BIN=$mingwBin" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "$mingwBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: "Create build directory and run CMake"
-      run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
-    - name: "Build Project" 
-      run: cmake --build build --target all --config Release -- -j4 
-    #- 
+      run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}" -DCMAKE_C_COMPILER="$env:MINGW1310_BIN\gcc.exe" -DCMAKE_CXX_COMPILER="$env:MINGW1310_BIN\g++.exe"
+    - name: "Build Project"
+      run: cmake --build build --target all --config Release -- -j4
+    - name: "Run unit tests"
+      run: ctest --test-dir build -C Release --output-on-failure --no-tests=error
+    - name: "Publish unit test results"
+      uses: mikepenz/action-junit-report@v4
+      if: always()
+      continue-on-error: true
+      with:
+        report_paths: 'build/test-results/*.xml'
+        check_name: "Unit test results"
+    #-
     #  name: Setup tmate session
     #  uses: mxschmitt/action-tmate@v3
     -
       name: Compress portable program
+      if: startsWith(github.ref, 'refs/tags/')
       run: |
         mkdir ${{github.workspace}}\build\all\plugins
         cd ${{github.workspace}}\build\
         cp ${{github.workspace}}/build/bin/taskplanner.exe ${{github.workspace}}\build\all\
         cp ${{github.workspace}}/build/libtaskmanager/libtaskmanager.* ${{github.workspace}}\build\all\
-        xcopy ${{github.workspace}}\build\plugins\*.dll ${{github.workspace}}\build\all\plugins /sy
-        ${{ env.Qt5_Dir }}/bin/qtenv2.bat
+        $pluginDlls = Get-ChildItem -Path ${{github.workspace}}\build\lib\taskplanner\ -Filter *.dll
+        if (-not $pluginDlls) { throw "No plugin DLLs found in build\lib\taskplanner" }
+        Copy-Item -Path $pluginDlls.FullName -Destination ${{github.workspace}}\build\all\plugins\ -ErrorAction Stop
+        ${{ env.Qt6_DIR }}/bin/qtenv2.bat
         echo "C:/ghcup/ghc/9.2.8/mingw/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         #echo "C:/msys64/mingw64/bin" >> $GITHUB_PATH
         echo $GITHUB_PATH
