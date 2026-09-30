@@ -2,6 +2,7 @@
 task planning tool
 
 ![version](https://img.shields.io/github/v/release/schoebey/taskplanner)
+![workflow](https://github.com/schoebey/taskplanner/actions/workflows/build.yml/badge.svg)
 [![Build status](https://ci.appveyor.com/api/projects/status/owlunevmqy5penk3?svg=true)](https://ci.appveyor.com/project/schoebey/taskplanner)
 
 ![screenshot1](screenshots/screenshot1.png)
