@@ -303,7 +303,8 @@ MainWindow::MainWindow(Manager* pManager, QWidget *parent) :
   pSpacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
   ui->pInfoToolBar->insertWidget(pInfoDisplayAction, pSpacer);
 
-  static const std::vector<QString> c_vsPluginFolders = { QCoreApplication::applicationDirPath() + "/plugins/serializers",
+  static const std::vector<QString> c_vsPluginFolders = { QCoreApplication::applicationDirPath() + "/plugins",
+                                                          QCoreApplication::applicationDirPath() + "/plugins/serializers",
                                                           QCoreApplication::applicationDirPath() + "/plugins/reports",
                                                           QCoreApplication::applicationDirPath() + "/../lib",
                                                           QCoreApplication::applicationDirPath() + "/../lib/" + taskplanner::project_name};
