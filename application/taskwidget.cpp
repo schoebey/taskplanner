@@ -939,6 +939,7 @@ void TaskWidget::mousePressEvent(QMouseEvent* pMouseEvent)
   QFrame::mousePressEvent(pMouseEvent);
 
   select();
+  pMouseEvent->accept();
 
   m_bMouseDown = pMouseEvent->buttons() & Qt::LeftButton;
   if (m_bMouseDown)
