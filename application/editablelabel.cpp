@@ -18,9 +18,9 @@ EditableLabel::EditableLabel(QWidget* pParent)
 
 void EditableLabel::mouseDoubleClickEvent(QMouseEvent* pMouseEvent)
 {
-  QLabel::mouseDoubleClickEvent(pMouseEvent);
-
+  DecoratedLabel::mouseDoubleClickEvent(pMouseEvent);
   edit();
+  pMouseEvent->accept();
 }
 
 void EditableLabel::edit()
