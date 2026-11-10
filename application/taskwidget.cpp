@@ -209,7 +209,7 @@ void TaskWidget::setUpContextMenu()
   {
     if (!m_bHasReminder)  { return; }
 
-    ReminderDialog dlg(this);
+    ReminderDialog dlg;  // parentless like the other dialogs: no app stylesheet, system palette
     dlg.setReminder(m_reminder);
 
     if (QDialog::Accepted == dlg.exec())
@@ -1002,7 +1002,7 @@ void TaskWidget::on_pReminder_clicked(bool bChecked)
   {
     // first click on an unconfigured task: open the dialog to configure the
     // reminder. The button is only left checked if the dialog is accepted.
-    ReminderDialog dlg(this);
+    ReminderDialog dlg;  // parentless like the other dialogs: no app stylesheet, system palette
 
     if (QDialog::Accepted == dlg.exec())
     {
